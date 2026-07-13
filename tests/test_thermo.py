@@ -8,9 +8,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import OutOfRangeError, ValidationError
-from mesim.compounds import load_compounds
+from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.thermo.ideal import ideal_gas_density, load_correlations
-from mesim.thermo.peng_robinson import PengRobinson
+from mesim.thermo.peng_robinson import PengRobinson, PengRobinsonMixture
 
 
 ROOT = Path(__file__).parents[1]
@@ -116,6 +116,9 @@ class PengRobinsonPureTest(unittest.TestCase):
         self.assertTrue(all(math.isclose(actual, wanted, rel_tol=1e-12) for actual, wanted in zip(roots, expected)))
         self.assertEqual(self.methane.state(150, 1_000_000, "liquid").compressibility, roots[0])
         self.assertEqual(self.methane.state(150, 1_000_000, "vapor").compressibility, roots[-1])
+        self.assertEqual(self.methane.stable_state(150, 800_000).phase, "vapor")
+        self.assertEqual(self.methane.stable_state(150, 1_200_000).phase, "liquid")
+        self.assertEqual(self.methane.stable_state(300, 1_000_000).phase, "single")
 
     def test_vapor_state_matches_independent_pr_properties(self):
         state = self.methane.state(300, 1_000_000, "vapor")
@@ -131,6 +134,38 @@ class PengRobinsonPureTest(unittest.TestCase):
                 self.methane.state(temperature, pressure, "vapor")
         with self.assertRaises(ValidationError):
             self.methane.state(300, 1_000_000, "unknown")
+
+
+class PengRobinsonMixtureTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        compounds = load_compounds(ROOT / "data/compounds/v1.json")
+        selected = tuple(c for c in compounds if c.id in {"Methane", "Ethane"})
+        interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
+        cls.mixture = PengRobinsonMixture(selected, (0.7, 0.3), interactions)
+
+    def test_mixing_rules_match_independent_equations(self):
+        parameters = self.mixture.parameters(250)
+        self.assertTrue(math.isclose(parameters.a_pa_m6_per_kmol2, 330869.45686457393, rel_tol=1e-12))
+        self.assertTrue(math.isclose(parameters.b_m3_per_kmol, 0.030923428538033274, rel_tol=1e-12))
+        self.assertTrue(math.isclose(parameters.da_dtemperature, -616.2303397589949, rel_tol=1e-12))
+
+    def test_mixture_state_matches_independent_pr_equations(self):
+        state = self.mixture.state(250, 5_000_000, "vapor")
+        self.assertTrue(math.isclose(state.compressibility, 0.6411750398839282, rel_tol=1e-12))
+        self.assertTrue(math.isclose(state.fugacity_coefficients[0], 0.8525219448372683, rel_tol=1e-12))
+        self.assertTrue(math.isclose(state.fugacity_coefficients[1], 0.4829182900524611, rel_tol=1e-12))
+        self.assertTrue(math.isclose(state.density_kg_per_m3, 75.9719962978659, rel_tol=1e-12))
+        self.assertTrue(math.isclose(state.departure_enthalpy_j_per_kmol, -2387903.066060099, rel_tol=1e-12))
+        self.assertTrue(math.isclose(state.departure_entropy_j_per_kmol_k, -6807.325988454073, rel_tol=1e-12))
+        self.assertEqual(self.mixture.stable_state(250, 5_000_000).phase, "single")
+
+    def test_composition_is_validated_at_construction(self):
+        compounds = tuple(model.compound for model in self.mixture.components)
+        interactions = self.mixture.interactions
+        for fractions in ((0.7,), (0.7, 0.4), (-0.1, 1.1), (math.nan, math.nan)):
+            with self.assertRaises(ValidationError):
+                PengRobinsonMixture(compounds, fractions, interactions)
 
 
 if __name__ == "__main__":

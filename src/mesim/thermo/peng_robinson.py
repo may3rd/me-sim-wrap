@@ -1,7 +1,7 @@
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
-from ..compounds import Compound
+from ..compounds import Compound, PRInteractions
 from ..errors import ValidationError
 
 
@@ -23,6 +23,23 @@ class PRState:
     phase: str
     compressibility: float
     fugacity_coefficient: float
+    density_kg_per_m3: float
+    departure_enthalpy_j_per_kmol: float
+    departure_entropy_j_per_kmol_k: float
+
+
+@dataclass(frozen=True)
+class PRMixtureParameters:
+    a_pa_m6_per_kmol2: float
+    b_m3_per_kmol: float
+    da_dtemperature: float
+
+
+@dataclass(frozen=True)
+class PRMixtureState:
+    phase: str
+    compressibility: float
+    fugacity_coefficients: tuple[float, ...]
     density_kg_per_m3: float
     departure_enthalpy_j_per_kmol: float
     departure_entropy_j_per_kmol_k: float
@@ -132,4 +149,135 @@ class PengRobinson:
             density,
             departure_enthalpy,
             departure_entropy,
+        )
+
+    def stable_state(self, temperature_k: float, pressure_pa: float) -> PRState:
+        if len(self.roots(temperature_k, pressure_pa)) == 1:
+            return replace(self.state(temperature_k, pressure_pa, "vapor"), phase="single")
+        return min(
+            (self.state(temperature_k, pressure_pa, phase) for phase in ("liquid", "vapor")),
+            key=lambda state: state.fugacity_coefficient,
+        )
+
+
+class PengRobinsonMixture:
+    def __init__(self, compounds: tuple[Compound, ...], mole_fractions: tuple[float, ...], interactions: PRInteractions):
+        if len(compounds) < 2 or len(compounds) != len(mole_fractions):
+            raise ValidationError("mixture compounds and mole fractions must have the same length of at least two")
+        if len({compound.id for compound in compounds}) != len(compounds):
+            raise ValidationError("mixture compounds must be unique")
+        if not all(math.isfinite(value) and value >= 0 for value in mole_fractions):
+            raise ValidationError("mole fractions must be finite and non-negative")
+        if not math.isclose(sum(mole_fractions), 1.0, rel_tol=0.0, abs_tol=1e-12):
+            raise ValidationError("mole fractions must sum to one")
+        self.components = tuple(PengRobinson(compound) for compound in compounds)
+        self.mole_fractions = mole_fractions
+        self.interactions = interactions
+
+    def _mix(self, temperature_k: float) -> tuple[PRMixtureParameters, tuple[PRParameters, ...], tuple[tuple[float, ...], ...]]:
+        pure = tuple(component.parameters(temperature_k) for component in self.components)
+        cross = tuple(
+            tuple(
+                math.sqrt(first.a_pa_m6_per_kmol2 * second.a_pa_m6_per_kmol2)
+                * (1.0 - self.interactions.get(self.components[i].compound.id, self.components[j].compound.id))
+                for j, second in enumerate(pure)
+            )
+            for i, first in enumerate(pure)
+        )
+        a_mixture = sum(
+            self.mole_fractions[i] * self.mole_fractions[j] * cross[i][j]
+            for i in range(len(pure))
+            for j in range(len(pure))
+        )
+        b_mixture = sum(fraction * parameter.b_m3_per_kmol for fraction, parameter in zip(self.mole_fractions, pure))
+        da_dtemperature = sum(
+            self.mole_fractions[i]
+            * self.mole_fractions[j]
+            * cross[i][j]
+            * 0.5
+            * (pure[i].da_dtemperature / pure[i].a_pa_m6_per_kmol2 + pure[j].da_dtemperature / pure[j].a_pa_m6_per_kmol2)
+            for i in range(len(pure))
+            for j in range(len(pure))
+        )
+        return PRMixtureParameters(a_mixture, b_mixture, da_dtemperature), pure, cross
+
+    def parameters(self, temperature_k: float) -> PRMixtureParameters:
+        return self._mix(temperature_k)[0]
+
+    def roots(self, temperature_k: float, pressure_pa: float) -> tuple[float, ...]:
+        PengRobinson._validate_state(temperature_k, pressure_pa)
+        parameters = self.parameters(temperature_k)
+        a_reduced = parameters.a_pa_m6_per_kmol2 * pressure_pa / (R**2 * temperature_k**2)
+        b_reduced = parameters.b_m3_per_kmol * pressure_pa / (R * temperature_k)
+        roots = _cubic_real_roots(
+            -(1.0 - b_reduced),
+            a_reduced - 3.0 * b_reduced**2 - 2.0 * b_reduced,
+            -(a_reduced * b_reduced - b_reduced**2 - b_reduced**3),
+        )
+        physical = tuple(root for root in roots if math.isfinite(root) and root > b_reduced)
+        if not physical:
+            raise ValidationError("Peng-Robinson EOS has no physical mixture root")
+        return physical
+
+    def state(self, temperature_k: float, pressure_pa: float, phase: str) -> PRMixtureState:
+        if phase not in {"vapor", "liquid"}:
+            raise ValidationError("phase must be vapor or liquid")
+        PengRobinson._validate_state(temperature_k, pressure_pa)
+        parameters, pure, cross = self._mix(temperature_k)
+        a_reduced = parameters.a_pa_m6_per_kmol2 * pressure_pa / (R**2 * temperature_k**2)
+        b_reduced = parameters.b_m3_per_kmol * pressure_pa / (R * temperature_k)
+        roots = self.roots(temperature_k, pressure_pa)
+        compressibility = max(roots) if phase == "vapor" else min(roots)
+        log_ratio = math.log(
+            (compressibility + (1.0 + SQRT_2) * b_reduced)
+            / (compressibility + (1.0 - SQRT_2) * b_reduced)
+        )
+        log_fugacities = tuple(
+            pure[i].b_m3_per_kmol / parameters.b_m3_per_kmol * (compressibility - 1.0)
+            - math.log(compressibility - b_reduced)
+            - a_reduced
+            / (2.0 * SQRT_2 * b_reduced)
+            * (
+                2.0 * sum(self.mole_fractions[j] * cross[i][j] for j in range(len(pure))) / parameters.a_pa_m6_per_kmol2
+                - pure[i].b_m3_per_kmol / parameters.b_m3_per_kmol
+            )
+            * log_ratio
+            for i in range(len(pure))
+        )
+        departure_enthalpy = R * temperature_k * (compressibility - 1.0) + (
+            temperature_k * parameters.da_dtemperature - parameters.a_pa_m6_per_kmol2
+        ) * log_ratio / (2.0 * SQRT_2 * parameters.b_m3_per_kmol)
+        departure_entropy = R * math.log(compressibility - b_reduced) + (
+            parameters.da_dtemperature * log_ratio / (2.0 * SQRT_2 * parameters.b_m3_per_kmol)
+        )
+        molecular_weight = sum(
+            fraction * component.compound.molecular_weight.value
+            for fraction, component in zip(self.mole_fractions, self.components)
+        )
+        density = pressure_pa * molecular_weight / (compressibility * R * temperature_k)
+        values = (*log_fugacities, departure_enthalpy, departure_entropy, density)
+        if not all(math.isfinite(value) for value in values):
+            raise ValidationError("Peng-Robinson mixture state is outside the representable range")
+        try:
+            fugacity_coefficients = tuple(math.exp(value) for value in log_fugacities)
+        except OverflowError as error:
+            raise ValidationError("Peng-Robinson mixture fugacity is outside the representable range") from error
+        return PRMixtureState(
+            phase,
+            compressibility,
+            fugacity_coefficients,
+            density,
+            departure_enthalpy,
+            departure_entropy,
+        )
+
+    def stable_state(self, temperature_k: float, pressure_pa: float) -> PRMixtureState:
+        if len(self.roots(temperature_k, pressure_pa)) == 1:
+            return replace(self.state(temperature_k, pressure_pa, "vapor"), phase="single")
+        return min(
+            (self.state(temperature_k, pressure_pa, phase) for phase in ("liquid", "vapor")),
+            key=lambda state: sum(
+                fraction * math.log(coefficient)
+                for fraction, coefficient in zip(self.mole_fractions, state.fugacity_coefficients)
+            ),
         )
