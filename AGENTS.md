@@ -8,3 +8,4 @@
 - When source text and a binding error conflict, capture the runtime invocation path and file hash before changing code.
 - Do not prescribe an absolute clone path until the user has created that clone.
 - Exclude capture timestamps from deterministic golden-case comparisons.
+- Read Windows PowerShell JSON outputs with utf-8-sig to accept its UTF-8 BOM.

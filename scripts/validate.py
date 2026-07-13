@@ -15,7 +15,7 @@ def enabled_cases() -> list[Path]:
 
 
 def normalized_digest(path: Path) -> str:
-    case = json.loads(path.read_text())
+    case = json.loads(path.read_text(encoding="utf-8-sig"))
     case.get("source", {}).pop("captured_utc", None)
     normalized = json.dumps(case, allow_nan=False, separators=(",", ":"), sort_keys=True)
     return hashlib.sha256(normalized.encode()).hexdigest()

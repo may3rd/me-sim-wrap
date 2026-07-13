@@ -33,8 +33,14 @@ class Phase1PackageTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             first = Path(directory) / "first.json"
             second = Path(directory) / "second.json"
-            first.write_text(json.dumps({"source": {"captured_utc": "2026-07-13T00:00:00Z"}, "value": 1}))
-            second.write_text(json.dumps({"source": {"captured_utc": "2026-07-13T00:00:01Z"}, "value": 1}))
+            first.write_text(
+                json.dumps({"source": {"captured_utc": "2026-07-13T00:00:00Z"}, "value": 1}),
+                encoding="utf-8-sig",
+            )
+            second.write_text(
+                json.dumps({"source": {"captured_utc": "2026-07-13T00:00:01Z"}, "value": 1}),
+                encoding="utf-8-sig",
+            )
 
             result = subprocess.run(
                 [sys.executable, str(ROOT / "scripts" / "validate.py"), "--compare", str(first), str(second)],
