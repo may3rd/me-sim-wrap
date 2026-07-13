@@ -26,12 +26,6 @@ class Phase0ArtifactsTest(unittest.TestCase):
         ):
             self.assertIn(token, script)
 
-    def test_capture_script_accepts_generic_dictionary_entries(self):
-        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
-
-        self.assertIn("[object]$Entry", script)
-        self.assertNotIn("[System.Collections.DictionaryEntry]$Entry", script)
-
     def test_capture_script_preloads_portable_thermoc_assembly(self):
         script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
 
@@ -54,6 +48,32 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertIn("source revision", text.lower())
         self.assertIn("golden-case-1", text)
 
+    def test_capture_script_reads_compounds_without_dictionary_entry_conversion(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("AvailableCompounds.ContainsKey", script)
+        self.assertIn("$automation.AvailableCompounds[", script)
+        self.assertIn("[object]$Constant", script)
+        self.assertNotIn("[object]$Entry", script)
+        self.assertNotIn("[System.Collections.DictionaryEntry]$Entry", script)
+
+    def test_capture_script_preloads_portable_thermoc_assembly(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn('-Filter "ThermoCS.dll"', script)
+        self.assertIn("-Recurse", script)
+        self.assertIn("$thermoCAssemblyPath.FullName", script)
+
+    def test_capture_script_reads_dwsim_objects_through_clr_reflection(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("Add-Type -TypeDefinition", script)
+        self.assertIn("public static class DwsimCaptureReflection", script)
+        self.assertIn("[DwsimCaptureReflection]::Get(", script)
+        self.assertIn("$object,", script)
+        self.assertIn('"Name"', script)
+        self.assertIn("$Object.PSObject.Properties[$Name]", script)
+        self.assertNotIn("function Get-ClrBaseObject", script)
 
 if __name__ == "__main__":
     unittest.main()
