@@ -1,0 +1,23 @@
+{
+  "schema_version": "pr-interactions-1",
+  "model": "Peng-Robinson",
+  "missing_pair_policy": "error",
+  "provenance": {
+    "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/pr_ip.dat",
+    "source_revision": "9.0.4",
+    "selection": "first entry loaded by DWSIM for each pair",
+    "imported_utc": "2026-07-13T07:24:14Z"
+  },
+  "pairs": [
+    {"compound_1": "Methane", "compound_2": "Ethane", "kij": -0.0033, "unit": "dimensionless"},
+    {"compound_1": "Methane", "compound_2": "Propane", "kij": 0.0119, "unit": "dimensionless"},
+    {"compound_1": "Methane", "compound_2": "N-butane", "kij": 0.0244, "unit": "dimensionless"},
+    {"compound_1": "Methane", "compound_2": "N-pentane", "kij": 0.023, "unit": "dimensionless"},
+    {"compound_1": "Ethane", "compound_2": "Propane", "kij": 0.0011, "unit": "dimensionless"},
+    {"compound_1": "Ethane", "compound_2": "N-butane", "kij": 0.0089, "unit": "dimensionless"},
+    {"compound_1": "Ethane", "compound_2": "N-pentane", "kij": 0.0078, "unit": "dimensionless"},
+    {"compound_1": "Propane", "compound_2": "N-butane", "kij": 0.0033, "unit": "dimensionless"},
+    {"compound_1": "Propane", "compound_2": "N-pentane", "kij": 0.0267, "unit": "dimensionless"},
+    {"compound_1": "N-butane", "compound_2": "N-pentane", "kij": 0.0174, "unit": "dimensionless"}
+  ]
+}

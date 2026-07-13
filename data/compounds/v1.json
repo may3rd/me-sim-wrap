@@ -1,0 +1,50 @@
+{
+  "schema_version": "compound-data-1",
+  "compounds": [
+    {
+      "id": "Methane", "name": "Methane", "cas": "74-82-8", "formula": "CH4",
+      "molecular_weight": {"value": 16.04246, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 190.56, "unit": "K"},
+      "critical_pressure": {"value": 4599000, "unit": "Pa"},
+      "acentric_factor": {"value": 0.011, "unit": "dimensionless"},
+      "normal_boiling_point": {"value": 111.66, "unit": "K"},
+      "provenance": {"database": "ChemSep", "source": "DWSIM.AvailableCompounds", "source_revision": "9.0.4", "imported_utc": "2026-07-13T01:51:18.8788100Z"}
+    },
+    {
+      "id": "Ethane", "name": "Ethane", "cas": "74-84-0", "formula": "CH3CH3",
+      "molecular_weight": {"value": 30.06904, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 305.32, "unit": "K"},
+      "critical_pressure": {"value": 4872000, "unit": "Pa"},
+      "acentric_factor": {"value": 0.099, "unit": "dimensionless"},
+      "normal_boiling_point": {"value": 184.55, "unit": "K"},
+      "provenance": {"database": "ChemSep", "source": "DWSIM.AvailableCompounds", "source_revision": "9.0.4", "imported_utc": "2026-07-13T01:51:18.8788100Z"}
+    },
+    {
+      "id": "Propane", "name": "Propane", "cas": "74-98-6", "formula": "CH3CH2CH3",
+      "molecular_weight": {"value": 44.09562, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 369.83, "unit": "K"},
+      "critical_pressure": {"value": 4248000, "unit": "Pa"},
+      "acentric_factor": {"value": 0.152, "unit": "dimensionless"},
+      "normal_boiling_point": {"value": 231.02, "unit": "K"},
+      "provenance": {"database": "ChemSep", "source": "DWSIM.AvailableCompounds", "source_revision": "9.0.4", "imported_utc": "2026-07-13T01:51:18.8788100Z"}
+    },
+    {
+      "id": "N-butane", "name": "N-butane", "cas": "106-97-8", "formula": "CH3(CH2)2CH3",
+      "molecular_weight": {"value": 58.1222, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 425.12, "unit": "K"},
+      "critical_pressure": {"value": 3796000, "unit": "Pa"},
+      "acentric_factor": {"value": 0.199, "unit": "dimensionless"},
+      "normal_boiling_point": {"value": 272.66, "unit": "K"},
+      "provenance": {"database": "ChemSep", "source": "DWSIM.AvailableCompounds", "source_revision": "9.0.4", "imported_utc": "2026-07-13T01:51:18.8788100Z"}
+    },
+    {
+      "id": "N-pentane", "name": "N-pentane", "cas": "109-66-0", "formula": "CH3(CH2)3CH3",
+      "molecular_weight": {"value": 72.14878, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 469.7, "unit": "K"},
+      "critical_pressure": {"value": 3370000, "unit": "Pa"},
+      "acentric_factor": {"value": 0.251, "unit": "dimensionless"},
+      "normal_boiling_point": {"value": 309.22, "unit": "K"},
+      "provenance": {"database": "ChemSep", "source": "DWSIM.AvailableCompounds", "source_revision": "9.0.4", "imported_utc": "2026-07-13T01:51:18.8788100Z"}
+    }
+  ]
+}
