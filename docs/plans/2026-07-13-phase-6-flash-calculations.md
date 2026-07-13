@@ -12,9 +12,9 @@
 
 ## Equation references
 
-- Rachford, H. H. and Rice, J. D., “Procedure for Use of Electronic Digital Computers in Calculating Flash Vaporization Hydrocarbon Equilibrium,” 1952.
-- Michelsen, M. L., “The Isothermal Flash Problem. Part I. Stability,” *Fluid Phase Equilibria* 9, 1982.
-- Michelsen, M. L., “The Isothermal Flash Problem. Part II. Phase-Split Calculation,” *Fluid Phase Equilibria* 9, 1982.
+- Rachford, H. H. and Rice, J. D., “Procedure for Use of Electronic Digital Computers in Calculating Flash Vaporization Hydrocarbon Equilibrium,” *Journal of Petroleum Technology* 4(10), 1952, DOI `10.2118/952327-G`.
+- Michelsen, M. L., “The Isothermal Flash Problem. Part I. Stability,” *Fluid Phase Equilibria* 9, 1982, pp. 1–19, DOI `10.1016/0378-3812(82)85001-2`.
+- Michelsen, M. L., “The Isothermal Flash Problem. Part II. Phase-Split Calculation,” *Fluid Phase Equilibria* 9, 1982, pp. 21–40, DOI `10.1016/0378-3812(82)85002-4`.
 
 The implementation tests must record the exact edition, page/equation, or DOI used for each independent vector.
 
