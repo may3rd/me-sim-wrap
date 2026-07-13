@@ -8,7 +8,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.thermo.flash import rachford_rice
+from mesim.compounds import load_compounds, load_pr_interactions
+from mesim.thermo.flash import pr_stability, rachford_rice
+
+
+ROOT = Path(__file__).parents[1]
 
 
 class RachfordRiceTest(unittest.TestCase):
@@ -66,6 +70,60 @@ class RachfordRiceTest(unittest.TestCase):
             rachford_rice((0.5, 0.5), (2.0, 0.5), max_iterations=0)
         with self.assertRaises(ValidationError):
             rachford_rice((0.5, 0.5), (2.0, 0.5), tolerance=0.0)
+
+
+class PRStabilityTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        cls.compounds = (compounds["Methane"], compounds["Ethane"])
+        cls.interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
+
+    def test_dwsim_backed_pure_limits_are_stable_with_zero_fraction(self):
+        vapor = pr_stability(self.compounds, (1.0, 0.0), self.interactions, 228.672, 459_900)
+        liquid = pr_stability(self.compounds, (1.0, 0.0), self.interactions, 133.392, 2_299_500)
+
+        for result in (vapor, liquid):
+            self.assertTrue(result.report.converged)
+            self.assertTrue(result.stable)
+            self.assertTrue(result.vapor_like.report.converged)
+            self.assertTrue(result.liquid_like.report.converged)
+            self.assertGreaterEqual(min(result.vapor_like.tangent_plane_distance, result.liquid_like.tangent_plane_distance), -1e-10)
+
+    def test_distinguishes_stable_vapor_stable_liquid_and_unstable_feed(self):
+        vapor = pr_stability(self.compounds, (0.7, 0.3), self.interactions, 200.0, 500_000)
+        liquid = pr_stability(self.compounds, (0.7, 0.3), self.interactions, 150.0, 1_000_000)
+        unstable = pr_stability(self.compounds, (0.7, 0.3), self.interactions, 180.0, 500_000)
+
+        self.assertTrue(vapor.stable)
+        self.assertEqual(vapor.feed_phase, "vapor")
+        self.assertTrue(liquid.stable)
+        self.assertEqual(liquid.feed_phase, "liquid")
+        self.assertFalse(unstable.stable)
+        self.assertLess(unstable.liquid_like.tangent_plane_distance, -0.5)
+
+    def test_near_critical_result_is_deterministic(self):
+        first = pr_stability(self.compounds, (0.7, 0.3), self.interactions, 250.0, 5_000_000)
+        second = pr_stability(self.compounds, (0.7, 0.3), self.interactions, 250.0, 5_000_000)
+
+        self.assertEqual(first, second)
+        self.assertTrue(first.report.converged)
+        self.assertTrue(first.stable)
+        self.assertLess(first.report.residual, 1e-10)
+
+    def test_reports_trial_iteration_exhaustion(self):
+        result = pr_stability(
+            self.compounds,
+            (0.7, 0.3),
+            self.interactions,
+            180.0,
+            500_000,
+            max_iterations=1,
+            tolerance=1e-30,
+        )
+
+        self.assertFalse(result.report.converged)
+        self.assertIsNotNone(result.report.failure_reason)
 
 
 if __name__ == "__main__":
