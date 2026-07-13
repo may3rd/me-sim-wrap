@@ -44,24 +44,23 @@ UNITS = MappingProxyType(
         **_aliases("mass", 1.0, "kg"),
         **_aliases("mass", 0.001, "g"),
         **_aliases("mass", 0.45359237, "lb", "lbm"),
-        **_aliases("amount", 1.0, "mol"),
-        **_aliases("amount", 1_000.0, "kmol"),
+        **_aliases("amount", 0.001, "mol"),
+        **_aliases("amount", 1.0, "kmol"),
         **_aliases("mass_flow", 1.0, "kg/s"),
         **_aliases("mass_flow", 1.0 / 3_600.0, "kg/h", "kg/hr"),
         **_aliases("mass_flow", 0.001, "g/s"),
         **_aliases("mass_flow", 0.45359237, "lb/s"),
         **_aliases("mass_flow", 0.45359237 / 3_600.0, "lb/h", "lb/hr"),
-        **_aliases("molar_flow", 1.0, "mol/s"),
-        **_aliases("molar_flow", 1.0 / 3_600.0, "mol/h", "mol/hr"),
-        **_aliases("molar_flow", 1_000.0, "kmol/s"),
-        **_aliases("molar_flow", 1_000.0 / 3_600.0, "kmol/h", "kmol/hr"),
+        **_aliases("molar_flow", 0.001, "mol/s"),
+        **_aliases("molar_flow", 0.001 / 3_600.0, "mol/h", "mol/hr"),
+        **_aliases("molar_flow", 1.0, "kmol/s"),
+        **_aliases("molar_flow", 1.0 / 3_600.0, "kmol/h", "kmol/hr"),
         **_aliases("volumetric_flow", 1.0, "m3/s", "m^3/s"),
         **_aliases("volumetric_flow", 1.0 / 3_600.0, "m3/h", "m3/hr", "m^3/h", "m^3/hr"),
         **_aliases("volumetric_flow", 0.001, "L/s"),
         **_aliases("volumetric_flow", 0.001 / 60.0, "L/min"),
         **_aliases("volumetric_flow", 0.028316846592, "ft3/s", "ft^3/s"),
         **_aliases("volumetric_flow", 0.028316846592 / 60.0, "ft3/min", "ft^3/min"),
-        **_aliases("volumetric_flow", 0.003785411784 / 60.0, "gpm"),
         **_aliases("energy", 1.0, "J"),
         **_aliases("energy", 1_000.0, "kJ"),
         **_aliases("energy", 1_000_000.0, "MJ"),
@@ -173,6 +172,12 @@ def _check_temperature(si_value: float, dimension: str) -> None:
         raise OutOfRangeError("temperature cannot be below 0 K")
 
 
+def _finite_conversion(value: float) -> float:
+    if not math.isfinite(value):
+        raise ValidationError("converted quantity must be finite")
+    return value
+
+
 def unit_dimension(unit: str) -> str:
     return _unit(unit).dimension
 
@@ -181,7 +186,7 @@ def to_si(value: float, unit: str, dimension: str | None = None) -> float:
     spec = _unit(unit)
     _check_dimension(spec, unit, dimension)
     number = _number(value)
-    si_value = (number + spec.offset) * spec.factor
+    si_value = _finite_conversion((number + spec.offset) * spec.factor)
     _check_temperature(si_value, spec.dimension)
     return si_value
 
@@ -191,7 +196,7 @@ def from_si(si_value: float, unit: str, dimension: str | None = None) -> float:
     _check_dimension(spec, unit, dimension)
     number = _number(si_value)
     _check_temperature(number, spec.dimension)
-    return number / spec.factor - spec.offset
+    return _finite_conversion(number / spec.factor - spec.offset)
 
 
 def convert(value: float, from_unit: str, dimension: str, to_unit: str) -> float:

@@ -16,7 +16,7 @@ class UnitsTest(unittest.TestCase):
         cases = (
             (1.0, "bar", "pressure", 100_000.0),
             (1.0, "kg/h", "mass_flow", 1 / 3600),
-            (1.0, "kmol/h", "molar_flow", 1000 / 3600),
+            (1.0, "kmol/h", "molar_flow", 1 / 3600),
             (1.0, "kJ", "energy", 1000.0),
             (1.0, "kW", "power", 1000.0),
             (1.0, "kJ/kg", "enthalpy", 1000.0),
@@ -58,7 +58,7 @@ class UnitsTest(unittest.TestCase):
             ("delta_K", "temperature_difference"),
             ("s", "time"),
             ("kg", "mass"),
-            ("mol", "amount"),
+            ("kmol", "amount"),
             ("m3/s", "volumetric_flow"),
             ("J/kg/K", "heat_capacity"),
             ("J/kmol/K", "molar_heat_capacity"),
@@ -79,7 +79,7 @@ class UnitsTest(unittest.TestCase):
             (0.0, "barg", "pressure", 101_325.0),
             (1.0, "h", "time", 3_600.0),
             (1.0, "lb", "mass", 0.45359237),
-            (1.0, "kmol", "amount", 1_000.0),
+            (1.0, "mol", "amount", 0.001),
             (1.0, "m3/h", "volumetric_flow", 1.0 / 3_600.0),
             (1.0, "kJ/kg/K", "heat_capacity", 1_000.0),
             (1.0, "J/mol/K", "molar_heat_capacity", 1_000.0),
@@ -113,6 +113,12 @@ class UnitsTest(unittest.TestCase):
         with self.assertRaises(ValidationError):
             to_si(20.0, "delta_degC", "temperature")
 
+    def test_molar_flow_and_enthalpy_share_kmol_basis(self):
+        flow_kmol_s = to_si(1.0, "kmol/s", "molar_flow")
+        enthalpy_j_kmol = to_si(1.0, "kJ/kmol", "molar_enthalpy")
+
+        self.assertEqual(flow_kmol_s * enthalpy_j_kmol, 1_000.0)
+
     def test_convert_round_trips_without_changing_requested_units(self):
         self.assertTrue(math.isclose(convert(1.0, "bar", "pressure", "psi"), 14.503773773, rel_tol=1e-9))
         self.assertTrue(math.isclose(convert(14.503773773, "psi", "pressure", "bar"), 1.0, rel_tol=1e-9))
@@ -130,11 +136,17 @@ class UnitsTest(unittest.TestCase):
         with self.assertRaises(ValidationError):
             to_si(1.0, "not-a-unit", "pressure")
         with self.assertRaises(ValidationError):
+            to_si(1.0, "gpm", "volumetric_flow")
+        with self.assertRaises(ValidationError):
             to_si(1.0, "bar", "temperature")
         with self.assertRaises(ValidationError):
             to_si(float("nan"), "bar", "pressure")
         with self.assertRaises(ValidationError):
             to_si(True, "bar", "pressure")
+        with self.assertRaises(ValidationError):
+            to_si(1e308, "MPa", "pressure")
+        with self.assertRaises(ValidationError):
+            from_si(1e308, "cSt", "kinematic_viscosity")
         with self.assertRaises(OutOfRangeError):
             to_si(-274.0, "degC", "temperature")
 

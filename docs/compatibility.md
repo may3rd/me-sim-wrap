@@ -45,8 +45,8 @@ The current canonical calculation bases are:
 |---|---|
 | absolute temperature; temperature difference | K; K difference |
 | pressure; pressure gradient | Pa; Pa/m |
-| time; mass; amount | s; kg; mol |
-| mass, molar, and volumetric flow | kg/s; mol/s; m3/s |
+| time; mass; amount | s; kg; kmol |
+| mass, molar, and volumetric flow | kg/s; kmol/s; m3/s |
 | energy; power; force | J; W; N |
 | mass and molar enthalpy | J/kg; J/kmol |
 | mass and molar heat capacity or entropy | J/kg/K; J/kmol/K |
