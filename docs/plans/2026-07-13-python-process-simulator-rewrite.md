@@ -339,6 +339,8 @@ git commit -m "test: freeze initial DWSIM reference cases"
 
 ### Phase 6: Flash calculations
 
+Detailed execution plan: [2026-07-13-phase-6-flash-calculations.md](2026-07-13-phase-6-flash-calculations.md).
+
 **Files:**
 - Create: `src/mesim/thermo/flash.py`
 - Create: `tests/test_flash.py`
@@ -349,8 +351,8 @@ git commit -m "test: freeze initial DWSIM reference cases"
 2. Implement bounded solution with explicit residual and iteration limit.
 3. Write failing TP flash cases using PR fugacity iteration and phase stability checks.
 4. Implement TP flash with a documented fallback path.
-5. Add bubble-point and dew-point calculations.
-6. Add PH and PS flashes using bracketed temperature solves; add TV and PV only when a UO needs them.
+5. Add isothermal bubble-pressure and dew-pressure calculations with caller-supplied bounds.
+6. Add PH using a bracketed temperature solve and an explicit enthalpy reference; defer PS until the expander needs it and defer TV/PV until a UO needs them.
 7. Verify mass balance, fugacity equality, energy consistency, determinism, and DWSIM parity.
 8. Commit `feat: add PR vapor-liquid flash calculations`.
 
