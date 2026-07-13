@@ -186,7 +186,7 @@ python scripts/validate.py --quiet
 |---|---|
 | T0 | Ideal gas, ideal liquid, pure-component vapor pressure and heat-capacity correlations |
 | T1 | Peng-Robinson and PR78, vapor and liquid roots, fugacity, departure enthalpy/entropy |
-| T2 | TP, PH, PS, TV, PV, bubble-point and dew-point flashes; stability testing |
+| T2 | TP, PH, bubble-pressure and dew-pressure flashes; stability testing. Add PS with the expander and TV/PV only on demand |
 | T3 | Soave-Redlich-Kwong, Lee-Kesler-Plocker, Chao-Seader, Grayson-Streed |
 | T4 | Wilson, NRTL, UNIQUAC, UNIFAC, modified UNIFAC; VLE, LLE, VLLE |
 | T5 | IAPWS-IF97 steam/water and seawater |
@@ -201,8 +201,8 @@ Models are added because an approved flowsheet requires them, not merely because
 | Phase | Scope |
 |---|---|
 | U0 | Material stream, energy stream, mixer, splitter, heater, cooler, valve, equilibrium separator |
-| U1 | Pump, compressor, expander, component separator, tank, vessel |
-| U2 | Two-stream heat exchanger, shell-and-tube sizing, filter, solids separator |
+| U1 | Pump, compressor, expander, component separator |
+| U2 | Two-stream heat exchanger and shell-and-tube thermal rating |
 | U3 | Pipe, fittings, orifice plate, relief valve; single- and two-phase hydraulic correlations |
 | U4 | Conversion, equilibrium and Gibbs reactors |
 | U5 | CSTR and PFR with kinetic reactions |
@@ -367,13 +367,14 @@ Detailed execution plan: [2026-07-13-phase-6-flash-calculations.md](2026-07-13-p
 
 **Steps:**
 
-1. Add validated immutable `StreamState` and calculated `PhaseState` records.
-2. Implement explicit `flash_stream()`; stream construction itself performs no hidden flash.
-3. Add an energy-stream scalar in SI power.
-4. Write balance-first tests, then implement mixer, splitter, heater, cooler, valve, and equilibrium separator.
-5. For each UO, test zero flow, invalid pressure, missing specification, phase change, and material/energy closure.
-6. Compare each UO to one DWSIM golden case.
-7. Commit one UO at a time, starting with mixer and splitter.
+1. Add validated immutable `StreamState` inputs and calculated `PhaseState` outputs. Preserve ordered compound IDs; never align compositions by array position without checking IDs.
+2. Implement explicit `flash_stream()`; constructing or copying a stream performs no hidden flash.
+3. Implement mixer and splitter first because they require no new thermodynamic mode. Mixer requires an explicit outlet pressure not above the lowest inlet pressure, sums component flows and enthalpy flow, then performs PH flash. Splitter preserves state and composition exactly and changes only outlet flows from explicit fractions. Commit each separately after component and total balance checks.
+4. Add an energy-stream scalar in SI power with one sign convention: positive duty enters the material stream.
+5. Implement one explicit specification mode per thermal operation: outlet temperature for heater/cooler. Duty is calculated output; reject a negative heater duty or positive cooler duty. Additional modes wait for a real case.
+6. Implement valve as fixed outlet pressure below inlet pressure with PH flash. Implement equilibrium separator only as routing of an already converged flashed state; outlet phase flow equals feed flow times phase fraction.
+7. For each operation, test zero flow, invalid pressure, missing or conflicting specification, phase change, component balance, and energy closure.
+8. Compare each operation to one deterministic DWSIM golden case. Commit one operation at a time.
 
 **Exit gate:** U0 operations pass conservation checks and DWSIM parity without a flowsheet framework.
 
@@ -385,132 +386,16 @@ Detailed execution plan: [2026-07-13-phase-6-flash-calculations.md](2026-07-13-p
 
 **Steps:**
 
-1. Write failing checks for duplicate tags, missing ports, incompatible connections, cycles without recycle blocks, and deterministic topological order.
-2. Represent the flowsheet with plain dictionaries and dataclasses; do not introduce a graph dependency.
-3. Execute acyclic flowsheets in topological order.
-4. Apply results atomically only after each UO converges.
+1. Write failing checks for duplicate tags, missing ports, incompatible connections, multiple writers, cycles, and deterministic topological order. All cycles are rejected until the recycle phase exists.
+2. Represent the flowsheet with plain dictionaries and dataclasses; do not introduce a graph dependency. Define fixed named ports per operation and validate connections before calculation.
+3. Treat unit operations as pure calculations from immutable inlet states and specifications. Execute acyclic flowsheets in deterministic topological order with tag ordering as the tie-breaker.
+4. Calculate into a new immutable result map. Publish nothing unless every operation converges; a failed solve retains the last complete authoritative state unchanged.
 5. Add a four-operation golden flowsheet and compare every stream.
 6. Commit `feat: solve acyclic steady-state flowsheets`.
 
 **Exit gate:** A feed-heater-valve-separator flowsheet matches DWSIM and never partially mutates on failure.
 
-### Phase 9: Pressure-changing and vessel operations
-
-**Files:**
-- Create: `src/mesim/unitops/pressure.py`
-- Create: `src/mesim/unitops/separation.py`
-- Modify: `tests/test_unitops.py`
-
-**Order:** pump, compressor, expander, component separator, tank, vessel.
-
-For each operation: write one failing normal case and one failing boundary case, implement the smallest calculation mode, verify material/energy balance and DWSIM parity, then commit. Add performance curves only after constant-efficiency modes pass.
-
-**Exit gate:** U1 matrix is green for the supported PR domain.
-
-### Phase 10: Heat exchangers and equipment sizing
-
-**Files:**
-- Create: `src/mesim/unitops/heat.py`
-- Modify: `tests/test_unitops.py`
-
-**Order:** specified-duty exchanger, specified-UA exchanger, effectiveness/NTU, pinch checks, shell-and-tube rating, filter, solids separator.
-
-Keep thermal rating and mechanical geometry separate. Report crossed temperatures, invalid LMTD, phase-change segments, and non-convergence explicitly.
-
-**Exit gate:** U2 energy closure and temperature profiles pass golden cases.
-
-### Phase 11: Hydraulics and relief calculations
-
-**Files:**
-- Create: `src/mesim/unitops/hydraulics.py`
-- Create: `tests/test_hydraulics.py`
-
-**Order:** Darcy-Weisbach single phase, fittings, pipe thermal coupling, orifice, relief valve, Lockhart-Martinelli, Beggs-Brill, Petalas-Aziz.
-
-Every correlation must declare units, regime, valid range, source, and behavior outside range. Preserve roughness, diameter, elevation, and segment data exactly as submitted.
-
-**Exit gate:** Pressure-drop profiles close and each enabled correlation passes published examples plus DWSIM comparison.
-
-### Phase 12: Expand thermodynamic coverage by demand
-
-**Files:**
-- Extend: `src/mesim/thermo/`
-- Extend: `data/compounds/` and `data/interactions/`
-- Extend: `tests/test_thermo.py` and `tests/test_flash.py`
-
-Implement one model per branch in this order:
-
-1. SRK and PR78.
-2. IAPWS-IF97 water/steam.
-3. Wilson and NRTL.
-4. UNIQUAC and UNIFAC.
-5. LLE and VLLE stability/flash.
-6. Lee-Kesler-Plocker, Chao-Seader and Grayson-Streed.
-7. Electrolytes and sour water.
-8. Seawater, black oil, petroleum characterization, solids/SLE and remaining specialty models.
-
-Do not create a generic property-package registry until the second model exists. At that point use a dictionary from stable model ID to constructor, not a plugin framework.
-
-**Exit gate:** Each model has a declared compound/data domain and its own passing compatibility slice before registration.
-
-### Phase 13: Reactions and reactors
-
-**Files:**
-- Create: `src/mesim/unitops/reactors.py`
-- Create: `data/reactions/`
-- Create: `tests/test_reactors.py`
-
-**Order:** reaction schema and element balance, conversion reactor, equilibrium reactor, Gibbs reactor, CSTR, PFR.
-
-Reject unbalanced stoichiometry at load time. Store original rate-expression units. Validate conversion, atom balance, heat of reaction, equilibrium residual, and energy closure.
-
-**Exit gate:** U4 and U5 pass independent reaction cases and DWSIM flowsheets.
-
-### Phase 14: Recycles, specifications and flowsheet convergence
-
-**Files:**
-- Modify: `src/mesim/flowsheet.py`
-- Create: `tests/test_recycles.py`
-
-**Order:** tear-stream recycle, energy recycle, adjust, specification.
-
-Start with direct substitution and bounded damping. Add Wegstein or Newton methods only when a captured case proves direct substitution insufficient. Record residual history and chosen algorithm.
-
-**Exit gate:** Recycle cases converge deterministically from documented initial guesses or fail with complete residual history.
-
-### Phase 15: Columns
-
-**Files:**
-- Create: `src/mesim/unitops/columns.py`
-- Create: `tests/test_columns.py`
-
-**Order:** shortcut column, absorber, reboiled absorber, equilibrium-stage data model, tridiagonal/bubble-point solver, Newton solver, sum-rates/inside-out only when required.
-
-Each stage must close component material and energy balances. Do not begin rigorous columns until T4 activity models and Phase 14 recycle convergence are stable.
-
-**Exit gate:** U6/U7 benchmark columns converge from documented initial estimates and match stage profiles within tolerance.
-
-### Phase 16: Dynamics and controls
-
-**Files:**
-- Create: `src/mesim/unitops/dynamics.py`
-- Create: `tests/test_dynamics.py`
-
-Add holdup states, time integration, tanks/vessels, heat exchangers, PID control, then dynamic reactors. Use SciPy integration rather than writing an ODE solver. Require fixed-step reproducibility mode for regression cases.
-
-**Exit gate:** Mass and energy accumulation close over every time step and dynamic golden trajectories pass.
-
-### Phase 17: Specialty energy operations
-
-**Files:**
-- Create: `src/mesim/unitops/specialty.py`
-- Create: `tests/test_specialty.py`
-
-Add hydroelectric turbine, wind turbine, solar panel, PEM fuel-cell variants, and water electrolyzer one at a time. Treat manufacturer/model constants as versioned input data, not hidden constants.
-
-**Exit gate:** U10 cases pass published model examples and DWSIM comparisons.
-
-### Phase 18: HTTP API and Linux containers
+### Phase 9: HTTP API, containers, and internal alpha
 
 **Files:**
 - Create: `src/mesim/api.py`
@@ -519,14 +404,133 @@ Add hydroelectric turbine, wind turbine, solar panel, PEM fuel-cell variants, an
 
 **Steps:**
 
-1. Expose compound lookup, flash, unit-operation calculation, flowsheet validation, and solve endpoints.
-2. Use Pydantic only for request/response validation; translate once into immutable kernel records.
-3. Require explicit units and return original plus SI values where relevant.
-4. Reject unknown models, compounds, units, tags, and non-finite numbers before calculation.
-5. Return structured convergence failures without stack traces.
-6. Build and test Linux arm64 and amd64 images.
+1. Expose only the verified compound lookup, flash, unit-operation calculation, flowsheet validation, and solve functions.
+2. Use Pydantic only at the HTTP boundary. Translate once into immutable kernel records and preserve submitted values and units beside SI values.
+3. Reject unknown models, compounds, units, tags, duplicate IDs, and non-finite numbers before calculation.
+4. Return structured solver failure records without stack traces or partial authoritative outputs.
+5. Version the API schema independently of model and data versions.
+6. Keep the service stateless. Set request-size, iteration, and execution-time limits at the API boundary.
+7. Record the internal authentication and network-exposure decision before deployment; do not expose an unauthenticated calculation service publicly.
+8. Build and test Linux arm64 and amd64 images. The production image contains no DWSIM files or Windows runtime.
+9. Run the same normalized request vectors on macOS arm64 and both Linux architectures.
 
-**Exit gate:** The same golden request produces equivalent JSON on macOS arm64 and Linux amd64/arm64.
+**Exit gate:** The first production-usable slice is callable from the internal web app and returns equivalent deterministic JSON on macOS arm64 and Linux amd64/arm64.
+
+### Phase 10: Pressure-changing and vessel operations
+
+**Files:**
+- Create: `src/mesim/unitops/pressure.py`
+- Create: `src/mesim/unitops/separation.py`
+- Modify: `tests/test_unitops.py`
+
+**Order:** pump, compressor, expander, component separator.
+
+Implement one mode first: specified outlet pressure and constant efficiency. Pump requires liquid inlet; compressor requires vapor inlet; expander adds PS flash before implementation. Reject efficiency outside `(0, 1]`, invalid phase, and impossible pressure direction. For each operation, write one normal and one boundary case, verify component/energy balance and DWSIM parity, then commit. Add performance curves only after a captured case requires them.
+
+Do not add pass-through steady-state tank or vessel classes; the existing equilibrium separator already covers that calculation. Add vessel holdup only with dynamics or an approved residence-time/sizing requirement.
+
+**Exit gate:** U1 matrix is green for the supported PR domain.
+
+### Phase 11: Heat exchangers
+
+**Files:**
+- Create: `src/mesim/unitops/heat.py`
+- Modify: `tests/test_unitops.py`
+
+**Order:** specified-duty exchanger, specified-UA exchanger, effectiveness/NTU, pinch checks, shell-and-tube thermal rating.
+
+Keep thermal rating and mechanical design separate. Mechanical code sizing, filters, and solids separation are outside this phase. Report crossed temperatures, invalid LMTD, phase-change segments, and non-convergence explicitly. Require segment energy closure when phase change occurs.
+
+**Exit gate:** U2 energy closure and temperature profiles pass golden cases.
+
+### Phase 12: Hydraulics and relief calculations
+
+**Files:**
+- Create: `src/mesim/unitops/hydraulics.py`
+- Create: `tests/test_hydraulics.py`
+
+**Order:** Darcy-Weisbach single phase, fittings, elevation, pipe thermal coupling, orifice, Lockhart-Martinelli, Beggs-Brill, then relief valve. Petalas-Aziz is added only when a required case falls outside the accepted Beggs-Brill domain.
+
+Every correlation must declare units, regime, valid range, primary source, and behavior outside range. Preserve roughness, diameter, elevation, and segment data exactly as submitted. Two-phase hydraulics starts only after TP/PH flashes and phase properties are verified. Relief calculations require an explicit standard and edition, scenario basis, relieving conditions, and independent benchmark; DWSIM agreement alone is insufficient for safety acceptance.
+
+**Exit gate:** Pressure-drop profiles close and each enabled correlation passes published examples plus DWSIM comparison.
+
+### Phase 13: Expand thermodynamic coverage by approved demand
+
+**Files:**
+- Extend: `src/mesim/thermo/`
+- Extend: `data/compounds/` and `data/interactions/`
+- Extend: `tests/test_thermo.py` and `tests/test_flash.py`
+
+This is a capability backlog, not an automatic sequence. Approve one model because an accepted flowsheet requires it, then implement it on one branch. Likely dependency order:
+
+1. PR78 only if the current five-compound domain needs its high-acentric-factor correction; SRK only for a required comparison.
+2. IAPWS-IF97 before verified steam/water equipment cases.
+3. Wilson or NRTL before the first nonideal liquid VLE case.
+4. UNIQUAC or UNIFAC only when required interaction/group data is source-backed.
+5. LLE/VLLE stability and flash before any decanter or liquid-liquid column.
+6. Electrolytes, sour water, seawater, petroleum, black oil, and solids each require a separate approved domain plan and dataset.
+
+Do not create a generic property-package registry until the second model exists. At that point use a dictionary from stable model ID to constructor, not a plugin framework.
+
+**Exit gate:** Each model has a declared compound/data domain and its own passing compatibility slice before registration.
+
+### Phase 14: Reactions and reactors
+
+**Files:**
+- Create: `src/mesim/unitops/reactors.py`
+- Create: `data/reactions/`
+- Create: `tests/test_reactors.py`
+
+**Order:** explicit elemental-composition data, reaction schema and element balance, conversion reactor, equilibrium reactor, Gibbs reactor, CSTR, PFR.
+
+Do not parse molecular-formula strings as authoritative element data. Add versioned elemental composition, formation enthalpy, formation Gibbs energy, and reaction provenance before consuming them. Reject unbalanced stoichiometry at load time. Store original rate-expression units. Equilibrium/Gibbs reactors require verified chemical potentials for every participating phase. CSTR/PFR require an approved kinetic-rate schema and SciPy integration; they are not extensions of the conversion reactor.
+
+**Exit gate:** U4 and U5 pass independent reaction cases and DWSIM flowsheets.
+
+### Phase 15: Recycles, specifications and flowsheet convergence
+
+**Files:**
+- Modify: `src/mesim/flowsheet.py`
+- Create: `tests/test_recycles.py`
+
+**Order:** tear-stream recycle, energy recycle, adjust, specification.
+
+Require explicit tear variables, scaling, convergence tolerances, and initial guesses. Start with direct substitution and bounded damping. Add Wegstein or Newton only when a captured case proves direct substitution insufficient. Record every residual vector, norm, damping value, and chosen algorithm. Never publish a partially converged flowsheet.
+
+**Exit gate:** Recycle cases converge deterministically from documented initial guesses or fail with complete residual history.
+
+### Phase 16: Columns
+
+**Files:**
+- Create: `src/mesim/unitops/columns.py`
+- Create: `tests/test_columns.py`
+
+**Order:** equilibrium-stage data model and balances, shortcut column, absorber, reboiled absorber, tridiagonal/bubble-point solver, Newton solver, sum-rates/inside-out only when a benchmark requires them.
+
+Each stage must close component material, phase equilibrium, summation, and energy equations. Do not begin rigorous columns until the required VLE/LLE model and Phase 15 recycle convergence are verified. Store stage profiles and residual history on failure.
+
+**Exit gate:** U6/U7 benchmark columns converge from documented initial estimates and match stage profiles within tolerance.
+
+### Phase 17: Dynamics and controls
+
+**Files:**
+- Create: `src/mesim/unitops/dynamics.py`
+- Create: `tests/test_dynamics.py`
+
+Define holdup states, algebraic constraints, initialization, and event handling before choosing an integrator. Add tanks/vessels, heat exchangers, PID control, then dynamic reactors. Use SciPy `solve_ivp` only for systems reduced explicitly to ODE form. If a required model remains a DAE, evaluate an IDA-capable dependency instead of writing a solver or pretending `solve_ivp` supports it. Require fixed-step reproducibility mode for regression cases and separate adaptive integration for production accuracy.
+
+**Exit gate:** Mass and energy accumulation close over every time step and dynamic golden trajectories pass.
+
+### Phase 18: Optional specialty energy operations
+
+**Files:**
+- Create only after approval: `src/mesim/unitops/specialty.py`
+- Create only after approval: `tests/test_specialty.py`
+
+This phase is not scheduled by default. Add hydroelectric, wind, solar, fuel-cell, or electrolyzer models only after an internal use case supplies requirements and source data. Treat manufacturer/model constants as versioned inputs, not hidden constants.
+
+**Exit gate:** U10 cases pass published model examples and DWSIM comparisons.
 
 ### Phase 19: Performance and optional native acceleration
 
@@ -534,7 +538,7 @@ Add hydroelectric turbine, wind turbine, solar panel, PEM fuel-cell variants, an
 - Create only after profiling: `benchmarks/`
 - Create only after approval: `native/`
 
-1. Benchmark large flashes, rigorous columns and dynamic models.
+1. Define measured latency and throughput targets from the deployed internal API, then benchmark the operations that miss them.
 2. Optimize Python data movement and algorithms first.
 3. Use NumPy/SciPy vectorization second.
 4. Add C/C++ only if an approved benchmark remains below the target throughput.
@@ -543,7 +547,7 @@ Add hydroelectric turbine, wind turbine, solar panel, PEM fuel-cell variants, an
 
 **Exit gate:** Native code is optional, measured, cross-platform, and numerically equivalent.
 
-### Phase 20: Parity closure and release
+### Phase 20: Compatibility and release process
 
 **Files:**
 - Modify: `docs/compatibility.md`
@@ -553,22 +557,23 @@ Add hydroelectric turbine, wind turbine, solar panel, PEM fuel-cell variants, an
 
 1. Mark every matrix item `unsupported`, `partial`, `verified`, or `verified-with-difference`.
 2. Publish validity ranges, data sources, tolerances, unsupported DWSIM modes, and known numerical differences.
-3. Run the full golden suite on macOS arm64 and Linux amd64/arm64.
+3. Run the Python calculation suite against committed golden references on macOS arm64 and Linux amd64/arm64; DWSIM capture itself remains Windows-only.
 4. Version compound data, model implementations, API schema, and solver settings independently.
-5. Tag release `0.1.0` only when the first domain is production-usable; do not wait for universal DWSIM parity.
+5. Invoke this release process first after the Phase 9 internal-alpha gate and tag `0.1.0`. Publish later verified capability slices as minor releases; do not wait for universal DWSIM parity.
 
 **Exit gate:** Release scope is explicit, reproducible, auditable, and deployable without Windows.
 
 ## 7. First production-usable milestone
 
-Stop after Phase 8 and ship an internal alpha when all of these are true:
+Stop after Phase 9 and ship an internal alpha when all of these are true:
 
 - Five light hydrocarbons are source-backed and versioned.
 - Units are explicit and round-trip safely.
 - Ideal properties and Peng-Robinson pass equation and DWSIM checks.
 - TP and PH flashes converge across the accepted domain.
 - Mixer, splitter, heater, cooler, valve and separator conserve material and energy.
-- One acyclic flowsheet solves deterministically on an M1 Mac and Linux amd64.
+- One acyclic flowsheet solves deterministically on an M1 Mac and Linux amd64/arm64.
+- The internal web app can call the versioned API from a Linux arm64/amd64 container.
 - Unsupported models fail explicitly instead of returning approximate values.
 
 This milestone proves the architecture. Do not begin columns, electrolytes, dynamics, or C++ before it passes.
@@ -596,14 +601,13 @@ Do not batch several unverified models into one commit.
 - Exact DWSIM file import: build after the Python object model stabilizes; initial golden cases use normalized JSON.
 - Web flowsheet editor: separate product work after the API is stable.
 
-## 10. Immediate implementation sequence
+## 10. Current implementation sequence
 
-Execute only these tasks in the first work batch:
+1. Finish Phase 5 DWSIM parity and merge the PR implementation candidate.
+2. Execute the detailed Phase 6 plan through TP, bubble/dew pressure, PH, and DWSIM gates.
+3. Implement Phase 7 streams and unit operations one commit at a time.
+4. Implement Phase 8 acyclic atomic flowsheet execution.
+5. Implement Phase 9 API and multi-architecture containers, then release the internal alpha.
+6. Stop for measured user feedback before approving any Phase 10+ capability.
 
-1. Phase 0 reference schema and Windows capture script.
-2. Phase 1 package and validation command.
-3. Phase 2 UoM.
-4. Phase 3 five-compound PR dataset.
-5. Stop for review before thermodynamic equations begin.
-
-This prevents a large unverified port and gives the first irreversible decisions—units and compound data—a dedicated review gate.
+Do not implement columns, reactions, specialty thermodynamics, dynamics, or native code merely to advance the matrix.

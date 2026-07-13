@@ -30,7 +30,7 @@ Accepted Phase 6 scope:
 - isothermal dew pressure
 - PH flash
 
-PS is deferred until the Phase 9 expander requires it. TV and PV remain deferred until a unit operation requires them.
+PS is deferred until the Phase 10 expander requires it. TV and PV remain deferred until a unit operation requires them.
 
 ## Task 1: Solver result contracts and Rachford-Rice
 
