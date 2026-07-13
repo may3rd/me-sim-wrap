@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from ..compounds import Compound, PRInteractions
 from ..errors import ValidationError
-from .peng_robinson import PengRobinsonMixture
+from .peng_robinson import PRMixtureState, PengRobinsonMixture
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,14 +42,29 @@ class StabilityResult:
     liquid_like: StabilityTrial
 
 
+@dataclass(frozen=True, slots=True)
+class TPFlashResult:
+    report: SolverReport
+    stability: StabilityResult
+    temperature_k: float
+    pressure_pa: float
+    phase: str
+    vapor_fraction: float | None
+    liquid_composition: tuple[float, ...]
+    vapor_composition: tuple[float, ...]
+    liquid_state: PRMixtureState | None
+    vapor_state: PRMixtureState | None
+
+
 def _report(
     converged: bool,
     iterations: int,
     residual: float,
     failure_reason: str | None = None,
     algorithm: str = "Rachford-Rice bisection",
+    warnings: tuple[str, ...] = (),
 ) -> SolverReport:
-    return SolverReport(converged, iterations, residual, algorithm, (), failure_reason)
+    return SolverReport(converged, iterations, residual, algorithm, warnings, failure_reason)
 
 
 def _validate_solver_limits(max_iterations: int, tolerance: float) -> None:
@@ -242,3 +257,172 @@ def pr_stability(
     )
     stable = converged and min(vapor.tangent_plane_distance, liquid.tangent_plane_distance) >= -tolerance
     return StabilityResult(report, stable, feed.phase, vapor, liquid)
+
+
+def _tp_failure(
+    stability: StabilityResult,
+    temperature_k: float,
+    pressure_pa: float,
+    iterations: int,
+    residual: float,
+    reason: str,
+    vapor_fraction: float | None = None,
+    liquid_composition: tuple[float, ...] = (),
+    vapor_composition: tuple[float, ...] = (),
+    liquid_state: PRMixtureState | None = None,
+    vapor_state: PRMixtureState | None = None,
+) -> TPFlashResult:
+    report = _report(False, iterations, residual, reason, "PR TP successive substitution")
+    return TPFlashResult(
+        report,
+        stability,
+        temperature_k,
+        pressure_pa,
+        "unknown" if vapor_fraction is None else "two-phase",
+        vapor_fraction,
+        liquid_composition,
+        vapor_composition,
+        liquid_state,
+        vapor_state,
+    )
+
+
+def tp_flash(
+    compounds: tuple[Compound, ...],
+    composition: tuple[float, ...],
+    interactions: PRInteractions,
+    temperature_k: float,
+    pressure_pa: float,
+    *,
+    max_iterations: int = 100,
+) -> TPFlashResult:
+    _validate_solver_limits(max_iterations, 1e-10)
+    stability = pr_stability(
+        compounds,
+        composition,
+        interactions,
+        temperature_k,
+        pressure_pa,
+        max_iterations=max_iterations,
+    )
+    if not stability.report.converged:
+        return _tp_failure(
+            stability,
+            temperature_k,
+            pressure_pa,
+            stability.report.iterations,
+            stability.report.residual,
+            "phase-stability calculation did not converge",
+        )
+
+    feed_model = PengRobinsonMixture(compounds, composition, interactions)
+    if stability.stable:
+        state = feed_model.stable_state(temperature_k, pressure_pa)
+        phase = stability.feed_phase
+        report = _report(True, 0, stability.report.residual, algorithm="PR TP stability result")
+        if phase == "liquid":
+            return TPFlashResult(report, stability, temperature_k, pressure_pa, phase, 0.0, composition, (), state, None)
+        if phase == "vapor":
+            return TPFlashResult(report, stability, temperature_k, pressure_pa, phase, 1.0, (), composition, None, state)
+        return TPFlashResult(report, stability, temperature_k, pressure_pa, "single", None, composition, composition, None, state)
+
+    log_k = _wilson_log_k(compounds, temperature_k, pressure_pa)
+    previous_residual = math.inf
+    damping = 1.0
+    last_rr = None
+    liquid_state = None
+    vapor_state = None
+    fugacity_residual = math.inf
+    material_residual = math.inf
+
+    for iteration in range(1, max_iterations + 1):
+        try:
+            k_values = tuple(math.exp(value) for value in log_k)
+        except OverflowError:
+            return _tp_failure(stability, temperature_k, pressure_pa, iteration, math.inf, "K values are outside the representable range")
+        last_rr = rachford_rice(composition, k_values)
+        if not last_rr.report.converged or last_rr.phase != "two-phase":
+            return _tp_failure(
+                stability,
+                temperature_k,
+                pressure_pa,
+                iteration,
+                abs(last_rr.report.residual),
+                "unstable feed did not produce a bounded two-phase split",
+                last_rr.vapor_fraction,
+                last_rr.liquid_composition,
+                last_rr.vapor_composition,
+            )
+        liquid_state = PengRobinsonMixture(compounds, last_rr.liquid_composition, interactions).state(
+            temperature_k, pressure_pa, "liquid"
+        )
+        vapor_state = PengRobinsonMixture(compounds, last_rr.vapor_composition, interactions).state(
+            temperature_k, pressure_pa, "vapor"
+        )
+        fugacity_terms = tuple(
+            math.log(liquid_fraction)
+            + math.log(liquid_phi)
+            - math.log(vapor_fraction)
+            - math.log(vapor_phi)
+            for overall, liquid_fraction, vapor_fraction, liquid_phi, vapor_phi in zip(
+                composition,
+                last_rr.liquid_composition,
+                last_rr.vapor_composition,
+                liquid_state.fugacity_coefficients,
+                vapor_state.fugacity_coefficients,
+            )
+            if overall > 0.0
+        )
+        fugacity_residual = max(abs(value) for value in fugacity_terms)
+        material_residual = max(
+            abs(
+                overall
+                - (1.0 - last_rr.vapor_fraction) * liquid_fraction
+                - last_rr.vapor_fraction * vapor_fraction
+            )
+            for overall, liquid_fraction, vapor_fraction in zip(
+                composition, last_rr.liquid_composition, last_rr.vapor_composition
+            )
+        )
+        residual = max(fugacity_residual, material_residual)
+        if fugacity_residual <= 1e-8 and material_residual <= 1e-10:
+            warnings = () if damping == 1.0 else (f"K-value damping reduced to {damping}",)
+            report = _report(True, iteration, residual, algorithm="PR TP successive substitution", warnings=warnings)
+            return TPFlashResult(
+                report,
+                stability,
+                temperature_k,
+                pressure_pa,
+                "two-phase",
+                last_rr.vapor_fraction,
+                last_rr.liquid_composition,
+                last_rr.vapor_composition,
+                liquid_state,
+                vapor_state,
+            )
+        if residual > previous_residual:
+            damping = max(1.0 / 16.0, damping / 2.0)
+        target_log_k = tuple(
+            math.log(liquid_phi) - math.log(vapor_phi)
+            for liquid_phi, vapor_phi in zip(
+                liquid_state.fugacity_coefficients, vapor_state.fugacity_coefficients
+            )
+        )
+        log_k = tuple(
+            current + damping * (target - current) for current, target in zip(log_k, target_log_k)
+        )
+        previous_residual = residual
+
+    return _tp_failure(
+        stability,
+        temperature_k,
+        pressure_pa,
+        max_iterations,
+        max(fugacity_residual, material_residual),
+        "PR TP iteration limit reached",
+        last_rr.vapor_fraction,
+        last_rr.liquid_composition,
+        last_rr.vapor_composition,
+        liquid_state,
+        vapor_state,
+    )

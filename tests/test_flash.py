@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
-from mesim.thermo.flash import pr_stability, rachford_rice
+from mesim.thermo.flash import pr_stability, rachford_rice, tp_flash
 
 
 ROOT = Path(__file__).parents[1]
@@ -122,6 +122,68 @@ class PRStabilityTest(unittest.TestCase):
             tolerance=1e-30,
         )
 
+        self.assertFalse(result.report.converged)
+        self.assertIsNotNone(result.report.failure_reason)
+
+
+class PRTPFlashTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        cls.compounds = (compounds["Methane"], compounds["Ethane"])
+        cls.interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
+
+    def test_returns_stable_liquid_vapor_and_near_critical_states(self):
+        liquid = tp_flash(self.compounds, (0.7, 0.3), self.interactions, 150.0, 1_000_000)
+        vapor = tp_flash(self.compounds, (0.7, 0.3), self.interactions, 200.0, 500_000)
+        near_critical = tp_flash(self.compounds, (0.7, 0.3), self.interactions, 250.0, 5_000_000)
+
+        self.assertEqual((liquid.phase, liquid.vapor_fraction), ("liquid", 0.0))
+        self.assertIsNotNone(liquid.liquid_state)
+        self.assertEqual((vapor.phase, vapor.vapor_fraction), ("vapor", 1.0))
+        self.assertIsNotNone(vapor.vapor_state)
+        self.assertEqual(near_critical.phase, "single")
+        self.assertTrue(all(result.report.converged for result in (liquid, vapor, near_critical)))
+
+    def test_two_phase_flash_closes_fugacity_and_material_balance(self):
+        feed = (0.7, 0.3)
+        result = tp_flash(self.compounds, feed, self.interactions, 180.0, 500_000)
+
+        self.assertTrue(result.report.converged)
+        self.assertEqual(result.phase, "two-phase")
+        self.assertGreater(result.vapor_fraction, 0.0)
+        self.assertLess(result.vapor_fraction, 1.0)
+        self.assertIsNotNone(result.liquid_state)
+        self.assertIsNotNone(result.vapor_state)
+        for index, overall in enumerate(feed):
+            liquid = result.liquid_composition[index]
+            vapor = result.vapor_composition[index]
+            self.assertTrue(math.isclose(overall, (1 - result.vapor_fraction) * liquid + result.vapor_fraction * vapor, rel_tol=1e-10))
+            liquid_fugacity = liquid * result.liquid_state.fugacity_coefficients[index]
+            vapor_fugacity = vapor * result.vapor_state.fugacity_coefficients[index]
+            self.assertTrue(math.isclose(liquid_fugacity, vapor_fugacity, rel_tol=1e-8))
+
+    def test_zero_fraction_and_repeat_execution_are_deterministic(self):
+        first = tp_flash(self.compounds, (1.0, 0.0), self.interactions, 228.672, 459_900)
+        second = tp_flash(self.compounds, (1.0, 0.0), self.interactions, 228.672, 459_900)
+
+        self.assertEqual(first, second)
+        self.assertTrue(first.report.converged)
+
+    def test_rejects_invalid_inputs_and_reports_iteration_exhaustion(self):
+        with self.assertRaises(ValidationError):
+            tp_flash(self.compounds, (0.7, 0.3), self.interactions, 0.0, 500_000)
+        with self.assertRaises(ValidationError):
+            tp_flash(self.compounds, (0.7, 0.4), self.interactions, 180.0, 500_000)
+
+        result = tp_flash(
+            self.compounds,
+            (0.7, 0.3),
+            self.interactions,
+            180.0,
+            500_000,
+            max_iterations=1,
+        )
         self.assertFalse(result.report.converged)
         self.assertIsNotNone(result.report.failure_reason)
 
