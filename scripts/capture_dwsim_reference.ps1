@@ -193,11 +193,13 @@ function New-CompoundRecord {
 $engineDirectory = (Resolve-Path $EngineBin).Path
 $automationPath = Join-Path $engineDirectory "DWSIM.Automation.dll"
 $interfacesPath = Join-Path $engineDirectory "DWSIM.Interfaces.dll"
+$thermoCAssemblyPath = Join-Path $engineDirectory "ThermoCS\ThermoCS.dll"
 if (-not (Test-Path $automationPath)) { throw "Missing DWSIM.Automation.dll in $engineDirectory" }
 if (-not (Test-Path $interfacesPath)) { throw "Missing DWSIM.Interfaces.dll in $engineDirectory" }
 if ([string]::IsNullOrWhiteSpace($DwsimRevision)) { throw "DwsimRevision is required for an auditable capture" }
 
 [Reflection.Assembly]::LoadFrom($interfacesPath) | Out-Null
+if (Test-Path $thermoCAssemblyPath) { [Reflection.Assembly]::LoadFrom($thermoCAssemblyPath) | Out-Null }
 [Reflection.Assembly]::LoadFrom($automationPath) | Out-Null
 $automation = New-Object DWSIM.Automation.Automation3
 
