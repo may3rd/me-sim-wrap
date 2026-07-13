@@ -5,7 +5,7 @@
     "source":  {
                    "dwsim_revision":  "9.0.4",
                    "automation_version":  "DWSIM version 9.0.4.0 (28-Jul-25 1:19:16 PM)",
-                   "captured_utc":  "2026-07-13T01:51:18.8788100Z",
+                   "captured_utc":  "2026-07-13T09:01:07.2627797Z",
                    "platform":  "Microsoft Windows NT 10.0.26200.0",
                    "architecture":  "AMD64",
                    "engine_bin":  "C:\\Users\\26008353\\Downloads\\DWSIM_v904_win64_portable\\Windows",
@@ -56,6 +56,32 @@
                                                             "source":  "DWSIM.AvailableCompounds",
                                                             "source_revision":  "9.0.4"
                                                         },
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101779.79340489578",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101779.79340489578
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "272.66",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  272.66
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.7502053394113617",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.7502053394113617
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
                                          "cas":  "106-97-8"
                                      },
                                      {
@@ -97,6 +123,32 @@
                                                             "source":  "DWSIM.AvailableCompounds",
                                                             "source_revision":  "9.0.4"
                                                         },
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101385.79585520517",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101385.79585520517
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "309.22",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  309.22
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.6749807643575136",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.6749807643575136
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
                                          "cas":  "109-66-0"
                                      },
                                      {
@@ -138,6 +190,32 @@
                                                             "source":  "DWSIM.AvailableCompounds",
                                                             "source_revision":  "9.0.4"
                                                         },
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101661.3294957499",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101661.3294957499
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "231.02",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  231.02
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.7065970330901676",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.7065970330901676
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
                                          "cas":  "74-98-6"
                                      },
                                      {
@@ -179,6 +257,32 @@
                                                             "source":  "DWSIM.AvailableCompounds",
                                                             "source_revision":  "9.0.4"
                                                         },
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101732.75995261119",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101732.75995261119
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "111.66",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  111.66
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "2.237611858493282",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  2.237611858493282
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
                                          "cas":  "74-82-8"
                                      },
                                      {
@@ -220,6 +324,32 @@
                                                             "source":  "DWSIM.AvailableCompounds",
                                                             "source_revision":  "9.0.4"
                                                         },
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "102592.42304721203",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  102592.42304721203
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "184.55",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  184.55
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.7644241539438332",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.7644241539438332
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
                                          "cas":  "74-84-0"
                                      }
                                  ],
