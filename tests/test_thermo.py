@@ -49,6 +49,8 @@ class IdealPropertiesTest(unittest.TestCase):
         for pressure in (math.nan, math.inf):
             with self.assertRaises(ValidationError):
                 methane.entropy_change(300, pressure)
+        extreme = methane.entropy_change(300, 5e-324, 300, 1e308).value
+        self.assertTrue(math.isfinite(extreme))
 
     def test_ranges_are_enforced_and_extrapolation_is_flagged(self):
         methane = self.correlations["Methane"]

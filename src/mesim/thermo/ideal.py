@@ -69,7 +69,10 @@ class IdealCorrelations:
             raise ValidationError("absolute pressures must be finite and positive")
         warnings = self._range("heat_capacity", self.heat_capacity_correlation, (temperature_k, reference_k), allow_extrapolation)
         thermal = _simpson(lambda value: self.heat_capacity(value, True).value / value, reference_k, temperature_k)
-        return Result(thermal - R * math.log(pressure_pa / reference_pressure_pa), "J/kmol/K", warnings)
+        value = thermal - R * (math.log(pressure_pa) - math.log(reference_pressure_pa))
+        if not math.isfinite(value):
+            raise ValidationError("ideal-gas entropy change must be finite")
+        return Result(value, "J/kmol/K", warnings)
 
 
 def _simpson(function, start: float, end: float) -> float:
