@@ -14,6 +14,8 @@ from mesim.thermo.peng_robinson import PengRobinson, PengRobinsonMixture
 
 
 ROOT = Path(__file__).parents[1]
+DWSIM_PR_FUGACITY_REL_TOL = 2e-6
+DWSIM_PR_CALORIC_DELTA_REL_TOL = 2e-4
 
 
 class IdealPropertiesTest(unittest.TestCase):
@@ -192,6 +194,69 @@ class PengRobinsonMixtureTest(unittest.TestCase):
         ):
             with self.assertRaises(ValidationError):
                 self.mixture.state(temperature, pressure, "vapor")
+
+    def test_pr_properties_match_captured_dwsim_reference_states(self):
+        golden = json.loads((ROOT / "tests/golden/pr-t1.json").read_text(encoding="utf-8-sig"))
+        self.assertEqual(golden["outputs"]["solve"], {"errors": [], "success": True, "executed": True})
+        streams = {
+            record["tag"]: {item["property"]: item["value"]["value"] for item in record["properties"]}
+            for record in golden["outputs"]["objects_after"]
+        }
+        pure_cases = {
+            "PR-V-METHANE": ("Methane", "vapor"),
+            "PR-V-ETHANE": ("Ethane", "vapor"),
+            "PR-V-PROPANE": ("Propane", "vapor"),
+            "PR-V-NBUTANE": ("N-butane", "vapor"),
+            "PR-V-NPENTANE": ("N-pentane", "vapor"),
+            "PR-L-METHANE": ("Methane", "liquid"),
+            "PR-L-ETHANE": ("Ethane", "liquid"),
+            "PR-L-PROPANE": ("Propane", "liquid"),
+            "PR-L-NBUTANE": ("N-butane", "liquid"),
+            "PR-L-NPENTANE": ("N-pentane", "liquid"),
+            "PR-3ROOT-METHANE": ("Methane", "vapor"),
+            "PR-NC-METHANE": ("Methane", "liquid"),
+        }
+        compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+
+        for tag, (compound_id, phase) in pure_cases.items():
+            with self.subTest(tag=tag):
+                properties = streams[tag]
+                model = PengRobinson(compounds[compound_id])
+                state = model.state(properties["PROP_MS_0"], properties["PROP_MS_1"], phase)
+                phase_name = "Vapor Phase" if phase == "vapor" else "Liquid Phase 1"
+                reference = properties[f"Fugacity Coefficient, {phase_name} / {compound_id}"]
+                self.assertTrue(math.isclose(state.fugacity_coefficient, reference, rel_tol=DWSIM_PR_FUGACITY_REL_TOL))
+
+        for tag, expected_phase in (("PR-3ROOT-METHANE", "vapor"), ("PR-NC-METHANE", "liquid")):
+            properties = streams[tag]
+            model = PengRobinson(compounds["Methane"])
+            self.assertEqual(model.stable_state(properties["PROP_MS_0"], properties["PROP_MS_1"]).phase, expected_phase)
+
+        interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
+        mixture = PengRobinsonMixture((compounds["Methane"], compounds["Ethane"]), (0.7, 0.3), interactions)
+        mixture_properties = streams["PR-MIX-ME-C2"]
+        mixture_state = mixture.state(mixture_properties["PROP_MS_0"], mixture_properties["PROP_MS_1"], "vapor")
+        for compound_id, actual in zip(("Methane", "Ethane"), mixture_state.fugacity_coefficients):
+            reference = mixture_properties[f"Fugacity Coefficient, Vapor Phase / {compound_id}"]
+            self.assertTrue(math.isclose(actual, reference, rel_tol=DWSIM_PR_FUGACITY_REL_TOL))
+
+        correlations = {record.compound_id: record for record in load_correlations(ROOT / "data/correlations/ideal-v1.json")}
+        for suffix, compound_id in (
+            ("METHANE", "Methane"),
+            ("ETHANE", "Ethane"),
+            ("PROPANE", "Propane"),
+            ("NBUTANE", "N-butane"),
+            ("NPENTANE", "N-pentane"),
+        ):
+            vapor = streams[f"PR-V-{suffix}"]
+            liquid = streams[f"PR-L-{suffix}"]
+            model = PengRobinson(compounds[compound_id])
+            vapor_state = model.state(vapor["PROP_MS_0"], vapor["PROP_MS_1"], "vapor")
+            liquid_state = model.state(liquid["PROP_MS_0"], liquid["PROP_MS_1"], "liquid")
+            enthalpy_delta = correlations[compound_id].enthalpy_change(liquid["PROP_MS_0"], vapor["PROP_MS_0"]).value + liquid_state.departure_enthalpy_j_per_kmol - vapor_state.departure_enthalpy_j_per_kmol
+            entropy_delta = correlations[compound_id].entropy_change(liquid["PROP_MS_0"], liquid["PROP_MS_1"], vapor["PROP_MS_0"], vapor["PROP_MS_1"]).value + liquid_state.departure_entropy_j_per_kmol_k - vapor_state.departure_entropy_j_per_kmol_k
+            self.assertTrue(math.isclose(enthalpy_delta, (liquid["PROP_MS_9"] - vapor["PROP_MS_9"]) * 1_000, rel_tol=DWSIM_PR_CALORIC_DELTA_REL_TOL))
+            self.assertTrue(math.isclose(entropy_delta, (liquid["PROP_MS_10"] - vapor["PROP_MS_10"]) * 1_000, rel_tol=DWSIM_PR_CALORIC_DELTA_REL_TOL))
 
 
 if __name__ == "__main__":

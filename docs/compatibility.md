@@ -80,6 +80,8 @@ Run each capture twice with the same binary and inputs. Compare the normalized J
 - T0: five-compound ideal-gas heat capacity, enthalpy, entropy, density, and pure vapor pressure.
 - T1 implementation candidate: five-compound Peng-Robinson pure and mixture parameters, physical cubic roots, fugacity coefficients, density, departure enthalpy/entropy, and minimum-residual-Gibbs stable-root selection.
 
-T1 equation checks cover vapor, liquid, single-root, three-root, and mixture states. Pure methane vapor and n-pentane liquid fugacity coefficients are checked against `tests/golden/u0-pr-c1-c5.json` from DWSIM 9.0.4. The T1 exit gate remains open until DWSIM references cover all five compounds, mixture fugacity, compressibility, density, departure enthalpy/entropy, near-critical states, and two-root states.
+T1 equation checks cover vapor, liquid, single-root, three-root, near-critical, and mixture states. `tests/golden/pr-t1.json` and its normalized repeat capture DWSIM 9.0.4 references for all five compounds plus a methane/ethane mixture. Pure and mixture fugacity coefficients agree within `2e-6` relative. Reference-independent liquid-to-vapor enthalpy and entropy changes, including PR departure terms, agree within `2e-4` relative.
+
+DWSIM material-stream density fields use `AUX_LIQDENS`/`AUX_VAPDENS`, while its PR compressibility path can apply configured Peneloux volume translation. They are not equivalent to this implementation's unmodified PR cubic density and roots. Independent equation vectors verify the Python PR compressibility and density calculations to `1e-8` relative. With that explicit model boundary, the Phase 5 T1 gate is closed.
 
 Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
