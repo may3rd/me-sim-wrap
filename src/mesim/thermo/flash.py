@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from ..compounds import Compound, PRInteractions
 from ..errors import ValidationError
+from .ideal import IdealCorrelations
 from .peng_robinson import PRMixtureState, PengRobinsonMixture
 
 
@@ -66,6 +67,19 @@ class PressureResult:
     vapor_composition: tuple[float, ...]
     liquid_state: PRMixtureState | None
     vapor_state: PRMixtureState | None
+
+
+@dataclass(frozen=True, slots=True)
+class PHFlashResult:
+    report: SolverReport
+    temperature_k: float
+    pressure_pa: float
+    target_enthalpy_j_per_kmol: float
+    enthalpy_j_per_kmol: float | None
+    temperature_bracket_k: tuple[float, float]
+    outer_iterations: int
+    inner_iterations: int
+    flash: TPFlashResult | None
 
 
 def _report(
@@ -571,3 +585,118 @@ def dew_pressure(
     temperature_k: float, bracket_pa: tuple[float, float], *, max_iterations: int = 100,
 ) -> PressureResult:
     return _pressure_solve("dew", compounds, composition, interactions, temperature_k, bracket_pa, max_iterations)
+
+
+def _validate_composition(compounds: tuple[Compound, ...], composition: tuple[float, ...]) -> None:
+    if len(compounds) != len(composition) or not composition or any(
+        isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0
+        for value in composition
+    ) or not math.isclose(math.fsum(composition), 1.0, rel_tol=0.0, abs_tol=1e-12):
+        raise ValidationError("compound composition must be finite, non-negative, and sum to one")
+
+
+def ideal_mixture_enthalpy(
+    compounds: tuple[Compound, ...], composition: tuple[float, ...], correlations: tuple[IdealCorrelations, ...], temperature_k: float
+) -> float:
+    _validate_composition(compounds, composition)
+    records = {record.compound_id: record for record in correlations}
+    if any(compound.id not in records for compound in compounds):
+        raise ValidationError("missing ideal heat-capacity correlation for a flash compound")
+    return math.fsum(
+        fraction * records[compound.id].enthalpy_change(temperature_k, 298.15).value
+        for compound, fraction in zip(compounds, composition)
+    )
+
+
+def phase_enthalpy(
+    compounds: tuple[Compound, ...], composition: tuple[float, ...], correlations: tuple[IdealCorrelations, ...],
+    temperature_k: float, state: PRMixtureState | None,
+) -> float:
+    if state is None or not math.isfinite(state.departure_enthalpy_j_per_kmol):
+        raise ValidationError("a finite PR phase state is required for phase enthalpy")
+    return ideal_mixture_enthalpy(compounds, composition, correlations, temperature_k) + state.departure_enthalpy_j_per_kmol
+
+
+def flash_enthalpy(compounds: tuple[Compound, ...], correlations: tuple[IdealCorrelations, ...], flash: TPFlashResult) -> float:
+    if not flash.report.converged:
+        raise ValidationError("a converged TP flash is required for total enthalpy")
+    if flash.phase == "two-phase":
+        liquid = phase_enthalpy(compounds, flash.liquid_composition, correlations, flash.temperature_k, flash.liquid_state)
+        vapor = phase_enthalpy(compounds, flash.vapor_composition, correlations, flash.temperature_k, flash.vapor_state)
+        return (1.0 - flash.vapor_fraction) * liquid + flash.vapor_fraction * vapor
+    if flash.phase == "liquid":
+        return phase_enthalpy(compounds, flash.liquid_composition, correlations, flash.temperature_k, flash.liquid_state)
+    return phase_enthalpy(compounds, flash.vapor_composition, correlations, flash.temperature_k, flash.vapor_state)
+
+
+def _validate_temperature_bracket(bracket_k: tuple[float, float]) -> None:
+    if len(bracket_k) != 2 or any(
+        isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0
+        for value in bracket_k
+    ) or bracket_k[0] >= bracket_k[1]:
+        raise ValidationError("temperature bracket must contain two increasing finite positive values")
+
+
+def _ph_result(
+    converged: bool, iterations: int, residual: float, reason: str | None, temperature_k: float,
+    pressure_pa: float, target: float, bracket: tuple[float, float], inner_iterations: int,
+    flash: TPFlashResult | None, enthalpy: float | None,
+) -> PHFlashResult:
+    report = _report(converged, iterations, residual, reason, "PR PH bisection")
+    return PHFlashResult(report, temperature_k, pressure_pa, target, enthalpy, bracket, iterations, inner_iterations, flash)
+
+
+def ph_flash(
+    compounds: tuple[Compound, ...], composition: tuple[float, ...], interactions: PRInteractions,
+    correlations: tuple[IdealCorrelations, ...], pressure_pa: float, target_enthalpy_j_per_kmol: float,
+    temperature_bracket_k: tuple[float, float], *, max_iterations: int = 100,
+) -> PHFlashResult:
+    _validate_solver_limits(max_iterations, 1e-10)
+    _validate_temperature_bracket(temperature_bracket_k)
+    if isinstance(target_enthalpy_j_per_kmol, bool) or not isinstance(target_enthalpy_j_per_kmol, (int, float)) or not math.isfinite(target_enthalpy_j_per_kmol):
+        raise ValidationError("target enthalpy must be finite")
+    low, high = temperature_bracket_k
+    inner_iterations = 0
+
+    def trial(temperature_k: float) -> tuple[TPFlashResult, float]:
+        nonlocal inner_iterations
+        flash = tp_flash(compounds, composition, interactions, temperature_k, pressure_pa, max_iterations=max_iterations)
+        inner_iterations += flash.report.iterations
+        return flash, flash_enthalpy(compounds, correlations, flash)
+
+    try:
+        low_flash, low_enthalpy = trial(low)
+        high_flash, high_enthalpy = trial(high)
+    except ValidationError as error:
+        return _ph_result(False, 0, math.inf, str(error), low, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, None, None)
+    if not low_flash.report.converged or not high_flash.report.converged:
+        failed = low_flash if not low_flash.report.converged else high_flash
+        return _ph_result(False, 0, failed.report.residual, "inner TP flash did not converge", low, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, failed, None)
+    low_residual = low_enthalpy - target_enthalpy_j_per_kmol
+    high_residual = high_enthalpy - target_enthalpy_j_per_kmol
+    if low_residual == 0.0:
+        return _ph_result(True, 0, 0.0, None, low, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, low_flash, low_enthalpy)
+    if high_residual == 0.0:
+        return _ph_result(True, 0, 0.0, high, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, high_flash, high_enthalpy)
+    if low_residual * high_residual > 0.0:
+        return _ph_result(False, 0, min(abs(low_residual), abs(high_residual)), "temperature bracket does not enclose target enthalpy", low, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, low_flash, low_enthalpy)
+
+    latest_flash, latest_enthalpy = low_flash, low_enthalpy
+    tolerance = max(1e-6 * abs(target_enthalpy_j_per_kmol), 1e-3)
+    for iteration in range(1, max_iterations + 1):
+        temperature_k = (low + high) / 2.0
+        try:
+            latest_flash, latest_enthalpy = trial(temperature_k)
+        except ValidationError as error:
+            return _ph_result(False, iteration, math.inf, str(error), temperature_k, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, None, None)
+        residual = latest_enthalpy - target_enthalpy_j_per_kmol
+        if not latest_flash.report.converged:
+            return _ph_result(False, iteration, latest_flash.report.residual, "inner TP flash did not converge", temperature_k, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, latest_flash, latest_enthalpy)
+        if abs(residual) <= tolerance and high - low <= 1e-8 * temperature_k:
+            return _ph_result(True, iteration, residual, None, temperature_k, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, latest_flash, latest_enthalpy)
+        if low_residual * residual <= 0.0:
+            high, high_residual = temperature_k, residual
+        else:
+            low, low_residual = temperature_k, residual
+
+    return _ph_result(False, max_iterations, latest_enthalpy - target_enthalpy_j_per_kmol, "PH iteration limit reached", temperature_k, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, latest_flash, latest_enthalpy)

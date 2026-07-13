@@ -9,7 +9,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
-from mesim.thermo.flash import bubble_pressure, dew_pressure, pr_stability, rachford_rice, tp_flash
+from mesim.thermo.flash import (
+    bubble_pressure,
+    dew_pressure,
+    flash_enthalpy,
+    ideal_mixture_enthalpy,
+    ph_flash,
+    phase_enthalpy,
+    pr_stability,
+    rachford_rice,
+    tp_flash,
+)
+from mesim.thermo.ideal import load_correlations
 
 
 ROOT = Path(__file__).parents[1]
@@ -253,6 +264,68 @@ class PRBubbleDewPressureTest(unittest.TestCase):
         )
         self.assertFalse(result.report.converged)
         self.assertIsNotNone(result.report.failure_reason)
+
+
+class PRPHFlashTest(unittest.TestCase):
+    """Caloric vectors use the Phase 6 reference state: 298.15 K and 101325 Pa."""
+
+    @classmethod
+    def setUpClass(cls):
+        compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        cls.compounds = (compounds["Methane"], compounds["Ethane"])
+        cls.interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
+        cls.correlations = load_correlations(ROOT / "data/correlations/ideal-v1.json")
+
+    def test_ideal_and_phase_enthalpy_use_the_explicit_reference(self):
+        composition = (0.7, 0.3)
+        ideal = ideal_mixture_enthalpy(self.compounds, composition, self.correlations, 298.15)
+        flash = tp_flash(self.compounds, composition, self.interactions, 200.0, 500_000.0)
+        phase = phase_enthalpy(self.compounds, composition, self.correlations, 200.0, flash.vapor_state)
+
+        self.assertEqual(ideal, 0.0)
+        self.assertTrue(math.isclose(phase, ideal_mixture_enthalpy(self.compounds, composition, self.correlations, 200.0) + flash.vapor_state.departure_enthalpy_j_per_kmol, rel_tol=1e-12))
+
+    def test_total_two_phase_enthalpy_is_weighted_by_vapor_fraction(self):
+        composition = (0.7, 0.3)
+        flash = tp_flash(self.compounds, composition, self.interactions, 180.0, 500_000.0)
+        total = flash_enthalpy(self.compounds, self.correlations, flash)
+        liquid = phase_enthalpy(self.compounds, flash.liquid_composition, self.correlations, 180.0, flash.liquid_state)
+        vapor = phase_enthalpy(self.compounds, flash.vapor_composition, self.correlations, 180.0, flash.vapor_state)
+
+        self.assertEqual(flash.phase, "two-phase")
+        self.assertTrue(math.isclose(total, (1.0 - flash.vapor_fraction) * liquid + flash.vapor_fraction * vapor, rel_tol=1e-12))
+
+    def test_ph_flash_round_trips_single_and_phase_crossing_states(self):
+        composition = (0.7, 0.3)
+        for temperature_k in (150.0, 180.0, 200.0):
+            with self.subTest(temperature_k=temperature_k):
+                source = tp_flash(self.compounds, composition, self.interactions, temperature_k, 500_000.0)
+                target = flash_enthalpy(self.compounds, self.correlations, source)
+                result = ph_flash(self.compounds, composition, self.interactions, self.correlations, 500_000.0, target, (140.0, 210.0))
+
+                self.assertTrue(result.report.converged)
+                self.assertTrue(math.isclose(result.temperature_k, temperature_k, rel_tol=1e-7, abs_tol=1e-5))
+                self.assertTrue(math.isclose(result.enthalpy_j_per_kmol, target, rel_tol=1e-6, abs_tol=1e-3))
+
+    def test_ph_flash_rejects_invalid_brackets_and_reports_unreachable_target(self):
+        with self.assertRaises(ValidationError):
+            ph_flash(self.compounds, (0.7, 0.3), self.interactions, self.correlations, 500_000.0, 0.0, (0.0, 210.0))
+
+        result = ph_flash(self.compounds, (0.7, 0.3), self.interactions, self.correlations, 500_000.0, 1e12, (140.0, 210.0))
+        self.assertFalse(result.report.converged)
+        self.assertIn("does not enclose", result.report.failure_reason)
+
+    def test_ph_flash_is_deterministic_and_reports_iteration_exhaustion(self):
+        composition = (0.7, 0.3)
+        source = tp_flash(self.compounds, composition, self.interactions, 180.0, 500_000.0)
+        target = flash_enthalpy(self.compounds, self.correlations, source)
+        first = ph_flash(self.compounds, composition, self.interactions, self.correlations, 500_000.0, target, (140.0, 210.0))
+        second = ph_flash(self.compounds, composition, self.interactions, self.correlations, 500_000.0, target, (140.0, 210.0))
+        exhausted = ph_flash(self.compounds, composition, self.interactions, self.correlations, 500_000.0, target, (140.0, 210.0), max_iterations=1)
+
+        self.assertEqual(first, second)
+        self.assertFalse(exhausted.report.converged)
+        self.assertIsNotNone(exhausted.report.failure_reason)
 
 
 if __name__ == "__main__":
