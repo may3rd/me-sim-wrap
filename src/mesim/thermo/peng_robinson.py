@@ -83,6 +83,21 @@ def _positive_exp(value: float, label: str) -> float:
     return result
 
 
+def _physical_roots(a_reduced: float, b_reduced: float, label: str) -> tuple[float, ...]:
+    try:
+        roots = _cubic_real_roots(
+            -(1.0 - b_reduced),
+            a_reduced - 3.0 * b_reduced**2 - 2.0 * b_reduced,
+            -(a_reduced * b_reduced - b_reduced**2 - b_reduced**3),
+        )
+    except (OverflowError, ValueError, ZeroDivisionError) as error:
+        raise ValidationError(f"{label} cubic is outside the representable range") from error
+    physical = tuple(root for root in roots if math.isfinite(root) and root > b_reduced)
+    if not physical:
+        raise ValidationError(f"{label} EOS has no physical compressibility root")
+    return physical
+
+
 class PengRobinson:
     def __init__(self, compound: Compound):
         self.compound = compound
@@ -124,15 +139,7 @@ class PengRobinson:
 
     def roots(self, temperature_k: float, pressure_pa: float) -> tuple[float, ...]:
         _, a_reduced, b_reduced = self._reduced_parameters(temperature_k, pressure_pa)
-        roots = _cubic_real_roots(
-            -(1.0 - b_reduced),
-            a_reduced - 3.0 * b_reduced**2 - 2.0 * b_reduced,
-            -(a_reduced * b_reduced - b_reduced**2 - b_reduced**3),
-        )
-        physical = tuple(root for root in roots if math.isfinite(root) and root > b_reduced)
-        if not physical:
-            raise ValidationError("Peng-Robinson EOS has no physical compressibility root")
-        return physical
+        return _physical_roots(a_reduced, b_reduced, "Peng-Robinson")
 
     def state(self, temperature_k: float, pressure_pa: float, phase: str) -> PRState:
         if phase not in {"vapor", "liquid"}:
@@ -235,15 +242,7 @@ class PengRobinsonMixture:
         PengRobinson._validate_state(temperature_k, pressure_pa)
         parameters = self.parameters(temperature_k)
         a_reduced, b_reduced = _reduced(parameters.a_pa_m6_per_kmol2, parameters.b_m3_per_kmol, temperature_k, pressure_pa)
-        roots = _cubic_real_roots(
-            -(1.0 - b_reduced),
-            a_reduced - 3.0 * b_reduced**2 - 2.0 * b_reduced,
-            -(a_reduced * b_reduced - b_reduced**2 - b_reduced**3),
-        )
-        physical = tuple(root for root in roots if math.isfinite(root) and root > b_reduced)
-        if not physical:
-            raise ValidationError("Peng-Robinson EOS has no physical mixture root")
-        return physical
+        return _physical_roots(a_reduced, b_reduced, "Peng-Robinson mixture")
 
     def state(self, temperature_k: float, pressure_pa: float, phase: str) -> PRMixtureState:
         if phase not in {"vapor", "liquid"}:

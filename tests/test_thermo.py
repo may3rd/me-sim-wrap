@@ -132,6 +132,7 @@ class PengRobinsonPureTest(unittest.TestCase):
         for temperature, pressure in (
             (0, 1), (300, 0), (math.nan, 1), (300, math.inf),
             (300, 5e-324), (300, 1e12), (1e-300, 1e300), (1e300, 1e-300),
+            (1e100, 1e200), (1e-200, 1e-200),
         ):
             with self.assertRaises(ValidationError):
                 self.methane.state(temperature, pressure, "vapor")
@@ -185,7 +186,10 @@ class PengRobinsonMixtureTest(unittest.TestCase):
         for fractions in ((0.7,), (0.7, 0.4), (-0.1, 1.1), (math.nan, math.nan)):
             with self.assertRaises(ValidationError):
                 PengRobinsonMixture(compounds, fractions, interactions)
-        for temperature, pressure in ((300, 5e-324), (300, 1e12), (1e-300, 1e300), (1e300, 1e-300)):
+        for temperature, pressure in (
+            (300, 5e-324), (300, 1e12), (1e-300, 1e300), (1e300, 1e-300),
+            (1e100, 1e200), (1e-200, 1e-200),
+        ):
             with self.assertRaises(ValidationError):
                 self.mixture.state(temperature, pressure, "vapor")
 
