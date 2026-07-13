@@ -26,10 +26,25 @@ python .\scripts\validate.py --compare `
   .\tests\golden\u0-pr-c1-c5-repeat.json
 
 ```
-Get-PropertyRecord : Cannot bind argument to parameter 'Unit' because it is an empty string.
-At C:\Users\26008353\Downloads\me-sim-wrap-live\scripts\capture_dwsim_reference.ps1:300 char:28
-+             $properties += Get-PropertyRecord `
-+                            ~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidData: (:) [Get-PropertyRecord], ParameterBindingValidationException
-    + FullyQualifiedErrorId : ParameterArgumentValidationErrorEmptyStringNotAllowed,Get-PropertyRecord
+PS C:\Users\26008353\Downloads\me-sim-wrap-live> powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\capture_dwsim_reference.ps1 `
+>>   -EngineBin $engine `
+>>   -DwsimRevision '9.0.4' `
+>>   -CasePath '.\tests\u0-pr-c1-c5.dwxmz' `
+>>   -CaseId 'u0-pr-c1-c5' `
+>>   -PropertyPackage 'Peng-Robinson (PR)' `
+>>   -FlashAlgorithm 'DWSIM default' `
+>>   -OutputPath '.\tests\golden\u0-pr-c1-c5.json'
+Wrote .\tests\golden\u0-pr-c1-c5.json
+PS C:\Users\26008353\Downloads\me-sim-wrap-live> powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\capture_dwsim_reference.ps1 `
+>>   -EngineBin $engine `
+>>   -DwsimRevision '9.0.4' `
+>>   -CasePath '.\tests\u0-pr-c1-c5.dwxmz' `
+>>   -CaseId 'u0-pr-c1-c5' `
+>>   -PropertyPackage 'Peng-Robinson (PR)' `
+>>   -FlashAlgorithm 'DWSIM default' `
+>>   -OutputPath '.\tests\golden\u0-pr-c1-c5-repeat.json'
+Wrote .\tests\golden\u0-pr-c1-c5-repeat.json
+PS C:\Users\26008353\Downloads\me-sim-wrap-live> python .\scripts\validate.py --compare `
+>>   .\tests\golden\u0-pr-c1-c5.json `
+>>   .\tests\golden\u0-pr-c1-c5-repeat.json
 ```
