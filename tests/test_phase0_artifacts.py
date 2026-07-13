@@ -26,21 +26,6 @@ class Phase0ArtifactsTest(unittest.TestCase):
         ):
             self.assertIn(token, script)
 
-    def test_capture_script_preloads_portable_thermoc_assembly(self):
-        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
-
-        self.assertIn('Join-Path $engineDirectory "ThermoCS\\ThermoCS.dll"', script)
-        self.assertIn('[Reflection.Assembly]::LoadFrom($thermoCAssemblyPath)', script)
-
-    def test_capture_script_reads_dwsim_objects_through_clr_reflection(self):
-        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
-
-        self.assertIn("Add-Type -TypeDefinition", script)
-        self.assertIn("public static class DwsimCaptureReflection", script)
-        self.assertIn('[DwsimCaptureReflection]::Get($object, "Name")', script)
-        self.assertIn('$Object.PSObject.Properties[$Name]', script)
-        self.assertNotIn("function Get-ClrBaseObject", script)
-
     def test_compatibility_record_requires_source_revision(self):
         text = (ROOT / "docs/compatibility.md").read_text()
 
@@ -74,6 +59,7 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertIn('"Name"', script)
         self.assertIn("$Object.PSObject.Properties[$Name]", script)
         self.assertNotIn("function Get-ClrBaseObject", script)
+        self.assertEqual(script.count('[object[]]@($PropertyName, $null)'), 2)
 
 if __name__ == "__main__":
     unittest.main()

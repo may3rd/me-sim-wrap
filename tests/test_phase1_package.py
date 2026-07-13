@@ -51,6 +51,28 @@ class Phase1PackageTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_validation_rejects_flowsheet_property_read_errors(self):
+        case = {
+            "case_kind": "flowsheet",
+            "inputs": {"objects_before": []},
+            "outputs": {
+                "solve": {"executed": True, "success": True, "errors": []},
+                "objects_after": [{"tag": "8", "properties": [{"read_error": "method not found"}]}],
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "broken.json"
+            path.write_text(json.dumps(case), encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "scripts" / "validate.py"), "--compare", str(path), str(path)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("property read error", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

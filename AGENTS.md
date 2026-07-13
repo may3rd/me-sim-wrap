@@ -14,3 +14,6 @@
 - Do not call GetType through a DWSIM PowerShell wrapper; unwrap BaseObject and invoke CLR members via System.Type.
 - Read PSObject.BaseObject through reflected PSObject metadata because direct access is re-adapted to DWSIM under strict mode.
 - Do not use one PowerShell reflection wrapper for all DWSIM types; adapter-safe stream access and compound catalog access have different boundaries.
+- Pass explicit nulls for optional VB.NET parameters when invoking DWSIM methods through CLR reflection.
+- Keep unittest method names unique because duplicate names silently replace earlier checks.
+- A normalized match proves repeatability only; reject golden cases containing property read errors.

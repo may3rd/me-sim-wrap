@@ -215,7 +215,7 @@ function Get-PropertyRecord {
         $unit = [string][DwsimCaptureReflection]::Invoke(
             $Object,
             "GetPropertyUnit",
-            [object[]]@($PropertyName)
+            [object[]]@($PropertyName, $null)
         )
     }
     catch {
@@ -226,7 +226,7 @@ function Get-PropertyRecord {
         $value = [DwsimCaptureReflection]::Invoke(
             $Object,
             "GetPropertyValue",
-            [object[]]@($PropertyName)
+            [object[]]@($PropertyName, $null)
         )
 
         $record = New-ValueRecord $value $unit
