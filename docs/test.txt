@@ -1,0 +1,4 @@
+$script = 'C:\Users\26008353\Downloads\me-sim-wrap-live\scripts\capture_dwsim_reference.ps1'
+Get-FileHash $script -Algorithm SHA256
+Select-String $script -Pattern 'DictionaryEntry'
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File $script -EngineBin 'C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows' -DwsimRevision '9.0.4' -OutputPath 'C:\Users\26008353\Downloads\me-sim-wrap-live\tests\golden\compound-catalog.json'
