@@ -6,3 +6,5 @@
 - Verify the deployed script revision before diagnosing a repeated runtime error.
 - Treat the script path in a stack trace as authoritative when verifying which artifact actually ran.
 - When source text and a binding error conflict, capture the runtime invocation path and file hash before changing code.
+- Do not prescribe an absolute clone path until the user has created that clone.
+- Exclude capture timestamps from deterministic golden-case comparisons.

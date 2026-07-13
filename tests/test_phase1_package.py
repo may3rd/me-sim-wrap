@@ -1,6 +1,8 @@
 import subprocess
 import sys
+import tempfile
 import unittest
+import json
 from pathlib import Path
 
 
@@ -26,6 +28,22 @@ class Phase1PackageTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, "")
+
+    def test_validation_compares_cases_without_capture_timestamp(self):
+        with tempfile.TemporaryDirectory() as directory:
+            first = Path(directory) / "first.json"
+            second = Path(directory) / "second.json"
+            first.write_text(json.dumps({"source": {"captured_utc": "2026-07-13T00:00:00Z"}, "value": 1}))
+            second.write_text(json.dumps({"source": {"captured_utc": "2026-07-13T00:00:01Z"}, "value": 1}))
+
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "scripts" / "validate.py"), "--compare", str(first), str(second)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
 
 
 if __name__ == "__main__":
