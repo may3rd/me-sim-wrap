@@ -1,8 +1,27 @@
+cd 'C:\Users\26008353\Downloads\me-sim-wrap-live'
+
+$engine = 'C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows'
+
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\capture_dwsim_reference.ps1 `
-  -EngineBin 'C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows' `
+  -EngineBin $engine `
   -DwsimRevision '9.0.4' `
   -CasePath '.\tests\u0-pr-c1-c5.dwxmz' `
   -CaseId 'u0-pr-c1-c5' `
   -PropertyPackage 'Peng-Robinson (PR)' `
   -FlashAlgorithm 'DWSIM default' `
   -OutputPath '.\tests\golden\u0-pr-c1-c5.json'
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\capture_dwsim_reference.ps1 `
+  -EngineBin $engine `
+  -DwsimRevision '9.0.4' `
+  -CasePath '.\tests\u0-pr-c1-c5.dwxmz' `
+  -CaseId 'u0-pr-c1-c5' `
+  -PropertyPackage 'Peng-Robinson (PR)' `
+  -FlashAlgorithm 'DWSIM default' `
+  -OutputPath '.\tests\golden\u0-pr-c1-c5-repeat.json'
+
+python .\scripts\validate.py --compare `
+  .\tests\golden\u0-pr-c1-c5.json `
+  .\tests\golden\u0-pr-c1-c5-repeat.json
+
+git status --short
