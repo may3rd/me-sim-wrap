@@ -104,7 +104,10 @@ class PengRobinson:
 
     @staticmethod
     def _validate_state(temperature_k: float, pressure_pa: float) -> None:
-        if not math.isfinite(temperature_k) or not math.isfinite(pressure_pa) or temperature_k <= 0 or pressure_pa <= 0:
+        if any(
+            isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0
+            for value in (temperature_k, pressure_pa)
+        ):
             raise ValidationError("absolute temperature and pressure must be finite and positive")
 
     def parameters(self, temperature_k: float) -> PRParameters:

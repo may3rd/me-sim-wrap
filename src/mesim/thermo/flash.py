@@ -323,6 +323,7 @@ def tp_flash(
     max_iterations: int = 100,
 ) -> TPFlashResult:
     _validate_solver_limits(max_iterations, 1e-10)
+    _validate_absolute_pressure(pressure_pa)
     stability = pr_stability(
         compounds,
         composition,
@@ -507,6 +508,9 @@ def _pressure_point(
         )
         residual = max(abs(current - target) for current, target in zip(log_k, target_log_k))
         if residual <= 1e-10:
+            if math.isclose(fixed_state.compressibility, last_state.compressibility, rel_tol=1e-9, abs_tol=1e-12):
+                report = _report(False, iteration, 0.0, f"{kind} pressure requires distinct liquid and vapor roots", f"PR {kind} K iteration")
+                return PressureResult(report, kind, temperature_k, pressure_pa, composition if liquid_fixed else last_composition, last_composition if liquid_fixed else composition, fixed_state if liquid_fixed else last_state, last_state if liquid_fixed else fixed_state)
             try:
                 outer_residual = math.expm1(log_total)
             except OverflowError:
@@ -543,10 +547,12 @@ def _pressure_solve(
     low, high = bracket_pa
     low_result = _pressure_point(kind, compounds, composition, interactions, temperature_k, low, max_iterations)
     high_result = _pressure_point(kind, compounds, composition, interactions, temperature_k, high, max_iterations)
-    if not low_result.report.converged or not high_result.report.converged:
+    if not low_result.report.converged and not high_result.report.converged:
         failed = low_result if not low_result.report.converged else high_result
         report = _report(False, failed.report.iterations, failed.report.residual, failed.report.failure_reason, f"PR {kind}-pressure bisection")
         return PressureResult(report, kind, temperature_k, failed.pressure_pa, failed.liquid_composition, failed.vapor_composition, failed.liquid_state, failed.vapor_state)
+    if not low_result.report.converged or not high_result.report.converged:
+        raise ValidationError("pressure bracket endpoints must admit distinct liquid and vapor roots")
     if low_result.report.residual == 0.0:
         return low_result
     if high_result.report.residual == 0.0:
@@ -593,6 +599,11 @@ def _validate_composition(compounds: tuple[Compound, ...], composition: tuple[fl
         for value in composition
     ) or not math.isclose(math.fsum(composition), 1.0, rel_tol=0.0, abs_tol=1e-12):
         raise ValidationError("compound composition must be finite, non-negative, and sum to one")
+
+
+def _validate_absolute_pressure(pressure_pa: float) -> None:
+    if isinstance(pressure_pa, bool) or not isinstance(pressure_pa, (int, float)) or not math.isfinite(pressure_pa) or pressure_pa <= 0:
+        raise ValidationError("absolute pressure must be finite and positive")
 
 
 def ideal_mixture_enthalpy(
@@ -653,25 +664,31 @@ def ph_flash(
 ) -> PHFlashResult:
     _validate_solver_limits(max_iterations, 1e-10)
     _validate_temperature_bracket(temperature_bracket_k)
+    _validate_absolute_pressure(pressure_pa)
     if isinstance(target_enthalpy_j_per_kmol, bool) or not isinstance(target_enthalpy_j_per_kmol, (int, float)) or not math.isfinite(target_enthalpy_j_per_kmol):
         raise ValidationError("target enthalpy must be finite")
     low, high = temperature_bracket_k
     inner_iterations = 0
 
-    def trial(temperature_k: float) -> tuple[TPFlashResult, float]:
+    def trial(temperature_k: float) -> TPFlashResult:
         nonlocal inner_iterations
         flash = tp_flash(compounds, composition, interactions, temperature_k, pressure_pa, max_iterations=max_iterations)
         inner_iterations += flash.report.iterations
-        return flash, flash_enthalpy(compounds, correlations, flash)
+        return flash
 
     try:
-        low_flash, low_enthalpy = trial(low)
-        high_flash, high_enthalpy = trial(high)
+        low_flash = trial(low)
+        high_flash = trial(high)
     except ValidationError as error:
         return _ph_result(False, 0, math.inf, str(error), low, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, None, None)
     if not low_flash.report.converged or not high_flash.report.converged:
         failed = low_flash if not low_flash.report.converged else high_flash
-        return _ph_result(False, 0, failed.report.residual, "inner TP flash did not converge", low, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, failed, None)
+        return _ph_result(False, 0, failed.report.residual, failed.report.failure_reason, low, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, failed, None)
+    try:
+        low_enthalpy = flash_enthalpy(compounds, correlations, low_flash)
+        high_enthalpy = flash_enthalpy(compounds, correlations, high_flash)
+    except ValidationError as error:
+        return _ph_result(False, 0, math.inf, str(error), low, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, low_flash, None)
     low_residual = low_enthalpy - target_enthalpy_j_per_kmol
     high_residual = high_enthalpy - target_enthalpy_j_per_kmol
     if low_residual == 0.0:
@@ -686,12 +703,16 @@ def ph_flash(
     for iteration in range(1, max_iterations + 1):
         temperature_k = (low + high) / 2.0
         try:
-            latest_flash, latest_enthalpy = trial(temperature_k)
+            latest_flash = trial(temperature_k)
         except ValidationError as error:
             return _ph_result(False, iteration, math.inf, str(error), temperature_k, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, None, None)
-        residual = latest_enthalpy - target_enthalpy_j_per_kmol
         if not latest_flash.report.converged:
-            return _ph_result(False, iteration, latest_flash.report.residual, "inner TP flash did not converge", temperature_k, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, latest_flash, latest_enthalpy)
+            return _ph_result(False, iteration, latest_flash.report.residual, latest_flash.report.failure_reason, temperature_k, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, latest_flash, None)
+        try:
+            latest_enthalpy = flash_enthalpy(compounds, correlations, latest_flash)
+        except ValidationError as error:
+            return _ph_result(False, iteration, math.inf, str(error), temperature_k, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, latest_flash, None)
+        residual = latest_enthalpy - target_enthalpy_j_per_kmol
         if abs(residual) <= tolerance and high - low <= 1e-8 * temperature_k:
             return _ph_result(True, iteration, residual, None, temperature_k, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, latest_flash, latest_enthalpy)
         if low_residual * residual <= 0.0:

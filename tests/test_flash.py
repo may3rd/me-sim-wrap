@@ -229,8 +229,8 @@ class PRBubbleDewPressureTest(unittest.TestCase):
         cls.interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
 
     def test_pure_component_bubble_and_dew_pressures_agree(self):
-        bubble = bubble_pressure(self.compounds, (1.0, 0.0), self.interactions, 150.0, (100_000.0, 5_000_000.0))
-        dew = dew_pressure(self.compounds, (1.0, 0.0), self.interactions, 150.0, (100_000.0, 5_000_000.0))
+        bubble = bubble_pressure(self.compounds, (1.0, 0.0), self.interactions, 150.0, (100_000.0, 1_500_000.0))
+        dew = dew_pressure(self.compounds, (1.0, 0.0), self.interactions, 150.0, (100_000.0, 1_500_000.0))
 
         self.assertTrue(bubble.report.converged)
         self.assertTrue(dew.report.converged)
@@ -264,6 +264,12 @@ class PRBubbleDewPressureTest(unittest.TestCase):
         )
         self.assertFalse(result.report.converged)
         self.assertIsNotNone(result.report.failure_reason)
+
+    def test_rejects_a_single_root_state_as_a_phase_envelope_boundary(self):
+        result = bubble_pressure(self.compounds, (0.7, 0.3), self.interactions, 300.0, (100_000.0, 5_000_000.0))
+
+        self.assertFalse(result.report.converged)
+        self.assertIn("distinct", result.report.failure_reason)
 
 
 class PRPHFlashTest(unittest.TestCase):
@@ -310,6 +316,10 @@ class PRPHFlashTest(unittest.TestCase):
     def test_ph_flash_rejects_invalid_brackets_and_reports_unreachable_target(self):
         with self.assertRaises(ValidationError):
             ph_flash(self.compounds, (0.7, 0.3), self.interactions, self.correlations, 500_000.0, 0.0, (0.0, 210.0))
+        for pressure_pa in (0.0, -1.0, math.nan, "invalid"):
+            with self.subTest(pressure_pa=pressure_pa):
+                with self.assertRaises(ValidationError):
+                    ph_flash(self.compounds, (0.7, 0.3), self.interactions, self.correlations, pressure_pa, 0.0, (140.0, 210.0))
 
         result = ph_flash(self.compounds, (0.7, 0.3), self.interactions, self.correlations, 500_000.0, 1e12, (140.0, 210.0))
         self.assertFalse(result.report.converged)
@@ -326,6 +336,7 @@ class PRPHFlashTest(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertFalse(exhausted.report.converged)
         self.assertIsNotNone(exhausted.report.failure_reason)
+        self.assertIsNotNone(exhausted.flash)
 
 
 if __name__ == "__main__":
