@@ -103,7 +103,18 @@ def ideal_gas_density(molecular_weight_kg_per_kmol: float, temperature_k: float,
         raise ValidationError("ideal-gas inputs must be finite")
     if molecular_weight_kg_per_kmol <= 0 or temperature_k <= 0 or pressure_pa <= 0:
         raise ValidationError("molecular weight, absolute temperature, and absolute pressure must be positive")
-    return Result(pressure_pa * molecular_weight_kg_per_kmol / (R * temperature_k), "kg/m3")
+    try:
+        density = math.exp(
+            math.log(pressure_pa)
+            + math.log(molecular_weight_kg_per_kmol)
+            - math.log(R)
+            - math.log(temperature_k)
+        )
+    except OverflowError as error:
+        raise ValidationError("ideal-gas density is outside the representable range") from error
+    if not math.isfinite(density) or density <= 0:
+        raise ValidationError("ideal-gas density is outside the representable range")
+    return Result(density, "kg/m3")
 
 
 def load_correlations(path: str | Path) -> tuple[IdealCorrelations, ...]:

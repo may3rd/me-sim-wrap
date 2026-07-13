@@ -42,6 +42,8 @@ class IdealPropertiesTest(unittest.TestCase):
         density = ideal_gas_density(16.04246, 300, 101325)
         self.assertEqual(density.unit, "kg/m3")
         self.assertTrue(math.isclose(density.value, 0.6516766162577914, rel_tol=1e-12))
+        extreme_density = ideal_gas_density(1e200, 1e100, 1e200).value
+        self.assertTrue(math.isfinite(extreme_density))
         self.assertEqual(methane.enthalpy_change(300, 298.15).unit, "J/kmol")
         self.assertEqual(methane.entropy_change(300, 101325).unit, "J/kmol/K")
         full_range = methane.entropy_change(1500, 101325, 10, 101325).value
