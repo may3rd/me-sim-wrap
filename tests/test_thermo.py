@@ -8,7 +8,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import OutOfRangeError, ValidationError
+from mesim.compounds import load_compounds
 from mesim.thermo.ideal import ideal_gas_density, load_correlations
+from mesim.thermo.peng_robinson import PengRobinson
 
 
 ROOT = Path(__file__).parents[1]
@@ -92,6 +94,43 @@ class IdealPropertiesTest(unittest.TestCase):
             self.assertTrue(math.isclose(reference["heat_capacity"]["value"], expected_cp, rel_tol=1e-10))
             vapor_temperature = reference["vapor_pressure_temperature"]["value"]
             self.assertTrue(math.isclose(reference["vapor_pressure"]["value"], correlation.vapor_pressure(vapor_temperature).value, rel_tol=1e-10))
+
+
+class PengRobinsonPureTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        compounds = load_compounds(ROOT / "data/compounds/v1.json")
+        cls.methane = PengRobinson(next(c for c in compounds if c.id == "Methane"))
+
+    def test_methane_parameters_match_independent_pr_equations(self):
+        parameters = self.methane.parameters(300)
+        self.assertTrue(math.isclose(parameters.kappa, 0.39157219968, rel_tol=1e-13))
+        self.assertTrue(math.isclose(parameters.alpha, 0.8104699865610172, rel_tol=1e-13))
+        self.assertTrue(math.isclose(parameters.a_pa_m6_per_kmol2, 202278.44274980662, rel_tol=1e-13))
+        self.assertTrue(math.isclose(parameters.b_m3_per_kmol, 0.026802920402019762, rel_tol=1e-13))
+
+    def test_cubic_roots_are_real_physical_and_phase_selected(self):
+        roots = self.methane.roots(150, 1_000_000)
+        expected = (0.03312399834715224, 0.12030482166960407, 0.8250801775914196)
+        self.assertEqual(len(roots), 3)
+        self.assertTrue(all(math.isclose(actual, wanted, rel_tol=1e-12) for actual, wanted in zip(roots, expected)))
+        self.assertEqual(self.methane.state(150, 1_000_000, "liquid").compressibility, roots[0])
+        self.assertEqual(self.methane.state(150, 1_000_000, "vapor").compressibility, roots[-1])
+
+    def test_vapor_state_matches_independent_pr_properties(self):
+        state = self.methane.state(300, 1_000_000, "vapor")
+        self.assertTrue(math.isclose(state.compressibility, 0.9785896699519482, rel_tol=1e-12))
+        self.assertTrue(math.isclose(state.fugacity_coefficient, 0.9786405888609191, rel_tol=1e-12))
+        self.assertTrue(math.isclose(state.density_kg_per_m3, 6.5722624579836175, rel_tol=1e-12))
+        self.assertTrue(math.isclose(state.departure_enthalpy_j_per_kmol, -180117.9009712916, rel_tol=1e-12))
+        self.assertTrue(math.isclose(state.departure_entropy_j_per_kmol_k, -420.87689978670664, rel_tol=1e-12))
+
+    def test_invalid_pure_states_are_rejected(self):
+        for temperature, pressure in ((0, 1), (300, 0), (math.nan, 1), (300, math.inf)):
+            with self.assertRaises(ValidationError):
+                self.methane.state(temperature, pressure, "vapor")
+        with self.assertRaises(ValidationError):
+            self.methane.state(300, 1_000_000, "unknown")
 
 
 if __name__ == "__main__":
