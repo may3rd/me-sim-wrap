@@ -81,3 +81,5 @@ Run each capture twice with the same binary and inputs. Compare the normalized J
 - T1 implementation candidate: five-compound Peng-Robinson pure and mixture parameters, physical cubic roots, fugacity coefficients, density, departure enthalpy/entropy, and minimum-residual-Gibbs stable-root selection.
 
 T1 equation checks cover vapor, liquid, single-root, three-root, and mixture states. Pure methane vapor and n-pentane liquid fugacity coefficients are checked against `tests/golden/u0-pr-c1-c5.json` from DWSIM 9.0.4. The T1 exit gate remains open until DWSIM references cover all five compounds, mixture fugacity, compressibility, density, departure enthalpy/entropy, near-critical states, and two-root states.
+
+Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
