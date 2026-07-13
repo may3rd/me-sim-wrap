@@ -35,6 +35,32 @@ Golden cases use `tests/golden/schema.json` with schema version `golden-case-1`.
 
 Numeric values include `value_text` in invariant culture so the source representation is retained alongside the JSON number.
 
+## Unit conversion boundary
+
+`src/mesim/units.py` uses an explicit allowlist. It does not parse arbitrary unit expressions and does not import DWSIM conversion code. Unknown symbols and physically incompatible dimensions are rejected.
+
+The current canonical calculation bases are:
+
+| Quantity family | Base unit |
+|---|---|
+| absolute temperature; temperature difference | K; K difference |
+| pressure; pressure gradient | Pa; Pa/m |
+| time; mass; amount | s; kg; mol |
+| mass, molar, and volumetric flow | kg/s; mol/s; m3/s |
+| energy; power; force | J; W; N |
+| mass and molar enthalpy | J/kg; J/kmol |
+| mass and molar heat capacity or entropy | J/kg/K; J/kmol/K |
+| density; specific volume | kg/m3; m3/kg |
+| dynamic viscosity; kinematic viscosity or diffusivity | Pa.s; m2/s |
+| thermal conductivity; surface tension | W/m/K; N/m |
+| length; area; volume; velocity; acceleration | m; m2; m3; m/s; m/s2 |
+| mass flux; heat flux; heat-transfer coefficient | kg/m2/s; W/m2; W/m2/K |
+| dimensionless values | 1 |
+
+Gauge-pressure aliases are affine inputs referenced to exactly 101325 Pa and produce absolute Pa internally. Temperature differences never use absolute-temperature offsets. `Quantity` retains the submitted value and symbol separately from its derived calculation value.
+
+Unit coverage grows only when an implemented model or approved API boundary needs it. Each addition requires an equation vector, round trip, and incompatible-dimension rejection. Matching every DWSIM display alias is not a compatibility target.
+
 ## Phase 0 capture command
 
 Run this on x64 Windows with a built DWSIM output directory containing `DWSIM.Automation.dll` and its dependencies:
