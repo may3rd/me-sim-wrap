@@ -19,6 +19,21 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+function Get-ClrBaseObject {
+    param([AllowNull()][object]$Object)
+
+    if ($null -eq $Object) { return $null }
+    return [Management.Automation.PSObject]::AsPSObject($Object).BaseObject
+}
+
+function Get-ClrType {
+    param([AllowNull()][object]$Object)
+
+    $baseObject = Get-ClrBaseObject $Object
+    if ($null -eq $baseObject) { return $null }
+    return [object].GetMethod("GetType").Invoke($baseObject, $null)
+}
+
 function Get-MemberValue {
     param(
         [AllowNull()]
@@ -27,10 +42,23 @@ function Get-MemberValue {
         [string]$Name
     )
 
-    if ($null -eq $Object) { return $null }
-    $property = $Object.GetType().GetProperty($Name)
-    if ($null -eq $property) { return $null }
-    return $property.GetValue($Object, $null)
+    $baseObject = Get-ClrBaseObject $Object
+    if ($null -eq $baseObject) { return $null }
+    $flags = [Reflection.BindingFlags]::GetProperty -bor [Reflection.BindingFlags]::Public -bor [Reflection.BindingFlags]::Instance
+    try { return (Get-ClrType $baseObject).InvokeMember($Name, $flags, $null, $baseObject, $null) }
+    catch [MissingMemberException] { return $null }
+}
+
+function Invoke-ClrMethod {
+    param(
+        [Parameter(Mandatory = $true)][object]$Object,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [object[]]$Arguments = @()
+    )
+
+    $baseObject = Get-ClrBaseObject $Object
+    $flags = [Reflection.BindingFlags]::InvokeMethod -bor [Reflection.BindingFlags]::Public -bor [Reflection.BindingFlags]::Instance
+    return (Get-ClrType $baseObject).InvokeMember($Name, $flags, $null, $baseObject, $Arguments)
 }
 
 function Get-NumericText {
@@ -114,10 +142,10 @@ function Get-PropertyRecord {
 
     $unit = "dimensionless"
     $readError = $null
-    try { $unit = [string]$Object.GetPropertyUnit($PropertyName) } catch { $unit = "dimensionless" }
+    try { $unit = [string](Invoke-ClrMethod -Object $Object -Name "GetPropertyUnit" -Arguments @($PropertyName)) } catch { $unit = "dimensionless" }
 
     try {
-        $value = $Object.GetPropertyValue($PropertyName)
+        $value = Invoke-ClrMethod -Object $Object -Name "GetPropertyValue" -Arguments @($PropertyName)
         $record = New-ValueRecord $value $unit
     }
     catch {
@@ -148,14 +176,14 @@ function Get-ObjectStates {
         }
 
         $properties = @()
-        foreach ($propertyName in $object.GetProperties([DWSIM.Interfaces.Enums.PropertyType]::ALL)) {
+        foreach ($propertyName in (Invoke-ClrMethod -Object $object -Name "GetProperties" -Arguments @([DWSIM.Interfaces.Enums.PropertyType]::ALL))) {
             $properties += Get-PropertyRecord $object ([string]$propertyName)
         }
 
         $states += @{
             tag = $tag
             name = [string]$name
-            type = [string]$object.GetType().Name
+            type = [string](Get-ClrType $object).Name
             calculated = [bool](Get-MemberValue $object "Calculated")
             error = Get-MemberValue $object "ErrorMessage"
             properties = @($properties | Sort-Object property)

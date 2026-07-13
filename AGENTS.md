@@ -11,3 +11,4 @@
 - Read Windows PowerShell JSON outputs with utf-8-sig to accept its UTF-8 BOM.
 - Include -ExecutionPolicy Bypass whenever giving a direct PowerShell script invocation on the Windows capture host.
 - Avoid PowerShell ETS property access on DWSIM objects because case-only CLR member duplicates break the adapter.
+- Do not call GetType through a DWSIM PowerShell wrapper; unwrap BaseObject and invoke CLR members via System.Type.
