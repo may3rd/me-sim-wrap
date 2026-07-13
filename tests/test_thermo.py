@@ -135,6 +135,22 @@ class PengRobinsonPureTest(unittest.TestCase):
         with self.assertRaises(ValidationError):
             self.methane.state(300, 1_000_000, "unknown")
 
+    def test_pure_fugacity_matches_dwsim_pr_vapor_and_liquid_cases(self):
+        golden = json.loads((ROOT / "tests/golden/u0-pr-c1-c5.json").read_text(encoding="utf-8-sig"))
+        streams = {record["tag"]: record for record in golden["outputs"]["objects_after"]}
+
+        def property_value(tag, name):
+            properties = {record["property"]: record["value"]["value"] for record in streams[tag]["properties"]}
+            return properties[name]
+
+        methane_reference = property_value("CH4-feed", "Fugacity Coefficient, Vapor Phase / Methane")
+        self.assertTrue(math.isclose(self.methane.state(300, 1_000_000, "vapor").fugacity_coefficient, methane_reference, rel_tol=1e-10))
+
+        compounds = load_compounds(ROOT / "data/compounds/v1.json")
+        pentane = PengRobinson(next(c for c in compounds if c.id == "N-pentane"))
+        pentane_reference = property_value("C5-feed", "Fugacity Coefficient, Liquid Phase 1 / N-pentane")
+        self.assertTrue(math.isclose(pentane.state(300, 1_000_000, "liquid").fugacity_coefficient, pentane_reference, rel_tol=2e-6))
+
 
 class PengRobinsonMixtureTest(unittest.TestCase):
     @classmethod

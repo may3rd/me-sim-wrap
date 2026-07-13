@@ -74,3 +74,10 @@ Use existing sample flowsheets when they isolate the operation. If a sample incl
 ## Acceptance
 
 Run each capture twice with the same binary and inputs. Compare the normalized JSON hashes. A mismatch blocks the phase until the nondeterminism is explained and either removed or recorded as an explicit limitation.
+
+## Implemented thermodynamics
+
+- T0: five-compound ideal-gas heat capacity, enthalpy, entropy, density, and pure vapor pressure.
+- T1: five-compound Peng-Robinson pure and mixture parameters, physical cubic roots, fugacity coefficients, density, departure enthalpy/entropy, and minimum-residual-Gibbs stable-root selection.
+
+T1 equation checks cover vapor, liquid, single-root, three-root, and mixture states. Pure methane vapor and n-pentane liquid fugacity coefficients are checked against `tests/golden/u0-pr-c1-c5.json` from DWSIM 9.0.4.
