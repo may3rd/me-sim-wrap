@@ -8,3 +8,20 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\capture_dwsim_
   -PropertyPackage 'Peng-Robinson (PR)' `
   -FlashAlgorithm 'DWSIM default' `
   -OutputPath '.\tests\golden\u0-pr-c1-c5.json'
+
+```
+PS C:\Users\26008353\Downloads\me-sim-wrap-live> powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\capture_dwsim_reference.ps1 `
+>>   -EngineBin 'C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows' `
+>>   -DwsimRevision '9.0.4' `
+>>   -CasePath '.\tests\u0-pr-c1-c5.dwxmz' `
+>>   -CaseId 'u0-pr-c1-c5' `
+>>   -PropertyPackage 'Peng-Robinson (PR)' `
+>>   -FlashAlgorithm 'DWSIM default' `
+>>   -OutputPath '.\tests\golden\u0-pr-c1-c5.json'
+Get-MemberValue : Exception calling "GetValue" with "2" argument(s): "Object does not match target type."
+At C:\Users\26008353\Downloads\me-sim-wrap-live\scripts\capture_dwsim_reference.ps1:205 char:17
++     $database = Get-MemberValue $constant "CurrentDB"
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Get-MemberValue], MethodInvocationException
+    + FullyQualifiedErrorId : TargetException,Get-MemberValue
+```
