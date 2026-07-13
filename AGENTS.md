@@ -1,5 +1,18 @@
 # Lessons
 
+- Use one coherent amount basis across molar flow, molar properties, and energy-balance equations.
+- Run `git diff <base> --check`, not only `git diff --check`, after committing a multi-commit phase.
+- Model dimensional compatibility separately from semantic property names when units share physical dimensions.
+
+- Check numerator and denominator prefixes together before defining molar-property conversion factors.
+- Do not assume SciPy `solve_ivp` supports general differential-algebraic systems.
+- Verify phase-envelope inequalities before encoding bubble/dew acceptance checks.
+- Convert finite-but-unrepresentable EOS states into domain validation errors instead of leaking arithmetic exceptions.
+- Use log-domain arithmetic when thermodynamic products can overflow before a finite quotient is formed.
+
+- Treat DWSIM compound catalog names as case-distinct lookup keys; select the frozen record explicitly.
+- Calculate thermodynamic test vectors from the stated equation before hardcoding them.
+- Inspect the captured JSON schema before writing an audit query against it.
 - Measure generated Markdown fence counts before asserting an expected total.
 - Choose and test the canonical SI base before writing molar or mass-flow factors.
 - Treat entries from generic .NET dictionary enumerators as KeyValuePair-compatible objects, not DictionaryEntry.

@@ -280,7 +280,9 @@ git commit -m "test: freeze initial DWSIM reference cases"
 5. Run `python -m unittest tests.test_units -v`.
 6. Commit `feat: add explicit unit conversion boundary`.
 
-**Exit gate:** Every U0-U3 input/output dimension is covered; round-trip checks pass without hidden rounding.
+Phase 2B extends this boundary with the process dimensions required by the current internal-alpha roadmap. Its design and implementation steps are recorded in `docs/plans/2026-07-13-phase-2b-units-design.md` and `docs/plans/2026-07-13-phase-2b-units.md`.
+
+**Exit gate:** Every accepted kernel and API boundary dimension needed by the implemented phases is covered; equation and round-trip checks pass without hidden rounding. Later models add exact unit aliases only with failing calculation-boundary tests. Full DWSIM display-unit parity is not required.
 
 ### Phase 3: Compound records and versioned data
 
