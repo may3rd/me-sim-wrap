@@ -163,7 +163,7 @@ function Get-ObjectStates {
 function New-CompoundRecord {
     param(
         [Parameter(Mandatory = $true)]
-        [System.Collections.DictionaryEntry]$Entry,
+        [object]$Entry,
         [Parameter(Mandatory = $true)]
         [string]$Revision
     )
