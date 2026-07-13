@@ -1,5 +1,8 @@
 # Lessons
 
+- Inspect large captured JSON with bounded queries instead of printing full nested records.
+- Use at least 10000 ms for collaboration wait timeouts.
+- Do not equate a one-root EOS state label with flash vapor/liquid phase classification.
 - Use one coherent amount basis across molar flow, molar properties, and energy-balance equations.
 - Run `git diff <base> --check`, not only `git diff --check`, after committing a multi-commit phase.
 - Model dimensional compatibility separately from semantic property names when units share physical dimensions.
