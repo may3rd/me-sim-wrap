@@ -41,6 +41,18 @@ class UnitsTest(unittest.TestCase):
         self.assertTrue(math.isclose(to_si(32.0, "degF", "temperature"), 273.15, rel_tol=1e-12))
         self.assertTrue(math.isclose(from_si(273.15, "degC", "temperature"), 0.0, abs_tol=1e-12))
 
+    def test_molar_enthalpy_uses_joules_per_kmol_as_si_base(self):
+        cases = (
+            ("J/kmol", 1.0),
+            ("kJ/kmol", 1_000.0),
+            ("J/mol", 1_000.0),
+            ("kJ/mol", 1_000_000.0),
+        )
+
+        for unit, expected in cases:
+            with self.subTest(unit=unit):
+                self.assertEqual(to_si(1.0, unit, "molar_enthalpy"), expected)
+
     def test_convert_round_trips_without_changing_requested_units(self):
         self.assertTrue(math.isclose(convert(1.0, "bar", "pressure", "psi"), 14.503773773, rel_tol=1e-9))
         self.assertTrue(math.isclose(convert(14.503773773, "psi", "pressure", "bar"), 1.0, rel_tol=1e-9))
