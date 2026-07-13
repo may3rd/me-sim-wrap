@@ -1,0 +1,320 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://me-sim-wrap.local/schemas/golden-case-1.json",
+  "title": "me-sim-wrap golden calculation case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "case_id",
+    "case_kind",
+    "source",
+    "inputs",
+    "outputs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "golden-case-1"
+    },
+    "case_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "case_kind": {
+      "enum": [
+        "compound_catalog",
+        "flowsheet"
+      ]
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "inputs": {
+      "$ref": "#/$defs/inputs"
+    },
+    "outputs": {
+      "$ref": "#/$defs/outputs"
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dwsim_revision",
+        "automation_version",
+        "captured_utc",
+        "platform",
+        "architecture",
+        "engine_bin",
+        "input_file",
+        "input_file_sha256",
+        "property_package",
+        "flash_algorithm",
+        "notes"
+      ],
+      "properties": {
+        "dwsim_revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "automation_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "captured_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "architecture": {
+          "type": "string",
+          "minLength": 1
+        },
+        "engine_bin": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_file": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_file_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "property_package": {
+          "type": "string"
+        },
+        "flash_algorithm": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "unit",
+        "value_text",
+        "value_type"
+      ],
+      "properties": {
+        "value": {},
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "value_type": {
+          "enum": [
+            "null",
+            "number",
+            "string",
+            "boolean",
+            "array",
+            "object"
+          ]
+        }
+      }
+    },
+    "property": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "property",
+        "value",
+        "unit",
+        "read_error"
+      ],
+      "properties": {
+        "property": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "$ref": "#/$defs/quantity"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "read_error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "object_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tag",
+        "name",
+        "type",
+        "calculated",
+        "error",
+        "properties"
+      ],
+      "properties": {
+        "tag": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "calculated": {
+          "type": "boolean"
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/property"
+          }
+        }
+      }
+    },
+    "compound": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "cas",
+        "formula",
+        "molecular_weight",
+        "critical_temperature",
+        "critical_pressure",
+        "acentric_factor",
+        "normal_boiling_point",
+        "provenance"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cas": {
+          "type": "string"
+        },
+        "formula": {
+          "type": "string"
+        },
+        "molecular_weight": {
+          "$ref": "#/$defs/quantity"
+        },
+        "critical_temperature": {
+          "$ref": "#/$defs/quantity"
+        },
+        "critical_pressure": {
+          "$ref": "#/$defs/quantity"
+        },
+        "acentric_factor": {
+          "$ref": "#/$defs/quantity"
+        },
+        "normal_boiling_point": {
+          "$ref": "#/$defs/quantity"
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compounds",
+        "objects_before"
+      ],
+      "properties": {
+        "compounds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/compound"
+          }
+        },
+        "objects_before": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/object_state"
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "solve",
+        "objects_after"
+      ],
+      "properties": {
+        "solve": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "executed",
+            "success",
+            "errors"
+          ],
+          "properties": {
+            "executed": {
+              "type": "boolean"
+            },
+            "success": {
+              "type": "boolean"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "objects_after": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/object_state"
+          }
+        }
+      }
+    }
+  }
+}
