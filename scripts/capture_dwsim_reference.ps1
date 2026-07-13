@@ -159,6 +159,21 @@ function New-ValueRecord {
 
     $numericText = Get-NumericText $Value
 
+    if (
+        ($Value -is [double] -or $Value -is [float]) -and
+        (
+            [double]::IsNaN([double]$Value) -or
+            [double]::IsInfinity([double]$Value)
+        )
+    ) {
+        return @{
+            value      = $null
+            unit       = $Unit
+            value_text = $numericText
+            value_type = "non_finite"
+        }
+    }
+
     if ($null -ne $numericText) {
         return @{
             value      = [double]$Value

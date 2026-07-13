@@ -18,3 +18,4 @@
 - Keep unittest method names unique because duplicate names silently replace earlier checks.
 - A normalized match proves repeatability only; reject golden cases containing property read errors.
 - Allow empty PowerShell string parameters when the function body intentionally normalizes them.
+- Preserve NaN and infinity as explicit text records instead of emitting non-compliant JSON numbers.

@@ -47,6 +47,13 @@ class Phase0ArtifactsTest(unittest.TestCase):
 
         self.assertIn("[AllowEmptyString()]\n        [string]$Unit", script)
 
+    def test_capture_script_serializes_non_finite_numbers_as_text(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("[double]::IsNaN", script)
+        self.assertIn("[double]::IsInfinity", script)
+        self.assertIn('value_type = "non_finite"', script)
+
     def test_capture_script_preloads_portable_thermoc_assembly(self):
         script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
 
