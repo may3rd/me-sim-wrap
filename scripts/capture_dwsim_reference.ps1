@@ -19,21 +19,33 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-function Get-ClrBaseObject {
-    param([AllowNull()][object]$Object)
+Add-Type -TypeDefinition @"
+using System;
+using System.Reflection;
 
-    if ($null -eq $Object) { return $null }
-    $psObject = [Management.Automation.PSObject]::AsPSObject($Object)
-    return [Management.Automation.PSObject].GetProperty("BaseObject").GetValue($psObject, $null)
+public static class DwsimCaptureReflection
+{
+    private const BindingFlags PublicInstance = BindingFlags.Public | BindingFlags.Instance;
+
+    public static object Get(object target, string name)
+    {
+        if (target == null) return null;
+        PropertyInfo property = target.GetType().GetProperty(name, PublicInstance);
+        return property == null ? null : property.GetValue(target, null);
+    }
+
+    public static object Invoke(object target, string name, object[] arguments)
+    {
+        if (target == null) throw new ArgumentNullException("target");
+        return target.GetType().InvokeMember(name, PublicInstance | BindingFlags.InvokeMethod, null, target, arguments);
+    }
+
+    public static string TypeName(object target)
+    {
+        return target == null ? null : target.GetType().Name;
+    }
 }
-
-function Get-ClrType {
-    param([AllowNull()][object]$Object)
-
-    $baseObject = Get-ClrBaseObject $Object
-    if ($null -eq $baseObject) { return $null }
-    return [object].GetMethod("GetType").Invoke($baseObject, $null)
-}
+"@
 
 function Get-MemberValue {
     param(
@@ -43,23 +55,10 @@ function Get-MemberValue {
         [string]$Name
     )
 
-    $baseObject = Get-ClrBaseObject $Object
-    if ($null -eq $baseObject) { return $null }
-    $flags = [Reflection.BindingFlags]::GetProperty -bor [Reflection.BindingFlags]::Public -bor [Reflection.BindingFlags]::Instance
-    try { return (Get-ClrType $baseObject).InvokeMember($Name, $flags, $null, $baseObject, $null) }
-    catch [MissingMemberException] { return $null }
-}
-
-function Invoke-ClrMethod {
-    param(
-        [Parameter(Mandatory = $true)][object]$Object,
-        [Parameter(Mandatory = $true)][string]$Name,
-        [object[]]$Arguments = @()
-    )
-
-    $baseObject = Get-ClrBaseObject $Object
-    $flags = [Reflection.BindingFlags]::InvokeMethod -bor [Reflection.BindingFlags]::Public -bor [Reflection.BindingFlags]::Instance
-    return (Get-ClrType $baseObject).InvokeMember($Name, $flags, $null, $baseObject, $Arguments)
+    if ($null -eq $Object) { return $null }
+    $property = $Object.PSObject.Properties[$Name]
+    if ($null -eq $property) { return $null }
+    return $property.Value
 }
 
 function Get-NumericText {
@@ -143,10 +142,10 @@ function Get-PropertyRecord {
 
     $unit = "dimensionless"
     $readError = $null
-    try { $unit = [string](Invoke-ClrMethod -Object $Object -Name "GetPropertyUnit" -Arguments @($PropertyName)) } catch { $unit = "dimensionless" }
+    try { $unit = [string][DwsimCaptureReflection]::Invoke($Object, "GetPropertyUnit", [object[]]@($PropertyName)) } catch { $unit = "dimensionless" }
 
     try {
-        $value = Invoke-ClrMethod -Object $Object -Name "GetPropertyValue" -Arguments @($PropertyName)
+        $value = [DwsimCaptureReflection]::Invoke($Object, "GetPropertyValue", [object[]]@($PropertyName))
         $record = New-ValueRecord $value $unit
     }
     catch {
@@ -166,27 +165,27 @@ function Get-ObjectStates {
     param([Parameter(Mandatory = $true)][object]$Flowsheet)
 
     $states = @()
-    $simulationObjects = Get-MemberValue $Flowsheet "SimulationObjects"
-    foreach ($object in (Get-MemberValue $simulationObjects "Values")) {
-        $name = Get-MemberValue $object "Name"
-        $graphicObject = Get-MemberValue $object "GraphicObject"
-        $graphicTag = Get-MemberValue $graphicObject "Tag"
+    $simulationObjects = [DwsimCaptureReflection]::Get($Flowsheet, "SimulationObjects")
+    foreach ($object in [DwsimCaptureReflection]::Get($simulationObjects, "Values")) {
+        $name = [DwsimCaptureReflection]::Get($object, "Name")
+        $graphicObject = [DwsimCaptureReflection]::Get($object, "GraphicObject")
+        $graphicTag = [DwsimCaptureReflection]::Get($graphicObject, "Tag")
         $tag = [string]$name
         if (-not [string]::IsNullOrWhiteSpace($graphicTag)) {
             $tag = [string]$graphicTag
         }
 
         $properties = @()
-        foreach ($propertyName in (Invoke-ClrMethod -Object $object -Name "GetProperties" -Arguments @([DWSIM.Interfaces.Enums.PropertyType]::ALL))) {
+        foreach ($propertyName in [DwsimCaptureReflection]::Invoke($object, "GetProperties", [object[]]@([DWSIM.Interfaces.Enums.PropertyType]::ALL))) {
             $properties += Get-PropertyRecord $object ([string]$propertyName)
         }
 
         $states += @{
             tag = $tag
             name = [string]$name
-            type = [string](Get-ClrType $object).Name
-            calculated = [bool](Get-MemberValue $object "Calculated")
-            error = Get-MemberValue $object "ErrorMessage"
+            type = [DwsimCaptureReflection]::TypeName($object)
+            calculated = [bool][DwsimCaptureReflection]::Get($object, "Calculated")
+            error = [DwsimCaptureReflection]::Get($object, "ErrorMessage")
             properties = @($properties | Sort-Object property)
         }
     }

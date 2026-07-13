@@ -13,3 +13,4 @@
 - Avoid PowerShell ETS property access on DWSIM objects because case-only CLR member duplicates break the adapter.
 - Do not call GetType through a DWSIM PowerShell wrapper; unwrap BaseObject and invoke CLR members via System.Type.
 - Read PSObject.BaseObject through reflected PSObject metadata because direct access is re-adapted to DWSIM under strict mode.
+- Do not use one PowerShell reflection wrapper for all DWSIM types; adapter-safe stream access and compound catalog access have different boundaries.
