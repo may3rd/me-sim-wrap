@@ -56,6 +56,18 @@ class TPFlashResult:
     vapor_state: PRMixtureState | None
 
 
+@dataclass(frozen=True, slots=True)
+class PressureResult:
+    report: SolverReport
+    kind: str
+    temperature_k: float
+    pressure_pa: float
+    liquid_composition: tuple[float, ...]
+    vapor_composition: tuple[float, ...]
+    liquid_state: PRMixtureState | None
+    vapor_state: PRMixtureState | None
+
+
 def _report(
     converged: bool,
     iterations: int,
@@ -426,3 +438,136 @@ def tp_flash(
         liquid_state,
         vapor_state,
     )
+
+
+def _validate_pressure_bracket(bracket_pa: tuple[float, float]) -> None:
+    if len(bracket_pa) != 2 or any(
+        isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0
+        for value in bracket_pa
+    ) or bracket_pa[0] >= bracket_pa[1]:
+        raise ValidationError("pressure bracket must contain two increasing finite positive values")
+
+
+def _equilibrium_composition(
+    composition: tuple[float, ...], log_k: tuple[float, ...], sign: float
+) -> tuple[tuple[float, ...], float]:
+    terms = tuple(-math.inf if fraction == 0.0 else math.log(fraction) + sign * value for fraction, value in zip(composition, log_k))
+    maximum = max(terms)
+    weights = tuple(0.0 if value == -math.inf else math.exp(value - maximum) for value in terms)
+    total = math.fsum(weights)
+    return tuple(value / total for value in weights), maximum + math.log(total)
+
+
+def _pressure_point(
+    kind: str,
+    compounds: tuple[Compound, ...],
+    composition: tuple[float, ...],
+    interactions: PRInteractions,
+    temperature_k: float,
+    pressure_pa: float,
+    max_iterations: int,
+) -> PressureResult:
+    liquid_fixed = kind == "bubble"
+    fixed_phase = "liquid" if liquid_fixed else "vapor"
+    fixed_state = PengRobinsonMixture(compounds, composition, interactions).state(temperature_k, pressure_pa, fixed_phase)
+    log_k = _wilson_log_k(compounds, temperature_k, pressure_pa)
+    last_composition: tuple[float, ...] = ()
+    last_state: PRMixtureState | None = None
+    residual = math.inf
+
+    for iteration in range(1, max_iterations + 1):
+        try:
+            last_composition, log_total = _equilibrium_composition(composition, log_k, 1.0 if liquid_fixed else -1.0)
+            last_state = PengRobinsonMixture(compounds, last_composition, interactions).state(
+                temperature_k, pressure_pa, "vapor" if liquid_fixed else "liquid"
+            )
+        except (OverflowError, ValueError, ValidationError) as error:
+            report = _report(False, iteration, math.inf, f"{kind} pressure K iteration failed: {error}", f"PR {kind} K iteration")
+            return PressureResult(report, kind, temperature_k, pressure_pa, composition if liquid_fixed else (), () if liquid_fixed else composition, fixed_state if liquid_fixed else last_state, last_state if liquid_fixed else fixed_state)
+        target_log_k = tuple(
+            math.log(liquid_phi) - math.log(vapor_phi)
+            for liquid_phi, vapor_phi in zip(
+                fixed_state.fugacity_coefficients if liquid_fixed else last_state.fugacity_coefficients,
+                last_state.fugacity_coefficients if liquid_fixed else fixed_state.fugacity_coefficients,
+            )
+        )
+        residual = max(abs(current - target) for current, target in zip(log_k, target_log_k))
+        if residual <= 1e-10:
+            try:
+                outer_residual = math.expm1(log_total)
+            except OverflowError:
+                outer_residual = math.inf
+            report = _report(True, iteration, outer_residual, algorithm=f"PR {kind} K iteration")
+            return PressureResult(
+                report,
+                kind,
+                temperature_k,
+                pressure_pa,
+                composition if liquid_fixed else last_composition,
+                last_composition if liquid_fixed else composition,
+                fixed_state if liquid_fixed else last_state,
+                last_state if liquid_fixed else fixed_state,
+            )
+        log_k = target_log_k
+
+    report = _report(False, max_iterations, residual, f"{kind} pressure K iteration limit reached", f"PR {kind} K iteration")
+    return PressureResult(report, kind, temperature_k, pressure_pa, composition if liquid_fixed else last_composition, last_composition if liquid_fixed else composition, fixed_state if liquid_fixed else last_state, last_state if liquid_fixed else fixed_state)
+
+
+def _pressure_solve(
+    kind: str,
+    compounds: tuple[Compound, ...],
+    composition: tuple[float, ...],
+    interactions: PRInteractions,
+    temperature_k: float,
+    bracket_pa: tuple[float, float],
+    max_iterations: int,
+) -> PressureResult:
+    _validate_solver_limits(max_iterations, 1e-10)
+    _validate_pressure_bracket(bracket_pa)
+    PengRobinsonMixture(compounds, composition, interactions)
+    low, high = bracket_pa
+    low_result = _pressure_point(kind, compounds, composition, interactions, temperature_k, low, max_iterations)
+    high_result = _pressure_point(kind, compounds, composition, interactions, temperature_k, high, max_iterations)
+    if not low_result.report.converged or not high_result.report.converged:
+        failed = low_result if not low_result.report.converged else high_result
+        report = _report(False, failed.report.iterations, failed.report.residual, failed.report.failure_reason, f"PR {kind}-pressure bisection")
+        return PressureResult(report, kind, temperature_k, failed.pressure_pa, failed.liquid_composition, failed.vapor_composition, failed.liquid_state, failed.vapor_state)
+    if low_result.report.residual == 0.0:
+        return low_result
+    if high_result.report.residual == 0.0:
+        return high_result
+    if low_result.report.residual * high_result.report.residual > 0.0:
+        raise ValidationError("pressure bracket does not enclose a bubble/dew residual root")
+
+    latest = low_result
+    for iteration in range(1, max_iterations + 1):
+        pressure_pa = (low + high) / 2.0
+        latest = _pressure_point(kind, compounds, composition, interactions, temperature_k, pressure_pa, max_iterations)
+        if not latest.report.converged:
+            report = _report(False, iteration, latest.report.residual, latest.report.failure_reason, f"PR {kind}-pressure bisection")
+            return PressureResult(report, kind, temperature_k, pressure_pa, latest.liquid_composition, latest.vapor_composition, latest.liquid_state, latest.vapor_state)
+        if abs(latest.report.residual) <= 1e-8 and high - low <= 1e-8 * pressure_pa:
+            report = _report(True, iteration, latest.report.residual, algorithm=f"PR {kind}-pressure bisection")
+            return PressureResult(report, kind, temperature_k, pressure_pa, latest.liquid_composition, latest.vapor_composition, latest.liquid_state, latest.vapor_state)
+        if low_result.report.residual * latest.report.residual <= 0.0:
+            high, high_result = pressure_pa, latest
+        else:
+            low, low_result = pressure_pa, latest
+
+    report = _report(False, max_iterations, latest.report.residual, f"{kind} pressure iteration limit reached", f"PR {kind}-pressure bisection")
+    return PressureResult(report, kind, temperature_k, latest.pressure_pa, latest.liquid_composition, latest.vapor_composition, latest.liquid_state, latest.vapor_state)
+
+
+def bubble_pressure(
+    compounds: tuple[Compound, ...], composition: tuple[float, ...], interactions: PRInteractions,
+    temperature_k: float, bracket_pa: tuple[float, float], *, max_iterations: int = 100,
+) -> PressureResult:
+    return _pressure_solve("bubble", compounds, composition, interactions, temperature_k, bracket_pa, max_iterations)
+
+
+def dew_pressure(
+    compounds: tuple[Compound, ...], composition: tuple[float, ...], interactions: PRInteractions,
+    temperature_k: float, bracket_pa: tuple[float, float], *, max_iterations: int = 100,
+) -> PressureResult:
+    return _pressure_solve("dew", compounds, composition, interactions, temperature_k, bracket_pa, max_iterations)

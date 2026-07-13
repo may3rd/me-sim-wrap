@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
-from mesim.thermo.flash import pr_stability, rachford_rice, tp_flash
+from mesim.thermo.flash import bubble_pressure, dew_pressure, pr_stability, rachford_rice, tp_flash
 
 
 ROOT = Path(__file__).parents[1]
@@ -202,6 +202,53 @@ class PRTPFlashTest(unittest.TestCase):
             self.interactions,
             180.0,
             500_000,
+            max_iterations=1,
+        )
+        self.assertFalse(result.report.converged)
+        self.assertIsNotNone(result.report.failure_reason)
+
+
+class PRBubbleDewPressureTest(unittest.TestCase):
+    """Vectors use Michelsen Part II, DOI 10.1016/0378-3812(82)85002-4."""
+
+    @classmethod
+    def setUpClass(cls):
+        compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        cls.compounds = (compounds["Methane"], compounds["Ethane"])
+        cls.interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
+
+    def test_pure_component_bubble_and_dew_pressures_agree(self):
+        bubble = bubble_pressure(self.compounds, (1.0, 0.0), self.interactions, 150.0, (100_000.0, 5_000_000.0))
+        dew = dew_pressure(self.compounds, (1.0, 0.0), self.interactions, 150.0, (100_000.0, 5_000_000.0))
+
+        self.assertTrue(bubble.report.converged)
+        self.assertTrue(dew.report.converged)
+        self.assertTrue(math.isclose(bubble.pressure_pa, dew.pressure_pa, rel_tol=1e-8))
+
+    def test_mixture_bubble_is_not_below_dew_pressure(self):
+        bubble = bubble_pressure(self.compounds, (0.7, 0.3), self.interactions, 180.0, (100_000.0, 3_000_000.0))
+        dew = dew_pressure(self.compounds, (0.7, 0.3), self.interactions, 180.0, (100_000.0, 500_000.0))
+
+        self.assertTrue(bubble.report.converged)
+        self.assertTrue(dew.report.converged)
+        self.assertGreaterEqual(bubble.pressure_pa, dew.pressure_pa)
+        self.assertTrue(math.isclose(math.fsum(bubble.liquid_composition), 1.0, abs_tol=1e-12))
+        self.assertTrue(math.isclose(math.fsum(dew.vapor_composition), 1.0, abs_tol=1e-12))
+
+    def test_requires_a_valid_bracket_and_reports_exhaustion(self):
+        with self.assertRaises(ValidationError):
+            bubble_pressure(self.compounds, (0.7, 0.3), self.interactions, 180.0, (0.0, 5_000_000.0))
+        with self.assertRaises(ValidationError):
+            dew_pressure(self.compounds, (0.7, 0.3), self.interactions, 180.0, (5_000_000.0, 100_000.0))
+        with self.assertRaises(ValidationError):
+            bubble_pressure(self.compounds, (0.7, 0.3), self.interactions, 180.0, (100_000.0, 5_000_000.0))
+
+        result = bubble_pressure(
+            self.compounds,
+            (0.7, 0.3),
+            self.interactions,
+            180.0,
+            (100_000.0, 5_000_000.0),
             max_iterations=1,
         )
         self.assertFalse(result.report.converged)
