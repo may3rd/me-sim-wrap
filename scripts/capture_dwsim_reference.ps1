@@ -17,8 +17,8 @@ param(
         "Methane",
         "Ethane",
         "Propane",
-        "n-Butane",
-        "n-Pentane"
+        "N-butane",
+        "N-pentane"
     )
 )
 
@@ -365,14 +365,38 @@ function New-CompoundRecord {
         $database = "DWSIM.AvailableCompounds"
     }
 
-    return @{
-        id = $CompoundId
+    $canonicalName = [string](
+        Get-MemberValue `
+            -Object $Constant `
+            -Name "Name"
+    )
 
-        name = [string](
-            Get-MemberValue `
-                -Object $Constant `
-                -Name "Name"
-        )
+    if ([string]::IsNullOrWhiteSpace($canonicalName)) {
+        throw "DWSIM returned an empty canonical name for '$CompoundId'"
+    }
+
+    $normalBoilingPoint = [double](
+        Get-MemberValue `
+            -Object $Constant `
+            -Name "NBP"
+    )
+
+    $idealHeatCapacity = [DwsimCaptureReflection]::Invoke(
+        $Constant,
+        "GetIdealGasHeatCapacity",
+        [object[]]@(300.0, $null)
+    )
+
+    $vaporPressure = [DwsimCaptureReflection]::Invoke(
+        $Constant,
+        "GetVaporPressure",
+        [object[]]@($normalBoilingPoint, $null)
+    )
+
+    return @{
+        id = $canonicalName
+
+        name = $canonicalName
 
         cas = [string](
             Get-MemberValue `
@@ -419,12 +443,26 @@ function New-CompoundRecord {
             -Unit "dimensionless"
 
         normal_boiling_point = New-ValueRecord `
-            -Value (
-                Get-MemberValue `
-                    -Object $Constant `
-                    -Name "NBP"
-            ) `
+            -Value $normalBoilingPoint `
             -Unit "K"
+
+        ideal_reference = @{
+            heat_capacity_temperature = New-ValueRecord `
+                -Value 300.0 `
+                -Unit "K"
+
+            heat_capacity = New-ValueRecord `
+                -Value $idealHeatCapacity `
+                -Unit "kJ/kg/K"
+
+            vapor_pressure_temperature = New-ValueRecord `
+                -Value $normalBoilingPoint `
+                -Unit "K"
+
+            vapor_pressure = New-ValueRecord `
+                -Value $vaporPressure `
+                -Unit "Pa"
+        }
 
         provenance = @{
             database        = [string]$database

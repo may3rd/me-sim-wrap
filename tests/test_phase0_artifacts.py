@@ -73,5 +73,22 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertNotIn("function Get-ClrBaseObject", script)
         self.assertEqual(script.count('[object[]]@($PropertyName, $null)'), 2)
 
+    def test_capture_script_records_ideal_compound_reference_values(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("ideal_reference", script)
+        self.assertIn('"GetIdealGasHeatCapacity"', script)
+        self.assertIn('"GetVaporPressure"', script)
+
+    def test_capture_script_uses_dwsim_canonical_compound_id(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("id = $canonicalName", script)
+        self.assertNotIn("id = $CompoundId", script)
+        self.assertIn('"N-butane"', script)
+        self.assertIn('"N-pentane"', script)
+        self.assertNotIn('"n-Butane"', script)
+        self.assertNotIn('"n-Pentane"', script)
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,35 @@
+{
+  "schema_version": "ideal-correlations-1",
+  "provenance": {
+    "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+    "source_revision": "9.0.4",
+    "imported_utc": "2026-07-13T07:24:14Z"
+  },
+  "correlations": [
+    {
+      "compound_id": "Methane",
+      "heat_capacity": {"equation": 16, "A": 33151.9, "B": -1220.001, "C": 12.0907, "D": -0.000384791, "E": 9.896403e-8, "minimum_k": 10, "maximum_k": 1500, "unit": "J/kmol/K"},
+      "vapor_pressure": {"equation": 101, "A": 39.98844, "B": -1337.308, "C": -3.580049, "D": 0.0000320698, "E": 2, "minimum_k": 83.65, "maximum_k": 191.03, "unit": "Pa"}
+    },
+    {
+      "compound_id": "Ethane",
+      "heat_capacity": {"equation": 16, "A": 35666.22, "B": -616.5198, "C": 11.69914, "D": 0.000444525, "E": -1.541942e-7, "minimum_k": 80, "maximum_k": 1500, "unit": "J/kmol/K"},
+      "vapor_pressure": {"equation": 101, "A": 61.43744, "B": -2814.319, "C": -6.778053, "D": 0.0000210827, "E": 2, "minimum_k": 90.35, "maximum_k": 305.42, "unit": "Pa"}
+    },
+    {
+      "compound_id": "Propane",
+      "heat_capacity": {"equation": 16, "A": 37840.4, "B": -445.5789, "C": 11.83871, "D": 0.000653764, "E": -2.200137e-7, "minimum_k": 80, "maximum_k": 1500, "unit": "J/kmol/K"},
+      "vapor_pressure": {"equation": 101, "A": 55.2725, "B": -3396.946, "C": -5.423393, "D": 8.953731e-6, "E": 2, "minimum_k": 85.47, "maximum_k": 371.25, "unit": "Pa"}
+    },
+    {
+      "compound_id": "N-butane",
+      "heat_capacity": {"equation": 16, "A": 44749.95, "B": -338.1412, "C": 11.81452, "D": 0.00097744, "E": -3.359129e-7, "minimum_k": 80, "maximum_k": 1500, "unit": "J/kmol/K"},
+      "vapor_pressure": {"equation": 101, "A": 68.5773, "B": -4444.916, "C": -7.395837, "D": 9.857432e-6, "E": 2, "minimum_k": 134.86, "maximum_k": 425.16, "unit": "Pa"}
+    },
+    {
+      "compound_id": "N-pentane",
+      "heat_capacity": {"equation": 16, "A": 81062, "B": -706.86, "C": 12.962, "D": -0.000049298, "E": 2.8357e-9, "minimum_k": 200, "maximum_k": 1500, "unit": "J/kmol/K"},
+      "vapor_pressure": {"equation": 101, "A": 72.14242, "B": -5265.589, "C": -7.720709, "D": 7.151866e-6, "E": 2, "minimum_k": 143.42, "maximum_k": 469.7, "unit": "Pa"}
+    }
+  ]
+}
