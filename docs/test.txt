@@ -1,4 +1,5 @@
 cd 'C:\Users\26008353\Downloads\me-sim-wrap-live'
+git pull --ff-only origin main
 
 $engine = 'C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows'
 
@@ -23,5 +24,3 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\capture_dwsim_
 python .\scripts\validate.py --compare `
   .\tests\golden\u0-pr-c1-c5.json `
   .\tests\golden\u0-pr-c1-c5-repeat.json
-
-git status --short
