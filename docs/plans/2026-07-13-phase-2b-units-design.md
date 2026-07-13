@@ -23,4 +23,3 @@ Reuse only independently verified factors from `packages/unit-converter/unit_con
 ## Verification
 
 Every added dimension gets one SI and one non-SI equation vector, a round trip, a wrong-dimension rejection, and non-finite rejection through the shared boundary.
-

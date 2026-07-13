@@ -44,4 +44,3 @@
 2. Make future unit additions demand-driven by verified model inputs and outputs.
 3. Run the full suite.
 4. Commit `docs: define process unit coverage boundary`.
-
