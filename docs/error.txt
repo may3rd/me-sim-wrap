@@ -1,0 +1,21 @@
+PS C:\Users\26008353\Downloads\me-sim-wrap-main\me-sim-wrap-main> powershell -ExecutionPolicy Bypass -File .\scripts\capture_dwsim_reference.ps1 `
+>>   -EngineBin 'C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows' `
+>>   -DwsimRevision '9.0.4' `
+>>   -OutputPath '.\tests\golden\compound-catalog.json'
+Error instantiating 'DWSIM.Thermodynamics.ThermoC.ThermoCPropertyPackage': System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.IO.FileNotFoundException: Could not load file or assembly 'ThermoCS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies. The system cannot find the file specified.
+   at DWSIM.Thermodynamics.ThermoC.ThermoCPropertyPackage.Init()
+   --- End of inner exception stack trace ---
+   at System.RuntimeTypeHandle.CreateInstance(RuntimeType type, Boolean publicOnly, Boolean noCheck, Boolean& canBeCached, RuntimeMethodHandleInternal& ctor, Boolean& bNeedSecurityCheck)
+   at System.RuntimeType.CreateInstanceSlow(Boolean publicOnly, Boolean skipCheckThis, Boolean fillCache, StackCrawlMark& stackMark)
+   at System.Activator.CreateInstance(Type type, Boolean nonPublic)
+   at System.Activator.CreateInstance(Type type)
+   at DWSIM.SharedClasses.Utility.GetPropertyPackages(Assembly assmbly) in C:\Users\danie\source\repos\DanWBR\dwsim\DWSIM.SharedClasses\Misc\Utilities.vb:line 645
+C:\Users\26008353\Downloads\me-sim-wrap-main\me-sim-wrap-main\scripts\capture_dwsim_reference.ps1 : Cannot process
+argument transformation on parameter 'Entry'. Cannot convert the "[Methane, Methane: CH4, 74-82-8, NBP = 111.66 K, Tc
+= 190.56 K, Pc = 4599000 Pa, AF = 0.011]" value of type "System.Collections.Generic.KeyValuePair`2[[System.String,
+mscorlib, Version=4.0.0.0, Culture=neutral,
+PublicKeyToken=b77a5c561934e089],[DWSIM.Interfaces.ICompoundConstantProperties, DWSIM.Interfaces, Version=9.0.4.0,
+Culture=neutral, PublicKeyToken=null]]" to type "System.Collections.DictionaryEntry".
+    + CategoryInfo          : InvalidData: (:) [capture_dwsim_reference.ps1], ParameterBindingArgumentTransformationEx
+   ception
+    + FullyQualifiedErrorId : ParameterArgumentTransformationError,capture_dwsim_reference.ps1
