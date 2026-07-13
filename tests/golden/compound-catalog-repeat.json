@@ -1,0 +1,242 @@
+﻿{
+    "schema_version":  "golden-case-1",
+    "case_id":  "compound-catalog",
+    "case_kind":  "compound_catalog",
+    "source":  {
+                   "dwsim_revision":  "9.0.4",
+                   "automation_version":  "DWSIM version 9.0.4.0 (28-Jul-25 1:19:16 PM)",
+                   "captured_utc":  "2026-07-13T02:04:08.7008243Z",
+                   "platform":  "Microsoft Windows NT 10.0.26200.0",
+                   "architecture":  "AMD64",
+                   "engine_bin":  "C:\\Users\\26008353\\Downloads\\DWSIM_v904_win64_portable\\Windows",
+                   "input_file":  null,
+                   "input_file_sha256":  null,
+                   "property_package":  "unknown",
+                   "flash_algorithm":  "unknown",
+                   "notes":  "Values are captured before and after CalculateFlowsheet4; numeric_text preserves invariant-culture source formatting."
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     {
+                                         "critical_pressure":  {
+                                                                   "value_text":  "3796000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  3796000
+                                                               },
+                                         "id":  "N-butane",
+                                         "formula":  "CH3(CH2)2CH3",
+                                         "molecular_weight":  {
+                                                                  "value_text":  "58.1222",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  58.1222
+                                                              },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.199",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.199
+                                                             },
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "272.66",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  272.66
+                                                                  },
+                                         "name":  "N-butane",
+                                         "critical_temperature":  {
+                                                                      "value_text":  "425.12",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  425.12
+                                                                  },
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.4"
+                                                        },
+                                         "cas":  "106-97-8"
+                                     },
+                                     {
+                                         "critical_pressure":  {
+                                                                   "value_text":  "3370000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  3370000
+                                                               },
+                                         "id":  "N-pentane",
+                                         "formula":  "CH3(CH2)3CH3",
+                                         "molecular_weight":  {
+                                                                  "value_text":  "72.14878",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  72.14878
+                                                              },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.251",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.251
+                                                             },
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "309.22",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  309.22
+                                                                  },
+                                         "name":  "N-pentane",
+                                         "critical_temperature":  {
+                                                                      "value_text":  "469.7",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  469.7
+                                                                  },
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.4"
+                                                        },
+                                         "cas":  "109-66-0"
+                                     },
+                                     {
+                                         "critical_pressure":  {
+                                                                   "value_text":  "4248000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  4248000
+                                                               },
+                                         "id":  "Propane",
+                                         "formula":  "CH3CH2CH3",
+                                         "molecular_weight":  {
+                                                                  "value_text":  "44.09562",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  44.09562
+                                                              },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.152",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.152
+                                                             },
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "231.02",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  231.02
+                                                                  },
+                                         "name":  "Propane",
+                                         "critical_temperature":  {
+                                                                      "value_text":  "369.83",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  369.83
+                                                                  },
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.4"
+                                                        },
+                                         "cas":  "74-98-6"
+                                     },
+                                     {
+                                         "critical_pressure":  {
+                                                                   "value_text":  "4599000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  4599000
+                                                               },
+                                         "id":  "Methane",
+                                         "formula":  "CH4",
+                                         "molecular_weight":  {
+                                                                  "value_text":  "16.04246",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  16.04246
+                                                              },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.011",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.011
+                                                             },
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "111.66",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  111.66
+                                                                  },
+                                         "name":  "Methane",
+                                         "critical_temperature":  {
+                                                                      "value_text":  "190.56",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  190.56
+                                                                  },
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.4"
+                                                        },
+                                         "cas":  "74-82-8"
+                                     },
+                                     {
+                                         "critical_pressure":  {
+                                                                   "value_text":  "4872000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  4872000
+                                                               },
+                                         "id":  "Ethane",
+                                         "formula":  "CH3CH3",
+                                         "molecular_weight":  {
+                                                                  "value_text":  "30.06904",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  30.06904
+                                                              },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.099",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.099
+                                                             },
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "184.55",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  184.55
+                                                                  },
+                                         "name":  "Ethane",
+                                         "critical_temperature":  {
+                                                                      "value_text":  "305.32",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  305.32
+                                                                  },
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.4"
+                                                        },
+                                         "cas":  "74-84-0"
+                                     }
+                                 ],
+                   "objects_before":  [
+
+                                      ]
+               },
+    "outputs":  {
+                    "solve":  {
+                                  "errors":  [
+
+                                             ],
+                                  "success":  true,
+                                  "executed":  false
+                              },
+                    "objects_after":  [
+
+                                      ]
+                }
+}
