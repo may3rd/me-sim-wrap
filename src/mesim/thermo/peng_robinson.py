@@ -62,6 +62,27 @@ def _cubic_real_roots(c2: float, c1: float, c0: float) -> tuple[float, ...]:
     return tuple(root for index, root in enumerate(roots) if index == 0 or not math.isclose(root, roots[index - 1], abs_tol=1e-12))
 
 
+def _reduced(a: float, b: float, temperature_k: float, pressure_pa: float) -> tuple[float, float]:
+    try:
+        a_reduced = math.exp(math.log(a) + math.log(pressure_pa) - 2.0 * math.log(R) - 2.0 * math.log(temperature_k))
+        b_reduced = math.exp(math.log(b) + math.log(pressure_pa) - math.log(R) - math.log(temperature_k))
+    except (OverflowError, ValueError) as error:
+        raise ValidationError("Peng-Robinson reduced parameters are outside the representable range") from error
+    if not math.isfinite(a_reduced) or not math.isfinite(b_reduced) or a_reduced <= 0 or b_reduced <= 0:
+        raise ValidationError("Peng-Robinson reduced parameters are outside the representable range")
+    return a_reduced, b_reduced
+
+
+def _positive_exp(value: float, label: str) -> float:
+    try:
+        result = math.exp(value)
+    except OverflowError as error:
+        raise ValidationError(f"{label} is outside the representable range") from error
+    if not math.isfinite(result) or result <= 0:
+        raise ValidationError(f"{label} is outside the representable range")
+    return result
+
+
 class PengRobinson:
     def __init__(self, compound: Compound):
         self.compound = compound
@@ -77,25 +98,28 @@ class PengRobinson:
         critical_temperature = self.compound.critical_temperature.value
         critical_pressure = self.compound.critical_pressure.value
         acentric_factor = self.compound.acentric_factor.value
-        kappa = 0.37464 + 1.54226 * acentric_factor - 0.26992 * acentric_factor**2
-        alpha_base = 1.0 + kappa * (1.0 - math.sqrt(temperature_k / critical_temperature))
-        alpha = alpha_base**2
-        a0 = 0.45724 * R**2 * critical_temperature**2 / critical_pressure
-        return PRParameters(
-            kappa,
-            alpha,
-            a0 * alpha,
-            0.07780 * R * critical_temperature / critical_pressure,
-            -a0 * kappa * alpha_base / math.sqrt(temperature_k * critical_temperature),
-        )
+        try:
+            kappa = 0.37464 + 1.54226 * acentric_factor - 0.26992 * acentric_factor**2
+            alpha_base = 1.0 + kappa * (1.0 - math.sqrt(temperature_k / critical_temperature))
+            alpha = alpha_base**2
+            a0 = 0.45724 * R**2 * critical_temperature**2 / critical_pressure
+            parameters = PRParameters(
+                kappa,
+                alpha,
+                a0 * alpha,
+                0.07780 * R * critical_temperature / critical_pressure,
+                -a0 * kappa * alpha_base / math.sqrt(temperature_k * critical_temperature),
+            )
+        except (OverflowError, ZeroDivisionError) as error:
+            raise ValidationError("Peng-Robinson parameters are outside the representable range") from error
+        if not all(math.isfinite(value) and value > 0 for value in (parameters.alpha, parameters.a_pa_m6_per_kmol2, parameters.b_m3_per_kmol)) or not math.isfinite(parameters.da_dtemperature):
+            raise ValidationError("Peng-Robinson parameters are outside the representable range")
+        return parameters
 
     def _reduced_parameters(self, temperature_k: float, pressure_pa: float) -> tuple[PRParameters, float, float]:
         self._validate_state(temperature_k, pressure_pa)
         parameters = self.parameters(temperature_k)
-        a_reduced = parameters.a_pa_m6_per_kmol2 * pressure_pa / (R**2 * temperature_k**2)
-        b_reduced = parameters.b_m3_per_kmol * pressure_pa / (R * temperature_k)
-        if not math.isfinite(a_reduced) or not math.isfinite(b_reduced):
-            raise ValidationError("Peng-Robinson reduced parameters are outside the representable range")
+        a_reduced, b_reduced = _reduced(parameters.a_pa_m6_per_kmol2, parameters.b_m3_per_kmol, temperature_k, pressure_pa)
         return parameters, a_reduced, b_reduced
 
     def roots(self, temperature_k: float, pressure_pa: float) -> tuple[float, ...]:
@@ -132,12 +156,13 @@ class PengRobinson:
         departure_entropy = R * math.log(compressibility - b_reduced) + (
             parameters.da_dtemperature * log_ratio / (2.0 * SQRT_2 * parameters.b_m3_per_kmol)
         )
-        density = math.exp(
+        density = _positive_exp(
             math.log(pressure_pa)
             + math.log(self.compound.molecular_weight.value)
             - math.log(compressibility)
             - math.log(R)
-            - math.log(temperature_k)
+            - math.log(temperature_k),
+            "Peng-Robinson density",
         )
         values = (log_fugacity, departure_enthalpy, departure_entropy, density)
         if not all(math.isfinite(value) for value in values):
@@ -145,7 +170,7 @@ class PengRobinson:
         return PRState(
             phase,
             compressibility,
-            math.exp(log_fugacity),
+            _positive_exp(log_fugacity, "Peng-Robinson fugacity coefficient"),
             density,
             departure_enthalpy,
             departure_entropy,
@@ -178,7 +203,7 @@ class PengRobinsonMixture:
         pure = tuple(component.parameters(temperature_k) for component in self.components)
         cross = tuple(
             tuple(
-                math.sqrt(first.a_pa_m6_per_kmol2 * second.a_pa_m6_per_kmol2)
+                math.sqrt(first.a_pa_m6_per_kmol2) * math.sqrt(second.a_pa_m6_per_kmol2)
                 * (1.0 - self.interactions.get(self.components[i].compound.id, self.components[j].compound.id))
                 for j, second in enumerate(pure)
             )
@@ -199,6 +224,8 @@ class PengRobinsonMixture:
             for i in range(len(pure))
             for j in range(len(pure))
         )
+        if not all(math.isfinite(value) and value > 0 for value in (a_mixture, b_mixture)) or not math.isfinite(da_dtemperature):
+            raise ValidationError("Peng-Robinson mixture parameters are outside the representable range")
         return PRMixtureParameters(a_mixture, b_mixture, da_dtemperature), pure, cross
 
     def parameters(self, temperature_k: float) -> PRMixtureParameters:
@@ -207,8 +234,7 @@ class PengRobinsonMixture:
     def roots(self, temperature_k: float, pressure_pa: float) -> tuple[float, ...]:
         PengRobinson._validate_state(temperature_k, pressure_pa)
         parameters = self.parameters(temperature_k)
-        a_reduced = parameters.a_pa_m6_per_kmol2 * pressure_pa / (R**2 * temperature_k**2)
-        b_reduced = parameters.b_m3_per_kmol * pressure_pa / (R * temperature_k)
+        a_reduced, b_reduced = _reduced(parameters.a_pa_m6_per_kmol2, parameters.b_m3_per_kmol, temperature_k, pressure_pa)
         roots = _cubic_real_roots(
             -(1.0 - b_reduced),
             a_reduced - 3.0 * b_reduced**2 - 2.0 * b_reduced,
@@ -224,8 +250,7 @@ class PengRobinsonMixture:
             raise ValidationError("phase must be vapor or liquid")
         PengRobinson._validate_state(temperature_k, pressure_pa)
         parameters, pure, cross = self._mix(temperature_k)
-        a_reduced = parameters.a_pa_m6_per_kmol2 * pressure_pa / (R**2 * temperature_k**2)
-        b_reduced = parameters.b_m3_per_kmol * pressure_pa / (R * temperature_k)
+        a_reduced, b_reduced = _reduced(parameters.a_pa_m6_per_kmol2, parameters.b_m3_per_kmol, temperature_k, pressure_pa)
         roots = self.roots(temperature_k, pressure_pa)
         compressibility = max(roots) if phase == "vapor" else min(roots)
         log_ratio = math.log(
@@ -254,14 +279,18 @@ class PengRobinsonMixture:
             fraction * component.compound.molecular_weight.value
             for fraction, component in zip(self.mole_fractions, self.components)
         )
-        density = pressure_pa * molecular_weight / (compressibility * R * temperature_k)
+        density = _positive_exp(
+            math.log(pressure_pa)
+            + math.log(molecular_weight)
+            - math.log(compressibility)
+            - math.log(R)
+            - math.log(temperature_k),
+            "Peng-Robinson mixture density",
+        )
         values = (*log_fugacities, departure_enthalpy, departure_entropy, density)
         if not all(math.isfinite(value) for value in values):
             raise ValidationError("Peng-Robinson mixture state is outside the representable range")
-        try:
-            fugacity_coefficients = tuple(math.exp(value) for value in log_fugacities)
-        except OverflowError as error:
-            raise ValidationError("Peng-Robinson mixture fugacity is outside the representable range") from error
+        fugacity_coefficients = tuple(_positive_exp(value, "Peng-Robinson mixture fugacity coefficient") for value in log_fugacities)
         return PRMixtureState(
             phase,
             compressibility,
