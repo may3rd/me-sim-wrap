@@ -2,3 +2,36 @@ $script = 'C:\Users\26008353\Downloads\me-sim-wrap-live\scripts\capture_dwsim_re
 Get-FileHash $script -Algorithm SHA256
 Select-String $script -Pattern 'DictionaryEntry'
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File $script -EngineBin 'C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows' -DwsimRevision '9.0.4' -OutputPath 'C:\Users\26008353\Downloads\me-sim-wrap-live\tests\golden\compound-catalog.json'
+
+
+PS C:\Users\26008353\Downloads\me-sim-wrap-main\me-sim-wrap-main> $script = 'C:\Users\26008353\Downloads\me-sim-wrap-live\scripts\capture_dwsim_reference.ps1'
+PS C:\Users\26008353\Downloads\me-sim-wrap-main\me-sim-wrap-main> Get-FileHash $script -Algorithm SHA256
+Resolve-Path : Cannot find path 'C:\Users\26008353\Downloads\me-sim-wrap-live\scripts\capture_dwsim_reference.ps1'
+because it does not exist.
+At
+C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psm1:110
+char:36
++                 $pathsToProcess += Resolve-Path $Path | Foreach-Objec ...
++                                    ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\260083...m_reference.ps1:String) [Resolve-Path], ItemNotFoundE
+   xception
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.ResolvePathCommand
+
+PS C:\Users\26008353\Downloads\me-sim-wrap-main\me-sim-wrap-main> Select-String $script -Pattern 'DictionaryEntry'
+Select-String : Cannot find path 'C:\Users\26008353\Downloads\me-sim-wrap-live\scripts\capture_dwsim_reference.ps1'
+because it does not exist.
+At line:1 char:1
++ Select-String $script -Pattern 'DictionaryEntry'
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\260083...m_reference.ps1:String) [Select-String], ItemNotFound
+   Exception
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.SelectStringCommand
+
+PS C:\Users\26008353\Downloads\me-sim-wrap-main\me-sim-wrap-main> powershell.exe -NoProfile -ExecutionPolicy Bypass -File $script -EngineBin 'C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows' -DwsimRevision '9.0.4' -OutputPath 'C:\Users\26008353\Downloads\me-sim-wrap-live\tests\golden\compound-catalog.json'
+The argument 'C:\Users\26008353\Downloads\me-sim-wrap-live\scripts\capture_dwsim_reference.ps1' to the -File parameter does not exist. Provide the path to an existing '.ps1' file as an argument to the -File parameter.
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\26008353\Downloads\me-sim-wrap-main\me-sim-wrap-main>
