@@ -38,6 +38,12 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertIn('Join-Path $engineDirectory "ThermoCS\\ThermoCS.dll"', script)
         self.assertIn('[Reflection.Assembly]::LoadFrom($thermoCAssemblyPath)', script)
 
+    def test_capture_script_reads_dwsim_objects_through_clr_reflection(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn('$Object.GetType().GetProperty($Name)', script)
+        self.assertNotIn('$Object.PSObject.Properties[$Name]', script)
+
     def test_compatibility_record_requires_source_revision(self):
         text = (ROOT / "docs/compatibility.md").read_text()
 

@@ -28,9 +28,9 @@ function Get-MemberValue {
     )
 
     if ($null -eq $Object) { return $null }
-    $property = $Object.PSObject.Properties[$Name]
+    $property = $Object.GetType().GetProperty($Name)
     if ($null -eq $property) { return $null }
-    return $property.Value
+    return $property.GetValue($Object, $null)
 }
 
 function Get-NumericText {
@@ -137,10 +137,14 @@ function Get-ObjectStates {
     param([Parameter(Mandatory = $true)][object]$Flowsheet)
 
     $states = @()
-    foreach ($object in $Flowsheet.SimulationObjects.Values) {
-        $tag = [string]$object.Name
-        if ($null -ne $object.GraphicObject -and -not [string]::IsNullOrWhiteSpace($object.GraphicObject.Tag)) {
-            $tag = [string]$object.GraphicObject.Tag
+    $simulationObjects = Get-MemberValue $Flowsheet "SimulationObjects"
+    foreach ($object in (Get-MemberValue $simulationObjects "Values")) {
+        $name = Get-MemberValue $object "Name"
+        $graphicObject = Get-MemberValue $object "GraphicObject"
+        $graphicTag = Get-MemberValue $graphicObject "Tag"
+        $tag = [string]$name
+        if (-not [string]::IsNullOrWhiteSpace($graphicTag)) {
+            $tag = [string]$graphicTag
         }
 
         $properties = @()
@@ -150,10 +154,10 @@ function Get-ObjectStates {
 
         $states += @{
             tag = $tag
-            name = [string]$object.Name
+            name = [string]$name
             type = [string]$object.GetType().Name
-            calculated = [bool]$object.Calculated
-            error = if ($null -eq $object.ErrorMessage) { $null } else { [string]$object.ErrorMessage }
+            calculated = [bool](Get-MemberValue $object "Calculated")
+            error = Get-MemberValue $object "ErrorMessage"
             properties = @($properties | Sort-Object property)
         }
     }
