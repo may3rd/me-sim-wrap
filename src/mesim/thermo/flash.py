@@ -70,32 +70,32 @@ def _report(
 def _validate_solver_limits(max_iterations: int, tolerance: float) -> None:
     if isinstance(max_iterations, bool) or not isinstance(max_iterations, int) or max_iterations <= 0:
         raise ValidationError("max_iterations must be a positive integer")
-    if isinstance(tolerance, bool) or not math.isfinite(tolerance) or tolerance <= 0:
+    if isinstance(tolerance, bool) or not isinstance(tolerance, (int, float)) or not math.isfinite(tolerance) or tolerance <= 0:
         raise ValidationError("tolerance must be finite and positive")
 
 
 def _validate(composition: tuple[float, ...], k_values: tuple[float, ...], max_iterations: int, tolerance: float) -> None:
     if not composition or len(composition) != len(k_values):
         raise ValidationError("composition and K values must have the same nonzero length")
-    if any(isinstance(value, bool) or not math.isfinite(value) or value < 0 for value in composition):
+    if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0 for value in composition):
         raise ValidationError("composition must be finite and non-negative")
     if not math.isclose(math.fsum(composition), 1.0, rel_tol=0.0, abs_tol=1e-12):
         raise ValidationError("composition must sum to one")
-    if any(isinstance(value, bool) or not math.isfinite(value) or value <= 0 for value in k_values):
+    if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0 for value in k_values):
         raise ValidationError("K values must be finite and positive")
     _validate_solver_limits(max_iterations, tolerance)
 
 
 def _residual(beta: float, composition: tuple[float, ...], k_values: tuple[float, ...]) -> float:
     return math.fsum(
-        fraction * (k_value - 1.0) / (1.0 + beta * (k_value - 1.0))
+        fraction * (k_value - 1.0) / ((1.0 - beta) + beta * k_value)
         for fraction, k_value in zip(composition, k_values)
     )
 
 
 def _compositions(beta: float, composition: tuple[float, ...], k_values: tuple[float, ...]) -> tuple[tuple[float, ...], tuple[float, ...]]:
     liquid = tuple(
-        fraction / (1.0 + beta * (k_value - 1.0))
+        fraction / ((1.0 - beta) + beta * k_value)
         for fraction, k_value in zip(composition, k_values)
     )
     return liquid, tuple(k_value * fraction for k_value, fraction in zip(k_values, liquid))

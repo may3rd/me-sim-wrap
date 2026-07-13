@@ -16,6 +16,8 @@ ROOT = Path(__file__).parents[1]
 
 
 class RachfordRiceTest(unittest.TestCase):
+    """Vectors use Rachford and Rice, DOI 10.2118/952327-G, residual in Phase 6 Task 1."""
+
     def test_classifies_single_phase_limits(self):
         liquid = rachford_rice((0.5, 0.5), (0.5, 0.8))
         self.assertEqual((liquid.phase, liquid.vapor_fraction), ("liquid", 0.0))
@@ -70,9 +72,25 @@ class RachfordRiceTest(unittest.TestCase):
             rachford_rice((0.5, 0.5), (2.0, 0.5), max_iterations=0)
         with self.assertRaises(ValidationError):
             rachford_rice((0.5, 0.5), (2.0, 0.5), tolerance=0.0)
+        with self.assertRaises(ValidationError):
+            rachford_rice((0.5, 0.5), (2.0, "invalid"))
+        with self.assertRaises(ValidationError):
+            rachford_rice((0.5, 0.5), (2.0, 0.5), tolerance="invalid")
+
+    def test_positive_finite_extreme_k_values_do_not_leak_arithmetic_errors(self):
+        result = rachford_rice((0.5, 0.5), (1e308, 5e-324))
+
+        self.assertTrue(result.report.converged)
+        self.assertEqual(result.phase, "two-phase")
+        self.assertTrue(math.isclose(result.vapor_fraction, 0.5, abs_tol=1e-12))
 
 
 class PRStabilityTest(unittest.TestCase):
+    """Vectors use Michelsen Part I, DOI 10.1016/0378-3812(82)85001-2.
+
+    Pure-state limits are also traceable to tests/golden/pr-t1.json, DWSIM 9.0.4.
+    """
+
     @classmethod
     def setUpClass(cls):
         compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
@@ -127,6 +145,8 @@ class PRStabilityTest(unittest.TestCase):
 
 
 class PRTPFlashTest(unittest.TestCase):
+    """Vectors use Michelsen Part II, DOI 10.1016/0378-3812(82)85002-4."""
+
     @classmethod
     def setUpClass(cls):
         compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
