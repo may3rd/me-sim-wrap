@@ -1,187 +1,23 @@
+$engine = 'C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows'
 
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\FOSSEE\Continuous_Crystallizer\Continous_Crystallizer_MultipleComp.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\FOSSEE\Cooling_Tower\CoolingTower.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\FOSSEE\Counter_Current_Stage-Wise_Adsorption_Tower\Countercurrent_Adsorption_Tower.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\FOSSEE\Cross_Flow_Tray_Dryer\Tray_dryer.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\FOSSEE\Cyclone_Separator\Cyclone_SingleComponent.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\FOSSEE\Electrostatic_Precipitator\ESP_MultipleCompound.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\FOSSEE\Humidifier\Humidifier_project.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\FOSSEE\Isothermal_Batch_Reactor\batchreactor.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\FOSSEE\Packed_Distillation_Column\packed_distillation_column.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\FOSSEE\Plate_Heat_Exchanger\custom_model.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\FOSSEE\Stoichiometric_Reactor\StoichometricReactor.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Biodiesel Combustion (Cantera).dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Biodiesel Production.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Cantera Interop.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Carbon Combustion.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Cavett's Problem.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Custom Mixer.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Dynamic Simulation - CSTR.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Dynamic Simulation - Heat Exchanger.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Dynamic Simulation - PFR.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Dynamic Simulation - Separator Pressure and Level Control.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Dynamic Simulation - Water Tank Level Control.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Dynamic Simulation - Water Tank Level with Custom Controller.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Electrolysis Cell with ExcelUO.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Extractive Distillation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Flowsheet Unit Operation Sample.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Gasoline Combustion (Cantera).dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Gibbs and Equilibrium Reactors.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Gibbs Reactor (Reaktoro).dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Heat Exchanger Sizing and Design.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Humid Air.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Hydrocyclone Custom Unit Operation.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Hydroelectric Turbine.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Hydrogen production through Methane Catalytic Steam Reforming.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\LiBr-H2O Heat Pump for Chip Cooling.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Liquid Phase Viscosity Override Script.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Liquid-Liquid Extraction.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Membrane Custom Unit Operation.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Methanol Synthesis by CO2 Hydrogenation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Natural Gas Processing Unit with Turbo-Expansion (Classic UI - Windows only).dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Natural Gas Processing Unit.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Natural Gas Water Saturator.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\PEM Fuel Cell.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Peng-Robinson EOS Fugacity and Enthalpy Override.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Pervaporation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Petroleum Distillation with Reboiler Heating Fluid.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Petroleum Distillation.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Simple Absorber Sample.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Simple LNG Exchanger Custom Unit Operation.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Solar Panel.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Three Phase Separator.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\User-Defined Flash.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Water Electrolyzer.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\samples\Wind Turbine.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\basic\basic distillation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\basic\compression and expansion.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\basic\heating and cooling.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\basic\heating and cooling_backup.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\basic\pump and valve.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\1.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\104.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\5.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\99.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ACECHLRO.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\acetaldehyde12.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\AceticAcidProduction.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ACETONEPRODUCTION.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Acetonitrile.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Alkylation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Allyl_chloride_process.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ASGP_CoW2k18_160020109_modified.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Benzene_Cyclohexane.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\braytonflowsheet.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\BTX.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\BTX1.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ButylAcetateProduction.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\C3MR.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\camere.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\chlorobenzene01.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\collins_helium_liquefier.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Cooling_Benzene_Heating_Methane.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\cs2.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\diethylether.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Dioxane_v3_24_04_2018.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\DMC_Methanol_Phenol_backup.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\DMC_Production.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\DME1.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\dme_chandravidhan.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\DNT_Modified.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\DWSIMGlucose.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\DWSIM_flowsheet.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\EB_converged.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ECflowsheet.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\EDFlowsheet.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ED_Flowsheet.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\EL_FINAL_Paritosh.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Energy_Efficient_Hybrid_Separation_Process.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\esterification.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\EtAc_Hexane_Final.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ETBE.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ETFO_ethanol_sheet.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\EthanolFinal.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ethnoltoluene.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Ethyleneglycol.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\EthyleneOxideFlowsheet.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Extractive_Distillation_benzene_Ethanol.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Extractive_Distillation_Ethanol_THF.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Extractive_Distillation_of_N_butane_and_1_butene.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Extractive_Distillation_THF_Water.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Extract_Distill_Ethanol_EthylAcetate.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Final.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Finalpfd.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Final_Flowsheet.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Flowsheet.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Flowsheet1_StyreneProduction.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Flowsheet2_ProductionOf10TPDOfAnilineFromNitrobenzeneAndHydrogen.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Flowsheet5_StudyOnTheEffectsOfInertsOnWaterGasShiftReaction.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Flowsheet_DryMethaneReformingProcess.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Flowsheet_EffectOfDistillationColumnSequenceOnSeparationOfCompounds.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Flowsheet_EthylAcetate.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Flowsheet_IPA_Water_Dehydration.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Flowsheet_PSD.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Flowsheet_PSD_Water_Cyclohexane.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Flowsheet_VinylChlorideProductionComplete2.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\fluxograma.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Gas_Processing_Plant.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\GLYCOL.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\HDA.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\HydroalkylationofToluenetoBenzeneUsingHydrogenFinal.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\IPA1.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ISOBUTANOLFINAL.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Isomerisation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Linde_Liquified_Natural_Gas_Production_Process.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\maleic_anhydride.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\MethanolandToluenedistillation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\MethanolDistillation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Methanolsynthesis.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Methanol_Chloroform_Separation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Methanol_Synthesis_by_CO2_Hydrogenation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\methylal.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\methylal_methanol_sep.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\MMA_Water_Separation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\N.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\NaturalGasProcessing.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Natural_Gas_Dehydration_using_Triethylene_Glycol.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Neat_Operation_Methanol_Water.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\NG_SWEETENING.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Organic_Rankine_cycle.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\p.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\PO_Production.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Preparation_of_Acetic_Acid_by_oxidation_of_Acetaldehyde.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Pressure_Swing_Distillation_of_ACN_Water_System.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ProductionOfVinylChloride.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Production_of_Ethanolamines.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Production_Of_N_Octane_From_Ethylene_And_I_Butane.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\propene_simulation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\PSD.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\PSD.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\PSDflowsheet.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\PSDforMethanolRecovery.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\PSDOfEthanolwaterMixture.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\psdvrvikram.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\PW_PSD.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\PyridineandWater_Separation.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\reactive.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Reactors - Acetate.dwxml
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Refrigerated.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\RevisedHNO3Flowsheet1.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Stacked_Column.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\StyreneProduction.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Styrene_production_plant.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\styrene_production_project.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\SulphurTrioxideProduction.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\TEALARCPLANT1.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\TEG.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\ThermodynamicModels.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\thfmethanol.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\THF_03.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Transesterification.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\TriplePSWDC.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Turton_Design_For_Production_Of_Acetone.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Urea_Snamprogetti.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\VARC_Cascade_direct.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\Vinyl_Cholride_Production.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\WATER_GAS_SHIFT_REACTION.dwxmz
-C:\Users\26008353\Downloads\DWSIM_v904_win64_portable\Windows\tests\xylenerigorous.dwxmz
+& .\scripts\capture_dwsim_reference.ps1 `
+  -EngineBin $engine `
+  -DwsimRevision '9.0.4' `
+  -CasePath '.\tests\u0-pr-c1-c5.dwxmz' `
+  -CaseId 'u0-pr-c1-c5' `
+  -PropertyPackage 'Peng-Robinson (PR)' `
+  -FlashAlgorithm 'DWSIM default' `
+  -OutputPath '.\tests\golden\u0-pr-c1-c5.json'
+
+& .\scripts\capture_dwsim_reference.ps1 `
+  -EngineBin $engine `
+  -DwsimRevision '9.0.4' `
+  -CasePath '.\tests\u0-pr-c1-c5.dwxmz' `
+  -CaseId 'u0-pr-c1-c5' `
+  -PropertyPackage 'Peng-Robinson (PR)' `
+  -FlashAlgorithm 'DWSIM default' `
+  -OutputPath '.\tests\golden\u0-pr-c1-c5-repeat.json'
+
+python .\scripts\validate.py --compare `
+  .\tests\golden\u0-pr-c1-c5.json `
+  .\tests\golden\u0-pr-c1-c5-repeat.json
