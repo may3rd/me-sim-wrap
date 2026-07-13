@@ -23,7 +23,8 @@ function Get-ClrBaseObject {
     param([AllowNull()][object]$Object)
 
     if ($null -eq $Object) { return $null }
-    return [Management.Automation.PSObject]::AsPSObject($Object).BaseObject
+    $psObject = [Management.Automation.PSObject]::AsPSObject($Object)
+    return [Management.Automation.PSObject].GetProperty("BaseObject").GetValue($psObject, $null)
 }
 
 function Get-ClrType {

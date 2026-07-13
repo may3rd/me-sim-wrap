@@ -41,10 +41,11 @@ class Phase0ArtifactsTest(unittest.TestCase):
     def test_capture_script_reads_dwsim_objects_through_clr_reflection(self):
         script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
 
-        self.assertIn('::AsPSObject($Object).BaseObject', script)
+        self.assertIn('[Management.Automation.PSObject].GetProperty("BaseObject").GetValue', script)
         self.assertIn('[object].GetMethod("GetType").Invoke', script)
         self.assertIn('InvokeMember', script)
         self.assertNotIn('$Object.GetType()', script)
+        self.assertNotIn('::AsPSObject($Object).BaseObject', script)
         self.assertNotIn('$Object.PSObject.Properties[$Name]', script)
 
     def test_compatibility_record_requires_source_revision(self):
