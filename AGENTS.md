@@ -9,3 +9,4 @@
 - Do not prescribe an absolute clone path until the user has created that clone.
 - Exclude capture timestamps from deterministic golden-case comparisons.
 - Read Windows PowerShell JSON outputs with utf-8-sig to accept its UTF-8 BOM.
+- Include -ExecutionPolicy Bypass whenever giving a direct PowerShell script invocation on the Windows capture host.
