@@ -42,6 +42,11 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertNotIn("[object]$Entry", script)
         self.assertNotIn("[System.Collections.DictionaryEntry]$Entry", script)
 
+    def test_capture_script_accepts_empty_unit_before_normalizing_it(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("[AllowEmptyString()]\n        [string]$Unit", script)
+
     def test_capture_script_preloads_portable_thermoc_assembly(self):
         script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
 

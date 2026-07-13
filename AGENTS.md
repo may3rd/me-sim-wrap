@@ -17,3 +17,4 @@
 - Pass explicit nulls for optional VB.NET parameters when invoking DWSIM methods through CLR reflection.
 - Keep unittest method names unique because duplicate names silently replace earlier checks.
 - A normalized match proves repeatability only; reject golden cases containing property read errors.
+- Allow empty PowerShell string parameters when the function body intentionally normalizes them.

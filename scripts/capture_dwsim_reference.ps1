@@ -140,6 +140,7 @@ function New-ValueRecord {
         [object]$Value,
 
         [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
         [string]$Unit
     )
 
