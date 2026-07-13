@@ -185,9 +185,9 @@ python scripts/validate.py --quiet
 | Phase | Scope |
 |---|---|
 | T0 | Ideal gas, ideal liquid, pure-component vapor pressure and heat-capacity correlations |
-| T1 | Peng-Robinson and PR78, vapor and liquid roots, fugacity, departure enthalpy/entropy |
+| T1 | Peng-Robinson, vapor and liquid roots, fugacity, departure enthalpy/entropy |
 | T2 | TP, PH, bubble-pressure and dew-pressure flashes; stability testing. Add PS with the expander and TV/PV only on demand |
-| T3 | Soave-Redlich-Kwong, Lee-Kesler-Plocker, Chao-Seader, Grayson-Streed |
+| T3 | PR78, Soave-Redlich-Kwong, Lee-Kesler-Plocker, Chao-Seader, Grayson-Streed |
 | T4 | Wilson, NRTL, UNIQUAC, UNIFAC, modified UNIFAC; VLE, LLE, VLLE |
 | T5 | IAPWS-IF97 steam/water and seawater |
 | T6 | Electrolyte ideal, electrolyte SVLE, LIQUAC-style scope, sour water |

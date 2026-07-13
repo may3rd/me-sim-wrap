@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from mesim import OutOfRangeError, ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.thermo.ideal import ideal_gas_density, load_correlations
-from mesim.thermo.peng_robinson import PengRobinson, PengRobinsonMixture
+from mesim.thermo.peng_robinson import R, PengRobinson, PengRobinsonMixture
 
 
 ROOT = Path(__file__).parents[1]
@@ -130,6 +130,33 @@ class PengRobinsonPureTest(unittest.TestCase):
         self.assertTrue(math.isclose(state.departure_enthalpy_j_per_kmol, -180117.9009712916, rel_tol=1e-12))
         self.assertTrue(math.isclose(state.departure_entropy_j_per_kmol_k, -420.87689978670664, rel_tol=1e-12))
 
+    def test_all_five_compounds_match_pr_compressibility_and_density_vectors(self):
+        compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        cases = (
+            ("Methane", 228.672, 459_900, "vapor", 0.9769560773559627, 3.972026712854805),
+            ("Methane", 133.392, 2_299_500, "liquid", 0.07641810997957241, 435.25534954039074),
+            ("Ethane", 366.384, 487_200, "vapor", 0.9777532927115367, 4.918434254072173),
+            ("Ethane", 213.724, 2_436_000, "liquid", 0.07492183233715713, 550.1751591593846),
+            ("Propane", 443.796, 424_800, "vapor", 0.978215816051031, 5.189526242524561),
+            ("Propane", 258.881, 2_124_000, "liquid", 0.07413142474555393, 586.9664199001448),
+            ("N-butane", 510.144, 379_600, "vapor", 0.9786151460690093, 5.315319160723636),
+            ("N-butane", 297.584, 1_898_000, "liquid", 0.07348938507033953, 606.6942474826709),
+            ("N-pentane", 563.64, 337_000, "vapor", 0.9790453070018497, 5.299319586954989),
+            ("N-pentane", 328.79, 1_685_000, "liquid", 0.07283586923224411, 610.5634521562398),
+        )
+
+        for compound_id, temperature, pressure, phase, expected_z, expected_density in cases:
+            with self.subTest(compound=compound_id, phase=phase):
+                model = PengRobinson(compounds[compound_id])
+                state = model.state(temperature, pressure, phase)
+                parameters = model.parameters(temperature)
+                a_reduced = parameters.a_pa_m6_per_kmol2 * pressure / (R * temperature) ** 2
+                b_reduced = parameters.b_m3_per_kmol * pressure / (R * temperature)
+                residual = state.compressibility**3 - (1 - b_reduced) * state.compressibility**2 + (a_reduced - 3 * b_reduced**2 - 2 * b_reduced) * state.compressibility - (a_reduced * b_reduced - b_reduced**2 - b_reduced**3)
+                self.assertTrue(math.isclose(state.compressibility, expected_z, rel_tol=1e-12))
+                self.assertTrue(math.isclose(state.density_kg_per_m3, expected_density, rel_tol=1e-12))
+                self.assertLess(abs(residual), 1e-12)
+
     def test_invalid_pure_states_are_rejected(self):
         for temperature, pressure in (
             (0, 1), (300, 0), (math.nan, 1), (300, math.inf),
@@ -197,6 +224,30 @@ class PengRobinsonMixtureTest(unittest.TestCase):
 
     def test_pr_properties_match_captured_dwsim_reference_states(self):
         golden = json.loads((ROOT / "tests/golden/pr-t1.json").read_text(encoding="utf-8-sig"))
+        expected_conditions = {
+            "PR-V-METHANE": (228.672, 459_900, {"Methane": 1.0}),
+            "PR-V-ETHANE": (366.384, 487_200, {"Ethane": 1.0}),
+            "PR-V-PROPANE": (443.796, 424_800, {"Propane": 1.0}),
+            "PR-V-NBUTANE": (510.144, 379_600, {"N-butane": 1.0}),
+            "PR-V-NPENTANE": (563.64, 337_000, {"N-pentane": 1.0}),
+            "PR-L-METHANE": (133.392, 2_299_500, {"Methane": 1.0}),
+            "PR-L-ETHANE": (213.724, 2_436_000, {"Ethane": 1.0}),
+            "PR-L-PROPANE": (258.881, 2_124_000, {"Propane": 1.0}),
+            "PR-L-NBUTANE": (297.584, 1_898_000, {"N-butane": 1.0}),
+            "PR-L-NPENTANE": (328.79, 1_685_000, {"N-pentane": 1.0}),
+            "PR-3ROOT-METHANE": (150.0, 1_000_000, {"Methane": 1.0}),
+            "PR-NC-METHANE": (188.6544, 4_369_050, {"Methane": 1.0}),
+            "PR-MIX-ME-C2": (250.0, 5_000_000, {"Methane": 0.7, "Ethane": 0.3}),
+        }
+        inputs = {
+            record["tag"]: {item["property"]: item["value"]["value"] for item in record["properties"]}
+            for record in golden["inputs"]["objects_before"]
+        }
+        self.assertEqual(set(inputs), set(expected_conditions))
+        for tag, (temperature, pressure, composition) in expected_conditions.items():
+            self.assertEqual((inputs[tag]["PROP_MS_0"], inputs[tag]["PROP_MS_1"]), (temperature, pressure))
+            for compound_id, fraction in composition.items():
+                self.assertEqual(inputs[tag][f"PROP_MS_102/{compound_id}"], fraction)
         self.assertEqual(golden["outputs"]["solve"], {"errors": [], "success": True, "executed": True})
         streams = {
             record["tag"]: {item["property"]: item["value"]["value"] for item in record["properties"]}
