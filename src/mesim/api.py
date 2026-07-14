@@ -20,8 +20,48 @@ COMPOUNDS = {compound.id: compound for compound in load_compounds(DATA / "compou
 INTERACTIONS = load_pr_interactions(DATA / "interactions/pr-v1.json")
 CORRELATIONS = load_correlations(DATA / "correlations/ideal-v1.json")
 CALCULATION_TIMEOUT_S = 5.0
+MAX_REQUEST_BYTES = 1_048_576
 
 app = FastAPI(title="me-sim", version="0.1.0a0")
+
+
+class _RequestTooLarge(Exception):
+    pass
+
+
+class RequestSizeLimit:
+    def __init__(self, app, maximum: int) -> None:
+        self.app = app
+        self.maximum = maximum
+
+    async def __call__(self, scope, receive, send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        length = dict(scope["headers"]).get(b"content-length")
+        if length is not None and int(length) > self.maximum:
+            await send({"type": "http.response.start", "status": 413, "headers": []})
+            await send({"type": "http.response.body", "body": b'{"detail":"request body too large"}'})
+            return
+        received = 0
+
+        async def limited_receive():
+            nonlocal received
+            message = await receive()
+            if message["type"] == "http.request":
+                received += len(message.get("body", b""))
+                if received > self.maximum:
+                    raise _RequestTooLarge
+            return message
+
+        try:
+            await self.app(scope, limited_receive, send)
+        except _RequestTooLarge:
+            await send({"type": "http.response.start", "status": 413, "headers": []})
+            await send({"type": "http.response.body", "body": b'{"detail":"request body too large"}'})
+
+
+app.add_middleware(RequestSizeLimit, maximum=MAX_REQUEST_BYTES)
 
 
 class QuantityInput(BaseModel):

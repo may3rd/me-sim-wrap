@@ -69,6 +69,10 @@ class ApiTest(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 422)
 
+    def test_api_rejects_oversized_request_before_parsing(self):
+        response = self.client.post("/v1/flash/tp", content=b"x" * (1_048_577))
+        self.assertEqual(response.status_code, 413)
+
     def test_heater_endpoint_returns_calculated_signed_duty(self):
         response = self.client.post("/v1/unitops/heater", json={
             "stream": {
