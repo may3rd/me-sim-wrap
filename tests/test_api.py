@@ -61,6 +61,8 @@ class ApiTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         body = response.json()
+        self.assertEqual(body["inputs"]["stream"]["pressure"], {"value": 500.0, "unit": "kPa", "si_value": 500_000.0})
+        self.assertEqual(body["inputs"]["stream"]["molar_flow"], {"value": 2.0, "unit": "kmol/s", "si_value": 2.0})
         self.assertEqual(body["outlet"]["stream"]["temperature_k"], 190.0)
         self.assertGreater(body["energy"]["duty_w"], 0.0)
 

@@ -86,6 +86,15 @@ def _phase(stream: StreamInput) -> PhaseState:
     )
 
 
+def _stream_input(stream: StreamInput) -> dict[str, object]:
+    return {
+        "compound_ids": list(stream.compound_ids), "composition": list(stream.composition),
+        "temperature": _quantity(stream.temperature.quantity("temperature")),
+        "pressure": _quantity(stream.pressure.quantity("pressure")),
+        "molar_flow": _quantity(stream.molar_flow.quantity("molar_flow")),
+    }
+
+
 def _phase_response(phase: PhaseState) -> dict[str, object]:
     return {
         "stream": {
@@ -134,7 +143,7 @@ def heat(request: HeaterRequest) -> dict[str, object]:
     result = heater(inlet, _compounds(request.stream.compound_ids), INTERACTIONS, CORRELATIONS, outlet_temperature.si_value)
     return {
         "schema_version": "mesim-api-1",
-        "inputs": {"outlet_temperature": _quantity(outlet_temperature)},
+        "inputs": {"stream": _stream_input(request.stream), "outlet_temperature": _quantity(outlet_temperature)},
         "outlet": _phase_response(result.outlet),
         "energy": {"duty_w": result.energy.duty_w},
     }
@@ -152,7 +161,7 @@ def throttle(request: ValveRequest) -> dict[str, object]:
     return {
         "schema_version": "mesim-api-1",
         "inputs": {
-            "outlet_pressure": _quantity(outlet_pressure),
+            "stream": _stream_input(request.stream), "outlet_pressure": _quantity(outlet_pressure),
             "temperature_bracket": [_quantity(item) for item in bracket],
         },
         "outlet": _phase_response(result),
