@@ -114,6 +114,8 @@ DWSIM material-stream density fields use `AUX_LIQDENS`/`AUX_VAPDENS`, while its 
 
 `tests/golden/u1-compressor-pr-eos.json` is the PR compressor reference: methane/ethane vapor, 500 kPa to 1 MPa, DWSIM adiabatic path, and 75% adiabatic efficiency. The kernel uses a bounded PS flash for the isentropic outlet followed by PH flash for actual outlet enthalpy. It accepts converged `vapor` and one-root `single` inlets; a one-root state is not relabelled as vapor. Outlet temperature, enthalpy, and power match DWSIM within `1e-4` relative.
 
+`tests/golden/u1-expander-pr-eos.json` is the matching adiabatic expander reference: methane/ethane, 1 MPa to 500 kPa, and 75% adiabatic efficiency. Temperature, enthalpy, and generated-power magnitude match within `1e-4` relative. `EnergyStream.duty_w` is negative because work leaves the material stream; DWSIM reports generated-power magnitude as positive.
+
 Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
 
 ## Phase 7 and 8 U0 status

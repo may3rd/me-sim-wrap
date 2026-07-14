@@ -12,7 +12,7 @@ from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.streams import StreamState, flash_stream
 from mesim.thermo.ideal import load_correlations
 from mesim.unitops.basic import cooler, equilibrium_separator, heater, mix_streams, split_stream, valve
-from mesim.unitops.pressure import compressor, pump
+from mesim.unitops.pressure import compressor, expander, pump
 
 
 ROOT = Path(__file__).parents[1]
@@ -209,6 +209,33 @@ class BasicUnitOperationTest(unittest.TestCase):
         for outlet_pressure_pa, efficiency in ((500_000.0, 0.75), (1_000_000.0, 0.0), (1_000_000.0, 1.1), (1_000_000.0, True)):
             with self.assertRaises(ValidationError):
                 compressor(vapor, self.compounds, self.interactions, self.correlations, outlet_pressure_pa, efficiency, (300.0, 400.0))
+
+    def test_expander_matches_dwsim_eos_reference(self):
+        golden = json.loads((ROOT / "tests/golden/u1-expander-pr-eos.json").read_text(encoding="utf-8-sig"))
+        records = {
+            object_["tag"]: {property_["property"]: property_["value"]["value"] for property_ in object_["properties"]}
+            for object_ in golden["outputs"]["objects_after"]
+        }
+        inlet = flash_stream(
+            StreamState(300.0, 1_000_000.0, 0.002, ("Methane", "Ethane"), (0.7, 0.3)),
+            self.compounds, self.interactions, self.correlations,
+        )
+        result = expander(inlet, self.compounds, self.interactions, self.correlations, 500_000.0, 0.75, (240.0, 300.0))
+
+        self.assertTrue(math.isclose(result.outlet.stream.temperature_k, records["3"]["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.outlet.enthalpy_j_per_kmol, records["3"]["PROP_MS_9"] * 1_000.0, rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.energy.duty_w, -records["X-1"]["PROP_TU_3"] * 1_000.0, rel_tol=1e-4))
+
+    def test_expander_rejects_nonvapor_inlet_efficiency_and_pressure_rise(self):
+        with self.assertRaises(ValidationError):
+            expander(self.first, self.compounds, self.interactions, self.correlations, 300_000.0, 0.75, (240.0, 300.0))
+        vapor = flash_stream(
+            StreamState(300.0, 1_000_000.0, 0.002, ("Methane", "Ethane"), (0.7, 0.3)),
+            self.compounds, self.interactions, self.correlations,
+        )
+        for outlet_pressure_pa, efficiency in ((1_000_000.0, 0.75), (500_000.0, 0.0), (500_000.0, 1.1), (500_000.0, True)):
+            with self.assertRaises(ValidationError):
+                expander(vapor, self.compounds, self.interactions, self.correlations, outlet_pressure_pa, efficiency, (240.0, 300.0))
 
     def test_equilibrium_separator_routes_existing_flash_without_reflashing(self):
         result = equilibrium_separator(self.first, self.compounds, self.correlations)
