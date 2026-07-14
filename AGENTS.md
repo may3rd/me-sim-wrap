@@ -36,4 +36,7 @@
 - Allow empty PowerShell string parameters when the function body intentionally normalizes them.
 - Preserve NaN and infinity as explicit text records instead of emitting non-compliant JSON numbers.
 - Re-read the exact target line before applying a narrow patch after a context mismatch.
+- Use utf-8-sig for ad hoc inspection of Windows-generated golden JSON files.
+- Verify test imports before diagnosing a new calculation-path failure.
+- Use a documented reference-flash tolerance for phase split flows; do not loosen total-flow parity.
 - Do not treat a DWSIM default flash result as an exact equilibrium reference without checking its configured convergence criterion and residual.
