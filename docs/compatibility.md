@@ -110,6 +110,8 @@ T1 equation checks cover vapor, liquid, single-root, three-root, near-critical, 
 
 DWSIM material-stream density fields use `AUX_LIQDENS`/`AUX_VAPDENS`, while its PR compressibility path can apply configured Peneloux volume translation. These fields are recorded as `verified-with-difference`, not treated as equivalent to this implementation's unmodified PR cubic density and roots. Independent vapor and liquid equation vectors verify the Python PR compressibility and density calculations across all five compounds to `1e-8` relative. With that explicit model boundary, the classic-PR Phase 5 T1 gate is closed; PR78 remains demand-driven T3 scope.
 
+`tests/golden/u1-pump-pr-eos.json` is the Phase 10 pump reference. Its DWSIM PR package sets liquid-density calculation to `EOS` and disables Peneloux volume translation; the default `Rackett_and_ExpData` density mode is not comparable because pump work depends on liquid molar volume. With the captured 75% efficiency, Python outlet temperature, enthalpy, and pump power match within `1e-4` relative. The earlier `u1-pump-pr*.json` captures remain immutable audit artifacts but are not pump-parity references.
+
 Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
 
 ## Phase 7 and 8 U0 status

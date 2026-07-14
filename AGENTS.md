@@ -46,3 +46,5 @@
 - Check mixture cardinality constraints before using a pure-component probe for a mixture flash.
 - Anchor a tolerance patch to its full assertion context so an earlier matching tolerance is not changed.
 - Follow operation-result nesting before reading stream properties in an exploratory parity calculation.
+- Add imports with a new golden-case test before treating its first run as a behavior failure.
+- For DWSIM pump parity, set liquid density calculation to EOS; Peneloux alone does not override Rackett-and-experimental density.
