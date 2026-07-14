@@ -14,8 +14,10 @@ from mesim.thermo.flash import (
     bubble_pressure,
     dew_pressure,
     flash_enthalpy,
+    flash_entropy,
     ideal_mixture_enthalpy,
     ph_flash,
+    ps_flash,
     phase_enthalpy,
     pr_stability,
     rachford_rice,
@@ -373,6 +375,16 @@ class PRPHFlashTest(unittest.TestCase):
                 self.assertTrue(result.report.converged)
                 self.assertTrue(math.isclose(result.temperature_k, temperature_k, rel_tol=1e-7, abs_tol=1e-5))
                 self.assertTrue(math.isclose(result.enthalpy_j_per_kmol, target, rel_tol=1e-6, abs_tol=1e-3))
+
+    def test_ps_flash_round_trips_a_vapor_state(self):
+        composition = (0.7, 0.3)
+        source = tp_flash(self.compounds, composition, self.interactions, 300.0, 500_000.0)
+        target = flash_entropy(self.compounds, self.correlations, source)
+        result = ps_flash(self.compounds, composition, self.interactions, self.correlations, 500_000.0, target, (280.0, 320.0))
+
+        self.assertTrue(result.report.converged)
+        self.assertTrue(math.isclose(result.temperature_k, 300.0, rel_tol=1e-7, abs_tol=1e-5))
+        self.assertTrue(math.isclose(result.entropy_j_per_kmol_k, target, rel_tol=1e-6, abs_tol=1e-3))
 
     def test_ph_flash_rejects_invalid_brackets_and_reports_unreachable_target(self):
         with self.assertRaises(ValidationError):
