@@ -10,7 +10,7 @@ from mesim import ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.streams import StreamState, flash_stream
 from mesim.thermo.ideal import load_correlations
-from mesim.unitops.basic import cooler, heater, mix_streams, split_stream
+from mesim.unitops.basic import cooler, equilibrium_separator, heater, mix_streams, split_stream, valve
 
 
 ROOT = Path(__file__).parents[1]
@@ -102,6 +102,52 @@ class BasicUnitOperationTest(unittest.TestCase):
             self.compounds, self.interactions, self.correlations,
         )
         self.assertEqual(heater(zero, self.compounds, self.interactions, self.correlations, 200.0).energy.duty_w, 0.0)
+
+    def test_valve_isenthalpically_flashes_at_lower_pressure(self):
+        outlet = valve(
+            self.second, self.compounds, self.interactions, self.correlations, 300_000.0, (140.0, 240.0),
+        )
+
+        self.assertTrue(outlet.flash.report.converged)
+        self.assertEqual(outlet.stream.pressure_pa, 300_000.0)
+        self.assertEqual(outlet.stream.molar_flow_kmol_s, self.second.stream.molar_flow_kmol_s)
+        self.assertTrue(math.isclose(outlet.enthalpy_j_per_kmol, self.second.enthalpy_j_per_kmol, rel_tol=1e-6))
+        with self.assertRaises(ValidationError):
+            valve(self.second, self.compounds, self.interactions, self.correlations, 600_000.0, (140.0, 240.0))
+        zero = flash_stream(
+            StreamState(190.0, 600_000.0, 0.0, ("Methane", "Ethane"), (0.2, 0.8)),
+            self.compounds, self.interactions, self.correlations,
+        )
+        self.assertEqual(
+            valve(zero, self.compounds, self.interactions, self.correlations, 300_000.0, (140.0, 240.0)).stream.molar_flow_kmol_s,
+            0.0,
+        )
+
+    def test_equilibrium_separator_routes_existing_flash_without_reflashing(self):
+        result = equilibrium_separator(self.first, self.compounds, self.correlations)
+
+        self.assertEqual(self.first.flash.phase, "two-phase")
+        self.assertIsNotNone(result.liquid)
+        self.assertIsNotNone(result.vapor)
+        self.assertTrue(math.isclose(
+            result.liquid.molar_flow_kmol_s + result.vapor.molar_flow_kmol_s,
+            self.first.stream.molar_flow_kmol_s,
+            abs_tol=1e-12,
+        ))
+        self.assertTrue(math.isclose(
+            result.liquid.molar_flow_kmol_s * result.liquid.enthalpy_j_per_kmol
+            + result.vapor.molar_flow_kmol_s * result.vapor.enthalpy_j_per_kmol,
+            self.first.stream.molar_flow_kmol_s * self.first.enthalpy_j_per_kmol,
+            rel_tol=1e-12,
+        ))
+        self.assertEqual(result.liquid.composition, self.first.flash.liquid_composition)
+        self.assertEqual(result.vapor.composition, self.first.flash.vapor_composition)
+        zero = flash_stream(
+            StreamState(180.0, 500_000.0, 0.0, ("Methane", "Ethane"), (0.7, 0.3)),
+            self.compounds, self.interactions, self.correlations,
+        )
+        zero_result = equilibrium_separator(zero, self.compounds, self.correlations)
+        self.assertEqual((zero_result.liquid.molar_flow_kmol_s, zero_result.vapor.molar_flow_kmol_s), (0.0, 0.0))
 
 
 if __name__ == "__main__":

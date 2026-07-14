@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from ..compounds import Compound, PRInteractions
 from ..errors import ConvergenceError, ValidationError
 from ..streams import EnergyStream, PhaseState, StreamState, flash_stream
-from ..thermo.flash import ph_flash
+from ..thermo.flash import ph_flash, phase_enthalpy
 from ..thermo.ideal import IdealCorrelations
 
 
@@ -117,3 +117,76 @@ def cooler(
 ) -> ThermalOperationResult:
     """Cool a flashed stream at constant pressure to a specified temperature."""
     return _thermal_operation(inlet, compounds, interactions, correlations, outlet_temperature_k, "cooler")
+
+
+def valve(
+    inlet: PhaseState,
+    compounds: tuple[Compound, ...],
+    interactions: PRInteractions,
+    correlations: tuple[IdealCorrelations, ...],
+    outlet_pressure_pa: float,
+    temperature_bracket_k: tuple[float, float],
+) -> PhaseState:
+    """Throttle a flashed stream isenthalpically to a lower pressure."""
+    _positive_finite(outlet_pressure_pa, "valve outlet pressure")
+    if outlet_pressure_pa >= inlet.stream.pressure_pa:
+        raise ValidationError("valve outlet pressure must be below inlet pressure")
+    if tuple(compound.id for compound in compounds) != inlet.stream.compound_ids:
+        raise ValidationError("valve inlet compound IDs must exactly match the supplied compound order")
+    result = ph_flash(
+        compounds, inlet.stream.composition, interactions, correlations, outlet_pressure_pa,
+        inlet.enthalpy_j_per_kmol, temperature_bracket_k,
+    )
+    if not result.report.converged or result.flash is None or result.enthalpy_j_per_kmol is None:
+        raise ConvergenceError(result.report.failure_reason or "valve PH flash did not converge")
+    stream = StreamState(
+        result.temperature_k, outlet_pressure_pa, inlet.stream.molar_flow_kmol_s, inlet.stream.compound_ids,
+        inlet.stream.composition, result.enthalpy_j_per_kmol, result.flash.vapor_fraction,
+    )
+    return PhaseState(stream, result.flash, result.enthalpy_j_per_kmol)
+
+
+@dataclass(frozen=True, slots=True)
+class EquilibriumSeparatorResult:
+    liquid: StreamState | None
+    vapor: StreamState | None
+
+
+def equilibrium_separator(
+    inlet: PhaseState,
+    compounds: tuple[Compound, ...],
+    correlations: tuple[IdealCorrelations, ...],
+) -> EquilibriumSeparatorResult:
+    """Route phases from an existing converged flash without recalculation."""
+    flash = inlet.flash
+    if tuple(compound.id for compound in compounds) != inlet.stream.compound_ids:
+        raise ValidationError("separator inlet compound IDs must exactly match the supplied compound order")
+    if not flash.report.converged:
+        raise ConvergenceError(flash.report.failure_reason or "separator requires a converged flash")
+
+    def phase_stream(composition: tuple[float, ...], state, flow: float, vapor_fraction: float) -> StreamState:
+        return StreamState(
+            flash.temperature_k, flash.pressure_pa, flow, inlet.stream.compound_ids, composition,
+            phase_enthalpy(compounds, composition, correlations, flash.temperature_k, state), vapor_fraction,
+        )
+
+    if flash.phase == "liquid":
+        return EquilibriumSeparatorResult(
+            phase_stream(flash.liquid_composition, flash.liquid_state, inlet.stream.molar_flow_kmol_s, 0.0), None,
+        )
+    if flash.phase == "vapor":
+        return EquilibriumSeparatorResult(
+            None, phase_stream(flash.vapor_composition, flash.vapor_state, inlet.stream.molar_flow_kmol_s, 1.0),
+        )
+    if flash.phase == "two-phase" and flash.vapor_fraction is not None:
+        return EquilibriumSeparatorResult(
+            phase_stream(
+                flash.liquid_composition, flash.liquid_state,
+                inlet.stream.molar_flow_kmol_s * (1.0 - flash.vapor_fraction), 0.0,
+            ),
+            phase_stream(
+                flash.vapor_composition, flash.vapor_state,
+                inlet.stream.molar_flow_kmol_s * flash.vapor_fraction, 1.0,
+            ),
+        )
+    raise ValidationError(f"unsupported separator flash phase: {flash.phase}")
