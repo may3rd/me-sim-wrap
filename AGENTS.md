@@ -39,4 +39,5 @@
 - Use utf-8-sig for ad hoc inspection of Windows-generated golden JSON files.
 - Verify test imports before diagnosing a new calculation-path failure.
 - Use a documented reference-flash tolerance for phase split flows; do not loosen total-flow parity.
+- Test affine unit conversion results with tolerance; never round calculation values for JSON display.
 - Do not treat a DWSIM default flash result as an exact equilibrium reference without checking its configured convergence criterion and residual.
