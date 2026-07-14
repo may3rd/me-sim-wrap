@@ -11,6 +11,7 @@ from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.streams import StreamState, flash_stream
 from mesim.thermo.ideal import load_correlations
 from mesim.unitops.basic import cooler, equilibrium_separator, heater, mix_streams, split_stream, valve
+from mesim.unitops.pressure import pump
 
 
 ROOT = Path(__file__).parents[1]
@@ -122,6 +123,56 @@ class BasicUnitOperationTest(unittest.TestCase):
             valve(zero, self.compounds, self.interactions, self.correlations, 300_000.0, (140.0, 240.0)).stream.molar_flow_kmol_s,
             0.0,
         )
+
+    def test_pump_raises_liquid_pressure_at_constant_efficiency(self):
+        compound_ids = ("N-pentane", "Ethane")
+        compounds = tuple(
+            {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}[compound_id]
+            for compound_id in compound_ids
+        )
+        correlations = tuple(
+            {correlation.compound_id: correlation for correlation in load_correlations(ROOT / "data/correlations/ideal-v1.json")}[compound_id]
+            for compound_id in compound_ids
+        )
+        inlet = flash_stream(
+            StreamState(300.0, 500_000.0, 2.0, compound_ids, (0.95, 0.05)),
+            compounds, self.interactions, correlations,
+        )
+        result = pump(inlet, compounds, self.interactions, correlations, 1_000_000.0, 0.8, (290.0, 330.0))
+        molar_volume = (
+            inlet.flash.liquid_state.compressibility * 8_314.46261815324 * inlet.stream.temperature_k
+            / inlet.stream.pressure_pa
+        )
+
+        self.assertEqual(result.outlet.stream.pressure_pa, 1_000_000.0)
+        self.assertEqual(result.outlet.stream.molar_flow_kmol_s, inlet.stream.molar_flow_kmol_s)
+        self.assertTrue(math.isclose(
+            result.outlet.enthalpy_j_per_kmol - inlet.enthalpy_j_per_kmol,
+            molar_volume * 500_000.0 / 0.8,
+            abs_tol=1.0,
+        ))
+        self.assertTrue(math.isclose(
+            result.energy.duty_w,
+            inlet.stream.molar_flow_kmol_s * (result.outlet.enthalpy_j_per_kmol - inlet.enthalpy_j_per_kmol),
+            rel_tol=1e-12,
+        ))
+
+    def test_pump_rejects_nonliquid_inlet_efficiency_and_pressure_drop(self):
+        with self.assertRaises(ValidationError):
+            pump(self.first, self.compounds, self.interactions, self.correlations, 600_000.0, 0.8, (140.0, 240.0))
+        liquid_ids = ("N-pentane", "Ethane")
+        compounds = tuple(
+            {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}[compound_id]
+            for compound_id in liquid_ids
+        )
+        correlations = tuple(
+            {correlation.compound_id: correlation for correlation in load_correlations(ROOT / "data/correlations/ideal-v1.json")}[compound_id]
+            for compound_id in liquid_ids
+        )
+        liquid = flash_stream(StreamState(300.0, 500_000.0, 1.0, liquid_ids, (0.95, 0.05)), compounds, self.interactions, correlations)
+        for outlet_pressure_pa, efficiency in ((500_000.0, 0.8), (1_000_000.0, 0.0), (1_000_000.0, 1.1), (1_000_000.0, True)):
+            with self.assertRaises(ValidationError):
+                pump(liquid, compounds, self.interactions, correlations, outlet_pressure_pa, efficiency, (290.0, 330.0))
 
     def test_equilibrium_separator_routes_existing_flash_without_reflashing(self):
         result = equilibrium_separator(self.first, self.compounds, self.correlations)

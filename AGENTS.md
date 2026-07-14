@@ -42,3 +42,6 @@
 - Test affine unit conversion results with tolerance; never round calculation values for JSON display.
 - Do not treat a DWSIM default flash result as an exact equilibrium reference without checking its configured convergence criterion and residual.
 - Verify existing function call signatures before wiring a new API endpoint.
+- Confirm loader return shapes before indexing fixture data in an exploratory calculation.
+- Check mixture cardinality constraints before using a pure-component probe for a mixture flash.
+- Anchor a tolerance patch to its full assertion context so an earlier matching tolerance is not changed.
