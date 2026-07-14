@@ -45,3 +45,4 @@
 - Confirm loader return shapes before indexing fixture data in an exploratory calculation.
 - Check mixture cardinality constraints before using a pure-component probe for a mixture flash.
 - Anchor a tolerance patch to its full assertion context so an earlier matching tolerance is not changed.
+- Follow operation-result nesting before reading stream properties in an exploratory parity calculation.
