@@ -5,12 +5,12 @@
     "source":  {
                    "dwsim_revision":  "9.0.4",
                    "automation_version":  "DWSIM version 9.0.4.0 (28-Jul-25 1:19:16 PM)",
-                   "captured_utc":  "2026-07-14T22:49:27.6000601Z",
+                   "captured_utc":  "2026-07-14T22:51:01.0388793Z",
                    "platform":  "Microsoft Windows NT 10.0.26200.0",
                    "architecture":  "AMD64",
                    "engine_bin":  "C:\\Users\\26008353\\Downloads\\DWSIM_v904_win64_portable\\Windows",
                    "input_file":  "C:\\Users\\26008353\\Downloads\\me-sim-wrap-live\\tests\\u1-pump-pr-classic.dwxmz",
-                   "input_file_sha256":  "98480ed08ac13375abb2ecb7a7461d5ef2b23d6318ec843ab0f6287e9ce33085",
+                   "input_file_sha256":  "0e656d64914a7aa2ec648c827cad88e844aa9780b754335033dba9132bbeaa44",
                    "property_package":  "Peng-Robinson (PR)",
                    "flash_algorithm":  "DWSIM default",
                    "bubble_dew_calculation":  false,
@@ -409,10 +409,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_PU_1",
                                                                      "value":  {
-                                                                                   "value_text":  "80",
+                                                                                   "value_text":  "75",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  80
+                                                                                   "value":  75
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -431,10 +431,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_PU_3",
                                                                      "value":  {
-                                                                                   "value_text":  "0.149161217316209",
+                                                                                   "value_text":  "0.159105298470623",
                                                                                    "unit":  "kW",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.149161217316209
+                                                                                   "value":  0.159105298470623
                                                                                },
                                                                      "unit":  "kW"
                                                                  },
@@ -442,10 +442,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_PU_2",
                                                                      "value":  {
-                                                                                   "value_text":  "0.294674674447606",
+                                                                                   "value_text":  "0.325788824467395",
                                                                                    "unit":  "K.",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.294674674447606
+                                                                                   "value":  0.325788824467395
                                                                                },
                                                                      "unit":  "K."
                                                                  }
@@ -4189,10 +4189,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_175",
                                                                      "value":  {
-                                                                                   "value_text":  "3.02422367002434E-09",
+                                                                                   "value_text":  "3.02560500074224E-09",
                                                                                    "unit":  "1/Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  3.02422367002434E-09
+                                                                                   "value":  3.02560500074224E-09
                                                                                },
                                                                      "unit":  "1/Pa"
                                                                  },
@@ -4200,10 +4200,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_173",
                                                                      "value":  {
-                                                                                   "value_text":  "-18.1986151802328",
+                                                                                   "value_text":  "-18.1629095294938",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -18.1986151802328
+                                                                                   "value":  -18.1629095294938
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -4211,10 +4211,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_174",
                                                                      "value":  {
-                                                                                   "value_text":  "-19.7762463658597",
+                                                                                   "value_text":  "-19.7406225327797",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -19.7762463658597
+                                                                                   "value":  -19.7406225327797
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -4277,10 +4277,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_207",
                                                                      "value":  {
-                                                                                   "value_text":  "-19.7762463658597",
+                                                                                   "value_text":  "-19.7406225327797",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -19.7762463658597
+                                                                                   "value":  -19.7406225327797
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -4288,10 +4288,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_208",
                                                                      "value":  {
-                                                                                   "value_text":  "-25525.769878036",
+                                                                                   "value_text":  "-25520.8035683498",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25525.769878036
+                                                                                   "value":  -25520.8035683498
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -4299,10 +4299,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_206",
                                                                      "value":  {
-                                                                                   "value_text":  "-18.1986151802328",
+                                                                                   "value_text":  "-18.1629095294938",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -18.1986151802328
+                                                                                   "value":  -18.1629095294938
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -4321,10 +4321,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_205",
                                                                      "value":  {
-                                                                                   "value_text":  "-364.420662618504",
+                                                                                   "value_text":  "-364.349760707407",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -364.420662618504
+                                                                                   "value":  -364.349760707407
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -4365,10 +4365,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_209",
                                                                      "value":  {
-                                                                                   "value_text":  "-1274.71823318607",
+                                                                                   "value_text":  "-1272.21723827112",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1274.71823318607
+                                                                                   "value":  -1272.21723827112
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -4376,10 +4376,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_210",
                                                                      "value":  {
-                                                                                   "value_text":  "-1385.22308301365",
+                                                                                   "value_text":  "-1382.72781899969",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1385.22308301365
+                                                                                   "value":  -1382.72781899969
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -4497,10 +4497,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_172",
                                                                      "value":  {
-                                                                                   "value_text":  "-364.420662618504",
+                                                                                   "value_text":  "-364.349760707407",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -364.420662618504
+                                                                                   "value":  -364.349760707407
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -4739,10 +4739,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_166",
                                                                      "value":  {
-                                                                                   "value_text":  "-364.420662618504",
+                                                                                   "value_text":  "-364.349760707407",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -364.420662618504
+                                                                                   "value":  -364.349760707407
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -4783,10 +4783,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_170",
                                                                      "value":  {
-                                                                                   "value_text":  "820.239316819967",
+                                                                                   "value_text":  "820.115600577866",
                                                                                    "unit":  "m/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  820.239316819967
+                                                                                   "value":  820.115600577866
                                                                                },
                                                                      "unit":  "m/s"
                                                                  },
@@ -4794,10 +4794,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_171",
                                                                      "value":  {
-                                                                                   "value_text":  "-3.60938831443198E-07",
+                                                                                   "value_text":  "-3.60806100178375E-07",
                                                                                    "unit":  "K/Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -3.60938831443198E-07
+                                                                                   "value":  -3.60806100178375E-07
                                                                                },
                                                                      "unit":  "K/Pa"
                                                                  },
@@ -4805,10 +4805,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_169",
                                                                      "value":  {
-                                                                                   "value_text":  "330663373.186267",
+                                                                                   "value_text":  "330512409.83363",
                                                                                    "unit":  "Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  330663373.186267
+                                                                                   "value":  330512409.83363
                                                                                },
                                                                      "unit":  "Pa"
                                                                  },
@@ -4816,10 +4816,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_167",
                                                                      "value":  {
-                                                                                   "value_text":  "-18.1986151802328",
+                                                                                   "value_text":  "-18.1629095294938",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -18.1986151802328
+                                                                                   "value":  -18.1629095294938
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -4827,10 +4827,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_168",
                                                                      "value":  {
-                                                                                   "value_text":  "-19.7762463658597",
+                                                                                   "value_text":  "-19.7406225327797",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -19.7762463658597
+                                                                                   "value":  -19.7406225327797
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -4948,10 +4948,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_214",
                                                                      "value":  {
-                                                                                   "value_text":  "-25525.769878036",
+                                                                                   "value_text":  "-25520.8035683498",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25525.769878036
+                                                                                   "value":  -25520.8035683498
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -4959,10 +4959,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Fugacity Coefficient, Vapor Phase / N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.668050272191373",
+                                                                                   "value_text":  "0.668114879682714",
                                                                                    "unit":  "Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.668050272191373
+                                                                                   "value":  0.668114879682714
                                                                                },
                                                                      "unit":  "Pa"
                                                                  },
@@ -4970,10 +4970,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Fugacity Coefficient, Liquid Phase 1 / N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.0748910247494228",
+                                                                                   "value_text":  "0.0749732155554526",
                                                                                    "unit":  "Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.0748910247494228
+                                                                                   "value":  0.0749732155554526
                                                                                },
                                                                      "unit":  "Pa"
                                                                  },
@@ -5003,10 +5003,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Activity Coefficient, Liquid Phase 1 / N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "1.01612946118865",
+                                                                                   "value_text":  "1.01607511239713",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.01612946118865
+                                                                                   "value":  1.01607511239713
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -5036,10 +5036,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Diffusion Coefficient, Liquid Phase 1 / N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "3.43544883930507E-07",
+                                                                                   "value_text":  "3.43660806309753E-07",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  3.43544883930507E-07
+                                                                                   "value":  3.43660806309753E-07
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -5058,10 +5058,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Diffusion Coefficient, Vapor Phase / N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "4.03973337113772E-12",
+                                                                                   "value_text":  "4.04046588852074E-12",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  4.03973337113772E-12
+                                                                                   "value":  4.04046588852074E-12
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -5069,10 +5069,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Activity Coefficient, Liquid Phase 1 / Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.73390807176481",
+                                                                                   "value_text":  "0.733759539655011",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.73390807176481
+                                                                                   "value":  0.733759539655011
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -5091,10 +5091,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_154",
                                                                      "value":  {
-                                                                                   "value_text":  "-338.056530056417",
+                                                                                   "value_text":  "-338.046585975243",
                                                                                    "unit":  "kW",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -338.056530056417
+                                                                                   "value":  -338.046585975243
                                                                                },
                                                                      "unit":  "kW"
                                                                  },
@@ -5124,10 +5124,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Diffusion Coefficient, Vapor Phase / Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "1.10552189156278E-11",
+                                                                                   "value_text":  "1.10572235380335E-11",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.10552189156278E-11
+                                                                                   "value":  1.10572235380335E-11
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -5135,10 +5135,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Diffusion Coefficient, Liquid Phase 1 / Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "2.8681548576651E-07",
+                                                                                   "value_text":  "2.86242709027329E-07",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  2.8681548576651E-07
+                                                                                   "value":  2.86242709027329E-07
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -5157,10 +5157,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Fugacity Coefficient, Vapor Phase / Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.947265234408237",
+                                                                                   "value_text":  "0.947299681899882",
                                                                                    "unit":  "Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.947265234408237
+                                                                                   "value":  0.947299681899882
                                                                                },
                                                                      "unit":  "Pa"
                                                                  },
@@ -5168,10 +5168,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Fugacity Coefficient, Liquid Phase 1 / Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "3.23710067868952",
+                                                                                   "value_text":  "3.23859095797772",
                                                                                    "unit":  "Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  3.23710067868952
+                                                                                   "value":  3.23859095797772
                                                                                },
                                                                      "unit":  "Pa"
                                                                  },
@@ -5322,10 +5322,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_251",
                                                                      "value":  {
-                                                                                   "value_text":  "1.67816841758952",
+                                                                                   "value_text":  "1.67830230878436",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.67816841758952
+                                                                                   "value":  1.67830230878436
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -5377,10 +5377,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_256",
                                                                      "value":  {
-                                                                                   "value_text":  "1.07611255836558",
+                                                                                   "value_text":  "1.07610602415378",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.07611255836558
+                                                                                   "value":  1.07610602415378
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -5520,10 +5520,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_218",
                                                                      "value":  {
-                                                                                   "value_text":  "-1274.71823318607",
+                                                                                   "value_text":  "-1272.21723827112",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1274.71823318607
+                                                                                   "value":  -1272.21723827112
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -5531,10 +5531,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_219",
                                                                      "value":  {
-                                                                                   "value_text":  "-1385.22308301365",
+                                                                                   "value_text":  "-1382.72781899969",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1385.22308301365
+                                                                                   "value":  -1382.72781899969
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -5542,10 +5542,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_217",
                                                                      "value":  {
-                                                                                   "value_text":  "-25525.769878036",
+                                                                                   "value_text":  "-25520.8035683498",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25525.769878036
+                                                                                   "value":  -25520.8035683498
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -5553,10 +5553,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_215",
                                                                      "value":  {
-                                                                                   "value_text":  "-1274.71823318607",
+                                                                                   "value_text":  "-1272.21723827112",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1274.71823318607
+                                                                                   "value":  -1272.21723827112
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -5564,10 +5564,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_216",
                                                                      "value":  {
-                                                                                   "value_text":  "-1385.22308301365",
+                                                                                   "value_text":  "-1382.72781899969",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1385.22308301365
+                                                                                   "value":  -1382.72781899969
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -5685,10 +5685,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_241/N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "7964.78365642716",
+                                                                                   "value_text":  "7963.72631954319",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  7964.78365642716
+                                                                                   "value":  7963.72631954319
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -5696,10 +5696,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_242/N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "7964.78365642716",
+                                                                                   "value_text":  "7963.72631954319",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  7964.78365642716
+                                                                                   "value":  7963.72631954319
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -5729,10 +5729,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_239/N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "7964.78365642716",
+                                                                                   "value_text":  "7963.72631954319",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  7964.78365642716
+                                                                                   "value":  7963.72631954319
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -5740,10 +5740,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_239/Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "419.199139811956",
+                                                                                   "value_text":  "419.143490502273",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  419.199139811956
+                                                                                   "value":  419.143490502273
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -5828,10 +5828,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_241/Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "419.199139811956",
+                                                                                   "value_text":  "419.143490502273",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  419.199139811956
+                                                                                   "value":  419.143490502273
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -5839,10 +5839,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_242/Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "419.199139811956",
+                                                                                   "value_text":  "419.143490502273",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  419.199139811956
+                                                                                   "value":  419.143490502273
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -5850,10 +5850,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_54",
                                                                      "value":  {
-                                                                                   "value_text":  "0.10952031017937",
+                                                                                   "value_text":  "0.109508034083163",
                                                                                    "unit":  "W/[m.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.10952031017937
+                                                                                   "value":  0.109508034083163
                                                                                },
                                                                      "unit":  "W/[m.K]"
                                                                  },
@@ -5861,10 +5861,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_55",
                                                                      "value":  {
-                                                                                   "value_text":  "3.40372671571982E-07",
+                                                                                   "value_text":  "3.40327858377411E-07",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  3.40372671571982E-07
+                                                                                   "value":  3.40327858377411E-07
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -5872,10 +5872,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_53",
                                                                      "value":  {
-                                                                                   "value_text":  "-80.389526791287",
+                                                                                   "value_text":  "-80.3729704459654",
                                                                                    "unit":  "kJ/[kmol.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -80.389526791287
+                                                                                   "value":  -80.3729704459654
                                                                                },
                                                                      "unit":  "kJ/[kmol.K]"
                                                                  },
@@ -5883,10 +5883,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_51",
                                                                      "value":  {
-                                                                                   "value_text":  "-1.14768740613292",
+                                                                                   "value_text":  "-1.1474510381659",
                                                                                    "unit":  "kJ/[kg.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1.14768740613292
+                                                                                   "value":  -1.1474510381659
                                                                                },
                                                                      "unit":  "kJ/[kg.K]"
                                                                  },
@@ -5894,10 +5894,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_52",
                                                                      "value":  {
-                                                                                   "value_text":  "-25415.2650282084",
+                                                                                   "value_text":  "-25410.2929876213",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25415.2650282084
+                                                                                   "value":  -25410.2929876213
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -5927,10 +5927,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_58",
                                                                      "value":  {
-                                                                                   "value_text":  "1.1948717906998911",
+                                                                                   "value_text":  "1.1948983281990446",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.1948717906998911
+                                                                                   "value":  1.1948983281990446
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -5938,10 +5938,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_56",
                                                                      "value":  {
-                                                                                   "value_text":  "0.000199885328420411",
+                                                                                   "value_text":  "0.000199832480096193",
                                                                                    "unit":  "Pa.s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.000199885328420411
+                                                                                   "value":  0.000199832480096193
                                                                                },
                                                                      "unit":  "Pa.s"
                                                                  },
@@ -5949,10 +5949,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_57",
                                                                      "value":  {
-                                                                                   "value_text":  "2.18344309837621",
+                                                                                   "value_text":  "2.18362525327783",
                                                                                    "unit":  "kJ/[kg.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  2.18344309837621
+                                                                                   "value":  2.18362525327783
                                                                                },
                                                                      "unit":  "kJ/[kg.K]"
                                                                  },
@@ -5960,10 +5960,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_44",
                                                                      "value":  {
-                                                                                   "value_text":  "0.0442612513313461",
+                                                                                   "value_text":  "0.0442589610055446",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.0442612513313461
+                                                                                   "value":  0.0442589610055446
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -5982,10 +5982,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_43",
                                                                      "value":  {
-                                                                                   "value_text":  "0.000238550107819539",
+                                                                                   "value_text":  "0.00023858177990589",
                                                                                    "unit":  "m3/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.000238550107819539
+                                                                                   "value":  0.00023858177990589
                                                                                },
                                                                      "unit":  "m3/s"
                                                                  },
@@ -6026,10 +6026,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_50",
                                                                      "value":  {
-                                                                                   "value_text":  "-362.843031432877",
+                                                                                   "value_text":  "-362.772047704121",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -362.843031432877
+                                                                                   "value":  -362.772047704121
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -6037,10 +6037,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_48",
                                                                      "value":  {
-                                                                                   "value_text":  "587.25433947813",
+                                                                                   "value_text":  "587.176380590584",
                                                                                    "unit":  "kg/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  587.25433947813
+                                                                                   "value":  587.176380590584
                                                                                },
                                                                      "unit":  "kg/m3"
                                                                  },
@@ -6213,10 +6213,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_61",
                                                                      "value":  {
-                                                                                   "value_text":  "0.000238550107819539",
+                                                                                   "value_text":  "0.00023858177990589",
                                                                                    "unit":  "m3/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.000238550107819539
+                                                                                   "value":  0.00023858177990589
                                                                                },
                                                                      "unit":  "m3/s"
                                                                  },
@@ -6224,10 +6224,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_62",
                                                                      "value":  {
-                                                                                   "value_text":  "0.0442612513313461",
+                                                                                   "value_text":  "0.0442589610055446",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.0442612513313461
+                                                                                   "value":  0.0442589610055446
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -6290,10 +6290,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_40",
                                                                      "value":  {
-                                                                                   "value_text":  "1.1948717906998911",
+                                                                                   "value_text":  "1.1948983281990446",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.1948717906998911
+                                                                                   "value":  1.1948983281990446
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -6334,10 +6334,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_10",
                                                                      "value":  {
-                                                                                   "value_text":  "-80.389526791287",
+                                                                                   "value_text":  "-80.3729704459654",
                                                                                    "unit":  "kJ/[kmol.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -80.389526791287
+                                                                                   "value":  -80.3729704459654
                                                                                },
                                                                      "unit":  "kJ/[kmol.K]"
                                                                  },
@@ -6345,10 +6345,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_11",
                                                                      "value":  {
-                                                                                   "value_text":  "0.10952031017937",
+                                                                                   "value_text":  "0.109508034083163",
                                                                                    "unit":  "W/[m.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.10952031017937
+                                                                                   "value":  0.109508034083163
                                                                                },
                                                                      "unit":  "W/[m.K]"
                                                                  },
@@ -6422,10 +6422,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_4",
                                                                      "value":  {
-                                                                                   "value_text":  "0.000238550107819539",
+                                                                                   "value_text":  "0.00023858177990589",
                                                                                    "unit":  "m3/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.000238550107819539
+                                                                                   "value":  0.00023858177990589
                                                                                },
                                                                      "unit":  "m3/s"
                                                                  },
@@ -6444,10 +6444,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_0",
                                                                      "value":  {
-                                                                                   "value_text":  "300.294674674448",
+                                                                                   "value_text":  "300.325788824467",
                                                                                    "unit":  "K",
                                                                                    "value_type":  "number",
-                                                                                   "value":  300.294674674448
+                                                                                   "value":  300.325788824467
                                                                                },
                                                                      "unit":  "K"
                                                                  },
@@ -6466,10 +6466,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_8",
                                                                      "value":  {
-                                                                                   "value_text":  "-1.14768740613292",
+                                                                                   "value_text":  "-1.1474510381659",
                                                                                    "unit":  "kJ/[kg.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1.14768740613292
+                                                                                   "value":  -1.1474510381659
                                                                                },
                                                                      "unit":  "kJ/[kg.K]"
                                                                  },
@@ -6477,10 +6477,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_9",
                                                                      "value":  {
-                                                                                   "value_text":  "-25415.2650282084",
+                                                                                   "value_text":  "-25410.2929876213",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25415.2650282084
+                                                                                   "value":  -25410.2929876213
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -6488,10 +6488,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_7",
                                                                      "value":  {
-                                                                                   "value_text":  "-362.843031432877",
+                                                                                   "value_text":  "-362.772047704121",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -362.843031432877
+                                                                                   "value":  -362.772047704121
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -6499,10 +6499,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_5",
                                                                      "value":  {
-                                                                                   "value_text":  "587.25433947813",
+                                                                                   "value_text":  "587.176380590584",
                                                                                    "unit":  "kg/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  587.25433947813
+                                                                                   "value":  587.176380590584
                                                                                },
                                                                      "unit":  "kg/m3"
                                                                  },
@@ -6521,10 +6521,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_33",
                                                                      "value":  {
-                                                                                   "value_text":  "-1.14768740613292",
+                                                                                   "value_text":  "-1.1474510381659",
                                                                                    "unit":  "kJ/[kg.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1.14768740613292
+                                                                                   "value":  -1.1474510381659
                                                                                },
                                                                      "unit":  "kJ/[kg.K]"
                                                                  },
@@ -6532,10 +6532,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_34",
                                                                      "value":  {
-                                                                                   "value_text":  "-25415.2650282084",
+                                                                                   "value_text":  "-25410.2929876213",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25415.2650282084
+                                                                                   "value":  -25410.2929876213
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -6543,10 +6543,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_32",
                                                                      "value":  {
-                                                                                   "value_text":  "-362.843031432877",
+                                                                                   "value_text":  "-362.772047704121",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -362.843031432877
+                                                                                   "value":  -362.772047704121
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -6554,10 +6554,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_30",
                                                                      "value":  {
-                                                                                   "value_text":  "587.25433947813",
+                                                                                   "value_text":  "587.176380590584",
                                                                                    "unit":  "kg/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  587.25433947813
+                                                                                   "value":  587.176380590584
                                                                                },
                                                                      "unit":  "kg/m3"
                                                                  },
@@ -6576,10 +6576,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_38",
                                                                      "value":  {
-                                                                                   "value_text":  "0.000199885328420411",
+                                                                                   "value_text":  "0.000199832480096193",
                                                                                    "unit":  "Pa.s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.000199885328420411
+                                                                                   "value":  0.000199832480096193
                                                                                },
                                                                      "unit":  "Pa.s"
                                                                  },
@@ -6587,10 +6587,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_39",
                                                                      "value":  {
-                                                                                   "value_text":  "2.18344309837621",
+                                                                                   "value_text":  "2.18362525327783",
                                                                                    "unit":  "kJ/[kg.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  2.18344309837621
+                                                                                   "value":  2.18362525327783
                                                                                },
                                                                      "unit":  "kJ/[kg.K]"
                                                                  },
@@ -6598,10 +6598,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_37",
                                                                      "value":  {
-                                                                                   "value_text":  "3.40372671571982E-07",
+                                                                                   "value_text":  "3.40327858377411E-07",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  3.40372671571982E-07
+                                                                                   "value":  3.40327858377411E-07
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -6609,10 +6609,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_35",
                                                                      "value":  {
-                                                                                   "value_text":  "-80.389526791287",
+                                                                                   "value_text":  "-80.3729704459654",
                                                                                    "unit":  "kJ/[kmol.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -80.389526791287
+                                                                                   "value":  -80.3729704459654
                                                                                },
                                                                      "unit":  "kJ/[kmol.K]"
                                                                  },
@@ -6620,10 +6620,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_36",
                                                                      "value":  {
-                                                                                   "value_text":  "0.10952031017937",
+                                                                                   "value_text":  "0.109508034083163",
                                                                                    "unit":  "W/[m.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.10952031017937
+                                                                                   "value":  0.109508034083163
                                                                                },
                                                                      "unit":  "W/[m.K]"
                                                                  },
@@ -6906,10 +6906,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_106/Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.616384261833022",
+                                                                                   "value_text":  "0.616247430968858",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.616384261833022
+                                                                                   "value":  0.616247430968858
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -6961,10 +6961,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_111/Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.40107087685506",
+                                                                                   "value_text":  "0.400931888452728",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.40107087685506
+                                                                                   "value":  0.400931888452728
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -6983,10 +6983,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_111/N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.59892912314494",
+                                                                                   "value_text":  "0.599068111547272",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.59892912314494
+                                                                                   "value":  0.599068111547272
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -7148,10 +7148,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_106/N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.383615738166978",
+                                                                                   "value_text":  "0.383752569031142",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.383615738166978
+                                                                                   "value":  0.383752569031142
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -7652,10 +7652,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_ES_0",
                                                                      "value":  {
-                                                                                   "value_text":  "0.149161217316209",
+                                                                                   "value_text":  "0.159105298470623",
                                                                                    "unit":  "kW",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.149161217316209
+                                                                                   "value":  0.159105298470623
                                                                                },
                                                                      "unit":  "kW"
                                                                  }
@@ -7727,10 +7727,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_PU_1",
                                                                      "value":  {
-                                                                                   "value_text":  "80",
+                                                                                   "value_text":  "75",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  80
+                                                                                   "value":  75
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -7749,10 +7749,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_PU_3",
                                                                      "value":  {
-                                                                                   "value_text":  "0.14916121731620871",
+                                                                                   "value_text":  "0.15910529847062266",
                                                                                    "unit":  "kW",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.14916121731620871
+                                                                                   "value":  0.15910529847062266
                                                                                },
                                                                      "unit":  "kW"
                                                                  },
@@ -7760,10 +7760,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_PU_2",
                                                                      "value":  {
-                                                                                   "value_text":  "0.29467467444760587",
+                                                                                   "value_text":  "0.325788824467395",
                                                                                    "unit":  "K.",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.29467467444760587
+                                                                                   "value":  0.325788824467395
                                                                                },
                                                                      "unit":  "K."
                                                                  }
@@ -11507,10 +11507,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_175",
                                                                      "value":  {
-                                                                                   "value_text":  "3.0242236700243374E-09",
+                                                                                   "value_text":  "3.0256050007422373E-09",
                                                                                    "unit":  "1/Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  3.0242236700243374E-09
+                                                                                   "value":  3.0256050007422373E-09
                                                                                },
                                                                      "unit":  "1/Pa"
                                                                  },
@@ -11518,10 +11518,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_173",
                                                                      "value":  {
-                                                                                   "value_text":  "-18.198615180232821",
+                                                                                   "value_text":  "-18.162909529493845",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -18.198615180232821
+                                                                                   "value":  -18.162909529493845
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -11529,10 +11529,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_174",
                                                                      "value":  {
-                                                                                   "value_text":  "-19.77624636585972",
+                                                                                   "value_text":  "-19.740622532779696",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -19.77624636585972
+                                                                                   "value":  -19.740622532779696
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -11595,10 +11595,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_207",
                                                                      "value":  {
-                                                                                   "value_text":  "-19.77624636585972",
+                                                                                   "value_text":  "-19.740622532779696",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -19.77624636585972
+                                                                                   "value":  -19.740622532779696
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -11606,10 +11606,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_208",
                                                                      "value":  {
-                                                                                   "value_text":  "-25525.769878035975",
+                                                                                   "value_text":  "-25520.803568349846",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25525.769878035975
+                                                                                   "value":  -25520.803568349846
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -11617,10 +11617,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_206",
                                                                      "value":  {
-                                                                                   "value_text":  "-18.198615180232821",
+                                                                                   "value_text":  "-18.162909529493845",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -18.198615180232821
+                                                                                   "value":  -18.162909529493845
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -11639,10 +11639,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_205",
                                                                      "value":  {
-                                                                                   "value_text":  "-364.42066261850437",
+                                                                                   "value_text":  "-364.34976070740686",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -364.42066261850437
+                                                                                   "value":  -364.34976070740686
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -11683,10 +11683,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_209",
                                                                      "value":  {
-                                                                                   "value_text":  "-1274.7182331860656",
+                                                                                   "value_text":  "-1272.2172382711237",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1274.7182331860656
+                                                                                   "value":  -1272.2172382711237
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -11694,10 +11694,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_210",
                                                                      "value":  {
-                                                                                   "value_text":  "-1385.2230830136464",
+                                                                                   "value_text":  "-1382.7278189996896",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1385.2230830136464
+                                                                                   "value":  -1382.7278189996896
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -11815,10 +11815,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_172",
                                                                      "value":  {
-                                                                                   "value_text":  "-364.42066261850437",
+                                                                                   "value_text":  "-364.34976070740686",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -364.42066261850437
+                                                                                   "value":  -364.34976070740686
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -12057,10 +12057,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_166",
                                                                      "value":  {
-                                                                                   "value_text":  "-364.42066261850437",
+                                                                                   "value_text":  "-364.34976070740686",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -364.42066261850437
+                                                                                   "value":  -364.34976070740686
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -12101,10 +12101,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_170",
                                                                      "value":  {
-                                                                                   "value_text":  "820.23931681996658",
+                                                                                   "value_text":  "820.11560057786585",
                                                                                    "unit":  "m/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  820.23931681996658
+                                                                                   "value":  820.11560057786585
                                                                                },
                                                                      "unit":  "m/s"
                                                                  },
@@ -12112,10 +12112,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_171",
                                                                      "value":  {
-                                                                                   "value_text":  "-3.6093883144319813E-07",
+                                                                                   "value_text":  "-3.6080610017837513E-07",
                                                                                    "unit":  "K/Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -3.6093883144319813E-07
+                                                                                   "value":  -3.6080610017837513E-07
                                                                                },
                                                                      "unit":  "K/Pa"
                                                                  },
@@ -12123,10 +12123,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_169",
                                                                      "value":  {
-                                                                                   "value_text":  "330663373.1862672",
+                                                                                   "value_text":  "330512409.83363038",
                                                                                    "unit":  "Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  330663373.1862672
+                                                                                   "value":  330512409.83363038
                                                                                },
                                                                      "unit":  "Pa"
                                                                  },
@@ -12134,10 +12134,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_167",
                                                                      "value":  {
-                                                                                   "value_text":  "-18.198615180232821",
+                                                                                   "value_text":  "-18.162909529493845",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -18.198615180232821
+                                                                                   "value":  -18.162909529493845
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -12145,10 +12145,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_168",
                                                                      "value":  {
-                                                                                   "value_text":  "-19.77624636585972",
+                                                                                   "value_text":  "-19.740622532779696",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -19.77624636585972
+                                                                                   "value":  -19.740622532779696
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -12266,10 +12266,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_214",
                                                                      "value":  {
-                                                                                   "value_text":  "-25525.769878035975",
+                                                                                   "value_text":  "-25520.803568349846",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25525.769878035975
+                                                                                   "value":  -25520.803568349846
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -12277,10 +12277,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Fugacity Coefficient, Vapor Phase / N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.66805027219137336",
+                                                                                   "value_text":  "0.66811487968271388",
                                                                                    "unit":  "Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.66805027219137336
+                                                                                   "value":  0.66811487968271388
                                                                                },
                                                                      "unit":  "Pa"
                                                                  },
@@ -12288,10 +12288,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Fugacity Coefficient, Liquid Phase 1 / N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.0748910247494228",
+                                                                                   "value_text":  "0.074973215555452638",
                                                                                    "unit":  "Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.0748910247494228
+                                                                                   "value":  0.074973215555452638
                                                                                },
                                                                      "unit":  "Pa"
                                                                  },
@@ -12321,10 +12321,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Activity Coefficient, Liquid Phase 1 / N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "1.0161294611886482",
+                                                                                   "value_text":  "1.0160751123971257",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.0161294611886482
+                                                                                   "value":  1.0160751123971257
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -12354,10 +12354,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Diffusion Coefficient, Liquid Phase 1 / N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "3.5014734182935705E-07",
+                                                                                   "value_text":  "3.5026869335137515E-07",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  3.5014734182935705E-07
+                                                                                   "value":  3.5026869335137515E-07
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -12376,10 +12376,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Diffusion Coefficient, Vapor Phase / N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "4.039733371137721E-12",
+                                                                                   "value_text":  "4.0404658885207394E-12",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  4.039733371137721E-12
+                                                                                   "value":  4.0404658885207394E-12
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -12387,10 +12387,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Activity Coefficient, Liquid Phase 1 / Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.73390807176480977",
+                                                                                   "value_text":  "0.73375953965501051",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.73390807176480977
+                                                                                   "value":  0.73375953965501051
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -12409,10 +12409,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_154",
                                                                      "value":  {
-                                                                                   "value_text":  "-338.05653005641716",
+                                                                                   "value_text":  "-338.046585975243",
                                                                                    "unit":  "kW",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -338.05653005641716
+                                                                                   "value":  -338.046585975243
                                                                                },
                                                                      "unit":  "kW"
                                                                  },
@@ -12442,10 +12442,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Diffusion Coefficient, Vapor Phase / Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "1.1055218915627799E-11",
+                                                                                   "value_text":  "1.1057223538033479E-11",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.1055218915627799E-11
+                                                                                   "value":  1.1057223538033479E-11
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -12453,10 +12453,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Diffusion Coefficient, Liquid Phase 1 / Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "2.9232768303123443E-07",
+                                                                                   "value_text":  "2.9174656472752139E-07",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  2.9232768303123443E-07
+                                                                                   "value":  2.9174656472752139E-07
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -12475,10 +12475,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Fugacity Coefficient, Vapor Phase / Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.94726523440823662",
+                                                                                   "value_text":  "0.94729968189988178",
                                                                                    "unit":  "Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.94726523440823662
+                                                                                   "value":  0.94729968189988178
                                                                                },
                                                                      "unit":  "Pa"
                                                                  },
@@ -12486,10 +12486,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "Fugacity Coefficient, Liquid Phase 1 / Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "3.2371006786895218",
+                                                                                   "value_text":  "3.2385909579777166",
                                                                                    "unit":  "Pa",
                                                                                    "value_type":  "number",
-                                                                                   "value":  3.2371006786895218
+                                                                                   "value":  3.2385909579777166
                                                                                },
                                                                      "unit":  "Pa"
                                                                  },
@@ -12640,10 +12640,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_251",
                                                                      "value":  {
-                                                                                   "value_text":  "1.6781684175895186",
+                                                                                   "value_text":  "1.6783023087843578",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.6781684175895186
+                                                                                   "value":  1.6783023087843578
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -12695,10 +12695,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_256",
                                                                      "value":  {
-                                                                                   "value_text":  "1.0761125583655831",
+                                                                                   "value_text":  "1.0761060241537783",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.0761125583655831
+                                                                                   "value":  1.0761060241537783
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -12838,10 +12838,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_218",
                                                                      "value":  {
-                                                                                   "value_text":  "-1274.7182331860656",
+                                                                                   "value_text":  "-1272.2172382711237",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1274.7182331860656
+                                                                                   "value":  -1272.2172382711237
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -12849,10 +12849,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_219",
                                                                      "value":  {
-                                                                                   "value_text":  "-1385.2230830136464",
+                                                                                   "value_text":  "-1382.7278189996896",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1385.2230830136464
+                                                                                   "value":  -1382.7278189996896
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -12860,10 +12860,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_217",
                                                                      "value":  {
-                                                                                   "value_text":  "-25525.769878035975",
+                                                                                   "value_text":  "-25520.803568349846",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25525.769878035975
+                                                                                   "value":  -25520.803568349846
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -12871,10 +12871,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_215",
                                                                      "value":  {
-                                                                                   "value_text":  "-1274.7182331860656",
+                                                                                   "value_text":  "-1272.2172382711237",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1274.7182331860656
+                                                                                   "value":  -1272.2172382711237
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -12882,10 +12882,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_216",
                                                                      "value":  {
-                                                                                   "value_text":  "-1385.2230830136464",
+                                                                                   "value_text":  "-1382.7278189996896",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1385.2230830136464
+                                                                                   "value":  -1382.7278189996896
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -13003,10 +13003,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_241/N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "7964.7836564271565",
+                                                                                   "value_text":  "7963.7263195431888",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  7964.7836564271565
+                                                                                   "value":  7963.7263195431888
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -13014,10 +13014,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_242/N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "7964.7836564271565",
+                                                                                   "value_text":  "7963.7263195431888",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  7964.7836564271565
+                                                                                   "value":  7963.7263195431888
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -13047,10 +13047,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_239/N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "7964.7836564271565",
+                                                                                   "value_text":  "7963.7263195431888",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  7964.7836564271565
+                                                                                   "value":  7963.7263195431888
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -13058,10 +13058,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_239/Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "419.1991398119556",
+                                                                                   "value_text":  "419.14349050227315",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  419.1991398119556
+                                                                                   "value":  419.14349050227315
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -13146,10 +13146,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_241/Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "419.1991398119556",
+                                                                                   "value_text":  "419.14349050227315",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  419.1991398119556
+                                                                                   "value":  419.14349050227315
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -13157,10 +13157,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_242/Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "419.1991398119556",
+                                                                                   "value_text":  "419.14349050227315",
                                                                                    "unit":  "mol/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  419.1991398119556
+                                                                                   "value":  419.14349050227315
                                                                                },
                                                                      "unit":  "mol/m3"
                                                                  },
@@ -13168,10 +13168,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_54",
                                                                      "value":  {
-                                                                                   "value_text":  "0.10952031017937001",
+                                                                                   "value_text":  "0.10950803408316333",
                                                                                    "unit":  "W/[m.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.10952031017937001
+                                                                                   "value":  0.10950803408316333
                                                                                },
                                                                      "unit":  "W/[m.K]"
                                                                  },
@@ -13179,10 +13179,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_55",
                                                                      "value":  {
-                                                                                   "value_text":  "3.3395452707820354E-07",
+                                                                                   "value_text":  "3.3390750712147047E-07",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  3.3395452707820354E-07
+                                                                                   "value":  3.3390750712147047E-07
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -13190,10 +13190,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_53",
                                                                      "value":  {
-                                                                                   "value_text":  "-80.389526791287039",
+                                                                                   "value_text":  "-80.372970445965379",
                                                                                    "unit":  "kJ/[kmol.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -80.389526791287039
+                                                                                   "value":  -80.372970445965379
                                                                                },
                                                                      "unit":  "kJ/[kmol.K]"
                                                                  },
@@ -13201,10 +13201,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_51",
                                                                      "value":  {
-                                                                                   "value_text":  "-1.1476874061329161",
+                                                                                   "value_text":  "-1.1474510381658973",
                                                                                    "unit":  "kJ/[kg.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1.1476874061329161
+                                                                                   "value":  -1.1474510381658973
                                                                                },
                                                                      "unit":  "kJ/[kg.K]"
                                                                  },
@@ -13212,10 +13212,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_52",
                                                                      "value":  {
-                                                                                   "value_text":  "-25415.265028208396",
+                                                                                   "value_text":  "-25410.29298762128",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25415.265028208396
+                                                                                   "value":  -25410.29298762128
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -13245,10 +13245,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_58",
                                                                      "value":  {
-                                                                                   "value_text":  "1.194871790699888",
+                                                                                   "value_text":  "1.1948983281990408",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.194871790699888
+                                                                                   "value":  1.1948983281990408
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -13256,10 +13256,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_56",
                                                                      "value":  {
-                                                                                   "value_text":  "0.00019611624521504161",
+                                                                                   "value_text":  "0.00019606260148360958",
                                                                                    "unit":  "Pa.s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.00019611624521504161
+                                                                                   "value":  0.00019606260148360958
                                                                                },
                                                                      "unit":  "Pa.s"
                                                                  },
@@ -13267,10 +13267,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_57",
                                                                      "value":  {
-                                                                                   "value_text":  "2.1834430983762081",
+                                                                                   "value_text":  "2.1836252532778282",
                                                                                    "unit":  "kJ/[kg.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  2.1834430983762081
+                                                                                   "value":  2.1836252532778282
                                                                                },
                                                                      "unit":  "kJ/[kg.K]"
                                                                  },
@@ -13278,10 +13278,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_44",
                                                                      "value":  {
-                                                                                   "value_text":  "0.044261251331346077",
+                                                                                   "value_text":  "0.044258961005544585",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.044261251331346077
+                                                                                   "value":  0.044258961005544585
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -13300,10 +13300,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_43",
                                                                      "value":  {
-                                                                                   "value_text":  "0.00023855010781953897",
+                                                                                   "value_text":  "0.00023858177990589044",
                                                                                    "unit":  "m3/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.00023855010781953897
+                                                                                   "value":  0.00023858177990589044
                                                                                },
                                                                      "unit":  "m3/s"
                                                                  },
@@ -13344,10 +13344,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_50",
                                                                      "value":  {
-                                                                                   "value_text":  "-362.84303143287747",
+                                                                                   "value_text":  "-362.772047704121",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -362.84303143287747
+                                                                                   "value":  -362.772047704121
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -13355,10 +13355,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_48",
                                                                      "value":  {
-                                                                                   "value_text":  "587.25433947812974",
+                                                                                   "value_text":  "587.17638059058368",
                                                                                    "unit":  "kg/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  587.25433947812974
+                                                                                   "value":  587.17638059058368
                                                                                },
                                                                      "unit":  "kg/m3"
                                                                  },
@@ -13531,10 +13531,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_61",
                                                                      "value":  {
-                                                                                   "value_text":  "0.00023855010781953897",
+                                                                                   "value_text":  "0.00023858177990589044",
                                                                                    "unit":  "m3/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.00023855010781953897
+                                                                                   "value":  0.00023858177990589044
                                                                                },
                                                                      "unit":  "m3/s"
                                                                  },
@@ -13542,10 +13542,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_62",
                                                                      "value":  {
-                                                                                   "value_text":  "0.044261251331346077",
+                                                                                   "value_text":  "0.044258961005544585",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.044261251331346077
+                                                                                   "value":  0.044258961005544585
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -13608,10 +13608,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_40",
                                                                      "value":  {
-                                                                                   "value_text":  "1.194871790699888",
+                                                                                   "value_text":  "1.1948983281990408",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  1.194871790699888
+                                                                                   "value":  1.1948983281990408
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -13652,10 +13652,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_10",
                                                                      "value":  {
-                                                                                   "value_text":  "-80.389526791287039",
+                                                                                   "value_text":  "-80.372970445965379",
                                                                                    "unit":  "kJ/[kmol.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -80.389526791287039
+                                                                                   "value":  -80.372970445965379
                                                                                },
                                                                      "unit":  "kJ/[kmol.K]"
                                                                  },
@@ -13663,10 +13663,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_11",
                                                                      "value":  {
-                                                                                   "value_text":  "0.10952031017937001",
+                                                                                   "value_text":  "0.10950803408316333",
                                                                                    "unit":  "W/[m.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.10952031017937001
+                                                                                   "value":  0.10950803408316333
                                                                                },
                                                                      "unit":  "W/[m.K]"
                                                                  },
@@ -13740,10 +13740,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_4",
                                                                      "value":  {
-                                                                                   "value_text":  "0.00023855010781953897",
+                                                                                   "value_text":  "0.00023858177990589044",
                                                                                    "unit":  "m3/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.00023855010781953897
+                                                                                   "value":  0.00023858177990589044
                                                                                },
                                                                      "unit":  "m3/s"
                                                                  },
@@ -13762,10 +13762,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_0",
                                                                      "value":  {
-                                                                                   "value_text":  "300.29467467444761",
+                                                                                   "value_text":  "300.32578882446739",
                                                                                    "unit":  "K",
                                                                                    "value_type":  "number",
-                                                                                   "value":  300.29467467444761
+                                                                                   "value":  300.32578882446739
                                                                                },
                                                                      "unit":  "K"
                                                                  },
@@ -13784,10 +13784,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_8",
                                                                      "value":  {
-                                                                                   "value_text":  "-1.1476874061329161",
+                                                                                   "value_text":  "-1.1474510381658973",
                                                                                    "unit":  "kJ/[kg.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1.1476874061329161
+                                                                                   "value":  -1.1474510381658973
                                                                                },
                                                                      "unit":  "kJ/[kg.K]"
                                                                  },
@@ -13795,10 +13795,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_9",
                                                                      "value":  {
-                                                                                   "value_text":  "-25415.265028208396",
+                                                                                   "value_text":  "-25410.29298762128",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25415.265028208396
+                                                                                   "value":  -25410.29298762128
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -13806,10 +13806,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_7",
                                                                      "value":  {
-                                                                                   "value_text":  "-362.84303143287747",
+                                                                                   "value_text":  "-362.772047704121",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -362.84303143287747
+                                                                                   "value":  -362.772047704121
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -13817,10 +13817,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_5",
                                                                      "value":  {
-                                                                                   "value_text":  "587.25433947812974",
+                                                                                   "value_text":  "587.17638059058368",
                                                                                    "unit":  "kg/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  587.25433947812974
+                                                                                   "value":  587.17638059058368
                                                                                },
                                                                      "unit":  "kg/m3"
                                                                  },
@@ -13839,10 +13839,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_33",
                                                                      "value":  {
-                                                                                   "value_text":  "-1.1476874061329161",
+                                                                                   "value_text":  "-1.1474510381658973",
                                                                                    "unit":  "kJ/[kg.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -1.1476874061329161
+                                                                                   "value":  -1.1474510381658973
                                                                                },
                                                                      "unit":  "kJ/[kg.K]"
                                                                  },
@@ -13850,10 +13850,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_34",
                                                                      "value":  {
-                                                                                   "value_text":  "-25415.265028208396",
+                                                                                   "value_text":  "-25410.29298762128",
                                                                                    "unit":  "kJ/kmol",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -25415.265028208396
+                                                                                   "value":  -25410.29298762128
                                                                                },
                                                                      "unit":  "kJ/kmol"
                                                                  },
@@ -13861,10 +13861,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_32",
                                                                      "value":  {
-                                                                                   "value_text":  "-362.84303143287747",
+                                                                                   "value_text":  "-362.772047704121",
                                                                                    "unit":  "kJ/kg",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -362.84303143287747
+                                                                                   "value":  -362.772047704121
                                                                                },
                                                                      "unit":  "kJ/kg"
                                                                  },
@@ -13872,10 +13872,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_30",
                                                                      "value":  {
-                                                                                   "value_text":  "587.25433947812974",
+                                                                                   "value_text":  "587.17638059058368",
                                                                                    "unit":  "kg/m3",
                                                                                    "value_type":  "number",
-                                                                                   "value":  587.25433947812974
+                                                                                   "value":  587.17638059058368
                                                                                },
                                                                      "unit":  "kg/m3"
                                                                  },
@@ -13894,10 +13894,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_38",
                                                                      "value":  {
-                                                                                   "value_text":  "0.00019611624521504161",
+                                                                                   "value_text":  "0.00019606260148360958",
                                                                                    "unit":  "Pa.s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.00019611624521504161
+                                                                                   "value":  0.00019606260148360958
                                                                                },
                                                                      "unit":  "Pa.s"
                                                                  },
@@ -13905,10 +13905,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_39",
                                                                      "value":  {
-                                                                                   "value_text":  "2.1834430983762081",
+                                                                                   "value_text":  "2.1836252532778282",
                                                                                    "unit":  "kJ/[kg.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  2.1834430983762081
+                                                                                   "value":  2.1836252532778282
                                                                                },
                                                                      "unit":  "kJ/[kg.K]"
                                                                  },
@@ -13916,10 +13916,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_37",
                                                                      "value":  {
-                                                                                   "value_text":  "3.3395452707820354E-07",
+                                                                                   "value_text":  "3.3390750712147047E-07",
                                                                                    "unit":  "m2/s",
                                                                                    "value_type":  "number",
-                                                                                   "value":  3.3395452707820354E-07
+                                                                                   "value":  3.3390750712147047E-07
                                                                                },
                                                                      "unit":  "m2/s"
                                                                  },
@@ -13927,10 +13927,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_35",
                                                                      "value":  {
-                                                                                   "value_text":  "-80.389526791287039",
+                                                                                   "value_text":  "-80.372970445965379",
                                                                                    "unit":  "kJ/[kmol.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  -80.389526791287039
+                                                                                   "value":  -80.372970445965379
                                                                                },
                                                                      "unit":  "kJ/[kmol.K]"
                                                                  },
@@ -13938,10 +13938,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_36",
                                                                      "value":  {
-                                                                                   "value_text":  "0.10952031017937001",
+                                                                                   "value_text":  "0.10950803408316333",
                                                                                    "unit":  "W/[m.K]",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.10952031017937001
+                                                                                   "value":  0.10950803408316333
                                                                                },
                                                                      "unit":  "W/[m.K]"
                                                                  },
@@ -14224,10 +14224,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_106/Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.616384261833022",
+                                                                                   "value_text":  "0.6162474309688577",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.616384261833022
+                                                                                   "value":  0.6162474309688577
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -14279,10 +14279,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_111/Ethane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.40107087685506004",
+                                                                                   "value_text":  "0.40093188845272815",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.40107087685506004
+                                                                                   "value":  0.40093188845272815
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -14301,10 +14301,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_111/N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.59892912314493985",
+                                                                                   "value_text":  "0.59906811154727191",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.59892912314493985
+                                                                                   "value":  0.59906811154727191
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -14466,10 +14466,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_106/N-pentane",
                                                                      "value":  {
-                                                                                   "value_text":  "0.38361573816697792",
+                                                                                   "value_text":  "0.38375256903114224",
                                                                                    "unit":  "dimensionless",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.38361573816697792
+                                                                                   "value":  0.38375256903114224
                                                                                },
                                                                      "unit":  "dimensionless"
                                                                  },
@@ -14970,10 +14970,10 @@
                                                                      "read_error":  null,
                                                                      "property":  "PROP_ES_0",
                                                                      "value":  {
-                                                                                   "value_text":  "0.14916121731620871",
+                                                                                   "value_text":  "0.15910529847062266",
                                                                                    "unit":  "kW",
                                                                                    "value_type":  "number",
-                                                                                   "value":  0.14916121731620871
+                                                                                   "value":  0.15910529847062266
                                                                                },
                                                                      "unit":  "kW"
                                                                  }
