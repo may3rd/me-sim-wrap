@@ -48,6 +48,22 @@ class ApiTest(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 422)
 
+    def test_heater_endpoint_returns_calculated_signed_duty(self):
+        response = self.client.post("/v1/unitops/heater", json={
+            "stream": {
+                "compound_ids": ["Methane", "Ethane"], "composition": [0.7, 0.3],
+                "temperature": {"value": 180.0, "unit": "K"},
+                "pressure": {"value": 500.0, "unit": "kPa"},
+                "molar_flow": {"value": 2.0, "unit": "kmol/s"},
+            },
+            "outlet_temperature": {"value": 190.0, "unit": "K"},
+        })
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["outlet"]["stream"]["temperature_k"], 190.0)
+        self.assertGreater(body["energy"]["duty_w"], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()
