@@ -26,6 +26,23 @@ class Phase0ArtifactsTest(unittest.TestCase):
         ):
             self.assertIn(token, script)
 
+    def test_capture_script_can_enable_dwsim_bubble_and_dew_calculation(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("[switch]$CalculateBubbleAndDewPoints", script)
+        self.assertIn("SetFlashSetting", script)
+        self.assertIn('"CalculateBubbleAndDewPoints"', script)
+        self.assertIn("bubble_dew_calculation", script)
+        self.assertIn("property_packages_updated", script)
+
+        load = script.index("$flowsheet = $automation.LoadFlowsheet2(")
+        setting = script.index("$propertyPackagesUpdated = [DwsimCaptureReflection]::SetFlashSetting(")
+        before = script.index("$before = @(", load)
+        solve = script.index("$automation.CalculateFlowsheet4(", load)
+        self.assertLess(load, setting)
+        self.assertLess(setting, before)
+        self.assertLess(setting, solve)
+
     def test_compatibility_record_requires_source_revision(self):
         text = (ROOT / "docs/compatibility.md").read_text()
 

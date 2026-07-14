@@ -13,6 +13,7 @@ param(
     [string]$CaseId,
     [string]$PropertyPackage = "unknown",
     [string]$FlashAlgorithm = "unknown",
+    [switch]$CalculateBubbleAndDewPoints,
     [string[]]$CompoundNames = @(
         "Methane",
         "Ethane",
@@ -27,6 +28,7 @@ Set-StrictMode -Version Latest
 
 Add-Type -TypeDefinition @"
 using System;
+using System.Collections;
 using System.Reflection;
 
 public static class DwsimCaptureReflection
@@ -72,6 +74,51 @@ public static class DwsimCaptureReflection
         return target == null
             ? null
             : target.GetType().Name;
+    }
+
+    public static int SetFlashSetting(
+        object flowsheet,
+        string settingName,
+        string settingValue)
+    {
+        object packages = Get(flowsheet, "PropertyPackages");
+        object values = Get(packages, "Values");
+        int count = 0;
+
+        if (!(values is IEnumerable))
+        {
+            throw new InvalidOperationException(
+                "DWSIM flowsheet has no enumerable property packages.");
+        }
+
+        foreach (object package in (IEnumerable)values)
+        {
+            object settings = Get(package, "FlashSettings");
+            Type[] arguments = settings == null
+                ? new Type[0]
+                : settings.GetType().GetGenericArguments();
+            PropertyInfo item = settings == null
+                ? null
+                : settings.GetType().GetProperty("Item", PublicInstance);
+
+            if (arguments.Length != 2 || !arguments[0].IsEnum || item == null)
+            {
+                throw new InvalidOperationException(
+                    "DWSIM property package has no writable FlashSettings dictionary.");
+            }
+
+            object key = Enum.Parse(arguments[0], settingName);
+            item.SetValue(settings, settingValue, new object[] { key });
+            count++;
+        }
+
+        if (count == 0)
+        {
+            throw new InvalidOperationException(
+                "DWSIM flowsheet has no property packages.");
+        }
+
+        return count;
     }
 }
 "@
@@ -565,6 +612,7 @@ $inputFile = $null
 $inputHash = $null
 $before = @()
 $after = @()
+$propertyPackagesUpdated = 0
 
 $solve = @{
     executed = $false
@@ -598,6 +646,14 @@ if (-not [string]::IsNullOrWhiteSpace($CasePath)) {
     $flowsheet = $automation.LoadFlowsheet2(
         $resolvedCase
     )
+
+    if ($CalculateBubbleAndDewPoints) {
+        $propertyPackagesUpdated = [DwsimCaptureReflection]::SetFlashSetting(
+            $flowsheet,
+            "CalculateBubbleAndDewPoints",
+            "True"
+        )
+    }
 
     $before = @(
         Get-ObjectStates -Flowsheet $flowsheet
@@ -664,6 +720,8 @@ $document = [ordered]@{
         input_file_sha256 = $inputHash
         property_package  = $PropertyPackage
         flash_algorithm   = $FlashAlgorithm
+        bubble_dew_calculation = [bool]$CalculateBubbleAndDewPoints
+        property_packages_updated = $propertyPackagesUpdated
 
         notes = (
             "Values are captured before and after " +
