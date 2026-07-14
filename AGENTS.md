@@ -35,3 +35,4 @@
 - A normalized match proves repeatability only; reject golden cases containing property read errors.
 - Allow empty PowerShell string parameters when the function body intentionally normalizes them.
 - Preserve NaN and infinity as explicit text records instead of emitting non-compliant JSON numbers.
+- Do not treat a DWSIM default flash result as an exact equilibrium reference without checking its configured convergence criterion and residual.

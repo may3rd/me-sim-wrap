@@ -1,4 +1,5 @@
 import math
+import json
 import sys
 import unittest
 from dataclasses import FrozenInstanceError
@@ -270,6 +271,66 @@ class PRBubbleDewPressureTest(unittest.TestCase):
 
         self.assertFalse(result.report.converged)
         self.assertIn("distinct", result.report.failure_reason)
+
+
+class PRDWSIMParityTest(unittest.TestCase):
+    """PR VLE vectors captured from DWSIM 9.0.4 in tests/golden/pr-flash.json."""
+
+    @classmethod
+    def setUpClass(cls):
+        compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        cls.compounds = (compounds["Methane"], compounds["Ethane"])
+        cls.interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
+        captured = json.loads((ROOT / "tests/golden/pr-flash.json").read_text(encoding="utf-8-sig"))
+        cls.records = {record["tag"]: record for record in captured["outputs"]["objects_after"]}
+
+    @classmethod
+    def value(cls, tag: str, property_id: str) -> float:
+        for record in cls.records[tag]["properties"]:
+            if record["property"] == property_id:
+                return record["value"]["value"]
+        raise AssertionError(f"{tag} lacks {property_id}")
+
+    def test_pr_tp_flash_matches_captured_dwsim_phase_states(self):
+        results = {}
+        for tag in ("PR6-TP-LIQUID", "PR6-TP-VAPOR", "PR6-TP-TWOPHASE", "PR6-TP-NEAR-CRITICAL"):
+            result = tp_flash(
+                self.compounds,
+                (0.7, 0.3),
+                self.interactions,
+                self.value(tag, "PROP_MS_0"),
+                self.value(tag, "PROP_MS_1"),
+            )
+            results[tag] = result
+            self.assertEqual(result.temperature_k, self.value(tag, "PROP_MS_0"))
+            self.assertEqual(result.pressure_pa, self.value(tag, "PROP_MS_1"))
+
+        self.assertEqual((results["PR6-TP-LIQUID"].phase, results["PR6-TP-LIQUID"].vapor_fraction), ("liquid", self.value("PR6-TP-LIQUID", "PROP_MS_27")))
+        self.assertEqual((results["PR6-TP-VAPOR"].phase, results["PR6-TP-VAPOR"].vapor_fraction), ("vapor", self.value("PR6-TP-VAPOR", "PROP_MS_27")))
+        # DWSIM's default NestedLoops solver stops at a 1e-6 vapor-fraction update,
+        # leaving this captured state at a 1.2e-4 fugacity residual.
+        self.assertTrue(math.isclose(results["PR6-TP-TWOPHASE"].vapor_fraction, self.value("PR6-TP-TWOPHASE", "PROP_MS_27"), rel_tol=5e-5))
+        # DWSIM labels its one-root near-critical stream as vapor; Python retains
+        # the more precise single-root classification and does not invent a split.
+        self.assertEqual(results["PR6-TP-NEAR-CRITICAL"].phase, "single")
+        self.assertEqual(self.value("PR6-TP-NEAR-CRITICAL", "PROP_MS_27"), 1.0)
+
+    def test_pr_ph_flash_matches_dwsim_temperature_with_caloric_model_boundary(self):
+        correlations = load_correlations(ROOT / "data/correlations/ideal-v1.json")
+        for source_tag, result_tag in (("PR6-PH-SOURCE-SINGLE", "PR6-PH-SINGLE"), ("PR6-PH-SOURCE-CROSSING", "PR6-PH-CROSSING")):
+            with self.subTest(result_tag=result_tag):
+                result = ph_flash(
+                    self.compounds,
+                    (0.7, 0.3),
+                    self.interactions,
+                    correlations,
+                    500_000.0,
+                    self.value(source_tag, "PROP_MS_9") * 1000.0,
+                    (140.0, 210.0),
+                )
+                self.assertTrue(result.report.converged)
+                self.assertTrue(math.isclose(result.temperature_k, self.value(result_tag, "PROP_MS_0"), rel_tol=2e-5))
+                self.assertTrue(math.isclose(result.enthalpy_j_per_kmol, result.target_enthalpy_j_per_kmol, rel_tol=1e-6))
 
 
 class PRPHFlashTest(unittest.TestCase):

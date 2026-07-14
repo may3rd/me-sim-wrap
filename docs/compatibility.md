@@ -111,3 +111,11 @@ T1 equation checks cover vapor, liquid, single-root, three-root, near-critical, 
 DWSIM material-stream density fields use `AUX_LIQDENS`/`AUX_VAPDENS`, while its PR compressibility path can apply configured Peneloux volume translation. These fields are recorded as `verified-with-difference`, not treated as equivalent to this implementation's unmodified PR cubic density and roots. Independent vapor and liquid equation vectors verify the Python PR compressibility and density calculations across all five compounds to `1e-8` relative. With that explicit model boundary, the classic-PR Phase 5 T1 gate is closed; PR78 remains demand-driven T3 scope.
 
 Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
+
+## Phase 6 flash parity status
+
+`tests/golden/pr-flash.json` and `tests/golden/pr-flash-repeat.json` are repeatable DWSIM 9.0.4 captures of the methane/ethane PR flash domain. The capture has no property-read errors. Python and DWSIM agree on stable liquid and stable vapor states. DWSIM reports the one-root near-critical stream as vapor while Python reports `single`; Python does not manufacture a vapor split from one EOS root. The two-phase vapor fraction differs by `3.96e-5` relative: DWSIM's default `NestedLoops` solver exits when the vapor-fraction update is below `1e-6`, although the saved state has a fugacity residual of about `1.2e-4`; Python retains its `1e-8` fugacity-equilibrium requirement.
+
+DWSIM's PR package is configured to use Lee-Kesler calorics, while this kernel uses ideal-gas heat-capacity correlations plus PR departure enthalpy. DWSIM-target PH temperatures differ by at most `2e-5` relative for the captured single-vapor and phase-crossing cases; Python PH energy closure remains `1e-6` relative to its supplied target.
+
+Bubble and dew pressure remain **not DWSIM-parity verified**. The present `PR6-BUBBLE` and `PR6-DEW` streams merely store manually supplied pressure states and report `PROP_MS_126` and `PROP_MS_127` as zero because DWSIM's `CalculateBubbleAndDewPoints` setting is disabled. Do not mark T2 fully supported until a capture records nonzero DWSIM bubble/dew property values or a direct solver result.
