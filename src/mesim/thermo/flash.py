@@ -82,6 +82,19 @@ class PHFlashResult:
     flash: TPFlashResult | None
 
 
+@dataclass(frozen=True, slots=True)
+class PSFlashResult:
+    report: SolverReport
+    temperature_k: float
+    pressure_pa: float
+    target_entropy_j_per_kmol_k: float
+    entropy_j_per_kmol_k: float | None
+    temperature_bracket_k: tuple[float, float]
+    outer_iterations: int
+    inner_iterations: int
+    flash: TPFlashResult | None
+
+
 def _report(
     converged: bool,
     iterations: int,
@@ -628,6 +641,24 @@ def phase_enthalpy(
     return ideal_mixture_enthalpy(compounds, composition, correlations, temperature_k) + state.departure_enthalpy_j_per_kmol
 
 
+def phase_entropy(
+    compounds: tuple[Compound, ...], composition: tuple[float, ...], correlations: tuple[IdealCorrelations, ...],
+    temperature_k: float, pressure_pa: float, state: PRMixtureState | None,
+) -> float:
+    _validate_composition(compounds, composition)
+    if state is None or not math.isfinite(state.departure_entropy_j_per_kmol_k):
+        raise ValidationError("a finite PR phase state is required for phase entropy")
+    records = {record.compound_id: record for record in correlations}
+    if any(compound.id not in records for compound in compounds):
+        raise ValidationError("missing ideal heat-capacity correlation for a flash compound")
+    ideal = math.fsum(
+        fraction * records[compound.id].entropy_change(temperature_k, pressure_pa).value
+        for compound, fraction in zip(compounds, composition)
+    )
+    mixing = -8314.46261815324 * math.fsum(fraction * math.log(fraction) for fraction in composition if fraction > 0.0)
+    return ideal + mixing + state.departure_entropy_j_per_kmol_k
+
+
 def flash_enthalpy(compounds: tuple[Compound, ...], correlations: tuple[IdealCorrelations, ...], flash: TPFlashResult) -> float:
     if not flash.report.converged:
         raise ValidationError("a converged TP flash is required for total enthalpy")
@@ -638,6 +669,18 @@ def flash_enthalpy(compounds: tuple[Compound, ...], correlations: tuple[IdealCor
     if flash.phase == "liquid":
         return phase_enthalpy(compounds, flash.liquid_composition, correlations, flash.temperature_k, flash.liquid_state)
     return phase_enthalpy(compounds, flash.vapor_composition, correlations, flash.temperature_k, flash.vapor_state)
+
+
+def flash_entropy(compounds: tuple[Compound, ...], correlations: tuple[IdealCorrelations, ...], flash: TPFlashResult) -> float:
+    if not flash.report.converged:
+        raise ValidationError("a converged TP flash is required for total entropy")
+    if flash.phase == "two-phase":
+        liquid = phase_entropy(compounds, flash.liquid_composition, correlations, flash.temperature_k, flash.pressure_pa, flash.liquid_state)
+        vapor = phase_entropy(compounds, flash.vapor_composition, correlations, flash.temperature_k, flash.pressure_pa, flash.vapor_state)
+        return (1.0 - flash.vapor_fraction) * liquid + flash.vapor_fraction * vapor
+    if flash.phase == "liquid":
+        return phase_entropy(compounds, flash.liquid_composition, correlations, flash.temperature_k, flash.pressure_pa, flash.liquid_state)
+    return phase_entropy(compounds, flash.vapor_composition, correlations, flash.temperature_k, flash.pressure_pa, flash.vapor_state)
 
 
 def _validate_temperature_bracket(bracket_k: tuple[float, float]) -> None:
@@ -721,3 +764,56 @@ def ph_flash(
             low, low_residual = temperature_k, residual
 
     return _ph_result(False, max_iterations, latest_enthalpy - target_enthalpy_j_per_kmol, "PH iteration limit reached", temperature_k, pressure_pa, target_enthalpy_j_per_kmol, (low, high), inner_iterations, latest_flash, latest_enthalpy)
+
+
+def ps_flash(
+    compounds: tuple[Compound, ...], composition: tuple[float, ...], interactions: PRInteractions,
+    correlations: tuple[IdealCorrelations, ...], pressure_pa: float, target_entropy_j_per_kmol_k: float,
+    temperature_bracket_k: tuple[float, float], *, max_iterations: int = 100,
+) -> PSFlashResult:
+    _validate_solver_limits(max_iterations, 1e-10)
+    _validate_temperature_bracket(temperature_bracket_k)
+    _validate_absolute_pressure(pressure_pa)
+    if isinstance(target_entropy_j_per_kmol_k, bool) or not isinstance(target_entropy_j_per_kmol_k, (int, float)) or not math.isfinite(target_entropy_j_per_kmol_k):
+        raise ValidationError("target entropy must be finite")
+    low, high = temperature_bracket_k
+    inner_iterations = 0
+
+    def trial(temperature_k: float) -> TPFlashResult:
+        nonlocal inner_iterations
+        flash = tp_flash(compounds, composition, interactions, temperature_k, pressure_pa, max_iterations=max_iterations)
+        inner_iterations += flash.report.iterations
+        return flash
+
+    try:
+        low_flash, high_flash = trial(low), trial(high)
+        low_entropy = flash_entropy(compounds, correlations, low_flash)
+        high_entropy = flash_entropy(compounds, correlations, high_flash)
+    except ValidationError as error:
+        return PSFlashResult(_report(False, 0, math.inf, str(error), "PR PS bisection"), low, pressure_pa, target_entropy_j_per_kmol_k, None, (low, high), 0, inner_iterations, None)
+    if not low_flash.report.converged or not high_flash.report.converged:
+        failed = low_flash if not low_flash.report.converged else high_flash
+        return PSFlashResult(_report(False, 0, failed.report.residual, failed.report.failure_reason, "PR PS bisection"), low, pressure_pa, target_entropy_j_per_kmol_k, None, (low, high), 0, inner_iterations, failed)
+    low_residual, high_residual = low_entropy - target_entropy_j_per_kmol_k, high_entropy - target_entropy_j_per_kmol_k
+    if low_residual * high_residual > 0.0:
+        return PSFlashResult(_report(False, 0, min(abs(low_residual), abs(high_residual)), "temperature bracket does not enclose target entropy", "PR PS bisection"), low, pressure_pa, target_entropy_j_per_kmol_k, low_entropy, (low, high), 0, inner_iterations, low_flash)
+
+    latest_flash, latest_entropy = low_flash, low_entropy
+    tolerance = max(1e-6 * abs(target_entropy_j_per_kmol_k), 1e-3)
+    for iteration in range(1, max_iterations + 1):
+        temperature_k = (low + high) / 2.0
+        try:
+            latest_flash = trial(temperature_k)
+            latest_entropy = flash_entropy(compounds, correlations, latest_flash)
+        except ValidationError as error:
+            return PSFlashResult(_report(False, iteration, math.inf, str(error), "PR PS bisection"), temperature_k, pressure_pa, target_entropy_j_per_kmol_k, None, (low, high), iteration, inner_iterations, None)
+        if not latest_flash.report.converged:
+            return PSFlashResult(_report(False, iteration, latest_flash.report.residual, latest_flash.report.failure_reason, "PR PS bisection"), temperature_k, pressure_pa, target_entropy_j_per_kmol_k, None, (low, high), iteration, inner_iterations, latest_flash)
+        residual = latest_entropy - target_entropy_j_per_kmol_k
+        if abs(residual) <= tolerance and high - low <= 1e-8 * temperature_k:
+            return PSFlashResult(_report(True, iteration, residual, algorithm="PR PS bisection"), temperature_k, pressure_pa, target_entropy_j_per_kmol_k, latest_entropy, (low, high), iteration, inner_iterations, latest_flash)
+        if low_residual * residual <= 0.0:
+            high, high_residual = temperature_k, residual
+        else:
+            low, low_residual = temperature_k, residual
+    return PSFlashResult(_report(False, max_iterations, latest_entropy - target_entropy_j_per_kmol_k, "PS iteration limit reached", "PR PS bisection"), temperature_k, pressure_pa, target_entropy_j_per_kmol_k, latest_entropy, (low, high), max_iterations, inner_iterations, latest_flash)
