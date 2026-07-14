@@ -81,6 +81,22 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["outlet"]["stream"]["pressure_pa"], 300_000.0)
 
+    def test_u0_flowsheet_endpoint_solves_declared_chain(self):
+        feed = {"compound_ids": ["Methane", "Ethane"], "temperature": {"value": 180.0, "unit": "K"}, "pressure": {"value": 500.0, "unit": "kPa"}, "molar_flow": {"value": 1.0, "unit": "kmol/s"}}
+        response = self.client.post("/v1/flowsheets/u0", json={
+            "feeds": [{**feed, "composition": [1.0, 0.0]}, {**feed, "composition": [0.0, 1.0]}],
+            "mixer_outlet_pressure": {"value": 500.0, "unit": "kPa"},
+            "mixer_temperature_bracket": [{"value": 140.0, "unit": "K"}, {"value": 240.0, "unit": "K"}],
+            "heater_outlet_temperature": {"value": 190.0, "unit": "K"},
+            "valve_outlet_pressure": {"value": 300.0, "unit": "kPa"},
+            "valve_temperature_bracket": [{"value": 140.0, "unit": "K"}, {"value": 240.0, "unit": "K"}],
+        })
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["streams"]["valve"]["stream"]["pressure_pa"], 300_000.0)
+        self.assertTrue(math.isclose(body["streams"]["liquid"]["molar_flow_kmol_s"] + body["streams"]["vapor"]["molar_flow_kmol_s"], 2.0, abs_tol=1e-12))
+
 
 if __name__ == "__main__":
     unittest.main()

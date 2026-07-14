@@ -11,7 +11,7 @@ from .streams import PhaseState, StreamState, flash_stream
 from .thermo.flash import tp_flash
 from .thermo.ideal import load_correlations
 from .units import Quantity
-from .unitops.basic import heater, valve
+from .unitops.basic import equilibrium_separator, heater, mix_streams, valve
 
 
 DATA = Path(__file__).resolve().parents[2] / "data"
@@ -58,6 +58,17 @@ class ValveRequest(BaseModel):
     stream: StreamInput
     outlet_pressure: QuantityInput
     temperature_bracket: tuple[QuantityInput, QuantityInput]
+
+
+class U0FlowsheetRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    feeds: tuple[StreamInput, StreamInput]
+    mixer_outlet_pressure: QuantityInput
+    mixer_temperature_bracket: tuple[QuantityInput, QuantityInput]
+    heater_outlet_temperature: QuantityInput
+    valve_outlet_pressure: QuantityInput
+    valve_temperature_bracket: tuple[QuantityInput, QuantityInput]
 
 
 @app.exception_handler(ValidationError)
@@ -107,6 +118,18 @@ def _phase_response(phase: PhaseState) -> dict[str, object]:
     }
 
 
+def _stream_response(stream: StreamState) -> dict[str, object]:
+    return {
+        "temperature_k": stream.temperature_k, "pressure_pa": stream.pressure_pa,
+        "molar_flow_kmol_s": stream.molar_flow_kmol_s, "compound_ids": stream.compound_ids,
+        "composition": stream.composition, "enthalpy_j_per_kmol": stream.enthalpy_j_per_kmol,
+    }
+
+
+def _bracket(items: tuple[QuantityInput, QuantityInput]) -> tuple[Quantity, Quantity]:
+    return tuple(item.quantity("temperature") for item in items)
+
+
 @app.get("/v1/compounds/{compound_id}")
 def compound(compound_id: str) -> dict[str, object]:
     try:
@@ -153,7 +176,7 @@ def heat(request: HeaterRequest) -> dict[str, object]:
 def throttle(request: ValveRequest) -> dict[str, object]:
     inlet = _phase(request.stream)
     outlet_pressure = request.outlet_pressure.quantity("pressure")
-    bracket = tuple(item.quantity("temperature") for item in request.temperature_bracket)
+    bracket = _bracket(request.temperature_bracket)
     result = valve(
         inlet, _compounds(request.stream.compound_ids), INTERACTIONS, CORRELATIONS, outlet_pressure.si_value,
         tuple(item.si_value for item in bracket),
@@ -165,4 +188,35 @@ def throttle(request: ValveRequest) -> dict[str, object]:
             "temperature_bracket": [_quantity(item) for item in bracket],
         },
         "outlet": _phase_response(result),
+    }
+
+
+@app.post("/v1/flowsheets/u0")
+def solve_u0(request: U0FlowsheetRequest) -> dict[str, object]:
+    first, second = (_phase(feed) for feed in request.feeds)
+    compounds = _compounds(first.stream.compound_ids)
+    mixer_pressure = request.mixer_outlet_pressure.quantity("pressure")
+    mixer_bracket = _bracket(request.mixer_temperature_bracket)
+    mixed = mix_streams((first, second), compounds, INTERACTIONS, CORRELATIONS, mixer_pressure.si_value, tuple(item.si_value for item in mixer_bracket))
+    heater_temperature = request.heater_outlet_temperature.quantity("temperature")
+    heated = heater(mixed, compounds, INTERACTIONS, CORRELATIONS, heater_temperature.si_value).outlet
+    valve_pressure = request.valve_outlet_pressure.quantity("pressure")
+    valve_bracket = _bracket(request.valve_temperature_bracket)
+    throttled = valve(heated, compounds, INTERACTIONS, CORRELATIONS, valve_pressure.si_value, tuple(item.si_value for item in valve_bracket))
+    separated = equilibrium_separator(throttled, compounds, CORRELATIONS)
+    return {
+        "schema_version": "mesim-api-1",
+        "inputs": {
+            "feeds": [_stream_input(feed) for feed in request.feeds],
+            "mixer_outlet_pressure": _quantity(mixer_pressure),
+            "mixer_temperature_bracket": [_quantity(item) for item in mixer_bracket],
+            "heater_outlet_temperature": _quantity(heater_temperature),
+            "valve_outlet_pressure": _quantity(valve_pressure),
+            "valve_temperature_bracket": [_quantity(item) for item in valve_bracket],
+        },
+        "streams": {
+            "mixer": _phase_response(mixed), "heater": _phase_response(heated), "valve": _phase_response(throttled),
+            "liquid": _stream_response(separated.liquid) if separated.liquid else None,
+            "vapor": _stream_response(separated.vapor) if separated.vapor else None,
+        },
     }
