@@ -11,7 +11,7 @@ from .streams import PhaseState, StreamState, flash_stream
 from .thermo.flash import tp_flash
 from .thermo.ideal import load_correlations
 from .units import Quantity
-from .unitops.basic import heater
+from .unitops.basic import heater, valve
 
 
 DATA = Path(__file__).resolve().parents[2] / "data"
@@ -50,6 +50,14 @@ class HeaterRequest(BaseModel):
 
     stream: StreamInput
     outlet_temperature: QuantityInput
+
+
+class ValveRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    stream: StreamInput
+    outlet_pressure: QuantityInput
+    temperature_bracket: tuple[QuantityInput, QuantityInput]
 
 
 @app.exception_handler(ValidationError)
@@ -129,4 +137,23 @@ def heat(request: HeaterRequest) -> dict[str, object]:
         "inputs": {"outlet_temperature": _quantity(outlet_temperature)},
         "outlet": _phase_response(result.outlet),
         "energy": {"duty_w": result.energy.duty_w},
+    }
+
+
+@app.post("/v1/unitops/valve")
+def throttle(request: ValveRequest) -> dict[str, object]:
+    inlet = _phase(request.stream)
+    outlet_pressure = request.outlet_pressure.quantity("pressure")
+    bracket = tuple(item.quantity("temperature") for item in request.temperature_bracket)
+    result = valve(
+        inlet, _compounds(request.stream.compound_ids), INTERACTIONS, CORRELATIONS, outlet_pressure.si_value,
+        tuple(item.si_value for item in bracket),
+    )
+    return {
+        "schema_version": "mesim-api-1",
+        "inputs": {
+            "outlet_pressure": _quantity(outlet_pressure),
+            "temperature_bracket": [_quantity(item) for item in bracket],
+        },
+        "outlet": _phase_response(result),
     }

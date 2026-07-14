@@ -64,6 +64,21 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(body["outlet"]["stream"]["temperature_k"], 190.0)
         self.assertGreater(body["energy"]["duty_w"], 0.0)
 
+    def test_valve_endpoint_isenthalpically_reduces_pressure(self):
+        response = self.client.post("/v1/unitops/valve", json={
+            "stream": {
+                "compound_ids": ["Methane", "Ethane"], "composition": [0.7, 0.3],
+                "temperature": {"value": 190.0, "unit": "K"},
+                "pressure": {"value": 600.0, "unit": "kPa"},
+                "molar_flow": {"value": 2.0, "unit": "kmol/s"},
+            },
+            "outlet_pressure": {"value": 300.0, "unit": "kPa"},
+            "temperature_bracket": [{"value": 140.0, "unit": "K"}, {"value": 240.0, "unit": "K"}],
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["outlet"]["stream"]["pressure_pa"], 300_000.0)
+
 
 if __name__ == "__main__":
     unittest.main()
