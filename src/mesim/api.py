@@ -126,6 +126,11 @@ def _stream_response(stream: StreamState) -> dict[str, object]:
     }
 
 
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"schema_version": "mesim-api-1", "status": "ok"}
+
+
 def _bracket(items: tuple[QuantityInput, QuantityInput]) -> tuple[Quantity, Quantity]:
     return tuple(item.quantity("temperature") for item in items)
 

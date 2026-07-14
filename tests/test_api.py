@@ -22,6 +22,9 @@ class ApiTest(unittest.TestCase):
         body = response.json()
         self.assertEqual((body["schema_version"], body["compound"]["id"]), ("mesim-api-1", "Methane"))
 
+    def test_health_reports_api_schema_version(self):
+        self.assertEqual(self.client.get("/health").json(), {"schema_version": "mesim-api-1", "status": "ok"})
+
     def test_tp_flash_preserves_submitted_units_and_returns_phase(self):
         response = self.client.post("/v1/flash/tp", json={
             "compound_ids": ["Methane", "Ethane"],

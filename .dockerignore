@@ -1,0 +1,8 @@
+.git
+.worktrees
+.DS_Store
+__pycache__
+*.pyc
+dwsim-windows
+tests
+docs
