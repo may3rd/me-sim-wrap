@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
-from mesim.streams import StreamState, flash_stream
+from mesim.streams import EnergyStream, StreamState, flash_stream
 from mesim.thermo.ideal import load_correlations
 
 
@@ -56,6 +56,18 @@ class StreamStateTest(unittest.TestCase):
         self.assertTrue(math.isfinite(result.enthalpy_j_per_kmol))
         with self.assertRaises(ValidationError):
             flash_stream(stream, tuple(reversed(self.compounds)), self.interactions, self.correlations)
+
+    def test_energy_stream_is_immutable_signed_si_power(self):
+        heating = EnergyStream(25_000.0)
+        cooling = EnergyStream(-25_000.0)
+
+        self.assertEqual((heating.duty_w, cooling.duty_w), (25_000.0, -25_000.0))
+        with self.assertRaises(FrozenInstanceError):
+            heating.duty_w = 0.0
+        for invalid in (True, math.nan, math.inf, "100"):
+            with self.subTest(invalid=invalid):
+                with self.assertRaises(ValidationError):
+                    EnergyStream(invalid)
 
 
 if __name__ == "__main__":

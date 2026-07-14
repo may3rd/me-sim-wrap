@@ -41,6 +41,16 @@ class StreamState:
 
 
 @dataclass(frozen=True, slots=True)
+class EnergyStream:
+    """Energy duty in W; positive duty enters the connected material stream."""
+    duty_w: float
+
+    def __post_init__(self) -> None:
+        if isinstance(self.duty_w, bool) or not isinstance(self.duty_w, (int, float)) or not math.isfinite(self.duty_w):
+            raise ValidationError("energy stream duty must be a finite numeric value")
+
+
+@dataclass(frozen=True, slots=True)
 class PhaseState:
     stream: StreamState
     flash: TPFlashResult
