@@ -1,5 +1,6 @@
 import math
 import sys
+import time
 import unittest
 from pathlib import Path
 
@@ -8,7 +9,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from fastapi.testclient import TestClient
 
+import mesim.api as api
 from mesim.api import app
+from fastapi import HTTPException
+
+
+def _slow(_: object) -> dict[str, object]:
+    time.sleep(0.1)
+    return {}
 
 
 class ApiTest(unittest.TestCase):
@@ -24,6 +32,16 @@ class ApiTest(unittest.TestCase):
 
     def test_health_reports_api_schema_version(self):
         self.assertEqual(self.client.get("/health").json(), {"schema_version": "mesim-api-1", "status": "ok"})
+
+    def test_calculation_deadline_terminates_worker(self):
+        original = api.CALCULATION_TIMEOUT_S
+        api.CALCULATION_TIMEOUT_S = 0.01
+        try:
+            with self.assertRaises(HTTPException) as error:
+                api._limited(_slow, None)
+        finally:
+            api.CALCULATION_TIMEOUT_S = original
+        self.assertEqual(error.exception.status_code, 408)
 
     def test_tp_flash_preserves_submitted_units_and_returns_phase(self):
         response = self.client.post("/v1/flash/tp", json={

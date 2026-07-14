@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from multiprocessing import get_context
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -18,6 +19,7 @@ DATA = Path(__file__).resolve().parents[2] / "data"
 COMPOUNDS = {compound.id: compound for compound in load_compounds(DATA / "compounds/v1.json")}
 INTERACTIONS = load_pr_interactions(DATA / "interactions/pr-v1.json")
 CORRELATIONS = load_correlations(DATA / "correlations/ideal-v1.json")
+CALCULATION_TIMEOUT_S = 5.0
 
 app = FastAPI(title="me-sim", version="0.1.0a0")
 
@@ -74,6 +76,38 @@ class U0FlowsheetRequest(BaseModel):
 @app.exception_handler(ValidationError)
 async def validation_error(_: Request, error: ValidationError) -> JSONResponse:
     return JSONResponse(status_code=422, content={"detail": str(error)})
+
+
+def _calculation_child(connection, function, request) -> None:
+    try:
+        connection.send(("ok", function(request)))
+    except HTTPException as error:
+        connection.send(("http", error.status_code, error.detail))
+    except ValidationError as error:
+        connection.send(("validation", str(error)))
+    finally:
+        connection.close()
+
+
+def _limited(function, request) -> dict[str, object]:
+    parent, child = get_context("spawn").Pipe(duplex=False)
+    process = get_context("spawn").Process(target=_calculation_child, args=(child, function, request))
+    process.start()
+    child.close()
+    process.join(CALCULATION_TIMEOUT_S)
+    if process.is_alive():
+        process.terminate()
+        process.join()
+        raise HTTPException(status_code=408, detail="calculation time limit exceeded")
+    if not parent.poll():
+        raise HTTPException(status_code=500, detail="calculation worker exited without a result")
+    result = parent.recv()
+    parent.close()
+    if result[0] == "ok":
+        return result[1]
+    if result[0] == "http":
+        raise HTTPException(status_code=result[1], detail=result[2])
+    raise ValidationError(result[1])
 
 
 def _quantity(quantity: Quantity) -> dict[str, float | str]:
@@ -146,6 +180,10 @@ def compound(compound_id: str) -> dict[str, object]:
 
 @app.post("/v1/flash/tp")
 def flash(request: TPFlashRequest) -> dict[str, object]:
+    return _limited(_flash, request)
+
+
+def _flash(request: TPFlashRequest) -> dict[str, object]:
     compounds = _compounds(request.compound_ids)
     temperature = request.temperature.quantity("temperature")
     pressure = request.pressure.quantity("pressure")
@@ -166,6 +204,10 @@ def flash(request: TPFlashRequest) -> dict[str, object]:
 
 @app.post("/v1/unitops/heater")
 def heat(request: HeaterRequest) -> dict[str, object]:
+    return _limited(_heat, request)
+
+
+def _heat(request: HeaterRequest) -> dict[str, object]:
     inlet = _phase(request.stream)
     outlet_temperature = request.outlet_temperature.quantity("temperature")
     result = heater(inlet, _compounds(request.stream.compound_ids), INTERACTIONS, CORRELATIONS, outlet_temperature.si_value)
@@ -179,6 +221,10 @@ def heat(request: HeaterRequest) -> dict[str, object]:
 
 @app.post("/v1/unitops/valve")
 def throttle(request: ValveRequest) -> dict[str, object]:
+    return _limited(_throttle, request)
+
+
+def _throttle(request: ValveRequest) -> dict[str, object]:
     inlet = _phase(request.stream)
     outlet_pressure = request.outlet_pressure.quantity("pressure")
     bracket = _bracket(request.temperature_bracket)
@@ -198,6 +244,10 @@ def throttle(request: ValveRequest) -> dict[str, object]:
 
 @app.post("/v1/flowsheets/u0")
 def solve_u0(request: U0FlowsheetRequest) -> dict[str, object]:
+    return _limited(_solve_u0, request)
+
+
+def _solve_u0(request: U0FlowsheetRequest) -> dict[str, object]:
     first, second = (_phase(feed) for feed in request.feeds)
     compounds = _compounds(first.stream.compound_ids)
     mixer_pressure = request.mixer_outlet_pressure.quantity("pressure")
