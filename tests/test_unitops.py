@@ -10,7 +10,7 @@ from mesim import ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.streams import StreamState, flash_stream
 from mesim.thermo.ideal import load_correlations
-from mesim.unitops.basic import mix_streams, split_stream
+from mesim.unitops.basic import cooler, heater, mix_streams, split_stream
 
 
 ROOT = Path(__file__).parents[1]
@@ -77,6 +77,31 @@ class BasicUnitOperationTest(unittest.TestCase):
             split_stream(self.first.stream, (0.2, 0.7))
         zero = StreamState(180.0, 500_000.0, 0.0, ("Methane", "Ethane"), (0.7, 0.3))
         self.assertEqual(tuple(outlet.molar_flow_kmol_s for outlet in split_stream(zero, (0.5, 0.5))), (0.0, 0.0))
+
+    def test_heater_and_cooler_close_energy_at_fixed_pressure(self):
+        heated = heater(self.first, self.compounds, self.interactions, self.correlations, 200.0)
+        cooled = cooler(self.second, self.compounds, self.interactions, self.correlations, 170.0)
+
+        self.assertEqual((heated.outlet.stream.temperature_k, cooled.outlet.stream.temperature_k), (200.0, 170.0))
+        self.assertEqual((heated.outlet.stream.pressure_pa, cooled.outlet.stream.pressure_pa), (500_000.0, 600_000.0))
+        self.assertGreater(heated.energy.duty_w, 0.0)
+        self.assertLess(cooled.energy.duty_w, 0.0)
+        self.assertTrue(math.isclose(
+            heated.energy.duty_w,
+            self.first.stream.molar_flow_kmol_s * (heated.outlet.enthalpy_j_per_kmol - self.first.enthalpy_j_per_kmol),
+            rel_tol=1e-12,
+        ))
+
+    def test_thermal_operations_reject_wrong_sign_and_allow_zero_flow(self):
+        with self.assertRaises(ValidationError):
+            heater(self.first, self.compounds, self.interactions, self.correlations, 170.0)
+        with self.assertRaises(ValidationError):
+            cooler(self.first, self.compounds, self.interactions, self.correlations, 200.0)
+        zero = flash_stream(
+            StreamState(180.0, 500_000.0, 0.0, ("Methane", "Ethane"), (0.7, 0.3)),
+            self.compounds, self.interactions, self.correlations,
+        )
+        self.assertEqual(heater(zero, self.compounds, self.interactions, self.correlations, 200.0).energy.duty_w, 0.0)
 
 
 if __name__ == "__main__":

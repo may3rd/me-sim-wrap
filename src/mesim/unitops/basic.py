@@ -1,8 +1,9 @@
 import math
+from dataclasses import dataclass
 
 from ..compounds import Compound, PRInteractions
 from ..errors import ConvergenceError, ValidationError
-from ..streams import PhaseState, StreamState
+from ..streams import EnergyStream, PhaseState, StreamState, flash_stream
 from ..thermo.flash import ph_flash
 from ..thermo.ideal import IdealCorrelations
 
@@ -66,3 +67,53 @@ def split_stream(stream: StreamState, fractions: tuple[float, ...]) -> tuple[Str
         )
         for fraction in fractions
     )
+
+
+@dataclass(frozen=True, slots=True)
+class ThermalOperationResult:
+    outlet: PhaseState
+    energy: EnergyStream
+
+
+def _thermal_operation(
+    inlet: PhaseState,
+    compounds: tuple[Compound, ...],
+    interactions: PRInteractions,
+    correlations: tuple[IdealCorrelations, ...],
+    outlet_temperature_k: float,
+    kind: str,
+) -> ThermalOperationResult:
+    _positive_finite(outlet_temperature_k, f"{kind} outlet temperature")
+    outlet = flash_stream(
+        StreamState(
+            outlet_temperature_k, inlet.stream.pressure_pa, inlet.stream.molar_flow_kmol_s,
+            inlet.stream.compound_ids, inlet.stream.composition,
+        ),
+        compounds, interactions, correlations,
+    )
+    duty = inlet.stream.molar_flow_kmol_s * (outlet.enthalpy_j_per_kmol - inlet.enthalpy_j_per_kmol)
+    if (kind == "heater" and duty < 0.0) or (kind == "cooler" and duty > 0.0):
+        raise ValidationError(f"{kind} outlet temperature gives an invalid duty sign")
+    return ThermalOperationResult(outlet, EnergyStream(duty))
+
+
+def heater(
+    inlet: PhaseState,
+    compounds: tuple[Compound, ...],
+    interactions: PRInteractions,
+    correlations: tuple[IdealCorrelations, ...],
+    outlet_temperature_k: float,
+) -> ThermalOperationResult:
+    """Heat a flashed stream at constant pressure to a specified temperature."""
+    return _thermal_operation(inlet, compounds, interactions, correlations, outlet_temperature_k, "heater")
+
+
+def cooler(
+    inlet: PhaseState,
+    compounds: tuple[Compound, ...],
+    interactions: PRInteractions,
+    correlations: tuple[IdealCorrelations, ...],
+    outlet_temperature_k: float,
+) -> ThermalOperationResult:
+    """Cool a flashed stream at constant pressure to a specified temperature."""
+    return _thermal_operation(inlet, compounds, interactions, correlations, outlet_temperature_k, "cooler")
