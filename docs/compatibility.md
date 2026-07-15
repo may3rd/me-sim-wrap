@@ -118,7 +118,9 @@ DWSIM material-stream density fields use `AUX_LIQDENS`/`AUX_VAPDENS`, while its 
 
 `tests/golden/u1-component-separator-pr-eos.json` is the component-separator reference. Its saved specification is outlet 1, 10% n-pentane and 90% ethane of each component's inlet mass flow. Per-component mass and molar split fractions are numerically identical, so the kernel has one fraction-based mode. Both outlet flows and enthalpies match within `1e-4` relative. DWSIM reports `EnergyImb` as inlet minus outlets; `EnergyStream.duty_w` is its negation because positive duty enters material.
 
-`tests/golden/u2-heat-duty-pr-eos.json` is the fixed-duty heat-exchanger reference: methane/ethane hot and cold feeds, each 2 mol/s at 500 kPa, with 400 K and 300 K inlet temperatures and a 2 kW heat transfer. The kernel supports DWSIM's `Calculate Outlet Temperatures` mode only: positive duty transfers energy from the hot inlet to the cold inlet at unchanged pressure. It has no external energy stream. Both outlet temperatures and enthalpies match within `1e-4` relative. UA, area, pressure-drop, efficiency, pinch, and shell-and-tube modes remain unsupported.
+`tests/golden/u2-heat-duty-pr-eos.json` is the fixed-duty heat-exchanger reference: methane/ethane hot and cold feeds, each 2 mol/s at 500 kPa, with 400 K and 300 K inlet temperatures and a 2 kW heat transfer. Positive duty transfers energy from the hot inlet to the cold inlet at unchanged pressure. It has no external energy stream. Both outlet temperatures and enthalpies match within `1e-4` relative.
+
+`tests/golden/u2-heat-ua-pr-eos.json` is the matching specified-UA reference: the same counter-current, no-loss streams with U = 25 W/m2/K and A = 1 m2. The kernel solves `Q = UA × LMTD` by bounded bisection and matches DWSIM's 1.955691 kW heat duty and both outlet temperatures within `1e-4` relative. Pressure-drop, thermal-efficiency, pinch, phase-change, and shell-and-tube modes remain unsupported.
 
 Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
 
