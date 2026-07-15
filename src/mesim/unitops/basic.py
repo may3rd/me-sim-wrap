@@ -135,6 +135,44 @@ def shell_tube_tube_side(
     return reynolds, friction, pressure_drop, coefficient
 
 
+def shell_tube_shell_side(
+    geometry: ShellTubeGeometry, mass_flow_kg_s: float, density_kg_m3: float, viscosity_pa_s: float,
+    conductivity_w_m_k: float, heat_capacity_j_kg_k: float, shell_diameter_mm: float,
+    baffle_spacing_mm: float, baffle_cut_percent: float,
+) -> tuple[float, float, float, float]:
+    """DWSIM simplified Tinker shell-side correlation for tube layout 0."""
+    shell_tube_area(geometry)
+    for value, name in ((mass_flow_kg_s, "shell mass flow"), (density_kg_m3, "shell density"), (viscosity_pa_s, "shell viscosity"), (conductivity_w_m_k, "shell conductivity"), (heat_capacity_j_kg_k, "shell heat capacity"), (shell_diameter_mm, "shell diameter"), (baffle_spacing_mm, "baffle spacing")):
+        _positive_finite(value, name)
+    if not 0.0 < baffle_cut_percent < 100.0:
+        raise ValidationError("shell baffle cut must be within (0, 100)")
+    outer, pitch, shell, spacing = geometry.tube_outer_diameter_mm / 1000.0, geometry.tube_pitch_mm / 1000.0, shell_diameter_mm / 1000.0, baffle_spacing_mm / 1000.0
+    if pitch / outer > 1.5:
+        raise ValidationError("shell tube pitch ratio must not exceed 1.5")
+    bundle = (1.1 * geometry.tube_count**0.5 - 1.0) * pitch + outer
+    xx, yy = shell / spacing, pitch / outer
+    nh = 0.9078565328950694 * xx**0.6633110612656448 * yy**-4.432976463965648
+    y = 5.371855907482061 * xx**-0.33416765138071414 * yy**0.7267144209289168
+    np = 0.5380765047084108 * xx**0.3761125784751041 * yy**-3.8741224386187474
+    fp = 1.0 / (0.8 + np * (shell / pitch) ** 0.5)
+    section = 0.97 * (pitch - outer) / pitch * spacing * bundle
+    mass_velocity = mass_flow_kg_s / (section / fp)
+    reynolds = mass_velocity * outer / viscosity_pa_s
+    if reynolds < 100.0:
+        friction = 276.46 * reynolds**-0.979
+    elif reynolds < 1000.0:
+        friction = 30.26 * reynolds**-0.523
+    else:
+        friction = 2.93 * reynolds**-0.186
+    baffles = geometry.tube_length_m / spacing + 1.0
+    pressure_drop = 4.0 * friction * mass_velocity**2 / (2.0 * density_kg_m3) * 1.154 * (1.0 - baffle_cut_percent / 100.0) * shell / pitch * baffles * (1.0 + y * pitch / shell) * geometry.shell_count
+    corrected_section = section * 0.96 / (1.0 / (1.0 + nh * (shell / pitch) ** 0.5))
+    corrected_reynolds = mass_flow_kg_s / corrected_section * outer / viscosity_pa_s
+    jh = 0.497 * corrected_reynolds**0.54 if corrected_reynolds < 100.0 else 0.378 * corrected_reynolds**0.61
+    coefficient = jh * conductivity_w_m_k * (viscosity_pa_s * heat_capacity_j_kg_k / conductivity_w_m_k) ** 0.34 / outer
+    return reynolds, friction, pressure_drop, coefficient
+
+
 def heat_exchanger(
     hot_inlet: PhaseState,
     cold_inlet: PhaseState,
