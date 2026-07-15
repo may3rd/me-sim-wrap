@@ -122,6 +122,8 @@ DWSIM material-stream density fields use `AUX_LIQDENS`/`AUX_VAPDENS`, while its 
 
 `tests/golden/u2-heat-ua-pr-eos.json` is the matching specified-UA reference: the same counter-current, no-loss streams with U = 25 W/m2/K and A = 1 m2. The kernel solves `Q = UA × LMTD` by bounded bisection and matches DWSIM's 1.955691 kW heat duty and both outlet temperatures within `1e-4` relative. Pressure-drop, thermal-efficiency, pinch, phase-change, and shell-and-tube modes remain unsupported.
 
+`tests/golden/u2-heat-efficiency-pr-eos.json` covers DWSIM's `Specify Heat Transfer Efficiency` mode at 50%. The kernel calculates `Qmax` from both streams' inlet enthalpy changes at the opposite inlet temperature, uses the smaller value, then transfers the requested percentage. It matches DWSIM's 4.497993 kW duty and both 351.864 K outlet temperatures within `1e-4` relative. Pressure-drop, pinch, phase-change, and shell-and-tube modes remain unsupported.
+
 Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
 
 ## Phase 7 and 8 U0 status

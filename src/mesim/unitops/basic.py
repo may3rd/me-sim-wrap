@@ -168,6 +168,46 @@ def heat_exchanger_ua(
     return heat_exchanger(hot_inlet, cold_inlet, compounds, interactions, correlations, (lower + upper) / 2.0, temperature_bracket_k)
 
 
+def heat_exchanger_efficiency(
+    hot_inlet: PhaseState,
+    cold_inlet: PhaseState,
+    compounds: tuple[Compound, ...],
+    interactions: PRInteractions,
+    correlations: tuple[IdealCorrelations, ...],
+    efficiency_percent: float,
+) -> HeatExchangerResult:
+    """Calculate a no-loss exchanger from DWSIM's maximum-heat-transfer efficiency."""
+    if isinstance(efficiency_percent, bool) or not isinstance(efficiency_percent, (int, float)) or not math.isfinite(efficiency_percent) or not 0.0 <= efficiency_percent <= 100.0:
+        raise ValidationError("heat exchanger efficiency must be finite and within [0, 100]")
+    compound_ids = tuple(compound.id for compound in compounds)
+    if hot_inlet.stream.compound_ids != compound_ids or cold_inlet.stream.compound_ids != compound_ids:
+        raise ValidationError("heat exchanger inlet compound IDs must exactly match the supplied compound order")
+    _positive_finite(hot_inlet.stream.molar_flow_kmol_s, "heat exchanger hot inlet flow")
+    _positive_finite(cold_inlet.stream.molar_flow_kmol_s, "heat exchanger cold inlet flow")
+    if hot_inlet.stream.temperature_k <= cold_inlet.stream.temperature_k:
+        raise ValidationError("heat exchanger hot inlet temperature must exceed cold inlet temperature")
+    if efficiency_percent == 0.0:
+        return HeatExchangerResult(hot_inlet, cold_inlet, 0.0)
+
+    hot_at_cold_inlet = flash_stream(
+        StreamState(cold_inlet.stream.temperature_k, hot_inlet.stream.pressure_pa, hot_inlet.stream.molar_flow_kmol_s, hot_inlet.stream.compound_ids, hot_inlet.stream.composition),
+        compounds, interactions, correlations,
+    )
+    cold_at_hot_inlet = flash_stream(
+        StreamState(hot_inlet.stream.temperature_k, cold_inlet.stream.pressure_pa, cold_inlet.stream.molar_flow_kmol_s, cold_inlet.stream.compound_ids, cold_inlet.stream.composition),
+        compounds, interactions, correlations,
+    )
+    maximum_duty = min(
+        hot_inlet.stream.molar_flow_kmol_s * (hot_inlet.enthalpy_j_per_kmol - hot_at_cold_inlet.enthalpy_j_per_kmol),
+        cold_inlet.stream.molar_flow_kmol_s * (cold_at_hot_inlet.enthalpy_j_per_kmol - cold_inlet.enthalpy_j_per_kmol),
+    )
+    return heat_exchanger(
+        hot_inlet, cold_inlet, compounds, interactions, correlations,
+        maximum_duty * efficiency_percent / 100.0,
+        (cold_inlet.stream.temperature_k, hot_inlet.stream.temperature_k),
+    )
+
+
 def _thermal_operation(
     inlet: PhaseState,
     compounds: tuple[Compound, ...],
