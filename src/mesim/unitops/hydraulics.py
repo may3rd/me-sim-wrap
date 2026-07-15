@@ -15,6 +15,48 @@ class PipePressureDrop:
     total_drop_pa: float
 
 
+@dataclass(frozen=True, slots=True)
+class OrificePressureDrop:
+    reynolds: float
+    discharge_coefficient: float
+    orifice_drop_pa: float
+    overall_drop_pa: float
+
+
+def orifice_pressure_drop(
+    pipe_diameter_m: float, orifice_diameter_m: float, mass_flow_kg_s: float,
+    density_kg_m3: float, viscosity_pa_s: float, tap: str, correction_factor: float = 1.0,
+) -> OrificePressureDrop:
+    """DWSIM ISO-5167-style incompressible orifice pressure drop."""
+    values = ((pipe_diameter_m, "pipe diameter"), (orifice_diameter_m, "orifice diameter"), (mass_flow_kg_s, "mass flow"), (density_kg_m3, "density"), (viscosity_pa_s, "viscosity"), (correction_factor, "correction factor"))
+    if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0.0 for value, _ in values):
+        raise ValidationError("orifice diameters, flow, properties, and correction factor must be finite and positive")
+    if orifice_diameter_m >= pipe_diameter_m:
+        raise ValidationError("orifice diameter must be below pipe diameter")
+    if tap == "corner":
+        separation, l1, l2 = 0.0, 0.0, 0.0
+    elif tap == "flange":
+        separation, l1, l2 = 0.0508, 0.0254 / orifice_diameter_m, 0.0254 / orifice_diameter_m
+    elif tap == "radius":
+        separation, l1, l2 = 1.5 * orifice_diameter_m, 1.0, 0.47
+    else:
+        raise ValidationError("orifice tap must be corner, flange, or radius")
+    beta = orifice_diameter_m / pipe_diameter_m
+    pipe_area = 3.1416 * pipe_diameter_m**2 / 4.0
+    orifice_area = 3.1416 * orifice_diameter_m**2 / 4.0
+    reynolds = mass_flow_kg_s * pipe_diameter_m / (pipe_area * viscosity_pa_s)
+    a = (19000.0 * beta / reynolds) ** 0.8
+    m2 = 2.0 * l2 / (1.0 - beta)
+    coefficient = 0.5961 + 0.0261 * beta**2 - 0.216 * beta**8 + 0.000521 * (1e6 * beta / reynolds) ** 0.7 + (0.0188 + 0.0063 * a) * beta**3.5 * (1e6 / reynolds) ** 0.3
+    coefficient += (0.043 + 0.08 * math.exp(-10.0 * l1) - 0.123 * math.exp(-7.0 * l1)) * (1.0 - 0.11 * a) * beta**4 / (1.0 - beta**4) - 0.031 * (m2 - 0.8 * m2**1.1) * beta**1.3
+    if pipe_diameter_m < 0.07112:
+        coefficient += 0.011 * (0.75 - beta) * (2.8 - pipe_diameter_m / 0.0254)
+    orifice_drop = density_kg_m3 / 2.0 * (mass_flow_kg_s / density_kg_m3 / (correction_factor * coefficient / (1.0 - beta**4) ** 0.5 * orifice_area)) ** 2 + density_kg_m3 * 9.8 * separation
+    recovery = (1.0 - beta**4 * (1.0 - coefficient**2)) ** 0.5
+    overall_drop = orifice_drop * (recovery - coefficient * beta**2) / (recovery + coefficient * beta**2)
+    return OrificePressureDrop(reynolds, coefficient, orifice_drop, overall_drop)
+
+
 def minor_loss_pressure_drop(loss_coefficient: float, density_kg_m3: float, velocity_m_s: float) -> float:
     """DWSIM fixed-K fitting pressure drop for one incompressible phase."""
     values = ((loss_coefficient, "loss coefficient"), (density_kg_m3, "density"), (velocity_m_s, "velocity"))
