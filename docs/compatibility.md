@@ -134,6 +134,8 @@ T3C derives mixture Cp by a centered, fixed-pressure derivative of the existing 
 
 `tests/golden/u2-shell-tube-rating-pr-eos.json` covers all-vapor, layout-0, counter-current shell-and-tube rating. It uses DWSIM's active steady-state baffle-derived shell-flow areas, Gnielinski tube coefficient, simplified Tinker shell correlation, external-area resistance stack, and corrected LMTD. Python matches the 6.461926 kW duty, both outlet temperatures, U, Reynolds numbers, and pressure drops within `1e-3` relative. Other tube layouts, liquid service, phase change, fouling, and pressure-coupled outlet flashes remain unsupported.
 
+U3 starts with a single-phase, isothermal Darcy-Weisbach pipe calculation using DWSIM's source friction-factor regimes: laminar below Re 2100, Churchill transition, and the explicit turbulent correlation above Re 4000. It reports velocity, Reynolds number, Darcy factor, friction drop, static drop, and total drop in SI. It has an equation test only; fittings, thermal coupling, compressible flow, two-phase flow, relief sizing, and DWSIM golden-case parity remain unsupported.
+
 Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
 
 ## Phase 7 and 8 U0 status
