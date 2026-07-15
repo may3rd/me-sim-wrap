@@ -173,6 +173,21 @@ def shell_tube_shell_side(
     return reynolds, friction, pressure_drop, coefficient
 
 
+def shell_tube_overall_coefficient(
+    geometry: ShellTubeGeometry, tube_coefficient_w_m2_k: float, shell_coefficient_w_m2_k: float,
+    tube_fouling_m2_k_w: float, shell_fouling_m2_k_w: float, tube_conductivity_w_m_k: float,
+) -> float:
+    """DWSIM overall HTC based on external tube area."""
+    shell_tube_area(geometry)
+    for value, name in ((tube_coefficient_w_m2_k, "tube coefficient"), (shell_coefficient_w_m2_k, "shell coefficient"), (tube_conductivity_w_m_k, "tube conductivity")):
+        _positive_finite(value, name)
+    if any(not math.isfinite(value) or value < 0.0 for value in (tube_fouling_m2_k_w, shell_fouling_m2_k_w)):
+        raise ValidationError("shell-tube fouling resistances must be finite and non-negative")
+    inner, outer = geometry.tube_inner_diameter_mm / 1000.0, geometry.tube_outer_diameter_mm / 1000.0
+    resistance = outer / (tube_coefficient_w_m2_k * inner) + tube_fouling_m2_k_w * outer / inner + outer * math.log(outer / inner) / (2.0 * tube_conductivity_w_m_k) + shell_fouling_m2_k_w + 1.0 / shell_coefficient_w_m2_k
+    return 1.0 / resistance
+
+
 def heat_exchanger(
     hot_inlet: PhaseState,
     cold_inlet: PhaseState,
