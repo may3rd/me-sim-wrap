@@ -97,6 +97,14 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertIn('"SaveData"', script)
         self.assertIn("Get-UtilityStates", script)
 
+    def test_capture_script_reads_attached_utility_inputs_from_dwxmz(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("System.IO.Compression.ZipFile", script)
+        self.assertIn("Get-SavedUtilityStates", script)
+        self.assertIn("AttachedUtility", script)
+        self.assertIn("ConvertFrom-Json", script)
+
     def test_capture_script_records_ideal_compound_reference_values(self):
         script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
 

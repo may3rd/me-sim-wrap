@@ -352,10 +352,75 @@ function Get-UtilityStates {
     )
 }
 
+function Get-SavedUtilityStates {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$CasePath
+    )
+
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $archive = [System.IO.Compression.ZipFile]::OpenRead($CasePath)
+
+    try {
+        $entry = @($archive.Entries | Where-Object {
+            $_.FullName.EndsWith(".xml")
+        }) | Select-Object -First 1
+
+        if ($null -eq $entry) {
+            throw "DWSIM case archive contains no XML document"
+        }
+
+        $reader = New-Object IO.StreamReader($entry.Open())
+        try {
+            [xml]$document = $reader.ReadToEnd()
+        }
+        finally {
+            $reader.Dispose()
+        }
+    }
+    finally {
+        $archive.Dispose()
+    }
+
+    $states = @{}
+
+    foreach ($simulationObject in $document.DWSIM_Simulation_Data.SimulationObjects.SimulationObject) {
+        $utilities = @()
+
+        foreach ($utility in $simulationObject.AttachedUtilities.AttachedUtility) {
+            $data = $null
+            $readError = $null
+
+            try {
+                $data = [string]$utility.Data | ConvertFrom-Json
+            }
+            catch {
+                $readError = $_.Exception.Message
+            }
+
+            $utilities += @{
+                name       = [string]$utility.Name
+                type       = [string]$utility.UtilityType
+                data       = $data
+                read_error = $readError
+            }
+        }
+
+        $states[[string]$simulationObject.Name] = @(
+            $utilities | Sort-Object name, type
+        )
+    }
+
+    return $states
+}
+
 function Get-ObjectStates {
     param(
         [Parameter(Mandatory = $true)]
-        [object]$Flowsheet
+        [object]$Flowsheet,
+
+        [Parameter(Mandatory = $true)]
+        [hashtable]$SavedUtilityStates
     )
 
     $states = @()
@@ -424,7 +489,14 @@ function Get-ObjectStates {
                 $object,
                 "ErrorMessage"
             )
-            utilities  = @(Get-UtilityStates -Object $object)
+            utilities  = @(
+                if ($SavedUtilityStates.ContainsKey([string]$name)) {
+                    $SavedUtilityStates[[string]$name]
+                }
+                else {
+                    Get-UtilityStates -Object $object
+                }
+            )
             properties = @(
                 $properties | Sort-Object property
             )
@@ -659,6 +731,7 @@ $inputHash = $null
 $before = @()
 $after = @()
 $propertyPackagesUpdated = 0
+$savedUtilityStates = @{}
 
 $solve = @{
     executed = $false
@@ -689,6 +762,9 @@ if (-not [string]::IsNullOrWhiteSpace($CasePath)) {
             -Path $resolvedCase
     ).Hash.ToLowerInvariant()
 
+    $savedUtilityStates = Get-SavedUtilityStates `
+        -CasePath $resolvedCase
+
     $flowsheet = $automation.LoadFlowsheet2(
         $resolvedCase
     )
@@ -702,7 +778,9 @@ if (-not [string]::IsNullOrWhiteSpace($CasePath)) {
     }
 
     $before = @(
-        Get-ObjectStates -Flowsheet $flowsheet
+        Get-ObjectStates `
+            -Flowsheet $flowsheet `
+            -SavedUtilityStates $savedUtilityStates
     )
 
     $errors = @()
@@ -731,7 +809,9 @@ if (-not [string]::IsNullOrWhiteSpace($CasePath)) {
     }
 
     $after = @(
-        Get-ObjectStates -Flowsheet $flowsheet
+        Get-ObjectStates `
+            -Flowsheet $flowsheet `
+            -SavedUtilityStates $savedUtilityStates
     )
 }
 
