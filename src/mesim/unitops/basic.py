@@ -4,8 +4,9 @@ from dataclasses import dataclass
 from ..compounds import Compound, PRInteractions
 from ..errors import ConvergenceError, ValidationError
 from ..streams import EnergyStream, PhaseState, StreamState, flash_stream
-from ..thermo.flash import ph_flash, phase_enthalpy
+from ..thermo.flash import mixture_heat_capacity, ph_flash, phase_enthalpy, tp_flash
 from ..thermo.ideal import IdealCorrelations
+from ..thermo.transport import TransportRecord, translated_vapor_density, vapor_transport
 
 
 def _positive_finite(value: float, name: str) -> None:
@@ -91,6 +92,28 @@ class ShellTubeGeometry:
     tube_length_m: float
     tube_count: int
     tube_pitch_mm: float
+
+
+@dataclass(frozen=True, slots=True)
+class VaporProperties:
+    density_kg_m3: float
+    viscosity_pa_s: float
+    conductivity_w_m_k: float
+    heat_capacity_j_kg_k: float
+
+
+def shell_tube_vapor_properties(
+    compounds: tuple[Compound, ...], composition: tuple[float, ...], correlations: tuple[IdealCorrelations, ...],
+    transport: tuple[TransportRecord, ...], interactions: PRInteractions, temperature_k: float, pressure_pa: float,
+) -> VaporProperties:
+    """All-vapor PR properties required by shell-and-tube rating."""
+    flash = tp_flash(compounds, composition, interactions, temperature_k, pressure_pa)
+    if not flash.report.converged or flash.phase not in {"vapor", "single"} or flash.vapor_state is None:
+        raise ValidationError("shell-tube rating requires a converged vapor state")
+    density = translated_vapor_density(compounds, composition, temperature_k, pressure_pa, flash.vapor_state.compressibility)
+    transport_values = vapor_transport(compounds, composition, transport, temperature_k, density)
+    return VaporProperties(density, transport_values.dynamic_viscosity_pa_s, transport_values.thermal_conductivity_w_per_m_k, mixture_heat_capacity(compounds, composition, correlations, interactions, temperature_k, pressure_pa))
+
 
 
 def shell_tube_area(geometry: ShellTubeGeometry) -> float:

@@ -11,7 +11,8 @@ from mesim import ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.streams import StreamState, flash_stream
 from mesim.thermo.ideal import load_correlations
-from mesim.unitops.basic import ShellTubeGeometry, cooler, equilibrium_separator, heat_exchanger, heat_exchanger_efficiency, heat_exchanger_pinch, heat_exchanger_ua, heater, mix_streams, shell_tube_area, shell_tube_overall_coefficient, shell_tube_shell_side, shell_tube_tube_side, split_stream, valve
+from mesim.thermo.transport import load_transport_correlations
+from mesim.unitops.basic import ShellTubeGeometry, cooler, equilibrium_separator, heat_exchanger, heat_exchanger_efficiency, heat_exchanger_pinch, heat_exchanger_ua, heater, mix_streams, shell_tube_area, shell_tube_overall_coefficient, shell_tube_shell_side, shell_tube_tube_side, shell_tube_vapor_properties, split_stream, valve
 from mesim.unitops.pressure import compressor, expander, pump
 from mesim.unitops.separation import component_separator
 
@@ -74,6 +75,13 @@ class BasicUnitOperationTest(unittest.TestCase):
     def test_shell_tube_overall_coefficient_uses_dwsim_resistance_stack(self):
         result = shell_tube_overall_coefficient(ShellTubeGeometry(1, 2, 50, 60, 5, 50, 70), 100.0, 200.0, 0.0001, 0.0001, 70.0)
         self.assertTrue(math.isclose(result, 57.80969090318782, rel_tol=1e-12))
+
+    def test_shell_tube_vapor_properties_match_pr_reference_state(self):
+        transport = {record.compound_id: record for record in load_transport_correlations(ROOT / "data/correlations/transport-v1.json")}
+        result = shell_tube_vapor_properties(self.compounds, (0.7, 0.3), self.correlations, tuple(transport[c.id] for c in self.compounds), self.interactions, 250.0, 5_000_000.0)
+        self.assertTrue(math.isclose(result.density_kg_m3, 74.75026162440514, rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.viscosity_pa_s, 1.1523666597159073e-5, rel_tol=7e-3))
+        self.assertTrue(math.isclose(result.conductivity_w_m_k, 0.024082896235667298, rel_tol=2e-6))
 
     def test_mixer_rejects_invalid_pressure_or_compound_order(self):
         with self.assertRaises(ValidationError):
