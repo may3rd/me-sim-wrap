@@ -8,10 +8,20 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import minor_loss_pressure_drop, orifice_pressure_drop, pipe_pressure_drop
+from mesim.unitops.hydraulics import lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_pressure_drop
 
 
 class HydraulicsTest(unittest.TestCase):
+    def test_lockhart_martinelli_matches_dwsim_two_phase_equations(self):
+        result = lockhart_martinelli_pressure_drop(0.05, 100.0, 10.0, 4.5e-5, 0.001, 0.002, 10.0, 800.0, 1e-5, 0.001)
+
+        self.assertTrue(math.isclose(result.vapor_reynolds, 25464.790894703252, rel_tol=1e-12))
+        self.assertTrue(math.isclose(result.liquid_reynolds, 40743.66543152521, rel_tol=1e-12))
+        self.assertTrue(math.isclose(result.martinelli_parameter, 17.1853059594934, rel_tol=1e-12))
+        self.assertTrue(math.isclose(result.liquid_holdup, 0.6792871801523932, rel_tol=1e-12))
+        self.assertTrue(math.isclose(result.friction_drop_pa, 44286.52902360688, rel_tol=1e-12))
+        self.assertTrue(math.isclose(result.static_drop_pa, 52593.33333333333, rel_tol=1e-12))
+
     def test_flange_tap_orifice_matches_dwsim_iso_5167_equations(self):
         result = orifice_pressure_drop(0.2, 0.1, 10.0, 1000.0, 0.001, "flange")
 

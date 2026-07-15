@@ -23,6 +23,36 @@ class OrificePressureDrop:
     overall_drop_pa: float
 
 
+@dataclass(frozen=True, slots=True)
+class LockhartMartinelliPressureDrop:
+    vapor_reynolds: float
+    liquid_reynolds: float
+    martinelli_parameter: float
+    liquid_holdup: float
+    friction_drop_pa: float
+    static_drop_pa: float
+    total_drop_pa: float
+
+
+def lockhart_martinelli_pressure_drop(
+    diameter_m: float, length_m: float, elevation_m: float, roughness_m: float,
+    vapor_flow_m3_s: float, liquid_flow_m3_s: float, vapor_density_kg_m3: float,
+    liquid_density_kg_m3: float, vapor_viscosity_pa_s: float, liquid_viscosity_pa_s: float,
+) -> LockhartMartinelliPressureDrop:
+    """DWSIM homogeneous Lockhart-Martinelli two-phase pressure drop."""
+    vapor = pipe_pressure_drop(diameter_m, length_m, 0.0, roughness_m, vapor_flow_m3_s, vapor_density_kg_m3, vapor_viscosity_pa_s)
+    liquid = pipe_pressure_drop(diameter_m, length_m, 0.0, roughness_m, liquid_flow_m3_s, liquid_density_kg_m3, liquid_viscosity_pa_s)
+    if vapor_flow_m3_s <= 0.0 or liquid_flow_m3_s <= 0.0:
+        raise ValidationError("Lockhart-Martinelli requires positive vapor and liquid flows")
+    x = (liquid.friction_drop_pa / vapor.friction_drop_pa) ** 0.5
+    liquid_multiplier = 1.0 + 20.0 / x + 1.0 / x**2
+    vapor_multiplier = 1.0 + 20.0 * x + x**2
+    vapor_fraction = vapor_flow_m3_s / (vapor_flow_m3_s + liquid_flow_m3_s)
+    static_drop = (vapor_fraction * vapor_density_kg_m3 + (1.0 - vapor_fraction) * liquid_density_kg_m3) * 9.8 * elevation_m
+    friction_drop = max(liquid_multiplier * liquid.friction_drop_pa, vapor_multiplier * vapor.friction_drop_pa)
+    return LockhartMartinelliPressureDrop(vapor.reynolds, liquid.reynolds, x, (1.0 / liquid_multiplier) ** 0.5, friction_drop, static_drop, friction_drop + static_drop)
+
+
 def orifice_pressure_drop(
     pipe_diameter_m: float, orifice_diameter_m: float, mass_flow_kg_s: float,
     density_kg_m3: float, viscosity_pa_s: float, tap: str, correction_factor: float = 1.0,
