@@ -82,6 +82,34 @@ class HeatExchangerResult:
     heat_duty_w: float
 
 
+@dataclass(frozen=True, slots=True)
+class ShellTubeGeometry:
+    shell_count: int
+    tube_passes: int
+    tube_inner_diameter_mm: float
+    tube_outer_diameter_mm: float
+    tube_length_m: float
+    tube_count: int
+    tube_pitch_mm: float
+
+
+def shell_tube_area(geometry: ShellTubeGeometry) -> float:
+    """DWSIM shell-and-tube external area, excluding two outer tube diameters."""
+    if geometry.shell_count <= 0 or geometry.tube_passes <= 0 or geometry.tube_count <= 0:
+        raise ValidationError("shell-tube counts and passes must be positive")
+    for value, name in (
+        (geometry.tube_inner_diameter_mm, "tube inner diameter"),
+        (geometry.tube_outer_diameter_mm, "tube outer diameter"),
+        (geometry.tube_length_m, "tube length"),
+        (geometry.tube_pitch_mm, "tube pitch"),
+    ):
+        _positive_finite(value, name)
+    outer = geometry.tube_outer_diameter_mm / 1000.0
+    if geometry.tube_inner_diameter_mm >= geometry.tube_outer_diameter_mm or geometry.tube_pitch_mm / 1000.0 < outer or geometry.tube_length_m <= 2.0 * outer:
+        raise ValidationError("shell-tube geometry has invalid tube diameters, pitch, or length")
+    return geometry.tube_count * math.pi * outer * (geometry.tube_length_m - 2.0 * outer)
+
+
 def heat_exchanger(
     hot_inlet: PhaseState,
     cold_inlet: PhaseState,
