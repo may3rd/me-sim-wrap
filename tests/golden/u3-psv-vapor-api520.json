@@ -5,7 +5,7 @@
     "source":  {
                    "dwsim_revision":  "9.0.4",
                    "automation_version":  "DWSIM version 9.0.4.0 (28-Jul-25 1:19:16 PM)",
-                   "captured_utc":  "2026-07-15T23:42:47.3338286Z",
+                   "captured_utc":  "2026-07-15T23:56:18.7229228Z",
                    "platform":  "Microsoft Windows NT 10.0.26200.0",
                    "architecture":  "AMD64",
                    "engine_bin":  "C:\\Users\\26008353\\Downloads\\DWSIM_v904_win64_portable\\Windows",
@@ -463,7 +463,21 @@
                                                              ],
                                               "type":  "Valve",
                                               "utilities":  [
-
+                                                                {
+                                                                    "read_error":  null,
+                                                                    "name":  "PressureSafetyValveSizing1",
+                                                                    "data":  {
+                                                                                 "Name":  "FrmPsvSize",
+                                                                                 "AutoUpdate":  true,
+                                                                                 "OverPressure":  10.0,
+                                                                                 "Kd":  0.85,
+                                                                                 "Kb":  1.0,
+                                                                                 "Kc":  1.0,
+                                                                                 "Method":  0,
+                                                                                 "RelievedFluid":  0
+                                                                             },
+                                                                    "type":  "5"
+                                                                }
                                                             ],
                                               "calculated":  true
                                           },
@@ -6703,7 +6717,21 @@
                                                              ],
                                               "type":  "Valve",
                                               "utilities":  [
-
+                                                                {
+                                                                    "read_error":  null,
+                                                                    "name":  "PressureSafetyValveSizing1",
+                                                                    "data":  {
+                                                                                 "Name":  "FrmPsvSize",
+                                                                                 "AutoUpdate":  true,
+                                                                                 "OverPressure":  10.0,
+                                                                                 "Kd":  0.85,
+                                                                                 "Kb":  1.0,
+                                                                                 "Kc":  1.0,
+                                                                                 "Method":  0,
+                                                                                 "RelievedFluid":  0
+                                                                             },
+                                                                    "type":  "5"
+                                                                }
                                                             ],
                                               "calculated":  true
                                           },
