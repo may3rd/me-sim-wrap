@@ -75,6 +75,49 @@ class ThermalOperationResult:
     energy: EnergyStream
 
 
+@dataclass(frozen=True, slots=True)
+class HeatExchangerResult:
+    hot_outlet: PhaseState
+    cold_outlet: PhaseState
+
+
+def heat_exchanger(
+    hot_inlet: PhaseState,
+    cold_inlet: PhaseState,
+    compounds: tuple[Compound, ...],
+    interactions: PRInteractions,
+    correlations: tuple[IdealCorrelations, ...],
+    heat_duty_w: float,
+    temperature_bracket_k: tuple[float, float],
+) -> HeatExchangerResult:
+    """Transfer a specified positive duty from hot inlet to cold inlet at constant pressure."""
+    _positive_finite(heat_duty_w, "heat exchanger duty")
+    compound_ids = tuple(compound.id for compound in compounds)
+    if hot_inlet.stream.compound_ids != compound_ids or cold_inlet.stream.compound_ids != compound_ids:
+        raise ValidationError("heat exchanger inlet compound IDs must exactly match the supplied compound order")
+    _positive_finite(hot_inlet.stream.molar_flow_kmol_s, "heat exchanger hot inlet flow")
+    _positive_finite(cold_inlet.stream.molar_flow_kmol_s, "heat exchanger cold inlet flow")
+
+    def outlet(inlet: PhaseState, target_enthalpy: float) -> PhaseState:
+        result = ph_flash(
+            compounds, inlet.stream.composition, interactions, correlations, inlet.stream.pressure_pa,
+            target_enthalpy, temperature_bracket_k,
+        )
+        if not result.report.converged or result.flash is None or result.enthalpy_j_per_kmol is None:
+            raise ConvergenceError(result.report.failure_reason or "heat exchanger PH flash did not converge")
+        stream = StreamState(
+            result.temperature_k, inlet.stream.pressure_pa, inlet.stream.molar_flow_kmol_s,
+            inlet.stream.compound_ids, inlet.stream.composition,
+            result.enthalpy_j_per_kmol, result.flash.vapor_fraction,
+        )
+        return PhaseState(stream, result.flash, result.enthalpy_j_per_kmol)
+
+    return HeatExchangerResult(
+        outlet(hot_inlet, hot_inlet.enthalpy_j_per_kmol - heat_duty_w / hot_inlet.stream.molar_flow_kmol_s),
+        outlet(cold_inlet, cold_inlet.enthalpy_j_per_kmol + heat_duty_w / cold_inlet.stream.molar_flow_kmol_s),
+    )
+
+
 def _thermal_operation(
     inlet: PhaseState,
     compounds: tuple[Compound, ...],
