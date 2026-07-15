@@ -57,3 +57,4 @@
 - Treat captured pipe segmentation as authoritative over a requested setup increment count.
 - Treat saved DWSIM separation specifications as authoritative when they differ from the requested capture setup.
 - Verify saved DWSIM mode fields after capture; a UI checkbox instruction is not evidence of the captured mode.
+- Under PowerShell strict mode, read optional XML children through PSObject.Properties before enumerating them.

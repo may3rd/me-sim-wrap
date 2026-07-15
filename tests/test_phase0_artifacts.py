@@ -104,6 +104,7 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertIn("Get-SavedUtilityStates", script)
         self.assertIn("AttachedUtility", script)
         self.assertIn("ConvertFrom-Json", script)
+        self.assertIn('PSObject.Properties["AttachedUtility"]', script)
 
     def test_capture_script_records_ideal_compound_reference_values(self):
         script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()

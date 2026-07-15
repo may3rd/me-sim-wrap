@@ -386,23 +386,31 @@ function Get-SavedUtilityStates {
 
     foreach ($simulationObject in $document.DWSIM_Simulation_Data.SimulationObjects.SimulationObject) {
         $utilities = @()
+        $attachedUtilities = $simulationObject.PSObject.Properties["AttachedUtilities"]
+        $utilityEntries = $null
 
-        foreach ($utility in $simulationObject.AttachedUtilities.AttachedUtility) {
-            $data = $null
-            $readError = $null
+        if ($null -ne $attachedUtilities) {
+            $utilityEntries = $attachedUtilities.Value.PSObject.Properties["AttachedUtility"]
+        }
 
-            try {
-                $data = [string]$utility.Data | ConvertFrom-Json
-            }
-            catch {
-                $readError = $_.Exception.Message
-            }
+        if ($null -ne $utilityEntries) {
+            foreach ($utility in $utilityEntries.Value) {
+                $data = $null
+                $readError = $null
 
-            $utilities += @{
-                name       = [string]$utility.Name
-                type       = [string]$utility.UtilityType
-                data       = $data
-                read_error = $readError
+                try {
+                    $data = [string]$utility.Data | ConvertFrom-Json
+                }
+                catch {
+                    $readError = $_.Exception.Message
+                }
+
+                $utilities += @{
+                    name       = [string]$utility.Name
+                    type       = [string]$utility.UtilityType
+                    data       = $data
+                    read_error = $readError
+                }
             }
         }
 
