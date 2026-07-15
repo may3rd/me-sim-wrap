@@ -12,6 +12,7 @@ from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.thermo.ideal import ideal_gas_density, load_correlations
 from mesim.thermo.peng_robinson import R, PengRobinson, PengRobinsonMixture
 from mesim.thermo.transport import load_transport_correlations, translated_vapor_density, vapor_transport
+from mesim.thermo.flash import mixture_heat_capacity
 
 
 ROOT = Path(__file__).parents[1]
@@ -311,6 +312,22 @@ class PengRobinsonMixtureTest(unittest.TestCase):
             self.assertTrue(math.isclose(entropy_delta, (liquid["PROP_MS_10"] - vapor["PROP_MS_10"]) * 1_000, rel_tol=DWSIM_PR_CALORIC_DELTA_REL_TOL))
 
 class VaporTransportTest(unittest.TestCase):
+    def test_mixture_heat_capacity_matches_captured_pr_reference(self):
+        golden = json.loads((ROOT / "tests/golden/pr-t1.json").read_text(encoding="utf-8-sig"))
+        properties = {
+            item["property"]: item["value"]["value"]
+            for record in golden["outputs"]["objects_after"] if record["tag"] == "PR-MIX-ME-C2"
+            for item in record["properties"]
+        }
+        compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        correlations = {record.compound_id: record for record in load_correlations(ROOT / "data/correlations/ideal-v1.json")}
+        actual = mixture_heat_capacity(
+            (compounds["Methane"], compounds["Ethane"]), (0.7, 0.3),
+            (correlations["Methane"], correlations["Ethane"]), load_pr_interactions(ROOT / "data/interactions/pr-v1.json"),
+            properties["PROP_MS_0"], properties["PROP_MS_1"],
+        )
+        self.assertTrue(math.isclose(actual, properties["PROP_MS_21"] * 1000.0, rel_tol=7e-3))
+
     def test_peneloux_density_matches_captured_dwsim_pr_vapor_states(self):
         golden = json.loads((ROOT / "tests/golden/pr-t1.json").read_text(encoding="utf-8-sig"))
         streams = {

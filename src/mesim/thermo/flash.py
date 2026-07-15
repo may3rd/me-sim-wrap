@@ -671,6 +671,21 @@ def flash_enthalpy(compounds: tuple[Compound, ...], correlations: tuple[IdealCor
     return phase_enthalpy(compounds, flash.vapor_composition, correlations, flash.temperature_k, flash.vapor_state)
 
 
+def mixture_heat_capacity(
+    compounds: tuple[Compound, ...], composition: tuple[float, ...], correlations: tuple[IdealCorrelations, ...],
+    interactions: PRInteractions, temperature_k: float, pressure_pa: float, step_k: float = 0.01,
+) -> float:
+    if not math.isfinite(step_k) or step_k <= 0 or temperature_k <= step_k:
+        raise ValidationError("heat-capacity temperature step must be positive and below temperature")
+    low = tp_flash(compounds, composition, interactions, temperature_k - step_k, pressure_pa)
+    high = tp_flash(compounds, composition, interactions, temperature_k + step_k, pressure_pa)
+    molecular_weight = math.fsum(fraction * compound.molecular_weight.value for compound, fraction in zip(compounds, composition))
+    value = (flash_enthalpy(compounds, correlations, high) - flash_enthalpy(compounds, correlations, low)) / (2.0 * step_k * molecular_weight)
+    if not math.isfinite(value) or value <= 0:
+        raise ValidationError("mixture heat capacity must be finite and positive")
+    return value
+
+
 def flash_entropy(compounds: tuple[Compound, ...], correlations: tuple[IdealCorrelations, ...], flash: TPFlashResult) -> float:
     if not flash.report.converged:
         raise ValidationError("a converged TP flash is required for total entropy")
