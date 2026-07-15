@@ -16,7 +16,7 @@ me-sim-wrap/
    └─ DWSIM.UI.Desktop.*  ← desktop UIs — we do NOT touch these
 ```
 
-`DWSIM.Api/` lives *inside* `dwsim-windows/` on purpose: its `.csproj` uses relative
+`DWSIM.Api/` lives _inside_ `dwsim-windows/` on purpose: its `.csproj` uses relative
 `..\DWSIM.Automation` project references. Keeping it there means the existing `DWSIM.sln`
 and relative refs resolve with zero rewiring. It is our code, not upstream.
 
