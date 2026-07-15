@@ -124,6 +124,8 @@ DWSIM material-stream density fields use `AUX_LIQDENS`/`AUX_VAPDENS`, while its 
 
 `tests/golden/u2-heat-efficiency-pr-eos.json` covers DWSIM's `Specify Heat Transfer Efficiency` mode at 50%. The kernel calculates `Qmax` from both streams' inlet enthalpy changes at the opposite inlet temperature, uses the smaller value, then transfers the requested percentage. It matches DWSIM's 4.497993 kW duty and both 351.864 K outlet temperatures within `1e-4` relative. Pressure-drop, pinch, phase-change, and shell-and-tube modes remain unsupported.
 
+`tests/golden/u2-heat-pinch-pr-eos.json` covers DWSIM's counter-current `Pinch Point` mode with MITA = 20 K and `PinchPointAtOutlets=false`. In the captured phase-free domain, the profile minimum is at a terminal; the kernel solves that minimum approach exactly. DWSIM's 25-segment, 0.01 kW profile search reports 7.086055 kW, while the kernel's exact result is accepted within 20 W; outlet temperatures match within `1e-4` relative. Phase-change profiles and the explicit outlet-pinch option remain unsupported.
+
 Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
 
 ## Phase 7 and 8 U0 status

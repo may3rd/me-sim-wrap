@@ -11,7 +11,7 @@ from mesim import ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.streams import StreamState, flash_stream
 from mesim.thermo.ideal import load_correlations
-from mesim.unitops.basic import cooler, equilibrium_separator, heat_exchanger, heat_exchanger_efficiency, heat_exchanger_ua, heater, mix_streams, split_stream, valve
+from mesim.unitops.basic import cooler, equilibrium_separator, heat_exchanger, heat_exchanger_efficiency, heat_exchanger_pinch, heat_exchanger_ua, heater, mix_streams, split_stream, valve
 from mesim.unitops.pressure import compressor, expander, pump
 from mesim.unitops.separation import component_separator
 
@@ -334,6 +334,28 @@ class BasicUnitOperationTest(unittest.TestCase):
         self.assertTrue(math.isclose(result.heat_duty_w, records["HX-1"]["PROP_HX_2"] * 1_000.0, rel_tol=1e-4))
         self.assertTrue(math.isclose(result.hot_outlet.stream.temperature_k, records["5"]["PROP_MS_0"], rel_tol=1e-4))
         self.assertTrue(math.isclose(result.cold_outlet.stream.temperature_k, records["4"]["PROP_MS_0"], rel_tol=1e-4))
+
+    def test_heat_exchanger_pinch_matches_dwsim_reference(self):
+        golden = json.loads((ROOT / "tests/golden/u2-heat-pinch-pr-eos.json").read_text(encoding="utf-8-sig"))
+        records = {
+            object_["tag"]: {property_["property"]: property_["value"]["value"] for property_ in object_["properties"]}
+            for object_ in golden["outputs"]["objects_after"]
+        }
+        hot = flash_stream(
+            StreamState(400.0, 500_000.0, 0.002, ("Methane", "Ethane"), (0.7, 0.3)),
+            self.compounds, self.interactions, self.correlations,
+        )
+        cold = flash_stream(
+            StreamState(300.0, 500_000.0, 0.002, ("Methane", "Ethane"), (0.7, 0.3)),
+            self.compounds, self.interactions, self.correlations,
+        )
+
+        result = heat_exchanger_pinch(hot, cold, self.compounds, self.interactions, self.correlations, 20.0)
+
+        self.assertTrue(math.isclose(result.heat_duty_w, records["HX-1"]["PROP_HX_2"] * 1_000.0, abs_tol=20.0))
+        self.assertTrue(math.isclose(result.hot_outlet.stream.temperature_k, records["5"]["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.cold_outlet.stream.temperature_k, records["4"]["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(min(400.0 - result.cold_outlet.stream.temperature_k, result.hot_outlet.stream.temperature_k - 300.0), 20.0, abs_tol=1e-6))
 
     def test_equilibrium_separator_routes_existing_flash_without_reflashing(self):
         result = equilibrium_separator(self.first, self.compounds, self.correlations)
