@@ -116,6 +116,8 @@ DWSIM material-stream density fields use `AUX_LIQDENS`/`AUX_VAPDENS`, while its 
 
 `tests/golden/u1-expander-pr-eos.json` is the matching adiabatic expander reference: methane/ethane, 1 MPa to 500 kPa, and 75% adiabatic efficiency. Temperature, enthalpy, and generated-power magnitude match within `1e-4` relative. `EnergyStream.duty_w` is negative because work leaves the material stream; DWSIM reports generated-power magnitude as positive.
 
+`tests/golden/u1-component-separator-pr-eos.json` is the component-separator reference. Its saved specification is outlet 1, 10% n-pentane and 90% ethane of each component's inlet mass flow. Per-component mass and molar split fractions are numerically identical, so the kernel has one fraction-based mode. Both outlet flows and enthalpies match within `1e-4` relative. DWSIM reports `EnergyImb` as inlet minus outlets; `EnergyStream.duty_w` is its negation because positive duty enters material.
+
 Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
 
 ## Phase 7 and 8 U0 status

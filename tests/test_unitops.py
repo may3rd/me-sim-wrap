@@ -13,6 +13,7 @@ from mesim.streams import StreamState, flash_stream
 from mesim.thermo.ideal import load_correlations
 from mesim.unitops.basic import cooler, equilibrium_separator, heater, mix_streams, split_stream, valve
 from mesim.unitops.pressure import compressor, expander, pump
+from mesim.unitops.separation import component_separator
 
 
 ROOT = Path(__file__).parents[1]
@@ -236,6 +237,38 @@ class BasicUnitOperationTest(unittest.TestCase):
         for outlet_pressure_pa, efficiency in ((1_000_000.0, 0.75), (500_000.0, 0.0), (500_000.0, 1.1), (500_000.0, True)):
             with self.assertRaises(ValidationError):
                 expander(vapor, self.compounds, self.interactions, self.correlations, outlet_pressure_pa, efficiency, (240.0, 300.0))
+
+    def test_component_separator_matches_dwsim_mass_fraction_reference(self):
+        golden = json.loads((ROOT / "tests/golden/u1-component-separator-pr-eos.json").read_text(encoding="utf-8-sig"))
+        records = {
+            object_["tag"]: {property_["property"]: property_["value"]["value"] for property_ in object_["properties"]}
+            for object_ in golden["outputs"]["objects_after"]
+        }
+        compounds = ({compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}["N-pentane"], self.compounds[1])
+        correlations = tuple(
+            {correlation.compound_id: correlation for correlation in load_correlations(ROOT / "data/correlations/ideal-v1.json")}[compound.id]
+            for compound in compounds
+        )
+        inlet = flash_stream(
+            StreamState(300.0, 500_000.0, 0.002, ("N-pentane", "Ethane"), (0.95, 0.05)),
+            compounds, self.interactions, correlations,
+        )
+        result = component_separator(inlet, compounds, self.interactions, correlations, (0.10, 0.90))
+
+        self.assertTrue(math.isclose(result.specified.stream.molar_flow_kmol_s * 1_000.0, records["3"]["PROP_MS_3"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.remainder.stream.molar_flow_kmol_s * 1_000.0, records["4"]["PROP_MS_3"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.specified.enthalpy_j_per_kmol, records["3"]["PROP_MS_9"] * 1_000.0, rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.remainder.enthalpy_j_per_kmol, records["4"]["PROP_MS_9"] * 1_000.0, rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.energy.duty_w, -records["CS-1"]["PROP_CP_0"] * 1_000.0, rel_tol=1e-4))
+
+    def test_component_separator_rejects_invalid_fractions(self):
+        inlet = flash_stream(
+            StreamState(300.0, 500_000.0, 0.002, ("Methane", "Ethane"), (0.7, 0.3)),
+            self.compounds, self.interactions, self.correlations,
+        )
+        for fractions in ((0.5,), (-0.1, 0.2), (1.1, 0.2), (math.nan, 0.2)):
+            with self.assertRaises(ValidationError):
+                component_separator(inlet, self.compounds, self.interactions, self.correlations, fractions)
 
     def test_equilibrium_separator_routes_existing_flash_without_reflashing(self):
         result = equilibrium_separator(self.first, self.compounds, self.correlations)
