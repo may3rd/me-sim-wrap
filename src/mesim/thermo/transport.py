@@ -8,6 +8,11 @@ from ..compounds import Compound
 from ..errors import OutOfRangeError, ValidationError
 
 
+# DWSIM PengRobinson.vb AUX_Ci fallback values for the catalog compounds.
+_PENELOUX = {"Methane": -0.1595, "Ethane": -0.1134, "Propane": -0.0863, "N-butane": -0.0675, "N-pentane": -0.039}
+R = 8314.46261815324  # J/kmol/K
+
+
 @dataclass(frozen=True)
 class TransportCorrelation:
     coefficients: tuple[float, float, float, float]
@@ -109,3 +114,22 @@ def vapor_transport(compounds: tuple[Compound, ...], mole_fractions: tuple[float
     if not all(math.isfinite(value) and value > 0 for value in (viscosity, conductivity)):
         raise ValidationError("vapor transport is outside the representable range")
     return VaporTransport(viscosity, conductivity)
+
+
+def translated_vapor_density(compounds: tuple[Compound, ...], mole_fractions: tuple[float, ...], temperature_k: float, pressure_pa: float, compressibility: float) -> float:
+    if len(compounds) != len(mole_fractions) or not compounds or not all(math.isfinite(value) and value >= 0 for value in mole_fractions) or not math.isclose(sum(mole_fractions), 1.0, rel_tol=0.0, abs_tol=1e-12):
+        raise ValidationError("translated-density components and mole fractions must be non-empty, finite, and sum to one")
+    if not all(math.isfinite(value) and value > 0 for value in (temperature_k, pressure_pa, compressibility)):
+        raise ValidationError("temperature, pressure, and compressibility must be finite and positive")
+    try:
+        translation = sum(
+            fraction * _PENELOUX[compound.id] * 0.07780 * R * compound.critical_temperature.value / compound.critical_pressure.value
+            for compound, fraction in zip(compounds, mole_fractions)
+        )
+    except KeyError as error:
+        raise ValidationError(f"missing Peneloux coefficient: {error.args[0]}") from error
+    molecular_weight = sum(fraction * compound.molecular_weight.value for compound, fraction in zip(compounds, mole_fractions))
+    volume = R * compressibility * temperature_k / pressure_pa - translation
+    if not math.isfinite(volume) or volume <= 0:
+        raise ValidationError("translated vapor volume must be finite and positive")
+    return molecular_weight / volume
