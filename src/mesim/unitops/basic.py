@@ -79,6 +79,7 @@ class ThermalOperationResult:
 class HeatExchangerResult:
     hot_outlet: PhaseState
     cold_outlet: PhaseState
+    heat_duty_w: float
 
 
 def heat_exchanger(
@@ -115,7 +116,56 @@ def heat_exchanger(
     return HeatExchangerResult(
         outlet(hot_inlet, hot_inlet.enthalpy_j_per_kmol - heat_duty_w / hot_inlet.stream.molar_flow_kmol_s),
         outlet(cold_inlet, cold_inlet.enthalpy_j_per_kmol + heat_duty_w / cold_inlet.stream.molar_flow_kmol_s),
+        heat_duty_w,
     )
+
+
+def heat_exchanger_ua(
+    hot_inlet: PhaseState,
+    cold_inlet: PhaseState,
+    compounds: tuple[Compound, ...],
+    interactions: PRInteractions,
+    correlations: tuple[IdealCorrelations, ...],
+    overall_coefficient_w_m2_k: float,
+    area_m2: float,
+    temperature_bracket_k: tuple[float, float],
+) -> HeatExchangerResult:
+    """Calculate a counter-current, no-loss exchanger from a specified UA."""
+    _positive_finite(overall_coefficient_w_m2_k, "heat exchanger overall coefficient")
+    _positive_finite(area_m2, "heat exchanger area")
+    if hot_inlet.stream.temperature_k <= cold_inlet.stream.temperature_k:
+        raise ValidationError("heat exchanger hot inlet temperature must exceed cold inlet temperature")
+    ua = overall_coefficient_w_m2_k * area_m2
+
+    def lmtd(result: HeatExchangerResult) -> float | None:
+        first = hot_inlet.stream.temperature_k - result.cold_outlet.stream.temperature_k
+        second = result.hot_outlet.stream.temperature_k - cold_inlet.stream.temperature_k
+        if first <= 0.0 or second <= 0.0:
+            return None
+        if math.isclose(first, second, rel_tol=1e-12, abs_tol=1e-12):
+            return (first + second) / 2.0
+        return (first - second) / math.log(first / second)
+
+    lower = 0.0
+    upper = ua * (hot_inlet.stream.temperature_k - cold_inlet.stream.temperature_k)
+    for _ in range(80):
+        trial = heat_exchanger(hot_inlet, cold_inlet, compounds, interactions, correlations, upper, temperature_bracket_k)
+        difference = lmtd(trial)
+        if difference is None or upper >= ua * difference:
+            break
+        upper *= 2.0
+    else:
+        raise ConvergenceError("heat exchanger UA duty bracket did not converge")
+
+    for _ in range(60):
+        duty = (lower + upper) / 2.0
+        trial = heat_exchanger(hot_inlet, cold_inlet, compounds, interactions, correlations, duty, temperature_bracket_k)
+        difference = lmtd(trial)
+        if difference is None or duty >= ua * difference:
+            upper = duty
+        else:
+            lower = duty
+    return heat_exchanger(hot_inlet, cold_inlet, compounds, interactions, correlations, (lower + upper) / 2.0, temperature_bracket_k)
 
 
 def _thermal_operation(
