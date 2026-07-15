@@ -5,7 +5,7 @@
     "source":  {
                    "dwsim_revision":  "9.0.4",
                    "automation_version":  "DWSIM version 9.0.4.0 (28-Jul-25 1:19:16 PM)",
-                   "captured_utc":  "2026-07-15T23:36:50.5187595Z",
+                   "captured_utc":  "2026-07-15T23:42:50.4354074Z",
                    "platform":  "Microsoft Windows NT 10.0.26200.0",
                    "architecture":  "AMD64",
                    "engine_bin":  "C:\\Users\\26008353\\Downloads\\DWSIM_v904_win64_portable\\Windows",
@@ -462,6 +462,9 @@
                                                                  }
                                                              ],
                                               "type":  "Valve",
+                                              "utilities":  [
+
+                                                            ],
                                               "calculated":  true
                                           },
                                           {
@@ -3518,6 +3521,9 @@
                                                                  }
                                                              ],
                                               "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
                                               "calculated":  true
                                           },
                                           {
@@ -6574,6 +6580,9 @@
                                                                  }
                                                              ],
                                               "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
                                               "calculated":  true
                                           }
                                       ]
@@ -6693,6 +6702,9 @@
                                                                  }
                                                              ],
                                               "type":  "Valve",
+                                              "utilities":  [
+
+                                                            ],
                                               "calculated":  true
                                           },
                                           {
@@ -9749,6 +9761,9 @@
                                                                  }
                                                              ],
                                               "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
                                               "calculated":  true
                                           },
                                           {
@@ -12805,6 +12820,9 @@
                                                                  }
                                                              ],
                                               "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
                                               "calculated":  true
                                           }
                                       ]
