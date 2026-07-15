@@ -53,5 +53,6 @@
 - Compute shell-tube resistance test vectors directly from the full external-area resistance sum.
 - Reproduce both captured shell-and-tube inlet mass flows before comparing a rating result to DWSIM.
 - Use the active steady HeatExchanger shell-area branch; dynamic branch annular-area assignments are not the rating solver.
+- Follow the approved phase order; do not recommend columns before the hydraulics and reaction prerequisites.
 - Treat saved DWSIM separation specifications as authoritative when they differ from the requested capture setup.
 - Verify saved DWSIM mode fields after capture; a UI checkbox instruction is not evidence of the captured mode.
