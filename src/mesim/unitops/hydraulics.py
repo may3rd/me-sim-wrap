@@ -56,6 +56,55 @@ class BeggsBrillPressureDrop:
     total_drop_pa: float
 
 
+@dataclass(frozen=True, slots=True)
+class ApiRp520VaporArea:
+    relieving_pressure_pa: float
+    critical_pressure_pa: float
+    choked: bool
+    required_area_in2: float
+    standard_orifice: str
+    standard_area_in2: float
+
+
+_API_526_ORIFICES = ("D", 0.11), ("E", 0.196), ("F", 0.307), ("G", 0.503), ("H", 0.785), ("J", 1.287), ("K", 1.838), ("L", 2.853), ("M", 3.6), ("N", 4.34), ("P", 6.38), ("Q", 11.05), ("R", 16.0), ("T", 26.0)
+
+
+def api_rp520_vapor_required_area(
+    temperature_k: float, set_pressure_pa: float, back_pressure_pa: float, mass_flow_kg_s: float,
+    compressibility: float, molecular_weight_kg_kmol: float, heat_capacity_ratio: float,
+    overpressure_percent: float, discharge_coefficient: float, backpressure_coefficient: float,
+    installation_coefficient: float,
+) -> ApiRp520VaporArea:
+    """DWSIM's API RP 520 vapor sizing utility; source-equation parity only."""
+    positive = (temperature_k, set_pressure_pa, back_pressure_pa, mass_flow_kg_s, compressibility, molecular_weight_kg_kmol, heat_capacity_ratio, discharge_coefficient, backpressure_coefficient, installation_coefficient)
+    if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0.0 for value in positive):
+        raise ValidationError("API RP 520 vapor inputs must be finite and positive")
+    if heat_capacity_ratio <= 1.0:
+        raise ValidationError("API RP 520 heat-capacity ratio must exceed one")
+    if isinstance(overpressure_percent, bool) or not isinstance(overpressure_percent, (int, float)) or not math.isfinite(overpressure_percent) or overpressure_percent < 0.0:
+        raise ValidationError("API RP 520 overpressure must be finite and non-negative")
+    relieving_pressure_kpa = (set_pressure_pa * 1.033 / 101325.0 * (1.0 + overpressure_percent / 100.0) + 1.033) * 101.325 / 1.033
+    back_pressure_kpa = (back_pressure_pa * 1.033 / 101325.0 + 1.033) * 101.325 / 1.033
+    if back_pressure_kpa >= relieving_pressure_kpa:
+        raise ValidationError("API RP 520 back pressure must be below relieving pressure")
+    critical_pressure_kpa = relieving_pressure_kpa * (2.0 / (heat_capacity_ratio + 1.0)) ** (heat_capacity_ratio / (heat_capacity_ratio - 1.0))
+    mass_flow_kg_h = mass_flow_kg_s * 3600.0
+    if back_pressure_kpa <= critical_pressure_kpa:
+        coefficient = 520.0 * (heat_capacity_ratio * (2.0 / (heat_capacity_ratio + 1.0)) ** ((heat_capacity_ratio + 1.0) / (heat_capacity_ratio - 1.0))) ** 0.5
+        area = 13160.0 * mass_flow_kg_h * (temperature_k * compressibility / molecular_weight_kg_kmol) ** 0.5 / (coefficient * discharge_coefficient * relieving_pressure_kpa * backpressure_coefficient * installation_coefficient)
+        choked = True
+    else:
+        ratio = back_pressure_kpa / relieving_pressure_kpa
+        coefficient = (heat_capacity_ratio / (heat_capacity_ratio - 1.0) * ratio ** (2.0 / heat_capacity_ratio) * (1.0 - ratio ** ((heat_capacity_ratio - 1.0) / heat_capacity_ratio)) / (1.0 - ratio)) ** 0.5
+        area = 17.9 * mass_flow_kg_h / (coefficient * discharge_coefficient * installation_coefficient) * (compressibility * temperature_k / (molecular_weight_kg_kmol * relieving_pressure_kpa * (relieving_pressure_kpa - back_pressure_kpa))) ** 0.5
+        choked = False
+    required_area = area * 0.00155
+    for designation, standard_area in _API_526_ORIFICES:
+        if required_area <= standard_area:
+            return ApiRp520VaporArea(relieving_pressure_kpa * 1000.0, critical_pressure_kpa * 1000.0, choked, required_area, designation, standard_area)
+    raise ValidationError("API RP 520 required area exceeds DWSIM's API 526 T orifice")
+
+
 def beggs_brill_pressure_drop(
     diameter_m: float, length_m: float, elevation_m: float, roughness_m: float,
     vapor_flow_m3_s: float, liquid_flow_m3_s: float, vapor_density_kg_m3: float,

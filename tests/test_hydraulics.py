@@ -8,10 +8,22 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_pressure_drop
+from mesim.unitops.hydraulics import api_rp520_vapor_required_area, beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_pressure_drop
 
 
 class HydraulicsTest(unittest.TestCase):
+    def test_api_rp520_vapor_matches_dwsim_psv_capture(self):
+        result = api_rp520_vapor_required_area(300.0, 1_100_000.0, 100_000.0, 0.1, 0.9764896861575462, 16.04246, 1.3467422057951541, 10.0, 0.85, 1.0, 1.0)
+
+        self.assertTrue(result.choked)
+        self.assertTrue(math.isclose(result.required_area_in2, 0.08013876894324415, rel_tol=1e-12))
+        self.assertEqual(result.standard_orifice, "D")
+        self.assertEqual(result.standard_area_in2, 0.11)
+
+    def test_api_rp520_vapor_rejects_nonphysical_heat_capacity_ratio(self):
+        with self.assertRaises(ValidationError):
+            api_rp520_vapor_required_area(300.0, 1_100_000.0, 100_000.0, 0.1, 0.98, 16.04, 1.0, 10.0, 0.85, 1.0, 1.0)
+
     def test_beggs_brill_matches_dwsim_inclined_two_phase_equations(self):
         result = beggs_brill_pressure_drop(0.05, 100.0, 10.0, 4.5e-5, 0.001, 0.002, 10.0, 800.0, 1e-5, 0.001, 0.03)
 
