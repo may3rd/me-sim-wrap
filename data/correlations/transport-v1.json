@@ -1,0 +1,15 @@
+{
+  "schema_version": "transport-correlations-1",
+  "provenance": {
+    "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+    "source_revision": "9.0.4",
+    "imported_utc": "2026-07-15T00:00:00Z"
+  },
+  "correlations": [
+    {"compound_id": "Methane", "critical_volume": {"value": 0.0986, "unit": "m3/kmol"}, "vapor_viscosity": {"equation": 102, "A": 5.3432e-7, "B": 0.58831, "C": 114.58, "D": -1338.5, "minimum_k": 90.0, "maximum_k": 1000.0, "unit": "Pa.s"}, "vapor_thermal_conductivity": {"equation": 102, "A": 7.4705e-6, "B": 1.4432, "C": -57.569, "D": 587.82, "minimum_k": 90.694, "maximum_k": 600.0, "unit": "W/m/K"}},
+    {"compound_id": "Ethane", "critical_volume": {"value": 0.1455, "unit": "m3/kmol"}, "vapor_viscosity": {"equation": 102, "A": 5.2452e-7, "B": 0.58906, "C": 188.8, "D": -2953.8, "minimum_k": 90.35, "maximum_k": 1000.0, "unit": "Pa.s"}, "vapor_thermal_conductivity": {"equation": 102, "A": 7.4549e-5, "B": 1.168, "C": 506.4, "D": -881.74, "minimum_k": 90.352, "maximum_k": 1000.0, "unit": "W/m/K"}},
+    {"compound_id": "Propane", "critical_volume": {"value": 0.2, "unit": "m3/kmol"}, "vapor_viscosity": {"equation": 102, "A": 4.7422e-8, "B": 0.90416, "C": -4.7484, "D": 478.57, "minimum_k": 85.47, "maximum_k": 1000.0, "unit": "Pa.s"}, "vapor_thermal_conductivity": {"equation": 102, "A": -1.139, "B": 0.10904, "C": -9898.6, "D": -7669600.0, "minimum_k": 85.47, "maximum_k": 1000.0, "unit": "W/m/K"}},
+    {"compound_id": "N-butane", "critical_volume": {"value": 0.255, "unit": "m3/kmol"}, "vapor_viscosity": {"equation": 102, "A": 2.7078e-8, "B": 0.97147, "C": -51.16, "D": 6431.0, "minimum_k": 134.86, "maximum_k": 1000.0, "unit": "Pa.s"}, "vapor_thermal_conductivity": {"equation": 102, "A": 0.042635, "B": 0.45147, "C": 4234.0, "D": 1756600.0, "minimum_k": 134.86, "maximum_k": 1000.0, "unit": "W/m/K"}},
+    {"compound_id": "N-pentane", "critical_volume": {"value": 0.311, "unit": "m3/kmol"}, "vapor_viscosity": {"equation": 102, "A": 5.9173e-8, "B": 0.85109, "C": 8.4138, "D": 3723.2, "minimum_k": 143.42, "maximum_k": 1000.0, "unit": "Pa.s"}, "vapor_thermal_conductivity": {"equation": 102, "A": -603.2, "B": 0.74698, "C": -818230000.0, "D": -8786500000.0, "minimum_k": 143.42, "maximum_k": 1000.0, "unit": "W/m/K"}}
+  ]
+}

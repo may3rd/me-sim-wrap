@@ -11,6 +11,7 @@ from mesim import OutOfRangeError, ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.thermo.ideal import ideal_gas_density, load_correlations
 from mesim.thermo.peng_robinson import R, PengRobinson, PengRobinsonMixture
+from mesim.thermo.transport import load_transport_correlations, vapor_transport
 
 
 ROOT = Path(__file__).parents[1]
@@ -308,6 +309,34 @@ class PengRobinsonMixtureTest(unittest.TestCase):
             entropy_delta = correlations[compound_id].entropy_change(liquid["PROP_MS_0"], liquid["PROP_MS_1"], vapor["PROP_MS_0"], vapor["PROP_MS_1"]).value + liquid_state.departure_entropy_j_per_kmol_k - vapor_state.departure_entropy_j_per_kmol_k
             self.assertTrue(math.isclose(enthalpy_delta, (liquid["PROP_MS_9"] - vapor["PROP_MS_9"]) * 1_000, rel_tol=DWSIM_PR_CALORIC_DELTA_REL_TOL))
             self.assertTrue(math.isclose(entropy_delta, (liquid["PROP_MS_10"] - vapor["PROP_MS_10"]) * 1_000, rel_tol=DWSIM_PR_CALORIC_DELTA_REL_TOL))
+
+class VaporTransportTest(unittest.TestCase):
+    def test_vapor_transport_matches_captured_dwsim_pr_states(self):
+        golden = json.loads((ROOT / "tests/golden/pr-t1.json").read_text(encoding="utf-8-sig"))
+        streams = {
+            record["tag"]: {item["property"]: item["value"]["value"] for item in record["properties"]}
+            for record in golden["outputs"]["objects_after"]
+        }
+        compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        transport = {record.compound_id: record for record in load_transport_correlations(ROOT / "data/correlations/transport-v1.json")}
+        cases = (
+            ("PR-V-METHANE", ("Methane",), (1.0,)),
+            ("PR-V-ETHANE", ("Ethane",), (1.0,)),
+            ("PR-V-PROPANE", ("Propane",), (1.0,)),
+            ("PR-V-NBUTANE", ("N-butane",), (1.0,)),
+            ("PR-V-NPENTANE", ("N-pentane",), (1.0,)),
+            ("PR-MIX-ME-C2", ("Methane", "Ethane"), (0.7, 0.3)),
+        )
+        for tag, ids, fractions in cases:
+            with self.subTest(tag=tag):
+                properties = streams[tag]
+                selected = tuple(compounds[compound_id] for compound_id in ids)
+                result = vapor_transport(
+                    selected, fractions, tuple(transport[compound_id] for compound_id in ids),
+                    properties["PROP_MS_0"], properties["PROP_MS_12"],
+                )
+                self.assertTrue(math.isclose(result.dynamic_viscosity_pa_s, properties["PROP_MS_20"], rel_tol=2e-6))
+                self.assertTrue(math.isclose(result.thermal_conductivity_w_per_m_k, properties["PROP_MS_18"], rel_tol=2e-6))
 
 
 if __name__ == "__main__":
