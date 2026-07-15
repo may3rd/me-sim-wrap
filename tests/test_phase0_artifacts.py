@@ -90,6 +90,13 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertNotIn("function Get-ClrBaseObject", script)
         self.assertEqual(script.count('[object[]]@($PropertyName, $null)'), 2)
 
+    def test_capture_script_records_saved_attached_utility_inputs(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn('"AttachedUtilities"', script)
+        self.assertIn('"SaveData"', script)
+        self.assertIn("Get-UtilityStates", script)
+
     def test_capture_script_records_ideal_compound_reference_values(self):
         script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
 

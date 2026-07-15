@@ -307,6 +307,51 @@ function Get-PropertyRecord {
     }
 }
 
+function Get-UtilityStates {
+    param(
+        [AllowNull()]
+        [object]$Object
+    )
+
+    $states = @()
+    $utilities = [DwsimCaptureReflection]::Get(
+        $Object,
+        "AttachedUtilities"
+    )
+
+    foreach ($utility in $utilities) {
+        $data = $null
+        $readError = $null
+
+        try {
+            $data = [DwsimCaptureReflection]::Invoke(
+                $utility,
+                "SaveData",
+                [object[]]@()
+            )
+        }
+        catch {
+            $readError = $_.Exception.Message
+        }
+
+        $states += @{
+            name       = [string][DwsimCaptureReflection]::Get(
+                $utility,
+                "Name"
+            )
+            type       = [DwsimCaptureReflection]::TypeName(
+                $utility
+            )
+            data       = $data
+            read_error = $readError
+        }
+    }
+
+    return @(
+        $states | Sort-Object name, type
+    )
+}
+
 function Get-ObjectStates {
     param(
         [Parameter(Mandatory = $true)]
@@ -379,6 +424,7 @@ function Get-ObjectStates {
                 $object,
                 "ErrorMessage"
             )
+            utilities  = @(Get-UtilityStates -Object $object)
             properties = @(
                 $properties | Sort-Object property
             )
