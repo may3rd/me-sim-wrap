@@ -211,6 +211,23 @@ def shell_tube_overall_coefficient(
     return 1.0 / resistance
 
 
+def shell_tube_lmtd_correction(ratio_r: float, ratio_p: float, shell_passes: int) -> float:
+    """DWSIM shell-and-tube correction factor for counter-current LMTD."""
+    if shell_passes <= 0 or not all(math.isfinite(value) and value > 0.0 for value in (ratio_r, ratio_p)):
+        raise ValidationError("shell-tube LMTD ratios and shell passes must be positive")
+    if math.isclose(ratio_r, 1.0, rel_tol=0.0, abs_tol=1e-12):
+        s = ratio_p / (shell_passes * (1.0 - ratio_p) + ratio_p)
+        factor = s * 2.0**0.5 / ((1.0 - s) * math.log((2.0 * (1.0 - s) + s * 2.0**0.5) / (2.0 * (1.0 - s) - s * 2.0**0.5)))
+    else:
+        alpha = ((1.0 - ratio_r * ratio_p) / (1.0 - ratio_p)) ** (1.0 / shell_passes)
+        s = (alpha - 1.0) / (alpha - ratio_r)
+        root = (ratio_r**2 + 1.0) ** 0.5
+        factor = root * math.log((1.0 - s) / (1.0 - ratio_r * s)) / ((ratio_r - 1.0) * math.log((2.0 - s * (ratio_r + 1.0 - root)) / (2.0 - s * (ratio_r + 1.0 + root))))
+    if not math.isfinite(factor) or not 0.0 < factor <= 1.0:
+        raise ValidationError("shell-tube LMTD correction is outside its physical range")
+    return factor
+
+
 def heat_exchanger(
     hot_inlet: PhaseState,
     cold_inlet: PhaseState,
