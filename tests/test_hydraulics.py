@@ -8,10 +8,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import pipe_pressure_drop
+from mesim.unitops.hydraulics import minor_loss_pressure_drop, pipe_pressure_drop
 
 
 class HydraulicsTest(unittest.TestCase):
+    def test_minor_loss_uses_dwsim_loss_coefficient_equation(self):
+        self.assertEqual(minor_loss_pressure_drop(0.78, 1000.0, 2.5), 2437.5)
+        with self.assertRaises(ValidationError):
+            minor_loss_pressure_drop(-0.01, 1000.0, 2.5)
+
     def test_single_phase_pipe_matches_dwsim_darcy_weibach_equations(self):
         result = pipe_pressure_drop(0.1, 100.0, 10.0, 4.5e-5, 0.01, 1000.0, 0.001)
 

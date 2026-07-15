@@ -15,6 +15,14 @@ class PipePressureDrop:
     total_drop_pa: float
 
 
+def minor_loss_pressure_drop(loss_coefficient: float, density_kg_m3: float, velocity_m_s: float) -> float:
+    """DWSIM fixed-K fitting pressure drop for one incompressible phase."""
+    values = ((loss_coefficient, "loss coefficient"), (density_kg_m3, "density"), (velocity_m_s, "velocity"))
+    if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0.0 for value, _ in values):
+        raise ValidationError("fitting loss coefficient, density, and velocity must be finite and non-negative")
+    return loss_coefficient * density_kg_m3 * velocity_m_s**2 / 2.0
+
+
 def pipe_pressure_drop(
     diameter_m: float, length_m: float, elevation_m: float, roughness_m: float,
     volumetric_flow_m3_s: float, density_kg_m3: float, viscosity_pa_s: float,
