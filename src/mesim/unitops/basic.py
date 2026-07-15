@@ -178,8 +178,12 @@ def shell_tube_shell_side(
     y = 5.371855907482061 * xx**-0.33416765138071414 * yy**0.7267144209289168
     np = 0.5380765047084108 * xx**0.3761125784751041 * yy**-3.8741224386187474
     fp = 1.0 / (0.8 + np * (shell / pitch) ** 0.5)
-    section = 0.97 * (pitch - outer) / pitch * spacing * bundle
-    mass_velocity = mass_flow_kg_s / (section / fp)
+    clearance = 0.97 * (pitch - outer) / pitch
+    section = clearance * spacing * bundle
+    pressure_section = section / fp
+    if pressure_section <= 0.0:
+        raise ValidationError("shell-tube pressure-drop flow area must be positive")
+    mass_velocity = mass_flow_kg_s / pressure_section
     reynolds = mass_velocity * outer / viscosity_pa_s
     if reynolds < 100.0:
         friction = 276.46 * reynolds**-0.979
@@ -226,6 +230,60 @@ def shell_tube_lmtd_correction(ratio_r: float, ratio_p: float, shell_passes: int
     if not math.isfinite(factor) or not 0.0 < factor <= 1.0:
         raise ValidationError("shell-tube LMTD correction is outside its physical range")
     return factor
+
+
+@dataclass(frozen=True, slots=True)
+class ShellTubeRatingResult:
+    result: "HeatExchangerResult"
+    overall_coefficient_w_m2_k: float
+    area_m2: float
+    shell_reynolds: float
+    tube_reynolds: float
+    cold_pressure_drop_pa: float
+    hot_pressure_drop_pa: float
+
+
+def shell_tube_rating(
+    hot_inlet: PhaseState, cold_inlet: PhaseState, compounds: tuple[Compound, ...], interactions: PRInteractions,
+    correlations: tuple[IdealCorrelations, ...], transport: tuple[TransportRecord, ...], geometry: ShellTubeGeometry,
+    shell_diameter_mm: float, baffle_spacing_mm: float, baffle_cut_percent: float, tube_conductivity_w_m_k: float,
+    tube_roughness_mm: float, tube_friction_multiplier: float,
+) -> ShellTubeRatingResult:
+    """All-vapor, layout-0, counter-current DWSIM shell-and-tube rating."""
+    if hot_inlet.stream.temperature_k <= cold_inlet.stream.temperature_k:
+        raise ValidationError("shell-tube hot inlet temperature must exceed cold inlet temperature")
+    ids = tuple(compound.id for compound in compounds)
+    if hot_inlet.stream.compound_ids != ids or cold_inlet.stream.compound_ids != ids or hot_inlet.stream.composition != cold_inlet.stream.composition:
+        raise ValidationError("shell-tube inlets must share the supplied compound order and composition")
+    area = shell_tube_area(geometry)
+    molecular_weight = math.fsum(x * c.molecular_weight.value for x, c in zip(cold_inlet.stream.composition, compounds))
+    cold_mass = cold_inlet.stream.molar_flow_kmol_s * molecular_weight
+    hot_mass = hot_inlet.stream.molar_flow_kmol_s * molecular_weight
+    duty = 0.0
+    maximum_duty = _maximum_heat_duty(hot_inlet, cold_inlet, compounds, interactions, correlations) * (1.0 - 1e-9)
+    correction = 1.0
+    for _ in range(80):
+        trial = heat_exchanger(hot_inlet, cold_inlet, compounds, interactions, correlations, duty, (cold_inlet.stream.temperature_k, hot_inlet.stream.temperature_k)) if duty else HeatExchangerResult(hot_inlet, cold_inlet, 0.0)
+        cold = shell_tube_vapor_properties(compounds, cold_inlet.stream.composition, correlations, transport, interactions, (cold_inlet.stream.temperature_k + trial.cold_outlet.stream.temperature_k) / 2, cold_inlet.stream.pressure_pa)
+        hot = shell_tube_vapor_properties(compounds, hot_inlet.stream.composition, correlations, transport, interactions, (hot_inlet.stream.temperature_k + trial.hot_outlet.stream.temperature_k) / 2, hot_inlet.stream.pressure_pa)
+        tube = shell_tube_tube_side(geometry, cold_mass, cold.density_kg_m3, cold.viscosity_pa_s, cold.conductivity_w_m_k, cold.heat_capacity_j_kg_k, tube_roughness_mm, tube_friction_multiplier)
+        shell = shell_tube_shell_side(geometry, hot_mass, hot.density_kg_m3, hot.viscosity_pa_s, hot.conductivity_w_m_k, hot.heat_capacity_j_kg_k, shell_diameter_mm, baffle_spacing_mm, baffle_cut_percent)
+        u = shell_tube_overall_coefficient(geometry, tube[3], shell[3], 0.0, 0.0, tube_conductivity_w_m_k)
+        dt1, dt2 = hot_inlet.stream.temperature_k - trial.cold_outlet.stream.temperature_k, trial.hot_outlet.stream.temperature_k - cold_inlet.stream.temperature_k
+        if dt1 <= 0 or dt2 <= 0:
+            break
+        lmtd = (dt1 + dt2) / 2 if math.isclose(dt1, dt2, rel_tol=1e-12) else (dt1 - dt2) / math.log(dt1 / dt2)
+        r = (hot_inlet.stream.temperature_k - trial.hot_outlet.stream.temperature_k) / (trial.cold_outlet.stream.temperature_k - cold_inlet.stream.temperature_k) if duty else hot_mass / cold_mass
+        p = (trial.cold_outlet.stream.temperature_k - cold_inlet.stream.temperature_k) / (hot_inlet.stream.temperature_k - cold_inlet.stream.temperature_k) if duty else 0.01
+        try:
+            correction = shell_tube_lmtd_correction(r, p, geometry.tube_passes)
+        except (ValidationError, ValueError, ZeroDivisionError):
+            pass
+        target = min(maximum_duty, u * area * correction * lmtd)
+        if abs(target - duty) <= 1e-5 * max(1.0, target):
+            return ShellTubeRatingResult(trial, u, area, shell[0], tube[0], tube[2], shell[2])
+        duty = 0.1 * target + 0.9 * duty
+    raise ConvergenceError("shell-tube rating did not converge")
 
 
 def heat_exchanger(
