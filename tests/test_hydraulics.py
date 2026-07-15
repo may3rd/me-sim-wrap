@@ -8,10 +8,18 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_pressure_drop
+from mesim.unitops.hydraulics import beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_pressure_drop
 
 
 class HydraulicsTest(unittest.TestCase):
+    def test_beggs_brill_matches_dwsim_inclined_two_phase_equations(self):
+        result = beggs_brill_pressure_drop(0.05, 100.0, 10.0, 4.5e-5, 0.001, 0.002, 10.0, 800.0, 1e-5, 0.001, 0.03)
+
+        self.assertEqual(result.flow_regime, "Intermittent")
+        self.assertTrue(math.isclose(result.liquid_holdup, 0.6859528681345057, rel_tol=1e-12))
+        self.assertTrue(math.isclose(result.friction_drop_pa, 41930.32301561977, rel_tol=1e-12))
+        self.assertTrue(math.isclose(result.static_drop_pa, 54122.915748215484, rel_tol=1e-12))
+
     def test_lockhart_martinelli_matches_dwsim_two_phase_equations(self):
         result = lockhart_martinelli_pressure_drop(0.05, 100.0, 10.0, 4.5e-5, 0.001, 0.002, 10.0, 800.0, 1e-5, 0.001)
 
