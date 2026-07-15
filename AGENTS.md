@@ -48,5 +48,7 @@
 - Follow operation-result nesting before reading stream properties in an exploratory parity calculation.
 - Add imports with a new golden-case test before treating its first run as a behavior failure.
 - For DWSIM pump parity, set liquid density calculation to EOS; Peneloux alone does not override Rackett-and-experimental density.
+- Derive tube Reynolds test vectors from per-pass tube area, not total tube area.
+- Apply the configured tube friction multiplier after selecting the base friction correlation.
 - Treat saved DWSIM separation specifications as authoritative when they differ from the requested capture setup.
 - Verify saved DWSIM mode fields after capture; a UI checkbox instruction is not evidence of the captured mode.

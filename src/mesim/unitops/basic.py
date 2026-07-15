@@ -110,6 +110,31 @@ def shell_tube_area(geometry: ShellTubeGeometry) -> float:
     return geometry.tube_count * math.pi * outer * (geometry.tube_length_m - 2.0 * outer)
 
 
+def shell_tube_tube_side(
+    geometry: ShellTubeGeometry, mass_flow_kg_s: float, density_kg_m3: float, viscosity_pa_s: float,
+    conductivity_w_m_k: float, heat_capacity_j_kg_k: float, roughness_mm: float, friction_multiplier: float,
+) -> tuple[float, float, float, float]:
+    """DWSIM tube-side pressure drop and Gnielinski heat-transfer coefficient."""
+    shell_tube_area(geometry)
+    for value, name in ((mass_flow_kg_s, "tube mass flow"), (density_kg_m3, "tube density"), (viscosity_pa_s, "tube viscosity"), (conductivity_w_m_k, "tube conductivity"), (heat_capacity_j_kg_k, "tube heat capacity"), (roughness_mm, "tube roughness"), (friction_multiplier, "tube friction multiplier")):
+        _positive_finite(value, name)
+    diameter = geometry.tube_inner_diameter_mm / 1000.0
+    paths = geometry.tube_count / geometry.tube_passes
+    velocity = mass_flow_kg_s / (density_kg_m3 * paths * math.pi * diameter**2 / 4.0)
+    reynolds = density_kg_m3 * velocity * diameter / viscosity_pa_s
+    if reynolds > 3250.0:
+        a1 = math.log10(((roughness_mm / 1000.0 / diameter) ** 1.1096) / 2.8257 + (7.149 / reynolds) ** 0.8961)
+        b1 = -2.0 * math.log10((roughness_mm / 1000.0 / diameter) / 3.7065 - 5.0452 * a1 / reynolds)
+        friction = (1.0 / b1) ** 2
+    else:
+        friction = 64.0 / reynolds
+    friction *= friction_multiplier
+    prandtl = viscosity_pa_s * heat_capacity_j_kg_k / conductivity_w_m_k
+    pressure_drop = friction * geometry.tube_length_m * geometry.tube_passes / diameter * velocity**2 * density_kg_m3 / 2.0
+    coefficient = conductivity_w_m_k / diameter * (friction / 8.0) * reynolds * prandtl / (1.07 + 12.7 * (friction / 8.0) ** 0.5 * (prandtl ** (2.0 / 3.0) - 1.0))
+    return reynolds, friction, pressure_drop, coefficient
+
+
 def heat_exchanger(
     hot_inlet: PhaseState,
     cold_inlet: PhaseState,

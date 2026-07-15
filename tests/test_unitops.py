@@ -11,7 +11,7 @@ from mesim import ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.streams import StreamState, flash_stream
 from mesim.thermo.ideal import load_correlations
-from mesim.unitops.basic import ShellTubeGeometry, cooler, equilibrium_separator, heat_exchanger, heat_exchanger_efficiency, heat_exchanger_pinch, heat_exchanger_ua, heater, mix_streams, shell_tube_area, split_stream, valve
+from mesim.unitops.basic import ShellTubeGeometry, cooler, equilibrium_separator, heat_exchanger, heat_exchanger_efficiency, heat_exchanger_pinch, heat_exchanger_ua, heater, mix_streams, shell_tube_area, shell_tube_tube_side, split_stream, valve
 from mesim.unitops.pressure import compressor, expander, pump
 from mesim.unitops.separation import component_separator
 
@@ -56,6 +56,13 @@ class BasicUnitOperationTest(unittest.TestCase):
         self.assertTrue(math.isclose(shell_tube_area(geometry), 45.99291644855457, rel_tol=1e-12))
         with self.assertRaises(ValidationError):
             shell_tube_area(ShellTubeGeometry(1, 2, 50, 60, 5, 50, 59))
+
+    def test_shell_tube_tube_side_uses_dwsim_friction_and_gnielinski_equations(self):
+        result = shell_tube_tube_side(ShellTubeGeometry(1, 2, 50, 60, 5, 50, 70), 0.0125, 4.0, 1e-5, 0.035, 2200.0, 0.045, 1.2)
+        self.assertTrue(math.isclose(result[0], 1273.2395447351628, rel_tol=1e-12))
+        self.assertTrue(math.isclose(result[1], 1.2 * 64.0 / result[0], rel_tol=1e-12))
+        self.assertGreater(result[2], 0.0)
+        self.assertGreater(result[3], 0.0)
 
     def test_mixer_rejects_invalid_pressure_or_compound_order(self):
         with self.assertRaises(ValidationError):
