@@ -49,3 +49,4 @@
 - Add imports with a new golden-case test before treating its first run as a behavior failure.
 - For DWSIM pump parity, set liquid density calculation to EOS; Peneloux alone does not override Rackett-and-experimental density.
 - Treat saved DWSIM separation specifications as authoritative when they differ from the requested capture setup.
+- Verify saved DWSIM mode fields after capture; a UI checkbox instruction is not evidence of the captured mode.
