@@ -5,12 +5,12 @@
     "source":  {
                    "dwsim_revision":  "9.0.4",
                    "automation_version":  "DWSIM version 9.0.4.0 (28-Jul-25 1:19:16 PM)",
-                   "captured_utc":  "2026-07-16T00:28:03.1909854Z",
+                   "captured_utc":  "2026-07-16T00:30:27.3995949Z",
                    "platform":  "Microsoft Windows NT 10.0.26200.0",
                    "architecture":  "AMD64",
                    "engine_bin":  "C:\\Users\\26008353\\Downloads\\DWSIM_v904_win64_portable\\Windows",
                    "input_file":  "C:\\Users\\26008353\\Downloads\\me-sim-wrap-live\\tests\\u3-psv-two-phase-api520.dwxmz",
-                   "input_file_sha256":  "93b20fb63aa91b3cac3d921b839243a690217d71db3e0eea69e1e08e4d497fba",
+                   "input_file_sha256":  "b3081676ae387c834f04000d0e9d2c377e947a64ad9ddf82440236a5b7f44fbc",
                    "property_package":  "Peng-Robinson (PR)",
                    "flash_algorithm":  "DWSIM default",
                    "bubble_dew_calculation":  false,
@@ -463,6 +463,21 @@
                                                              ],
                                               "type":  "Valve",
                                               "utilities":  [
+                                                                {
+                                                                    "read_error":  null,
+                                                                    "name":  "PressureSafetyValveSizing2",
+                                                                    "data":  {
+                                                                                 "Name":  "FrmPsvSize",
+                                                                                 "AutoUpdate":  false,
+                                                                                 "OverPressure":  10.0,
+                                                                                 "Kd":  0.85,
+                                                                                 "Kb":  1.0,
+                                                                                 "Kc":  1.0,
+                                                                                 "Method":  0,
+                                                                                 "RelievedFluid":  2
+                                                                             },
+                                                                    "type":  "5"
+                                                                },
                                                                 {
                                                                     "read_error":  null,
                                                                     "name":  "PressureSafetyValveSizing1",
@@ -7795,6 +7810,21 @@
                                                              ],
                                               "type":  "Valve",
                                               "utilities":  [
+                                                                {
+                                                                    "read_error":  null,
+                                                                    "name":  "PressureSafetyValveSizing2",
+                                                                    "data":  {
+                                                                                 "Name":  "FrmPsvSize",
+                                                                                 "AutoUpdate":  false,
+                                                                                 "OverPressure":  10.0,
+                                                                                 "Kd":  0.85,
+                                                                                 "Kb":  1.0,
+                                                                                 "Kc":  1.0,
+                                                                                 "Method":  0,
+                                                                                 "RelievedFluid":  2
+                                                                             },
+                                                                    "type":  "5"
+                                                                },
                                                                 {
                                                                     "read_error":  null,
                                                                     "name":  "PressureSafetyValveSizing1",
