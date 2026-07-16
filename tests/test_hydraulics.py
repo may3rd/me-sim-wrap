@@ -3,6 +3,8 @@ import math
 import sys
 import unittest
 from pathlib import Path
+from xml.etree import ElementTree
+from zipfile import ZipFile
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -45,6 +47,28 @@ class HydraulicsTest(unittest.TestCase):
         self.assertTrue(math.isclose(result.liquid_holdup, 0.6859528681345057, rel_tol=1e-12))
         self.assertTrue(math.isclose(result.friction_drop_pa, 41930.32301561977, rel_tol=1e-12))
         self.assertTrue(math.isclose(result.static_drop_pa, 54122.915748215484, rel_tol=1e-12))
+
+    def test_beggs_brill_matches_captured_dwsim_two_phase_pipe(self):
+        golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-two-phase-beggs-brill-pr-eos.json").read_text(encoding="utf-8-sig"))
+        pipe = next(item for item in golden["outputs"]["objects_after"] if item["tag"] == "PIPE-001")
+        values = {item["property"]: item["value"]["value"] for item in pipe["properties"]}
+        with ZipFile(Path(__file__).parents[1] / "tests/u3-pipe-two-phase-beggs-brill-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
+        source = next(item for item in root.findall("./SimulationObjects/SimulationObject") if item.findtext("SelectedFlowPackage") == "Beggs_Brill")
+        diameter_m = float(source.findtext("./Profile/Sections/Section/DI")) * 0.0254
+        prefix = "HydraulicSegment,1,Results,1,"
+        result = beggs_brill_pressure_drop(
+            diameter_m, 2.0, 0.2, 4.5e-5,
+            values[prefix + "VolumetricFlowVapor"], values[prefix + "VolumetricFlowLiquid"],
+            values[prefix + "DensityVapor"], values[prefix + "DensityLiquid"],
+            values[prefix + "ViscosityVapor"], values[prefix + "ViscosityLiquid"],
+            values[prefix + "SurfaceTension"],
+        )
+
+        self.assertEqual(result.flow_regime, values[prefix + "FlowRegime"])
+        self.assertTrue(math.isclose(result.liquid_holdup, values[prefix + "LiquidHoldup"], rel_tol=1e-6))
+        self.assertTrue(math.isclose(result.friction_drop_pa, values[prefix + "PressureDropFriction"], rel_tol=1e-6))
+        self.assertTrue(math.isclose(result.static_drop_pa, values[prefix + "PressureDropHydrostatic"], rel_tol=1e-6))
 
     def test_lockhart_martinelli_matches_dwsim_two_phase_equations(self):
         result = lockhart_martinelli_pressure_drop(0.05, 100.0, 10.0, 4.5e-5, 0.001, 0.002, 10.0, 800.0, 1e-5, 0.001)
