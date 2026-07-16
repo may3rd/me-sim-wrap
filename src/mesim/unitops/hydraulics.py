@@ -137,6 +137,59 @@ def api_rp520_liquid_required_area(
     raise ValidationError("API RP 520 liquid viscosity correction did not converge")
 
 
+def api_rp520_two_phase_required_area(
+    set_pressure_pa: float, back_pressure_pa: float, volumetric_flow_m3_s: float,
+    vapor_mass_fraction: float, vapor_density_kg_m3: float, mixture_density_kg_m3: float,
+    mixture_density_at_90_percent_pressure_kg_m3: float, overpressure_percent: float,
+    discharge_coefficient: float, backpressure_coefficient: float, installation_coefficient: float,
+) -> ApiRp520Area:
+    """DWSIM's API RP 520 two-phase sizing utility; source-equation parity only."""
+    positive = (set_pressure_pa, back_pressure_pa, volumetric_flow_m3_s, vapor_density_kg_m3, mixture_density_kg_m3, mixture_density_at_90_percent_pressure_kg_m3, discharge_coefficient, backpressure_coefficient, installation_coefficient)
+    if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0.0 for value in positive):
+        raise ValidationError("API RP 520 two-phase inputs must be finite and positive")
+    if not isinstance(vapor_mass_fraction, (int, float)) or isinstance(vapor_mass_fraction, bool) or not math.isfinite(vapor_mass_fraction) or not 0.0 < vapor_mass_fraction < 1.0:
+        raise ValidationError("API RP 520 two-phase vapor mass fraction must be between zero and one")
+    if isinstance(overpressure_percent, bool) or not isinstance(overpressure_percent, (int, float)) or not math.isfinite(overpressure_percent) or overpressure_percent < 0.0:
+        raise ValidationError("API RP 520 overpressure must be finite and non-negative")
+    relieving_pressure_pa = set_pressure_pa * (1.0 + overpressure_percent / 100.0)
+    if back_pressure_pa >= relieving_pressure_pa:
+        raise ValidationError("API RP 520 back pressure must be below relieving pressure")
+    pressure = relieving_pressure_pa * 1.033 / 101325.0 * 14.22
+    back_pressure = back_pressure_pa * 1.033 / 101325.0 * 14.22
+    specific_vapor_volume = 16.0185 / vapor_density_kg_m3
+    specific_volume = 16.0185 / mixture_density_kg_m3
+    specific_volume_90 = 16.0185 / mixture_density_at_90_percent_pressure_kg_m3
+    expansion = 9.0 * (specific_volume_90 / specific_volume - 1.0)
+    if expansion <= 0.0:
+        raise ValidationError("API RP 520 two-phase density at 90 percent pressure must be lower")
+
+    def residual(eta: float) -> float:
+        return eta**2 + (expansion**2 - 2.0 * expansion) * (1.0 - eta)**2 + 2.0 * expansion**2 * math.log(eta) + 2.0 * expansion**2 * (1.0 - eta)
+
+    low, high = 1e-12, 1.0
+    if residual(low) * residual(high) >= 0.0:
+        raise ValidationError("API RP 520 two-phase critical-flow equation has no bracket")
+    for _ in range(100):
+        middle = (low + high) / 2.0
+        if residual(low) * residual(middle) <= 0.0:
+            high = middle
+        else:
+            low = middle
+    critical_ratio = (low + high) / 2.0
+    critical_pressure = critical_ratio * pressure
+    if critical_pressure >= back_pressure:
+        flow_coefficient = 68.09 * critical_ratio * (pressure / (specific_volume * expansion)) ** 0.5
+        choked = True
+    else:
+        flow_coefficient = 68.09 * (-2.0 * (expansion / math.log(back_pressure / pressure) + (expansion - 1.0) * (1.0 - back_pressure / pressure))) ** 0.5 * (pressure / specific_volume) ** 0.5 / (expansion * (pressure / back_pressure - 1.0) + 1.0)
+        choked = False
+    required_area = 0.04 * volumetric_flow_m3_s * 86400.0 * 2.20462 / (discharge_coefficient * backpressure_coefficient * installation_coefficient * flow_coefficient)
+    for designation, standard_area in _API_526_ORIFICES:
+        if required_area <= standard_area:
+            return ApiRp520Area(relieving_pressure_pa, critical_ratio * relieving_pressure_pa, choked, required_area, designation, standard_area)
+    raise ValidationError("API RP 520 required area exceeds DWSIM's API 526 T orifice")
+
+
 def beggs_brill_pressure_drop(
     diameter_m: float, length_m: float, elevation_m: float, roughness_m: float,
     vapor_flow_m3_s: float, liquid_flow_m3_s: float, vapor_density_kg_m3: float,
