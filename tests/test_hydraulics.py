@@ -80,6 +80,26 @@ class HydraulicsTest(unittest.TestCase):
         self.assertTrue(math.isclose(result.friction_drop_pa, 44286.52902360688, rel_tol=1e-12))
         self.assertTrue(math.isclose(result.static_drop_pa, 52593.33333333333, rel_tol=1e-12))
 
+    def test_lockhart_martinelli_matches_captured_dwsim_two_phase_pipe(self):
+        golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-two-phase-lockhart-martinelli-pr-eos.json").read_text(encoding="utf-8-sig"))
+        pipe = next(item for item in golden["outputs"]["objects_after"] if item["tag"] == "PIPE-001")
+        values = {item["property"]: item["value"]["value"] for item in pipe["properties"]}
+        with ZipFile(Path(__file__).parents[1] / "tests/u3-pipe-two-phase-lockhart-martinelli-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
+        source = next(item for item in root.findall("./SimulationObjects/SimulationObject") if item.findtext("SelectedFlowPackage") == "Lockhart_Martinelli")
+        diameter_m = float(source.findtext("./Profile/Sections/Section/DI")) * 0.0254
+        prefix = "HydraulicSegment,1,Results,1,"
+        result = lockhart_martinelli_pressure_drop(
+            diameter_m, 2.0, 0.2, 4.5e-5,
+            values[prefix + "VolumetricFlowVapor"], values[prefix + "VolumetricFlowLiquid"],
+            values[prefix + "DensityVapor"], values[prefix + "DensityLiquid"],
+            values[prefix + "ViscosityVapor"], values[prefix + "ViscosityLiquid"],
+        )
+
+        self.assertTrue(math.isclose(result.liquid_holdup, values[prefix + "LiquidHoldup"], rel_tol=1e-12))
+        self.assertTrue(math.isclose(result.friction_drop_pa, values[prefix + "PressureDropFriction"], rel_tol=1e-12))
+        self.assertTrue(math.isclose(result.static_drop_pa, values[prefix + "PressureDropHydrostatic"], rel_tol=1e-12))
+
     def test_flange_tap_orifice_matches_dwsim_iso_5167_equations(self):
         result = orifice_pressure_drop(0.2, 0.1, 10.0, 1000.0, 0.001, "flange")
 
