@@ -8,10 +8,17 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import api_rp520_vapor_required_area, beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_pressure_drop
+from mesim.unitops.hydraulics import api_rp520_liquid_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_pressure_drop
 
 
 class HydraulicsTest(unittest.TestCase):
+    def test_api_rp520_liquid_matches_dwsim_psv_capture(self):
+        result = api_rp520_liquid_required_area(1_100_000.0, 100_000.0, 0.0001560675811547515, 640.7480609367764, 0.00020498569099240772, 10.0, 0.85, 1.0)
+
+        self.assertTrue(math.isclose(result.required_area_in2, 0.004803176512159658, rel_tol=1e-12))
+        self.assertEqual(result.standard_orifice, "D")
+        self.assertEqual(result.standard_area_in2, 0.11)
+
     def test_api_rp520_vapor_matches_dwsim_psv_capture(self):
         result = api_rp520_vapor_required_area(300.0, 1_100_000.0, 100_000.0, 0.1, 0.9764896861575462, 16.04246, 1.3467422057951541, 10.0, 0.85, 1.0, 1.0)
 

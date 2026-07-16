@@ -57,7 +57,7 @@ class BeggsBrillPressureDrop:
 
 
 @dataclass(frozen=True, slots=True)
-class ApiRp520VaporArea:
+class ApiRp520Area:
     relieving_pressure_pa: float
     critical_pressure_pa: float
     choked: bool
@@ -74,7 +74,7 @@ def api_rp520_vapor_required_area(
     compressibility: float, molecular_weight_kg_kmol: float, heat_capacity_ratio: float,
     overpressure_percent: float, discharge_coefficient: float, backpressure_coefficient: float,
     installation_coefficient: float,
-) -> ApiRp520VaporArea:
+) -> ApiRp520Area:
     """DWSIM's API RP 520 vapor sizing utility; source-equation parity only."""
     positive = (temperature_k, set_pressure_pa, back_pressure_pa, mass_flow_kg_s, compressibility, molecular_weight_kg_kmol, heat_capacity_ratio, discharge_coefficient, backpressure_coefficient, installation_coefficient)
     if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0.0 for value in positive):
@@ -101,8 +101,40 @@ def api_rp520_vapor_required_area(
     required_area = area * 0.00155
     for designation, standard_area in _API_526_ORIFICES:
         if required_area <= standard_area:
-            return ApiRp520VaporArea(relieving_pressure_kpa * 1000.0, critical_pressure_kpa * 1000.0, choked, required_area, designation, standard_area)
+            return ApiRp520Area(relieving_pressure_kpa * 1000.0, critical_pressure_kpa * 1000.0, choked, required_area, designation, standard_area)
     raise ValidationError("API RP 520 required area exceeds DWSIM's API 526 T orifice")
+
+
+def api_rp520_liquid_required_area(
+    set_pressure_pa: float, back_pressure_pa: float, volumetric_flow_m3_s: float,
+    density_kg_m3: float, viscosity_pa_s: float, overpressure_percent: float,
+    discharge_coefficient: float, installation_coefficient: float,
+) -> ApiRp520Area:
+    """DWSIM's API RP 520 liquid sizing utility; source-equation parity only."""
+    positive = (set_pressure_pa, back_pressure_pa, volumetric_flow_m3_s, density_kg_m3, viscosity_pa_s, discharge_coefficient, installation_coefficient)
+    if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0.0 for value in positive):
+        raise ValidationError("API RP 520 liquid inputs must be finite and positive")
+    if isinstance(overpressure_percent, bool) or not isinstance(overpressure_percent, (int, float)) or not math.isfinite(overpressure_percent) or overpressure_percent < 0.0:
+        raise ValidationError("API RP 520 overpressure must be finite and non-negative")
+    relieving_pressure_kpa = (set_pressure_pa * 1.033 / 101325.0 * (1.0 + overpressure_percent / 100.0) + 1.033) * 101.325 / 1.033 - 101.325
+    back_pressure_kpa = (back_pressure_pa * 1.033 / 101325.0 + 1.033) * 101.325 / 1.033 - 101.325
+    if back_pressure_kpa >= relieving_pressure_kpa:
+        raise ValidationError("API RP 520 back pressure must be below relieving pressure")
+    flow = 16.6667 / 24.0 * volumetric_flow_m3_s * 86400.0
+    density = density_kg_m3 / 1000.0
+    correction = 1.0
+    # ponytail: DWSIM passes Pa.s into its cP-labelled utility equation; retain source behavior for parity.
+    for _ in range(100):
+        required_area = 11.78 * flow / (discharge_coefficient * installation_coefficient * correction) * (density / (relieving_pressure_kpa - back_pressure_kpa)) ** 0.5 * 0.00155
+        standard = next(((letter, area) for letter, area in _API_526_ORIFICES if required_area <= area), None)
+        if standard is None:
+            raise ValidationError("API RP 520 required area exceeds DWSIM's API 526 T orifice")
+        reynolds = flow * 18800.0 * density / (viscosity_pa_s * (standard[1] / 0.00155) ** 0.5)
+        correction = (0.9935 + 2.878 / reynolds**0.5 + 342.75 / reynolds**1.5) ** -1
+        required_area = 11.78 * flow / (discharge_coefficient * installation_coefficient * correction) * (density / (relieving_pressure_kpa - back_pressure_kpa)) ** 0.5 * 0.00155
+        if required_area <= standard[1]:
+            return ApiRp520Area(relieving_pressure_kpa * 1000.0, 0.0, False, required_area, standard[0], standard[1])
+    raise ValidationError("API RP 520 liquid viscosity correction did not converge")
 
 
 def beggs_brill_pressure_drop(
