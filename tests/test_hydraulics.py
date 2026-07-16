@@ -64,6 +64,19 @@ class HydraulicsTest(unittest.TestCase):
         self.assertTrue(math.isclose(result.orifice_drop_pa, 2557.7410450297325, rel_tol=1e-12))
         self.assertTrue(math.isclose(result.overall_drop_pa, 1871.5167680391855, rel_tol=1e-12))
 
+    def test_orifice_matches_captured_dwsim_liquid_case(self):
+        golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-orifice-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
+        objects = {item["tag"]: item for item in golden["inputs"]["objects_before"]}
+        properties = {item["property"]: item["value"]["value"] for item in objects["ORIF-FEED"]["properties"]}
+        orifice = {item["property"]: item["value"]["value"] for item in objects["ORIF-001"]["properties"]}
+        result = orifice_pressure_drop(
+            orifice["PROP_OP_2"] / 1000.0, orifice["PROP_OP_1"] / 1000.0,
+            properties["PROP_MS_2"], properties["PROP_MS_5"], properties["PROP_MS_38"], "flange",
+        )
+
+        self.assertTrue(math.isclose(result.orifice_drop_pa, orifice["PROP_OP_6"], rel_tol=1e-12))
+        self.assertTrue(math.isclose(result.overall_drop_pa, orifice["PROP_OP_5"], rel_tol=1e-12))
+
     def test_minor_loss_uses_dwsim_loss_coefficient_equation(self):
         self.assertEqual(minor_loss_pressure_drop(0.78, 1000.0, 2.5), 2437.5)
         with self.assertRaises(ValidationError):
