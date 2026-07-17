@@ -37,9 +37,10 @@ me-sim-wrap/
 
 ## The Python kernel (`mesim`)
 
-A deterministic steady-state process-simulation kernel. Current domain: five light
-hydrocarbons (methane, ethane, propane, n-butane, n-pentane) with Peng-Robinson
-thermodynamics.
+A deterministic process-simulation kernel with steady-state and bounded dynamic
+capabilities. The original verified domain is five light hydrocarbons (methane,
+ethane, propane, n-butane, n-pentane) with Peng-Robinson thermodynamics; later
+golden-backed slices add the compounds required by reactions and columns.
 
 **Design rules (from the rewrite plan):**
 
@@ -69,7 +70,10 @@ thermodynamics.
 | Specialty energy | Partial (U10: solar panel, wind turbine, and hydroelectric turbine source-equation parity) |
 
 See [`docs/compatibility.md`](docs/compatibility.md) for the full matrix and current
-parity/difference notes.
+parity/difference notes. Release boundaries are collected in
+[`docs/model-limitations.md`](docs/model-limitations.md), with source lineage in
+[`docs/data-provenance.md`](docs/data-provenance.md) and changes in
+[`CHANGELOG.md`](CHANGELOG.md).
 
 ### HTTP API
 

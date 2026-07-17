@@ -2,12 +2,14 @@ import atexit
 from dataclasses import asdict
 from multiprocessing import TimeoutError as MultiprocessingTimeoutError, get_context
 from pathlib import Path
+import sys
 from threading import Lock
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
 
+from . import __version__
 from .compounds import load_compounds, load_pr_interactions
 from .errors import ValidationError
 from .streams import PhaseState, StreamState, flash_stream
@@ -17,7 +19,9 @@ from .units import Quantity
 from .unitops.basic import equilibrium_separator, heater, mix_streams, valve
 
 
-DATA = Path(__file__).resolve().parents[2] / "data"
+_SOURCE_DATA = Path(__file__).resolve().parents[2] / "data"
+_INSTALLED_DATA = Path(sys.prefix) / "share" / "mesim" / "data"
+DATA = _SOURCE_DATA if _SOURCE_DATA.is_dir() else _INSTALLED_DATA
 COMPOUNDS = {compound.id: compound for compound in load_compounds(DATA / "compounds/v1.json")}
 INTERACTIONS = load_pr_interactions(DATA / "interactions/pr-v1.json")
 CORRELATIONS = load_correlations(DATA / "correlations/ideal-v1.json")
@@ -28,7 +32,7 @@ CALCULATION_WORKERS = 2
 _CALCULATION_POOL = None
 _CALCULATION_POOL_LOCK = Lock()
 
-app = FastAPI(title="me-sim", version="0.1.0a0")
+app = FastAPI(title="me-sim", version=__version__)
 
 
 class _RequestTooLarge(Exception):

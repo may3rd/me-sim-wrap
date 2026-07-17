@@ -6,6 +6,30 @@ The rewrite uses the vendored DWSIM source under `dwsim-windows/` as a reference
 
 DWSIM is licensed under GPLv3. This workspace is currently for internal use. Any future distribution of code derived from DWSIM must be reviewed for GPLv3 compliance before release.
 
+## Release support matrix
+
+Status terms are normative: `verified` means equation and executable golden gates pass in the stated domain; `verified-with-difference` means the documented numerical or model distinction is intentional; `partial` means only the named slice is supported; and `unsupported` means callers must not expect a result.
+
+| Capability | Status | Release boundary |
+|---|---|---|
+| T0 ideal-gas and pure-component correlations | verified | Versioned catalog compounds within each saved correlation range |
+| T1 Peng-Robinson pure and mixture properties | verified-with-difference | Classic PR; unmodified and explicit Peneloux density paths remain distinct |
+| T2 TP and PH flash | verified-with-difference | TP/PH verified; bubble/dew equations pass independent vectors but lack a valid nonzero DWSIM property capture |
+| T3 caloric and transport extensions | partial | Named vapor/liquid correlations and captured mixtures only |
+| U0 streams, basic operations, and acyclic flowsheets | verified-with-difference | Phase-split flow uses the documented reference-flash tolerance |
+| U1 pressure-changing and component-separation operations | verified | Captured PR pump, compressor, expander, and component-separator modes |
+| U2 heat exchangers | partial | Duty, UA, efficiency, terminal pinch, and one vapor shell-and-tube rating slice |
+| U3 hydraulics and relief utilities | partial | Captured pipe/orifice/correlation equations; not a relief-system design tool |
+| U4 equilibrium and conversion reactors | partial | Named single/multiple reaction and vapor Gibbs slices |
+| U5 kinetic reactors | partial | One ideally mixed CSTR and one supplied-profile PFR reaction family |
+| U6/U7 columns | partial | Shortcut and fixed-thermodynamic profile solvers; no live fully energy-coupled rigorous solve |
+| U8 recycle and logical blocks | verified | Direct-substitution material/energy recycle, scalar adjust, and bounded expression specification |
+| U9 dynamics and controls | partial | Explicit holdup/HX/CSTR primitives and one DWSIM tank/PID trajectory; no general DAE solver |
+| U10 specialty energy | partial | Source-equation solar, wind, and hydro gates only |
+| Electrolytes, solids, petroleum assays, CAPE-OPEN, fuel cells, and electrolyzers | unsupported | No Python calculation path |
+
+The detailed evidence and tolerances below define each row. [Model limitations](model-limitations.md) are part of this matrix, not optional guidance.
+
 ## Source revision
 
 The exact DWSIM source revision is not assumed from the directory name. Every capture must provide `-DwsimRevision` with the Git commit, release identifier, or an approved immutable snapshot identifier. The revision is stored in every golden case under `source.dwsim_revision`.
