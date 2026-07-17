@@ -6,8 +6,10 @@ from dataclasses import dataclass
 
 from ..compounds import Compound, PRInteractions
 from ..errors import ConvergenceError, ValidationError
-from ..thermo.flash import flash_enthalpy, ph_flash, tp_flash
+from ..thermo.flash import dwsim_pr_liquid_heat_capacity, flash_enthalpy, ph_flash, tp_flash
 from ..thermo.ideal import IdealCorrelations
+from ..thermo.peng_robinson import PengRobinsonMixture, R
+from ..thermo.transport import TransportRecord, liquid_transport
 
 
 def _dwsim_friction_factor(reynolds: float, diameter_m: float, roughness_m: float) -> float:
@@ -92,6 +94,15 @@ class PipeEstimatedHtc:
 
 
 @dataclass(frozen=True, slots=True)
+class PipeLiquidProperties:
+    density_kg_m3: float
+    heat_capacity_j_kg_k: float
+    thermal_conductivity_w_m_k: float
+    viscosity_pa_s: float
+    velocity_m_s: float
+
+
+@dataclass(frozen=True, slots=True)
 class PipeEstimatedHtcProfileResult:
     htc_results: tuple[PipeEstimatedHtc, ...]
     segment_results: tuple[PipeThermalResult, ...]
@@ -102,6 +113,7 @@ class PipeEstimatedHtcProfileResult:
     absorbed_radiation_w: float = 0.0
     external_temperatures_k: tuple[float, ...] = ()
     segment_start_distances_m: tuple[float, ...] = ()
+    liquid_properties: tuple[PipeLiquidProperties, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -914,6 +926,54 @@ def pipe_estimated_htc_soil(
     )
 
 
+def pipe_liquid_pr_properties(
+    temperature_k: float, pressure_pa: float,
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
+    transport_records: tuple[TransportRecord, ...], molar_flow_kmol_s: float,
+    inner_diameter_m: float, *, allow_transport_extrapolation: bool = False,
+) -> PipeLiquidProperties:
+    """Calculate the liquid fields consumed by DWSIM's pipe correlations."""
+    if (
+        isinstance(molar_flow_kmol_s, bool) or not isinstance(molar_flow_kmol_s, (int, float))
+        or not math.isfinite(molar_flow_kmol_s) or molar_flow_kmol_s <= 0.0
+        or isinstance(inner_diameter_m, bool) or not isinstance(inner_diameter_m, (int, float))
+        or not math.isfinite(inner_diameter_m) or inner_diameter_m <= 0.0
+    ):
+        raise ValidationError("calculated pipe liquid flow and inner diameter must be finite and positive")
+    if not isinstance(allow_transport_extrapolation, bool):
+        raise ValidationError("calculated pipe transport extrapolation flag must be boolean")
+    flash = tp_flash(compounds, composition, interactions, temperature_k, pressure_pa)
+    if not flash.report.converged or flash.phase != "liquid":
+        raise ValidationError("calculated pipe properties require a converged liquid flash")
+    state = PengRobinsonMixture(compounds, composition, interactions).state(
+        temperature_k, pressure_pa, "liquid",
+    )
+    # AUX_LIQDENS uses the PR Z root with its source-level 8.314 J/mol/K.
+    density = state.density_kg_per_m3 * R / 8314.0
+    heat_capacity = dwsim_pr_liquid_heat_capacity(
+        compounds, composition, correlations, interactions, temperature_k, pressure_pa,
+    )
+    transport = liquid_transport(
+        compounds, composition, transport_records, temperature_k,
+        allow_transport_extrapolation,
+    )
+    molecular_weight = math.fsum(
+        fraction * compound.molecular_weight.value
+        for fraction, compound in zip(composition, compounds)
+    )
+    mass_flow_kg_s = molar_flow_kmol_s * molecular_weight
+    area_m2 = math.pi * inner_diameter_m**2 / 4.0
+    velocity = mass_flow_kg_s / density / area_m2
+    values = (
+        density, heat_capacity, transport.thermal_conductivity_w_per_m_k,
+        transport.dynamic_viscosity_pa_s, velocity,
+    )
+    if not all(math.isfinite(value) and value > 0.0 for value in values):
+        raise ValidationError("calculated pipe liquid properties must be finite and positive")
+    return PipeLiquidProperties(*values)
+
+
 def pipe_estimated_htc_air_profile(
     inlet_temperature_k: float, external_temperature_k: float,
     inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
@@ -999,6 +1059,75 @@ def pipe_estimated_htc_air_profile(
         math.fsum(item.area_m2 for item in segment_results), temperature,
         math.fsum(item.heat_transfer_w for item in segment_results),
         tuple(radiation_results), math.fsum(radiation_results),
+    )
+
+
+def pipe_estimated_htc_air_pr_calculated_profile(
+    inlet_temperature_k: float, inlet_pressure_pa: float, external_temperature_k: float,
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
+    transport_records: tuple[TransportRecord, ...], molar_flow_kmol_s: float,
+    outlet_pressures_pa: tuple[float, ...], inner_diameter_m: float,
+    outer_diameter_m: float, roughness_m: float,
+    segment_lengths_m: tuple[float, ...], external_air_velocity_m_s: float,
+    insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+    *, allow_transport_extrapolation: bool = False,
+) -> PipeEstimatedHtcProfileResult:
+    """Advance estimated-air HTC while recalculating liquid properties per segment."""
+    try:
+        pressures = tuple(outlet_pressures_pa)
+        lengths = tuple(segment_lengths_m)
+    except TypeError as exc:
+        raise ValidationError("calculated pipe pressures and lengths must be finite sequences") from exc
+    if not pressures or len(pressures) != len(lengths):
+        raise ValidationError("calculated pipe pressures and lengths must have equal non-zero counts")
+
+    def htc_builder(
+        _external_temperature: float, temperature: float,
+        velocity: float, heat_capacity: float,
+        conductivity: float, viscosity: float, density: float,
+    ) -> PipeEstimatedHtc:
+        return pipe_estimated_htc_air(
+            temperature, external_temperature_k,
+            inner_diameter_m, outer_diameter_m, roughness_m,
+            velocity, heat_capacity, conductivity, viscosity, density,
+            external_air_velocity_m_s, insulation_thickness_m,
+            insulation_conductivity_w_m_k,
+        )
+
+    temperature = inlet_temperature_k
+    pressure = inlet_pressure_pa
+    property_results = []
+    htc_results = []
+    thermal_results = []
+    for outlet_pressure, length in zip(pressures, lengths):
+        properties = pipe_liquid_pr_properties(
+            temperature, pressure, compounds, composition, interactions,
+            correlations, transport_records, molar_flow_kmol_s,
+            inner_diameter_m,
+            allow_transport_extrapolation=allow_transport_extrapolation,
+        )
+        segment = _pipe_estimated_htc_pr_profile(
+            temperature, pressure, (external_temperature_k,),
+            compounds, composition, interactions, correlations, molar_flow_kmol_s,
+            (outlet_pressure,), inner_diameter_m, outer_diameter_m, roughness_m,
+            (length,), (properties.velocity_m_s,), (properties.heat_capacity_j_kg_k,),
+            (properties.thermal_conductivity_w_m_k,), (properties.viscosity_pa_s,),
+            (properties.density_kg_m3,), htc_builder,
+        )
+        property_results.append(properties)
+        htc_results.extend(segment.htc_results)
+        thermal_results.extend(segment.segment_results)
+        temperature = segment.outlet_temperature_k
+        pressure = outlet_pressure
+    results = tuple(thermal_results)
+    return PipeEstimatedHtcProfileResult(
+        tuple(htc_results), results,
+        math.fsum(item.area_m2 for item in results), temperature,
+        math.fsum(item.heat_transfer_w for item in results),
+        (0.0,) * len(results), 0.0,
+        (external_temperature_k,) * len(results), (), tuple(property_results),
     )
 
 

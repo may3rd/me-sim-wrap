@@ -13,7 +13,7 @@ from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.thermo.ideal import ideal_gas_density, load_correlations
 from mesim.thermo.peng_robinson import R, PengRobinson, PengRobinsonMixture
 from mesim.thermo.transport import liquid_transport, load_transport_correlations, translated_vapor_density, vapor_transport
-from mesim.thermo.flash import mixture_heat_capacity
+from mesim.thermo.flash import dwsim_pr_liquid_heat_capacity, mixture_heat_capacity
 
 
 ROOT = Path(__file__).parents[1]
@@ -328,6 +328,29 @@ class TransportTest(unittest.TestCase):
             properties["PROP_MS_0"], properties["PROP_MS_1"],
         )
         self.assertTrue(math.isclose(actual, properties["PROP_MS_21"] * 1000.0, rel_tol=7e-3))
+
+    def test_dwsim_pr_liquid_heat_capacity_matches_pipe_states(self):
+        golden = json.loads((ROOT / "tests/golden/u3-pipe-thermal-tabulated-htc-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
+        pipe_object = next(item for item in golden["outputs"]["objects_after"] if item["tag"] == "PIPE-1")
+        pipe = {item["property"]: item["value"]["value"] for item in pipe_object["properties"]}
+        compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        correlations = {record.compound_id: record for record in load_correlations(ROOT / "data/correlations/ideal-v1.json")}
+        selected = (compounds["N-pentane"], compounds["Ethane"])
+        selected_correlations = (correlations["N-pentane"], correlations["Ethane"])
+        composition = (0.952380952380952, 0.0476190476190476)
+        interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
+
+        for index in range(1, 7):
+            actual = dwsim_pr_liquid_heat_capacity(
+                selected, composition, selected_correlations, interactions,
+                pipe[f"HydraulicSegment,1,Results,{index},InitialTemperature"],
+                pipe[f"HydraulicSegment,1,Results,{index},InitialPressure"],
+            )
+            self.assertTrue(math.isclose(
+                actual,
+                pipe[f"HydraulicSegment,1,Results,{index},HeatCapacityLiquid"] * 1000.0,
+                rel_tol=1e-12,
+            ))
 
     def test_peneloux_density_matches_captured_dwsim_pr_vapor_states(self):
         golden = json.loads((ROOT / "tests/golden/pr-t1.json").read_text(encoding="utf-8-sig"))

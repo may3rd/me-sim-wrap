@@ -686,6 +686,108 @@ def mixture_heat_capacity(
     return value
 
 
+def dwsim_pr_liquid_heat_capacity(
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    correlations: tuple[IdealCorrelations, ...], interactions: PRInteractions,
+    temperature_k: float, pressure_pa: float,
+) -> float:
+    """Return DWSIM's analytic Peng-Robinson liquid Cp in J/kg/K."""
+    if len(compounds) != len(composition) or len(compounds) != len(correlations) or len(compounds) < 2:
+        raise ValidationError("PR heat-capacity components, composition, and correlations must have equal counts of at least two")
+    if any(compound.id != correlation.compound_id for compound, correlation in zip(compounds, correlations)):
+        raise ValidationError("PR heat-capacity correlations must match component order")
+    model = PengRobinsonMixture(compounds, composition, interactions)
+    compressibility = model.state(temperature_k, pressure_pa, "liquid").compressibility
+
+    # DWSIM FluidProperties.PROPS.CpCvR uses R = 8.314 J/mol/K and the
+    # analytic EOS derivatives below, independently of the enthalpy routine.
+    source_r = 8.314
+    critical_temperatures = tuple(compound.critical_temperature.value for compound in compounds)
+    critical_pressures = tuple(compound.critical_pressure.value for compound in compounds)
+    kappas = tuple(
+        0.37464 + 1.54226 * compound.acentric_factor.value - 0.26992 * compound.acentric_factor.value**2
+        for compound in compounds
+    )
+    try:
+        alphas = tuple(
+            (1.0 + kappa * (1.0 - math.sqrt(temperature_k / critical_temperature))) ** 2
+            for kappa, critical_temperature in zip(kappas, critical_temperatures)
+        )
+        attraction = tuple(
+            0.45724 * alpha * source_r**2 * critical_temperature**2 / critical_pressure
+            for alpha, critical_temperature, critical_pressure in zip(
+                alphas, critical_temperatures, critical_pressures,
+            )
+        )
+        covolumes = tuple(
+            0.0778 * source_r * critical_temperature / critical_pressure
+            for critical_temperature, critical_pressure in zip(critical_temperatures, critical_pressures)
+        )
+        cross_attraction = tuple(
+            tuple(
+                math.sqrt(attraction[i] * attraction[j])
+                * (1.0 - interactions.get(compounds[i].id, compounds[j].id))
+                for j in range(len(compounds))
+            )
+            for i in range(len(compounds))
+        )
+        mixture_attraction = math.fsum(
+            composition[i] * composition[j] * cross_attraction[i][j]
+            for i in range(len(compounds)) for j in range(len(compounds))
+        )
+        mixture_covolume = math.fsum(
+            fraction * covolume for fraction, covolume in zip(composition, covolumes)
+        )
+        molar_volume = compressibility * source_r * temperature_k / pressure_pa
+        derivative_sum = math.fsum(
+            composition[i] * composition[j]
+            * (1.0 - interactions.get(compounds[i].id, compounds[j].id))
+            * (
+                kappas[j] * math.sqrt(attraction[i] * critical_temperatures[j] / critical_pressures[j])
+                + kappas[i] * math.sqrt(attraction[j] * critical_temperatures[i] / critical_pressures[i])
+            )
+            for i in range(len(compounds)) for j in range(len(compounds))
+            if composition[i] > 0.0 and composition[j] > 0.0
+        )
+        da_dtemperature = -source_r / 2.0 * math.sqrt(0.45724 / temperature_k) * derivative_sum
+        d2a_dtemperature2 = (
+            source_r / 4.0 * math.sqrt(0.45724 / temperature_k)
+            / temperature_k * derivative_sum
+        )
+        denominator = molar_volume**2 + 2.0 * mixture_covolume * molar_volume - mixture_covolume**2
+        dp_dtemperature_v = (
+            source_r / (molar_volume - mixture_covolume)
+            - da_dtemperature / denominator
+        )
+        dv_dtemperature_p = dp_dtemperature_v / (
+            source_r * temperature_k / (molar_volume - mixture_covolume) ** 2
+            - mixture_attraction * (2.0 * molar_volume + 2.0 * mixture_covolume) / denominator**2
+        )
+        ideal_cp_kj_kmol_k = math.fsum(
+            fraction * correlation.heat_capacity(temperature_k).value / 1000.0
+            for fraction, correlation in zip(composition, correlations)
+        )
+        logarithm = math.log(
+            (molar_volume + (1.0 - math.sqrt(2.0)) * mixture_covolume)
+            / (molar_volume + (1.0 + math.sqrt(2.0)) * mixture_covolume)
+        )
+        molar_cp_kj_kmol_k = (
+            ideal_cp_kj_kmol_k - source_r
+            + temperature_k * dp_dtemperature_v * dv_dtemperature_p
+            - temperature_k * d2a_dtemperature2 / (math.sqrt(8.0) * mixture_covolume) * logarithm
+        )
+        molecular_weight = math.fsum(
+            fraction * compound.molecular_weight.value
+            for fraction, compound in zip(composition, compounds)
+        )
+        value = molar_cp_kj_kmol_k / molecular_weight * 1000.0
+    except (OverflowError, ValueError, ZeroDivisionError) as error:
+        raise ValidationError("DWSIM PR heat capacity is outside the representable range") from error
+    if not math.isfinite(value) or value <= 0.0:
+        raise ValidationError("DWSIM PR heat capacity must be finite and positive")
+    return value
+
+
 def flash_entropy(compounds: tuple[Compound, ...], correlations: tuple[IdealCorrelations, ...], flash: TPFlashResult) -> float:
     if not flash.report.converged:
         raise ValidationError("a converged TP flash is required for total entropy")
