@@ -22,7 +22,7 @@ class CompoundDataTest(unittest.TestCase):
             (ROOT / "tests/golden/compound-catalog.json").read_text(encoding="utf-8-sig")
         )["inputs"]["compounds"]
 
-        self.assertEqual(len(compounds), 9)
+        self.assertEqual(len(compounds), 13)
         self.assertTrue({c["id"] for c in captured}.issubset({c.id for c in compounds}))
         for compound in (item for item in compounds if item.id in {c["id"] for c in captured}):
             reference = next(c for c in captured if c["id"] == compound.id)
@@ -85,7 +85,7 @@ class CompoundDataTest(unittest.TestCase):
 
     def test_pr_interactions_are_symmetric_and_missing_is_explicit(self):
         interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
-        self.assertEqual(interactions.provenance.source_revision, "9.0.4")
+        self.assertEqual(interactions.provenance.source_revision, "9.0.5.0")
         self.assertTrue(interactions.provenance.imported_utc.endswith("Z"))
         self.assertEqual(interactions.get("Methane", "N-pentane"), 0.023)
         self.assertEqual(interactions.get("N-pentane", "Methane"), 0.023)
@@ -98,7 +98,9 @@ class CompoundDataTest(unittest.TestCase):
         interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
         names = {
             "1": "Methane", "2": "Ethane", "3": "Propane", "5": "N-butane", "7": "N-pentane",
-            "902": "Hydrogen", "908": "Carbon monoxide", "909": "Carbon dioxide", "1921": "Water",
+            "901": "Oxygen", "902": "Hydrogen", "905": "Nitrogen",
+            "908": "Carbon monoxide", "909": "Carbon dioxide", "914": "Argon",
+            "1101": "Methanol", "1921": "Water",
         }
         expected = {}
         source = ROOT / interactions.provenance.source

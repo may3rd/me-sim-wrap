@@ -4,9 +4,9 @@
   "missing_pair_policy": "error",
   "provenance": {
     "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/pr_ip.dat",
-    "source_revision": "9.0.4",
-    "selection": "first entry loaded by DWSIM for each selected pair; explicit zero for absent steam-reforming pairs",
-    "imported_utc": "2026-07-13T07:24:14Z"
+    "source_revision": "9.0.5.0",
+    "selection": "first entry loaded by DWSIM for each selected pair; explicit zero for absent steam-reforming and methanol-column pairs",
+    "imported_utc": "2026-07-17T09:00:00Z"
   },
   "pairs": [
     {"compound_1": "Methane", "compound_2": "Ethane", "kij": -0.0033, "unit": "dimensionless"},
@@ -28,6 +28,28 @@
     {"compound_1": "Water", "compound_2": "Methane", "kij": 0.5, "unit": "dimensionless"},
     {"compound_1": "Hydrogen", "compound_2": "Water", "kij": 0.0, "unit": "dimensionless"},
     {"compound_1": "Carbon monoxide", "compound_2": "Carbon dioxide", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Carbon monoxide", "compound_2": "Water", "kij": 0.0, "unit": "dimensionless"}
+    {"compound_1": "Carbon monoxide", "compound_2": "Water", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Hydrogen", "compound_2": "Nitrogen", "kij": 0.0711, "unit": "dimensionless"},
+    {"compound_1": "Hydrogen", "compound_2": "Argon", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Hydrogen", "compound_2": "Oxygen", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Hydrogen", "compound_2": "Methanol", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Nitrogen", "compound_2": "Carbon monoxide", "kij": 0.033, "unit": "dimensionless"},
+    {"compound_1": "Nitrogen", "compound_2": "Argon", "kij": -0.0026, "unit": "dimensionless"},
+    {"compound_1": "Nitrogen", "compound_2": "Oxygen", "kij": -0.0159, "unit": "dimensionless"},
+    {"compound_1": "Nitrogen", "compound_2": "Water", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Nitrogen", "compound_2": "Methanol", "kij": -0.2141, "unit": "dimensionless"},
+    {"compound_1": "Nitrogen", "compound_2": "Carbon dioxide", "kij": -0.0222, "unit": "dimensionless"},
+    {"compound_1": "Carbon monoxide", "compound_2": "Argon", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Carbon monoxide", "compound_2": "Oxygen", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Carbon monoxide", "compound_2": "Methanol", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Argon", "compound_2": "Oxygen", "kij": 0.0107, "unit": "dimensionless"},
+    {"compound_1": "Argon", "compound_2": "Water", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Argon", "compound_2": "Methanol", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Argon", "compound_2": "Carbon dioxide", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Oxygen", "compound_2": "Water", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Oxygen", "compound_2": "Methanol", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Oxygen", "compound_2": "Carbon dioxide", "kij": 0.0, "unit": "dimensionless"},
+    {"compound_1": "Water", "compound_2": "Methanol", "kij": -0.0778, "unit": "dimensionless"},
+    {"compound_1": "Methanol", "compound_2": "Carbon dioxide", "kij": 0.022, "unit": "dimensionless"}
   ]
 }
