@@ -82,6 +82,8 @@ class PipeEstimatedHtcProfileResult:
     total_area_m2: float
     outlet_temperature_k: float
     heat_transfer_w: float
+    segment_absorbed_radiation_w: tuple[float, ...] = ()
+    absorbed_radiation_w: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -498,6 +500,105 @@ def pipe_defined_htc_heat_transfer(
     )
 
 
+def pipe_absorbed_solar_radiation(
+    solar_irradiation_kwh_m2: float, absorption_efficiency: float,
+    outer_diameter_m: float, length_m: float, inlet_volumetric_flow_m3_s: float,
+) -> float:
+    """DWSIM steady-pipe absorbed irradiation, returned as heat rate in watts."""
+    positive = (outer_diameter_m, length_m, inlet_volumetric_flow_m3_s)
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value <= 0.0
+        for value in positive
+    ):
+        raise ValidationError("pipe radiation geometry and volumetric flow must be finite and positive")
+    if (
+        isinstance(solar_irradiation_kwh_m2, bool)
+        or not isinstance(solar_irradiation_kwh_m2, (int, float))
+        or not math.isfinite(solar_irradiation_kwh_m2)
+        or solar_irradiation_kwh_m2 < 0.0
+    ):
+        raise ValidationError("pipe solar irradiation must be finite and non-negative")
+    if (
+        isinstance(absorption_efficiency, bool)
+        or not isinstance(absorption_efficiency, (int, float))
+        or not math.isfinite(absorption_efficiency)
+        or not 0.0 <= absorption_efficiency <= 1.0
+    ):
+        raise ValidationError("pipe radiation absorption efficiency must be between zero and one")
+
+    # DWSIM 9.0.5 uses the outer diameter for both residence volume and exposed area.
+    residence_time_s = (
+        math.pi * outer_diameter_m**2 / 4.0 * length_m / inlet_volumetric_flow_m3_s
+    )
+    exposed_area_m2 = math.pi * outer_diameter_m * length_m
+    absorbed_energy_kj_m2 = absorption_efficiency * solar_irradiation_kwh_m2 * 3600.0
+    return absorbed_energy_kj_m2 / residence_time_s * exposed_area_m2 * 1000.0
+
+
+def pipe_irradiated_heat_transfer(
+    inlet_temperature_k: float, external_temperature_k: float, overall_htc_w_m2_k: float,
+    outer_diameter_m: float, length_m: float, mass_flow_kg_s: float,
+    heat_capacity_j_kg_k: float, absorbed_radiation_w: float,
+) -> PipeThermalResult:
+    """Solve DWSIM's constant-property LMTD balance with an absorbed radiation source."""
+    baseline = pipe_defined_htc_heat_transfer(
+        inlet_temperature_k, external_temperature_k, overall_htc_w_m2_k,
+        outer_diameter_m, length_m, mass_flow_kg_s, heat_capacity_j_kg_k,
+    )
+    if (
+        isinstance(absorbed_radiation_w, bool)
+        or not isinstance(absorbed_radiation_w, (int, float))
+        or not math.isfinite(absorbed_radiation_w)
+        or absorbed_radiation_w < 0.0
+    ):
+        raise ValidationError("absorbed pipe radiation must be finite and non-negative")
+    if absorbed_radiation_w == 0.0:
+        return baseline
+    if external_temperature_k <= inlet_temperature_k:
+        raise ValidationError("irradiated pipe parity currently requires external temperature above inlet temperature")
+
+    capacity_rate = mass_flow_kg_s * heat_capacity_j_kg_k
+    maximum_radiation = capacity_rate * (external_temperature_k - inlet_temperature_k)
+    if absorbed_radiation_w >= maximum_radiation:
+        raise ValidationError("absorbed radiation would drive the supported pipe balance to external temperature or above")
+    if overall_htc_w_m2_k == 0.0:
+        temperature_change = absorbed_radiation_w / capacity_rate
+        return PipeThermalResult(
+            baseline.area_m2, inlet_temperature_k + temperature_change, absorbed_radiation_w,
+        )
+
+    ua_w_k = overall_htc_w_m2_k * baseline.area_m2
+    inlet_difference = external_temperature_k - inlet_temperature_k
+
+    def residual(outlet_temperature_k: float) -> float:
+        temperature_change = outlet_temperature_k - inlet_temperature_k
+        if temperature_change == 0.0:
+            lmtd_k = inlet_difference
+        elif outlet_temperature_k == external_temperature_k:
+            lmtd_k = 0.0
+        else:
+            outlet_difference = external_temperature_k - outlet_temperature_k
+            lmtd_k = temperature_change / math.log(inlet_difference / outlet_difference)
+        return capacity_rate * temperature_change - ua_w_k * lmtd_k - absorbed_radiation_w
+
+    lower = inlet_temperature_k
+    upper = external_temperature_k
+    for _ in range(80):
+        midpoint = (lower + upper) / 2.0
+        if residual(midpoint) > 0.0:
+            upper = midpoint
+        else:
+            lower = midpoint
+        if upper - lower <= 1.0e-12 * max(1.0, abs(midpoint)):
+            break
+    outlet_temperature = (lower + upper) / 2.0
+    return PipeThermalResult(
+        baseline.area_m2, outlet_temperature,
+        capacity_rate * (outlet_temperature - inlet_temperature_k),
+    )
+
+
 def pipe_estimated_htc_air(
     fluid_temperature_k: float, external_temperature_k: float,
     inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
@@ -626,6 +727,9 @@ def pipe_estimated_htc_air_profile(
     densities_kg_m3: tuple[float, ...], external_air_velocity_m_s: float,
     insulation_thickness_m: float = 0.0,
     insulation_conductivity_w_m_k: float | None = None,
+    solar_irradiation_kwh_m2: float = 0.0,
+    solar_absorption_efficiency: float = 0.0,
+    inlet_volumetric_flow_m3_s: float | None = None,
 ) -> PipeEstimatedHtcProfileResult:
     """Advance a supplied-property liquid profile with estimated HTC to external air."""
     try:
@@ -639,14 +743,39 @@ def pipe_estimated_htc_air_profile(
         raise ValidationError("estimated pipe HTC profile must contain at least one segment")
     if len({len(values) for values in sequences}) != 1:
         raise ValidationError("estimated pipe HTC profile property sequences must have equal counts")
+    if (
+        isinstance(solar_irradiation_kwh_m2, bool)
+        or not isinstance(solar_irradiation_kwh_m2, (int, float))
+        or not math.isfinite(solar_irradiation_kwh_m2)
+        or solar_irradiation_kwh_m2 < 0.0
+    ):
+        raise ValidationError("pipe solar irradiation must be finite and non-negative")
+    if (
+        isinstance(solar_absorption_efficiency, bool)
+        or not isinstance(solar_absorption_efficiency, (int, float))
+        or not math.isfinite(solar_absorption_efficiency)
+        or not 0.0 <= solar_absorption_efficiency <= 1.0
+    ):
+        raise ValidationError("pipe radiation absorption efficiency must be between zero and one")
+    radiation_enabled = solar_irradiation_kwh_m2 > 0.0 and solar_absorption_efficiency > 0.0
+    if radiation_enabled and inlet_volumetric_flow_m3_s is None:
+        raise ValidationError("pipe inlet volumetric flow is required when irradiation is enabled")
 
     lengths, velocities, heat_capacities, conductivities, viscosities, densities = sequences
     temperature = inlet_temperature_k
     htc_results = []
     thermal_results = []
+    radiation_results = []
     for length, velocity, heat_capacity, conductivity, viscosity, density in zip(
         lengths, velocities, heat_capacities, conductivities, viscosities, densities,
     ):
+        absorbed_radiation = (
+            pipe_absorbed_solar_radiation(
+                solar_irradiation_kwh_m2, solar_absorption_efficiency,
+                outer_diameter_m, length, inlet_volumetric_flow_m3_s,
+            )
+            if radiation_enabled else 0.0
+        )
         mean_temperature = temperature
         for _ in range(20):
             htc = pipe_estimated_htc_air(
@@ -655,9 +784,10 @@ def pipe_estimated_htc_air_profile(
                 external_air_velocity_m_s, insulation_thickness_m,
                 insulation_conductivity_w_m_k,
             )
-            thermal = pipe_defined_htc_heat_transfer(
+            thermal = pipe_irradiated_heat_transfer(
                 temperature, external_temperature_k, htc.overall_htc_w_m2_k,
                 outer_diameter_m, length, mass_flow_kg_s, heat_capacity,
+                absorbed_radiation,
             )
             updated_mean = (temperature + thermal.outlet_temperature_k) / 2.0
             if math.isclose(updated_mean, mean_temperature, rel_tol=0.0, abs_tol=1.0e-12):
@@ -665,12 +795,14 @@ def pipe_estimated_htc_air_profile(
             mean_temperature = updated_mean
         htc_results.append(htc)
         thermal_results.append(thermal)
+        radiation_results.append(absorbed_radiation)
         temperature = thermal.outlet_temperature_k
     segment_results = tuple(thermal_results)
     return PipeEstimatedHtcProfileResult(
         tuple(htc_results), segment_results,
         math.fsum(item.area_m2 for item in segment_results), temperature,
         math.fsum(item.heat_transfer_w for item in segment_results),
+        tuple(radiation_results), math.fsum(radiation_results),
     )
 
 
