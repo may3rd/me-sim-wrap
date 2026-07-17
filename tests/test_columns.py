@@ -16,6 +16,7 @@ from mesim.errors import ValidationError
 from mesim.unitops.columns import (
     EquilibriumStageState,
     StageStream,
+    column_balance_residuals,
     equilibrium_stage_residuals,
     shortcut_column,
 )
@@ -256,6 +257,73 @@ class ShortcutColumnParityTest(unittest.TestCase):
             shortcut_column(1.0, (0.5, 0.5), (1.0, 2.0), 0, 0, 0.01, 0.1, 1.5, 1.0)
         with self.assertRaises(ValidationError):
             shortcut_column(1.0, (0.5, 0.5), (1.0, 2.0), 0, 1, 0.01, 0.1, 1.5, 1.0)
+
+
+class AbsorberGoldenGateTest(unittest.TestCase):
+    NAMES = ("Metano", "Etano", "Propano", "nOctano", "nNonano", "nDecano")
+
+    def test_repeatable_absorber_closes_material_and_preserves_saved_solver(self):
+        path = ROOT / "tests/golden/u6-absorber-simple-pr-eos.json"
+        golden = json.loads(path.read_text(encoding="utf-8-sig"))
+        repeat = json.loads(
+            (ROOT / "tests/golden/u6-absorber-simple-pr-eos-repeat.json").read_text(
+                encoding="utf-8-sig"
+            )
+        )
+        normalized_golden = copy.deepcopy(golden)
+        normalized_repeat = copy.deepcopy(repeat)
+        normalized_golden["source"].pop("captured_utc")
+        normalized_repeat["source"].pop("captured_utc")
+        self.assertEqual(normalized_golden, normalized_repeat)
+        self.assertTrue(golden["outputs"]["solve"]["success"])
+        self.assertFalse(golden["outputs"]["solve"]["errors"])
+        self.assertFalse(any(
+            record["error"] or prop["read_error"]
+            for record in golden["outputs"]["objects_after"]
+            for prop in record["properties"]
+        ))
+
+        objects = {record["tag"]: record for record in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {item["property"]: item["value"]["value"] for item in record["properties"]}
+            for tag, record in objects.items()
+        }
+        stream_vector = lambda tag: tuple(
+            properties[tag][f"PROP_MS_104/{name}"] / 1000.0 for name in self.NAMES
+        )
+        residuals = column_balance_residuals(
+            (stream_vector("Gas"), stream_vector("Liquid Solvent")),
+            (stream_vector("Residue Gas"), stream_vector("Solvent + Solute")),
+        )
+        self.assertTrue(residuals.is_closed(2.0e-12))
+        self.assertGreater(
+            1.0 - properties["Residue Gas"]["PROP_MS_104/Propano"]
+            / properties["Gas"]["PROP_MS_104/Propano"],
+            0.999999999,
+        )
+
+        with ZipFile(ROOT / "tests/u6-absorber-simple-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(
+                archive.read(next(name for name in archive.namelist() if name.endswith(".xml")))
+            )
+        graphic_ids = {
+            graphic.findtext("Tag"): graphic.findtext("Name")
+            for graphic in root.findall(".//GraphicObject")
+        }
+        saved = next(
+            record for record in root.findall(".//SimulationObject")
+            if record.findtext("Name") == graphic_ids["ABS-000"]
+        )
+        self.assertEqual(saved.findtext("OperationMode"), "Absorber")
+        self.assertEqual(saved.findtext("NumberOfStages"), "12")
+        self.assertEqual(saved.findtext("SolvingMethodName"), "Burningham-Otto (Sum Rates)")
+        self.assertEqual(saved.findtext("MaxIterations"), "100")
+        self.assertEqual(saved.findtext("ExternalLoopTolerance"), "1E-10")
+        self.assertEqual(saved.findtext("InternalLoopTolerance"), "1E-10")
+
+    def test_column_balance_rejects_inconsistent_vectors(self):
+        with self.assertRaises(ValidationError):
+            column_balance_residuals(((1.0, 2.0),), ((1.0,),))
 
 
 if __name__ == "__main__":

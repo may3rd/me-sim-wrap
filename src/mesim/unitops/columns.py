@@ -165,6 +165,48 @@ class ShortcutColumnResult:
     iterations: int
 
 
+@dataclass(frozen=True, slots=True)
+class ColumnBalanceResiduals:
+    component_kmol_s: tuple[float, ...]
+    total_kmol_s: float
+
+    def is_closed(self, tolerance_kmol_s: float) -> bool:
+        if not _finite_number(tolerance_kmol_s) or tolerance_kmol_s <= 0.0:
+            raise ValidationError("column balance tolerance must be positive and finite")
+        return (
+            max(abs(value) for value in self.component_kmol_s) <= tolerance_kmol_s
+            and abs(self.total_kmol_s) <= tolerance_kmol_s
+        )
+
+
+def column_balance_residuals(
+    inlet_component_flows_kmol_s: tuple[tuple[float, ...], ...],
+    outlet_component_flows_kmol_s: tuple[tuple[float, ...], ...],
+) -> ColumnBalanceResiduals:
+    """Return steady column component and total material residuals."""
+    try:
+        inlets = tuple(tuple(stream) for stream in inlet_component_flows_kmol_s)
+        outlets = tuple(tuple(stream) for stream in outlet_component_flows_kmol_s)
+    except TypeError as error:
+        raise ValidationError("column balance streams must be finite sequences") from error
+    if not inlets or not outlets or not inlets[0]:
+        raise ValidationError("column balance requires inlet and outlet component flows")
+    component_count = len(inlets[0])
+    streams = inlets + outlets
+    if any(
+        len(stream) != component_count
+        or any(not _finite_number(value) or value < 0.0 for value in stream)
+        for stream in streams
+    ):
+        raise ValidationError("column balance component flows are invalid")
+    residuals = tuple(
+        math.fsum(stream[index] for stream in inlets)
+        - math.fsum(stream[index] for stream in outlets)
+        for index in range(component_count)
+    )
+    return ColumnBalanceResiduals(residuals, math.fsum(residuals))
+
+
 def _underwood_value(
     theta: float,
     relative_volatilities: tuple[float, ...],

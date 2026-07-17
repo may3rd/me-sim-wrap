@@ -1,0 +1,1533 @@
+﻿{
+    "schema_version":  "golden-case-1",
+    "case_id":  "u6-absorber-simple-pr-eos",
+    "case_kind":  "flowsheet",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 10.0.9671.22371 (24-Jun-26 5:25:42 AM)",
+                   "captured_utc":  "2026-07-17T10:12:38.2193192Z",
+                   "platform":  "Microsoft Windows NT 10.0.22631.0",
+                   "architecture":  "AMD64",
+                   "engine_bin":  "C:\\Users\\may3r\\AppData\\Local\\DWSIM10",
+                   "input_file":  "C:\\Users\\may3r\\Code\\me-sim-wrap-live\\tests\\u6-absorber-simple-pr-eos.dwxmz",
+                   "input_file_sha256":  "ea83fd475c691d3895942d17274810878317749f32f0e22619ecf45d6816320f",
+                   "property_package":  "Peng-Robinson (PR)",
+                   "flash_algorithm":  "Burningham-Otto (Sum Rates)",
+                   "bubble_dew_calculation":  false,
+                   "property_packages_updated":  0,
+                   "notes":  "Values are captured before and after CalculateFlowsheet4; numeric_text preserves invariant-culture source formatting."
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     {
+                                         "id":  "N-octane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-6.5991866626494193",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -6.5991866626494193
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-1827.4773808637949",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -1827.4773808637949
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "140.0701226051292",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  140.0701226051292
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  8,
+                                                          "H":  18
+                                                      },
+                                         "cas":  "111-65-9",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101504.92989120896",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101504.92989120896
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "398.82",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  398.82
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.658687166820296",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.658687166820296
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "2490000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  2490000
+                                                               },
+                                         "name":  "N-octane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "114.2285",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  114.2285
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "568.7",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  568.7
+                                                                  },
+                                         "formula":  "CH3(CH2)6CH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "398.82",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  398.82
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.397",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.397
+                                                             }
+                                     },
+                                     {
+                                         "id":  "N-nonane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-6.63506597248097",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -6.63506597248097
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-1783.4768363987084",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -1783.4768363987084
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "194.7680832964927",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  194.7680832964927
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  9,
+                                                          "H":  20
+                                                      },
+                                         "cas":  "111-84-2",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "103000.03836360785",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  103000.03836360785
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "423.97",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  423.97
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.6559537991768312",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.6559537991768312
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "2290000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  2290000
+                                                               },
+                                         "name":  "N-nonane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "128.2551",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  128.2551
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "594.6",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  594.6
+                                                                  },
+                                         "formula":  "CH3(CH2)7CH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "423.97",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  423.97
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.443",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.443
+                                                             }
+                                     },
+                                     {
+                                         "id":  "N-decane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-6.6626924270521437",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -6.6626924270521437
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-1753.2823968226412",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -1753.2823968226412
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "233.19935030295534",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  233.19935030295534
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  10,
+                                                          "H":  22
+                                                      },
+                                         "cas":  "124-18-5",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "102435.08709618264",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  102435.08709618264
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "447.3",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  447.3
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.6531435350798076",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.6531435350798076
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "2110000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  2110000
+                                                               },
+                                         "name":  "N-decane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "142.2817",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  142.2817
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "617.7",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  617.7
+                                                                  },
+                                         "formula":  "CH3(CH2)8CH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "447.3",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  447.3
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.491",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.491
+                                                             }
+                                     },
+                                     {
+                                         "id":  "Methane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-5.0239810431425829",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -5.0239810431425829
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-4645.1728724896311",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -4645.1728724896311
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-3147.27292447667",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -3147.27292447667
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  1,
+                                                          "H":  4
+                                                      },
+                                         "cas":  "74-82-8",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101732.75995261119",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101732.75995261119
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "111.66",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  111.66
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "2.237611858493282",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  2.237611858493282
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "4599000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  4599000
+                                                               },
+                                         "name":  "Methane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "16.04246",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  16.04246
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "190.56",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  190.56
+                                                                  },
+                                         "formula":  "CH4",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "111.66",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  111.66
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.011",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.011
+                                                             }
+                                     },
+                                     {
+                                         "id":  "Ethane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-5.7891257239978229",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -5.7891257239978229
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-2787.5848380926027",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -2787.5848380926027
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-1061.5570034826519",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -1061.5570034826519
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  2,
+                                                          "H":  6
+                                                      },
+                                         "cas":  "74-84-0",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "102592.42304721203",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  102592.42304721203
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "184.55",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  184.55
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.7644241539438332",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.7644241539438332
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "4872000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  4872000
+                                                               },
+                                         "name":  "Ethane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "30.06904",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  30.06904
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "305.32",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  305.32
+                                                                  },
+                                         "formula":  "CH3CH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "184.55",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  184.55
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.099",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.099
+                                                             }
+                                     },
+                                     {
+                                         "id":  "Propane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-6.1070459955092993",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -6.1070459955092993
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-2373.9319233973806",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -2373.9319233973806
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-553.11615983628315",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -553.11615983628315
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  3,
+                                                          "H":  8
+                                                      },
+                                         "cas":  "74-98-6",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101661.3294957499",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101661.3294957499
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "231.02",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  231.02
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.7065970330901676",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.7065970330901676
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "4248000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  4248000
+                                                               },
+                                         "name":  "Propane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "44.09562",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  44.09562
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "369.83",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  369.83
+                                                                  },
+                                         "formula":  "CH3CH2CH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "231.02",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  231.02
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.152",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.152
+                                                             }
+                                     }
+                                 ],
+                   "objects_before":  [
+                                          {
+                                              "tag":  "Residue Gas",
+                                              "name":  "MAT-ab09a11c-8c0c-4200-8483-48cf9d8cc5a4",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nOctano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.063934350966902",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.063934350966902
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Propano",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.09072246893846E-08",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.09072246893846E-08
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nDecano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.00667174393247526",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.00667174393247526
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nNonano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.0208665965880359",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.0208665965880359
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Etano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.0664321673491007",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.0664321673491007
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "101325",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  101325
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "298.250942657701",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  298.250942657701
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Metano",
+                                                                     "value":  {
+                                                                                   "value_text":  "9.40609333095875",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  9.40609333095875
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "9.56399820070249",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  9.56399820070249
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "Solvent + Solute",
+                                              "name":  "MAT-84cef965-bf0f-4776-bd27-10dbd3e85167",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nOctano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.828885850982",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.828885850982
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Propano",
+                                                                     "value":  {
+                                                                                   "value_text":  "11.0852455272814",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  11.0852455272814
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nDecano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.886148457149",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.886148457149
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nNonano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.871953604728",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.871953604728
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Etano",
+                                                                     "value":  {
+                                                                                   "value_text":  "11.0188133710308",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  11.0188133710308
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "101325",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  101325
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "299.640350221877",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  299.640350221877
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Metano",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.67915220554094",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.67915220554094
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "803.370199016712",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  803.370199016712
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "ABS-000",
+                                              "name":  "ABS-8a8b2acc-b94a-4a02-baab-4b406f310080",
+                                              "error":  null,
+                                              "properties":  [
+
+                                                             ],
+                                              "type":  "AbsorptionColumn",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "Gas",
+                                              "name":  "MAT-e338ce1b-5184-449d-9a05-6b5a6ab3f6c9",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nOctano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Propano",
+                                                                     "value":  {
+                                                                                   "value_text":  "11.0852455381887",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  11.0852455381887
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nDecano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nNonano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Etano",
+                                                                     "value":  {
+                                                                                   "value_text":  "11.0852455381887",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  11.0852455381887
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "101325",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  101325
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "298.15",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  298.15
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Metano",
+                                                                     "value":  {
+                                                                                   "value_text":  "11.0852455381887",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  11.0852455381887
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "33.255736614566",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  33.255736614566
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "Liquid Solvent",
+                                              "name":  "MAT-7af05093-95a6-4049-8cf7-593d9cdfc82d",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nOctano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.892820200949",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.892820200949
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Propano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nDecano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.892820200949",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.892820200949
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nNonano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.892820200949",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.892820200949
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Etano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "101325",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  101325
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "298.15",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  298.15
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Metano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "779.678460602848",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  779.678460602848
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          }
+                                      ]
+               },
+    "outputs":  {
+                    "solve":  {
+                                  "errors":  [
+
+                                             ],
+                                  "success":  true,
+                                  "executed":  true
+                              },
+                    "objects_after":  [
+                                          {
+                                              "tag":  "Residue Gas",
+                                              "name":  "MAT-ab09a11c-8c0c-4200-8483-48cf9d8cc5a4",
+                                              "error":  "",
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nOctano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.063934350966902",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.063934350966902
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Propano",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.0907224689384594E-08",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.0907224689384594E-08
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nDecano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.0066717439324752645",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.0066717439324752645
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nNonano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.020866596588035871",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.020866596588035871
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Etano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.0664321673491007",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.0664321673491007
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "101325",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  101325
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "298.25055145454462",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  298.25055145454462
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Metano",
+                                                                     "value":  {
+                                                                                   "value_text":  "9.4060933309587469",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  9.4060933309587469
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "9.5639982007024873",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  9.5639982007024873
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "Solvent + Solute",
+                                              "name":  "MAT-84cef965-bf0f-4776-bd27-10dbd3e85167",
+                                              "error":  "",
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nOctano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.82888585098181",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.82888585098181
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Propano",
+                                                                     "value":  {
+                                                                                   "value_text":  "11.085245527281447",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  11.085245527281447
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nDecano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.88614845714869",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.88614845714869
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nNonano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.87195360472828",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.87195360472828
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Etano",
+                                                                     "value":  {
+                                                                                   "value_text":  "11.018813371030808",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  11.018813371030808
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "101325",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  101325
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "299.64035022187693",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  299.64035022187693
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Metano",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.6791522055409436",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.6791522055409436
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "803.37019901671192",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  803.37019901671192
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "ABS-000",
+                                              "name":  "ABS-8a8b2acc-b94a-4a02-baab-4b406f310080",
+                                              "error":  "",
+                                              "properties":  [
+
+                                                             ],
+                                              "type":  "AbsorptionColumn",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "Gas",
+                                              "name":  "MAT-e338ce1b-5184-449d-9a05-6b5a6ab3f6c9",
+                                              "error":  "",
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nOctano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Propano",
+                                                                     "value":  {
+                                                                                   "value_text":  "11.085245538188671",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  11.085245538188671
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nDecano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nNonano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Etano",
+                                                                     "value":  {
+                                                                                   "value_text":  "11.085245538188671",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  11.085245538188671
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "101325",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  101325
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "298.15",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  298.15
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Metano",
+                                                                     "value":  {
+                                                                                   "value_text":  "11.085245538188671",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  11.085245538188671
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "33.255736614566047",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  33.255736614566047
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "Liquid Solvent",
+                                              "name":  "MAT-7af05093-95a6-4049-8cf7-593d9cdfc82d",
+                                              "error":  "",
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nOctano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.89282020094913",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.89282020094913
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Propano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nDecano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.89282020094913",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.89282020094913
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/nNonano",
+                                                                     "value":  {
+                                                                                   "value_text":  "259.89282020094913",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  259.89282020094913
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Etano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "101325",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  101325
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "298.15",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  298.15
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Metano",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "779.67846060284819",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  779.67846060284819
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          }
+                                      ]
+                }
+}
