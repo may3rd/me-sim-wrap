@@ -1,0 +1,1632 @@
+﻿{
+    "schema_version":  "golden-case-1",
+    "case_id":  "u7-distillation-acetone-nrtl",
+    "case_kind":  "flowsheet",
+    "source":  {
+                   "dwsim_revision":  "10.0.9671.22371",
+                   "automation_version":  "DWSIM version 10.0.9671.22371 (24-Jun-26 5:25:42 AM)",
+                   "captured_utc":  "2026-07-17T15:12:33.9070372Z",
+                   "platform":  "Microsoft Windows NT 10.0.22631.0",
+                   "architecture":  "AMD64",
+                   "engine_bin":  "C:\\Users\\may3r\\AppData\\Local\\DWSIM10",
+                   "input_file":  "C:\\Users\\may3r\\Code\\me-sim-wrap-live\\tests\\u7-distillation-acetone-nrtl.dwxmz",
+                   "input_file_sha256":  "078b90884100a8d1bdeac1fe75dabdff69611a2b0908194e6a0e4c2d5bb67e9b",
+                   "property_package":  "NRTL",
+                   "flash_algorithm":  "Wang-Henke (Bubble Point)",
+                   "bubble_dew_calculation":  false,
+                   "column_profiles_captured":  true,
+                   "property_packages_updated":  0,
+                   "notes":  "Values are captured before and after CalculateFlowsheet4; numeric_text preserves invariant-culture source formatting."
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     {
+                                         "id":  "Acetone",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-3.7190402336092814",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -3.7190402336092814
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-3713.8979674974526",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -3713.8979674974526
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-2605.0661218468454",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -2605.0661218468454
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  3,
+                                                          "H":  6,
+                                                          "O":  1
+                                                      },
+                                         "cas":  "67-64-1",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101083.91803348652",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101083.91803348652
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "329.22",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  329.22
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.2915951953088816",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.2915951953088816
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "4700000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  4700000
+                                                               },
+                                         "name":  "Acetone",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "10.0.9671.22371"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "58.07914",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  58.07914
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "508.1",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  508.1
+                                                                  },
+                                         "formula":  "CH3COCH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "329.22",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  329.22
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.307",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.307
+                                                             }
+                                     },
+                                     {
+                                         "id":  "Methanol",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-4.0425903710759021",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -4.0425903710759021
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-6271.1715237504941",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -6271.1715237504941
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-5065.873204614214",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -5065.873204614214
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  1,
+                                                          "H":  4,
+                                                          "O":  1
+                                                      },
+                                         "cas":  "67-56-1",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101070.45238492134",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101070.45238492134
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "337.69",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  337.69
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.3951350694156555",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.3951350694156555
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "8097000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  8097000
+                                                               },
+                                         "name":  "Methanol",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "10.0.9671.22371"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "32.04186",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  32.04186
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "512.64",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  512.64
+                                                                  },
+                                         "formula":  "CH3OH",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "337.69",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  337.69
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.565",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.565
+                                                             }
+                                     }
+                                 ],
+                   "objects_before":  [
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+
+                                                                 },
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "-405.682661002075",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -405.682661002075
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.565785136530692",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.565785136530692
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.29316749133935",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.29316749133935
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.85895262787005",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.85895262787005
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "388.292590101941",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  388.292590101941
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.0932360552417061",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.0932360552417061
+                                                                               },
+                                                                     "unit":  "kg/s"
+                                                                 }
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "MAT-2bfc6fd0-cbc8-4b85-84f4-c990c3990d85",
+                                              "type":  "MaterialStream",
+                                              "error":  null,
+                                              "tag":  "HP Azeotrope"
+                                          },
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+                                                                     "Tf":  [
+                                                                                388.293,
+                                                                                389.069,
+                                                                                390.086,
+                                                                                391.211,
+                                                                                392.256,
+                                                                                393.089,
+                                                                                393.676,
+                                                                                394.055,
+                                                                                394.288,
+                                                                                394.425,
+                                                                                394.504,
+                                                                                394.694,
+                                                                                394.804,
+                                                                                394.867,
+                                                                                394.903,
+                                                                                394.947,
+                                                                                394.948,
+                                                                                394.948,
+                                                                                394.949,
+                                                                                394.949
+                                                                            ],
+                                                                     "Lf":  [
+                                                                                74.3581,
+                                                                                75.4483,
+                                                                                76.574,
+                                                                                77.6162,
+                                                                                78.4742,
+                                                                                79.1083,
+                                                                                79.5363,
+                                                                                79.8065,
+                                                                                79.9695,
+                                                                                80.0651,
+                                                                                83.4617,
+                                                                                83.598,
+                                                                                83.6767,
+                                                                                83.7216,
+                                                                                83.7398,
+                                                                                83.7711,
+                                                                                83.7748,
+                                                                                83.7769,
+                                                                                83.7781,
+                                                                                0.5
+                                                                            ],
+                                                                     "Vf":  [
+                                                                                0,
+                                                                                76.2171,
+                                                                                77.3073,
+                                                                                78.4329,
+                                                                                79.4752,
+                                                                                80.3331,
+                                                                                80.9672,
+                                                                                81.3953,
+                                                                                81.6654,
+                                                                                81.8284,
+                                                                                81.924,
+                                                                                82.9617,
+                                                                                83.098,
+                                                                                83.1767,
+                                                                                83.2216,
+                                                                                83.2398,
+                                                                                83.2711,
+                                                                                83.2748,
+                                                                                83.2769,
+                                                                                83.2781
+                                                                            ],
+                                                                     "xf":  [
+                                                                                [
+                                                                                    0.304357,
+                                                                                    0.695643
+                                                                                ],
+                                                                                [
+                                                                                    0.239457,
+                                                                                    0.760543
+                                                                                ],
+                                                                                [
+                                                                                    0.176189,
+                                                                                    0.823811
+                                                                                ],
+                                                                                [
+                                                                                    0.121933,
+                                                                                    0.878067
+                                                                                ],
+                                                                                [
+                                                                                    0.0807634,
+                                                                                    0.919237
+                                                                                ],
+                                                                                [
+                                                                                    0.0525424,
+                                                                                    0.947458
+                                                                                ],
+                                                                                [
+                                                                                    0.0345782,
+                                                                                    0.965422
+                                                                                ],
+                                                                                [
+                                                                                    0.0236897,
+                                                                                    0.97631
+                                                                                ],
+                                                                                [
+                                                                                    0.0172877,
+                                                                                    0.982712
+                                                                                ],
+                                                                                [
+                                                                                    0.0135913,
+                                                                                    0.986409
+                                                                                ],
+                                                                                [
+                                                                                    0.0114795,
+                                                                                    0.988521
+                                                                                ],
+                                                                                [
+                                                                                    0.00650583,
+                                                                                    0.993494
+                                                                                ],
+                                                                                [
+                                                                                    0.00366719,
+                                                                                    0.996333
+                                                                                ],
+                                                                                [
+                                                                                    0.00206069,
+                                                                                    0.997939
+                                                                                ],
+                                                                                [
+                                                                                    0.00115586,
+                                                                                    0.998844
+                                                                                ],
+                                                                                [
+                                                                                    0.000647547,
+                                                                                    0.999352
+                                                                                ],
+                                                                                [
+                                                                                    0.000362499,
+                                                                                    0.999638
+                                                                                ],
+                                                                                [
+                                                                                    0.000202779,
+                                                                                    0.999797
+                                                                                ],
+                                                                                [
+                                                                                    0.000113322,
+                                                                                    0.999887
+                                                                                ],
+                                                                                [
+                                                                                    6.32305E-05,
+                                                                                    0.999937
+                                                                                ]
+                                                                            ],
+                                                                     "yf":  [
+                                                                                [
+                                                                                    0.362389,
+                                                                                    0.637611
+                                                                                ],
+                                                                                [
+                                                                                    0.304369,
+                                                                                    0.695631
+                                                                                ],
+                                                                                [
+                                                                                    0.241033,
+                                                                                    0.758967
+                                                                                ],
+                                                                                [
+                                                                                    0.17924,
+                                                                                    0.82076
+                                                                                ],
+                                                                                [
+                                                                                    0.126209,
+                                                                                    0.873791
+                                                                                ],
+                                                                                [
+                                                                                    0.0859414,
+                                                                                    0.914059
+                                                                                ],
+                                                                                [
+                                                                                    0.0583252,
+                                                                                    0.941675
+                                                                                ],
+                                                                                [
+                                                                                    0.0407394,
+                                                                                    0.959261
+                                                                                ],
+                                                                                [
+                                                                                    0.0300777,
+                                                                                    0.969922
+                                                                                ],
+                                                                                [
+                                                                                    0.0238081,
+                                                                                    0.976192
+                                                                                ],
+                                                                                [
+                                                                                    0.0201878,
+                                                                                    0.979812
+                                                                                ],
+                                                                                [
+                                                                                    0.0115482,
+                                                                                    0.988452
+                                                                                ],
+                                                                                [
+                                                                                    0.00654456,
+                                                                                    0.993455
+                                                                                ],
+                                                                                [
+                                                                                    0.00368883,
+                                                                                    0.996311
+                                                                                ],
+                                                                                [
+                                                                                    0.00207268,
+                                                                                    0.997927
+                                                                                ],
+                                                                                [
+                                                                                    0.00116242,
+                                                                                    0.998838
+                                                                                ],
+                                                                                [
+                                                                                    0.000651053,
+                                                                                    0.999349
+                                                                                ],
+                                                                                [
+                                                                                    0.000364296,
+                                                                                    0.999636
+                                                                                ],
+                                                                                [
+                                                                                    0.000203617,
+                                                                                    0.999796
+                                                                                ],
+                                                                                [
+                                                                                    0.000113623,
+                                                                                    0.999886
+                                                                                ]
+                                                                            ],
+                                                                     "Kf":  [
+                                                                                [
+                                                                                    1.19067,
+                                                                                    0.916578
+                                                                                ],
+                                                                                [
+                                                                                    1.27108,
+                                                                                    0.914651
+                                                                                ],
+                                                                                [
+                                                                                    1.36804,
+                                                                                    0.921288
+                                                                                ],
+                                                                                [
+                                                                                    1.46998,
+                                                                                    0.934735
+                                                                                ],
+                                                                                [
+                                                                                    1.5627,
+                                                                                    0.950562
+                                                                                ],
+                                                                                [
+                                                                                    1.63566,
+                                                                                    0.964749
+                                                                                ],
+                                                                                [
+                                                                                    1.68676,
+                                                                                    0.975403
+                                                                                ],
+                                                                                [
+                                                                                    1.71971,
+                                                                                    0.982537
+                                                                                ],
+                                                                                [
+                                                                                    1.73984,
+                                                                                    0.986985
+                                                                                ],
+                                                                                [
+                                                                                    1.75172,
+                                                                                    0.989642
+                                                                                ],
+                                                                                [
+                                                                                    1.7586,
+                                                                                    0.991191
+                                                                                ],
+                                                                                [
+                                                                                    1.77506,
+                                                                                    0.994925
+                                                                                ],
+                                                                                [
+                                                                                    1.78463,
+                                                                                    0.997112
+                                                                                ],
+                                                                                [
+                                                                                    1.79009,
+                                                                                    0.998368
+                                                                                ],
+                                                                                [
+                                                                                    1.79319,
+                                                                                    0.999082
+                                                                                ],
+                                                                                [
+                                                                                    1.79604,
+                                                                                    1
+                                                                                ],
+                                                                                [
+                                                                                    1.79653,
+                                                                                    1
+                                                                                ],
+                                                                                [
+                                                                                    1.79681,
+                                                                                    1
+                                                                                ],
+                                                                                [
+                                                                                    1.79696,
+                                                                                    1
+                                                                                ],
+                                                                                [
+                                                                                    1.79705,
+                                                                                    1
+                                                                                ]
+                                                                            ],
+                                                                     "Hlf":  [
+                                                                                 -405.68136488670461,
+                                                                                 -379.42239551064267,
+                                                                                 -354.90613293712806,
+                                                                                 -334.54380165926995,
+                                                                                 -319.38163164589139,
+                                                                                 -309.067328778209,
+                                                                                 -302.51389751321858,
+                                                                                 -298.54149435682336,
+                                                                                 -296.19989875213719,
+                                                                                 -294.8487973269992,
+                                                                                 -294.07744059095933,
+                                                                                 -292.25677706429883,
+                                                                                 -291.21793254767886,
+                                                                                 -290.62936431659193,
+                                                                                 -290.29681928430671,
+                                                                                 -290.03858736238237,
+                                                                                 -289.9651002959929,
+                                                                                 -289.92562601791013,
+                                                                                 -289.90051037041241,
+                                                                                 -289.88813423696047
+                                                                             ],
+                                                                     "Hvf":  [
+                                                                                 129.84771885014925,
+                                                                                 130.73056730551019,
+                                                                                 131.98027344119393,
+                                                                                 133.42601816016216,
+                                                                                 134.80509443983789,
+                                                                                 135.92230756590664,
+                                                                                 136.71708710601035,
+                                                                                 137.23299172967211,
+                                                                                 137.55144307842329,
+                                                                                 137.73889616723812,
+                                                                                 137.84703864167545,
+                                                                                 138.10763755729408,
+                                                                                 138.25863769201393,
+                                                                                 138.34520766562173,
+                                                                                 138.39475926280628,
+                                                                                 138.45999016084161,
+                                                                                 138.45932810775332,
+                                                                                 138.458075193779,
+                                                                                 138.45894629650653,
+                                                                                 138.45855321002867
+                                                                             ]
+                                                                 },
+                                              "properties":  [
+
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "DC-d8d17391-93e8-4990-b225-e42f4f7b0b33",
+                                              "type":  "DistillationColumn",
+                                              "error":  null,
+                                              "tag":  "Acetone Column (6 atm)"
+                                          },
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+
+                                                                 },
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "-551.970445496062",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -551.970445496062
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.565921201143434",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.565921201143434
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.79303142672661",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.79303142672661
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "2.35895262787005",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  2.35895262787005
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "328.645273233207",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  328.645273233207
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950.057",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950.057
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.122272512391319",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.122272512391319
+                                                                               },
+                                                                     "unit":  "kg/s"
+                                                                 }
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "MAT-df21fa52-ddbf-4e61-a6bb-9fb208f76a2d",
+                                              "type":  "MaterialStream",
+                                              "error":  null,
+                                              "tag":  "HP Feed"
+                                          },
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+
+                                                                 },
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_ES_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "2071.78227771607",
+                                                                                   "unit":  "kW",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  2071.78227771607
+                                                                               },
+                                                                     "unit":  "kW"
+                                                                 }
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "EN-4883c9b1-2698-4122-8d02-6b279638b979",
+                                              "type":  "EnergyStream",
+                                              "error":  null,
+                                              "tag":  "Reboiler Duty (2)"
+                                          },
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+
+                                                                 },
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_ES_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "2050.53385111738",
+                                                                                   "unit":  "kW",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  2050.53385111738
+                                                                               },
+                                                                     "unit":  "kW"
+                                                                 }
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "EN-b696460e-1663-400d-a21c-87d50b8de316",
+                                              "type":  "EnergyStream",
+                                              "error":  null,
+                                              "tag":  "Condenser Duty (2)"
+                                          },
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+
+                                                                 },
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "-289.888918115141",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -289.888918115141
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "3.16152529062644E-05",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  3.16152529062644E-05
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.499968384747094",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.499968384747094
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.5",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.5
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "394.948739661997",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  394.948739661997
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.0290391768020448",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.0290391768020448
+                                                                               },
+                                                                     "unit":  "kg/s"
+                                                                 }
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "MAT-4c626b03-8509-409c-a65d-9d3346c1fff6",
+                                              "type":  "MaterialStream",
+                                              "error":  null,
+                                              "tag":  "Acetone Rich Product"
+                                          }
+                                      ]
+               },
+    "outputs":  {
+                    "solve":  {
+                                  "errors":  [
+
+                                             ],
+                                  "success":  true,
+                                  "executed":  true
+                              },
+                    "objects_after":  [
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+
+                                                                 },
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "-405.87078129889005",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -405.87078129889005
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.56620704524624743",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.56620704524624743
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.2913474778325154",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.2913474778325154
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.8575545230787629",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.8575545230787629
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "388.28828890508868",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  388.28828890508868
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.093143867656292761",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.093143867656292761
+                                                                               },
+                                                                     "unit":  "kg/s"
+                                                                 }
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "MAT-2bfc6fd0-cbc8-4b85-84f4-c990c3990d85",
+                                              "type":  "MaterialStream",
+                                              "error":  "",
+                                              "tag":  "HP Azeotrope"
+                                          },
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+                                                                     "Tf":  [
+                                                                                388.28828890508868,
+                                                                                389.06317869878808,
+                                                                                390.07832283661389,
+                                                                                391.20335700947226,
+                                                                                392.249296552309,
+                                                                                393.083496110807,
+                                                                                393.67213337749615,
+                                                                                394.05304297163218,
+                                                                                394.28607403637488,
+                                                                                394.42380309751894,
+                                                                                394.5035599474794,
+                                                                                394.69363003055321,
+                                                                                394.80408308623487,
+                                                                                394.86724097914572,
+                                                                                394.9030244371221,
+                                                                                394.94667801017647,
+                                                                                394.94768376578179,
+                                                                                394.94824700001425,
+                                                                                394.94856252639056,
+                                                                                394.94873918752216
+                                                                            ],
+                                                                     "Lf":  [
+                                                                                74.302180923150516,
+                                                                                75.390957895695692,
+                                                                                76.5160019605054,
+                                                                                77.558564436185222,
+                                                                                78.417522102541511,
+                                                                                79.052773367332,
+                                                                                79.4818180270861,
+                                                                                79.752724651408371,
+                                                                                79.916217248766245,
+                                                                                80.012119142428134,
+                                                                                83.406990077659941,
+                                                                                83.543433074306662,
+                                                                                83.622300945922362,
+                                                                                83.667264302085215,
+                                                                                83.685528476349319,
+                                                                                83.71681029313352,
+                                                                                83.720550439854932,
+                                                                                83.722644886783328,
+                                                                                83.723817671075466,
+                                                                                0.5
+                                                                            ],
+                                                                     "Vf":  [
+                                                                                0,
+                                                                                76.159735446229277,
+                                                                                77.248512418774453,
+                                                                                78.373556483584167,
+                                                                                79.416118959263983,
+                                                                                80.275076625620272,
+                                                                                80.910327890410755,
+                                                                                81.339372550164867,
+                                                                                81.610279174487133,
+                                                                                81.773771771845,
+                                                                                81.8696736655069,
+                                                                                82.906990077659941,
+                                                                                83.043433074306662,
+                                                                                83.122300945922362,
+                                                                                83.167264302085215,
+                                                                                83.185528476349319,
+                                                                                83.21681029313352,
+                                                                                83.220550439854932,
+                                                                                83.222644886783328,
+                                                                                83.223817671075466
+                                                                            ],
+                                                                     "xf":  [
+                                                                                [
+                                                                                    0.304813149876107,
+                                                                                    0.69518685012389292
+                                                                                ],
+                                                                                [
+                                                                                    0.23994013978417933,
+                                                                                    0.76005986021582062
+                                                                                ],
+                                                                                [
+                                                                                    0.17663872357840657,
+                                                                                    0.8233612764215934
+                                                                                ],
+                                                                                [
+                                                                                    0.12230130402232023,
+                                                                                    0.8776986959776798
+                                                                                ],
+                                                                                [
+                                                                                    0.081033573472444984,
+                                                                                    0.91896642652755511
+                                                                                ],
+                                                                                [
+                                                                                    0.052726018811782412,
+                                                                                    0.9472739811882176
+                                                                                ],
+                                                                                [
+                                                                                    0.034697773164567416,
+                                                                                    0.96530222683543254
+                                                                                ],
+                                                                                [
+                                                                                    0.023766754551701429,
+                                                                                    0.97623324544829848
+                                                                                ],
+                                                                                [
+                                                                                    0.017338317411416903,
+                                                                                    0.98266168258858311
+                                                                                ],
+                                                                                [
+                                                                                    0.01362609920805803,
+                                                                                    0.986373900791942
+                                                                                ],
+                                                                                [
+                                                                                    0.011505060549434853,
+                                                                                    0.9884949394505651
+                                                                                ],
+                                                                                [
+                                                                                    0.0065205237125010125,
+                                                                                    0.993479476287499
+                                                                                ],
+                                                                                [
+                                                                                    0.003675543687628863,
+                                                                                    0.99632445631237121
+                                                                                ],
+                                                                                [
+                                                                                    0.0020654126214618312,
+                                                                                    0.99793458737853813
+                                                                                ],
+                                                                                [
+                                                                                    0.0011585187620266467,
+                                                                                    0.99884148123797345
+                                                                                ],
+                                                                                [
+                                                                                    0.00064903951898569428,
+                                                                                    0.99935096048101435
+                                                                                ],
+                                                                                [
+                                                                                    0.00036333634481376084,
+                                                                                    0.99963666365518622
+                                                                                ],
+                                                                                [
+                                                                                    0.00020324783100521271,
+                                                                                    0.99979675216899477
+                                                                                ],
+                                                                                [
+                                                                                    0.00011358422092625485,
+                                                                                    0.99988641577907378
+                                                                                ],
+                                                                                [
+                                                                                    6.3377044592652663E-05,
+                                                                                    0.99993662295540731
+                                                                                ]
+                                                                            ],
+                                                                     "yf":  [
+                                                                                [
+                                                                                    0.36277749988469982,
+                                                                                    0.63722250011530013
+                                                                                ],
+                                                                                [
+                                                                                    0.30482306982528351,
+                                                                                    0.69517693017471649
+                                                                                ],
+                                                                                [
+                                                                                    0.24151294609329962,
+                                                                                    0.75848705390670035
+                                                                                ],
+                                                                                [
+                                                                                    0.17968783216696074,
+                                                                                    0.82031216783303917
+                                                                                ],
+                                                                                [
+                                                                                    0.12657746366553937,
+                                                                                    0.87342253633446054
+                                                                                ],
+                                                                                [
+                                                                                    0.086215212691650209,
+                                                                                    0.91378478730834978
+                                                                                ],
+                                                                                [
+                                                                                    0.058514544928197534,
+                                                                                    0.94148545507180259
+                                                                                ],
+                                                                                [
+                                                                                    0.040866275714998047,
+                                                                                    0.959133724285002
+                                                                                ],
+                                                                                [
+                                                                                    0.030163013973784476,
+                                                                                    0.9698369860262156
+                                                                                ],
+                                                                                [
+                                                                                    0.023867556460486515,
+                                                                                    0.97613244353951356
+                                                                                ],
+                                                                                [
+                                                                                    0.020231806401380344,
+                                                                                    0.97976819359861966
+                                                                                ],
+                                                                                [
+                                                                                    0.011574001755337373,
+                                                                                    0.98842599824466271
+                                                                                ],
+                                                                                [
+                                                                                    0.0065593635976643142,
+                                                                                    0.99344063640233571
+                                                                                ],
+                                                                                [
+                                                                                    0.0036972491782815706,
+                                                                                    0.99630275082171837
+                                                                                ],
+                                                                                [
+                                                                                    0.0020774359359896351,
+                                                                                    0.99792256406401036
+                                                                                ],
+                                                                                [
+                                                                                    0.0011650939632324591,
+                                                                                    0.9988349060367675
+                                                                                ],
+                                                                                [
+                                                                                    0.00065255631294855281,
+                                                                                    0.99934744368705131
+                                                                                ],
+                                                                                [
+                                                                                    0.00036513798495780913,
+                                                                                    0.99963486201504215
+                                                                                ],
+                                                                                [
+                                                                                    0.00020408804972112156,
+                                                                                    0.999795911950279
+                                                                                ],
+                                                                                [
+                                                                                    0.00011388584405313844,
+                                                                                    0.99988611415594686
+                                                                                ]
+                                                                            ],
+                                                                     "Kf":  [
+                                                                                [
+                                                                                    1.1901635478395669,
+                                                                                    0.9166204740520334
+                                                                                ],
+                                                                                [
+                                                                                    1.2704129875870891,
+                                                                                    0.91463444731487131
+                                                                                ],
+                                                                                [
+                                                                                    1.3672706708962232,
+                                                                                    0.92120807187236209
+                                                                                ],
+                                                                                [
+                                                                                    1.4692225369417715,
+                                                                                    0.93461705206167667
+                                                                                ],
+                                                                                [
+                                                                                    1.5620372919698693,
+                                                                                    0.95044009348068526
+                                                                                ],
+                                                                                [
+                                                                                    1.6351549886482932,
+                                                                                    0.964646771108539
+                                                                                ],
+                                                                                [
+                                                                                    1.6864063480578448,
+                                                                                    0.97532713475477262
+                                                                                ],
+                                                                                [
+                                                                                    1.7194722832728018,
+                                                                                    0.98248418475500909
+                                                                                ],
+                                                                                [
+                                                                                    1.7396736521804956,
+                                                                                    0.98694902142862728
+                                                                                ],
+                                                                                [
+                                                                                    1.751605950907215,
+                                                                                    0.98961706382923875
+                                                                                ],
+                                                                                [
+                                                                                    1.758513683126524,
+                                                                                    0.991171683836039
+                                                                                ],
+                                                                                [
+                                                                                    1.7750110674619604,
+                                                                                    0.99491335436368133
+                                                                                ],
+                                                                                [
+                                                                                    1.7845968257000406,
+                                                                                    0.99710554138085428
+                                                                                ],
+                                                                                [
+                                                                                    1.7900777500162552,
+                                                                                    0.99836478605165246
+                                                                                ],
+                                                                                [
+                                                                                    1.7931828159221934,
+                                                                                    0.99908001700848093
+                                                                                ],
+                                                                                [
+                                                                                    1.7960381841978168,
+                                                                                    1.0000032964595558
+                                                                                ],
+                                                                                [
+                                                                                    1.7965349055811253,
+                                                                                    1.0000019263577382
+                                                                                ],
+                                                                                [
+                                                                                    1.7968094090164384,
+                                                                                    1.000001359041202
+                                                                                ],
+                                                                                [
+                                                                                    1.7969638195240958,
+                                                                                    1.0000010349098394
+                                                                                ],
+                                                                                [
+                                                                                    1.7970497197167108,
+                                                                                    1.0000009067932367
+                                                                                ]
+                                                                            ],
+                                                                     "Hlf":  [
+                                                                                 -405.87078129889005,
+                                                                                 -379.61061660595112,
+                                                                                 -355.07534185219845,
+                                                                                 -334.67761052614236,
+                                                                                 -319.47822046044041,
+                                                                                 -309.13355696657948,
+                                                                                 -302.55692293774064,
+                                                                                 -298.56722803994603,
+                                                                                 -296.21859180586046,
+                                                                                 -294.86120976879704,
+                                                                                 -294.085210682541,
+                                                                                 -292.26156259415143,
+                                                                                 -291.21975961709722,
+                                                                                 -290.62980918063124,
+                                                                                 -290.297403691927,
+                                                                                 -290.0399253581802,
+                                                                                 -289.96625976625387,
+                                                                                 -289.92499812338326,
+                                                                                 -289.901892346403,
+                                                                                 -289.88895574735562
+                                                                             ],
+                                                                     "Hvf":  [
+                                                                                 129.84262913896151,
+                                                                                 130.72398392528697,
+                                                                                 131.9707765774329,
+                                                                                 133.41627844921433,
+                                                                                 134.79634528804468,
+                                                                                 135.91493983462203,
+                                                                                 136.71187558346978,
+                                                                                 137.23048700892653,
+                                                                                 137.54879630057383,
+                                                                                 137.73727862381546,
+                                                                                 137.84654177726381,
+                                                                                 138.10716938787891,
+                                                                                 138.25883332017162,
+                                                                                 138.34562356364128,
+                                                                                 138.39481850012996,
+                                                                                 138.45949535193739,
+                                                                                 138.458837234129,
+                                                                                 138.45846740667511,
+                                                                                 138.45826020383439,
+                                                                                 138.45814409819565
+                                                                             ]
+                                                                 },
+                                              "properties":  [
+
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "DC-d8d17391-93e8-4990-b225-e42f4f7b0b33",
+                                              "type":  "DistillationColumn",
+                                              "error":  "",
+                                              "tag":  "Acetone Column (6 atm)"
+                                          },
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+
+                                                                 },
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "-552.10803357286909",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -552.10803357286909
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.56634725224855254",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.56634725224855254
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.7912072708302107",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.7912072708302107
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "2.3575545230787629",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  2.3575545230787629
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "328.64215052466591",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  328.64215052466591
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950.057",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950.057
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.12218021694636677",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.12218021694636677
+                                                                               },
+                                                                     "unit":  "kg/s"
+                                                                 }
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "MAT-df21fa52-ddbf-4e61-a6bb-9fb208f76a2d",
+                                              "type":  "MaterialStream",
+                                              "error":  "",
+                                              "tag":  "HP Feed"
+                                          },
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+
+                                                                 },
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_ES_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "2070.4325810095834",
+                                                                                   "unit":  "kW",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  2070.4325810095834
+                                                                               },
+                                                                     "unit":  "kW"
+                                                                 }
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "EN-4883c9b1-2698-4122-8d02-6b279638b979",
+                                              "type":  "EnergyStream",
+                                              "error":  "",
+                                              "tag":  "Reboiler Duty (2)"
+                                          },
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+
+                                                                 },
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_ES_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "2049.1984121145388",
+                                                                                   "unit":  "kW",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  2049.1984121145388
+                                                                               },
+                                                                     "unit":  "kW"
+                                                                 }
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "EN-b696460e-1663-400d-a21c-87d50b8de316",
+                                              "type":  "EnergyStream",
+                                              "error":  "",
+                                              "tag":  "Condenser Duty (2)"
+                                          },
+                                          {
+                                              "utilities":  [
+
+                                                            ],
+                                              "column_profile":  {
+
+                                                                 },
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "-289.88895574790274",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -289.88895574790274
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "3.1688522296326332E-05",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  3.1688522296326332E-05
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.49996831147770365",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.49996831147770365
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.5",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.5
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "394.94873918734044",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  394.94873918734044
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.029039174894256444",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.029039174894256444
+                                                                               },
+                                                                     "unit":  "kg/s"
+                                                                 }
+                                                             ],
+                                              "calculated":  true,
+                                              "name":  "MAT-4c626b03-8509-409c-a65d-9d3346c1fff6",
+                                              "type":  "MaterialStream",
+                                              "error":  "",
+                                              "tag":  "Acetone Rich Product"
+                                          }
+                                      ]
+                }
+}

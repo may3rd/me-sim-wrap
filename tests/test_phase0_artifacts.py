@@ -48,7 +48,10 @@ class Phase0ArtifactsTest(unittest.TestCase):
 
         self.assertIn("[switch]$CaptureColumnProfiles", script)
         self.assertIn("public static object NumericArray", script)
+        self.assertIn("public static object ColumnEnthalpyArray", script)
         self.assertIn('foreach ($profileName in @("Tf", "Lf", "Vf", "xf", "yf", "Kf"))', script)
+        self.assertIn('@("Hlf", "xf", "Liquid")', script)
+        self.assertIn('@("Hvf", "yf", "Vapor")', script)
         self.assertIn("column_profiles_captured", script)
 
     def test_compatibility_record_requires_source_revision(self):

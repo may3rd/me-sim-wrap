@@ -208,6 +208,263 @@ def column_balance_residuals(
 
 
 @dataclass(frozen=True, slots=True)
+class ColumnProfileResiduals:
+    component_material_kmol_s: tuple[tuple[float, ...], ...]
+    phase_equilibrium: tuple[tuple[float, ...], ...]
+    liquid_summation: tuple[float, ...]
+    vapor_summation: tuple[float, ...]
+    flow_scale_kmol_s: float
+
+    @property
+    def maximum_scaled_component_residual(self) -> float:
+        return max(
+            abs(value) / self.flow_scale_kmol_s
+            for row in self.component_material_kmol_s
+            for value in row
+        )
+
+    def is_closed(
+        self,
+        scaled_component_tolerance: float,
+        equilibrium_tolerance: float,
+        summation_tolerance: float,
+    ) -> bool:
+        tolerances = (
+            scaled_component_tolerance,
+            equilibrium_tolerance,
+            summation_tolerance,
+        )
+        if any(not _finite_number(value) or value <= 0.0 for value in tolerances):
+            raise ValidationError("column profile tolerances must be positive and finite")
+        return (
+            self.maximum_scaled_component_residual <= scaled_component_tolerance
+            and max(
+                abs(value) for row in self.phase_equilibrium for value in row
+            )
+            <= equilibrium_tolerance
+            and max(abs(value) for value in self.liquid_summation)
+            <= summation_tolerance
+            and max(abs(value) for value in self.vapor_summation)
+            <= summation_tolerance
+        )
+
+
+def fixed_k_column_profile_residuals(
+    feed_component_flows_by_stage_kmol_s: tuple[tuple[float, ...], ...],
+    liquid_flows_kmol_s: tuple[float, ...],
+    vapor_flows_kmol_s: tuple[float, ...],
+    liquid_mole_fractions: tuple[tuple[float, ...], ...],
+    vapor_mole_fractions: tuple[tuple[float, ...], ...],
+    equilibrium_ratios_by_stage: tuple[tuple[float, ...], ...],
+    liquid_product_flows_by_stage_kmol_s: tuple[float, ...] | None = None,
+    vapor_product_flows_by_stage_kmol_s: tuple[float, ...] | None = None,
+) -> ColumnProfileResiduals:
+    """Evaluate fixed-K material, equilibrium, and summation profile closure.
+
+    Internal liquid flows point toward increasing stage index and internal
+    vapor flows point toward decreasing stage index. End-stage internal flows
+    therefore represent the ordinary vapor-overhead and liquid-bottoms
+    products. Explicit product arrays cover side draws and a total-condenser
+    liquid distillate without changing that convention.
+    """
+    try:
+        feeds = tuple(tuple(float(value) for value in row) for row in feed_component_flows_by_stage_kmol_s)
+        liquid = tuple(float(value) for value in liquid_flows_kmol_s)
+        vapor = tuple(float(value) for value in vapor_flows_kmol_s)
+        liquid_fractions = tuple(tuple(float(value) for value in row) for row in liquid_mole_fractions)
+        vapor_fractions = tuple(tuple(float(value) for value in row) for row in vapor_mole_fractions)
+        ratios = tuple(tuple(float(value) for value in row) for row in equilibrium_ratios_by_stage)
+        liquid_products = (
+            (0.0,) * len(feeds)
+            if liquid_product_flows_by_stage_kmol_s is None
+            else tuple(float(value) for value in liquid_product_flows_by_stage_kmol_s)
+        )
+        vapor_products = (
+            (0.0,) * len(feeds)
+            if vapor_product_flows_by_stage_kmol_s is None
+            else tuple(float(value) for value in vapor_product_flows_by_stage_kmol_s)
+        )
+    except (TypeError, ValueError) as error:
+        raise ValidationError("column profile inputs must be finite sequences") from error
+    stage_count = len(feeds)
+    component_count = len(feeds[0]) if feeds else 0
+    matrices = feeds + liquid_fractions + vapor_fractions + ratios
+    if (
+        stage_count < 2
+        or component_count < 2
+        or any(len(values) != stage_count for values in (
+            liquid, vapor, liquid_products, vapor_products,
+        ))
+        or any(len(matrix) != stage_count for matrix in (
+            liquid_fractions, vapor_fractions, ratios,
+        ))
+        or any(len(row) != component_count for row in matrices)
+        or any(not _finite_number(value) or value < 0.0 for row in feeds for value in row)
+        or any(not _finite_number(value) or value < 0.0 for value in (
+            liquid + vapor + liquid_products + vapor_products
+        ))
+        or any(not _finite_number(value) or value < 0.0 for row in (
+            liquid_fractions + vapor_fractions
+        ) for value in row)
+        or any(not _finite_number(value) or value <= 0.0 for row in ratios for value in row)
+    ):
+        raise ValidationError("column profile inputs are invalid")
+    flow_scale = math.fsum(value for row in feeds for value in row)
+    if flow_scale <= 0.0:
+        raise ValidationError("column profile requires at least one feed")
+
+    material: list[tuple[float, ...]] = []
+    for stage in range(stage_count):
+        stage_residuals = []
+        for component in range(component_count):
+            residual = feeds[stage][component]
+            if stage > 0:
+                residual += liquid[stage - 1] * liquid_fractions[stage - 1][component]
+            if stage < stage_count - 1:
+                residual += vapor[stage + 1] * vapor_fractions[stage + 1][component]
+            residual -= (
+                liquid[stage] + liquid_products[stage]
+            ) * liquid_fractions[stage][component]
+            residual -= (
+                vapor[stage] + vapor_products[stage]
+            ) * vapor_fractions[stage][component]
+            stage_residuals.append(residual)
+        material.append(tuple(stage_residuals))
+    equilibrium = tuple(
+        tuple(
+            vapor_fraction - ratio * liquid_fraction
+            for vapor_fraction, ratio, liquid_fraction in zip(
+                vapor_row, ratio_row, liquid_row
+            )
+        )
+        for vapor_row, ratio_row, liquid_row in zip(
+            vapor_fractions, ratios, liquid_fractions
+        )
+    )
+    return ColumnProfileResiduals(
+        tuple(material),
+        equilibrium,
+        tuple(math.fsum(row) - 1.0 for row in liquid_fractions),
+        tuple(math.fsum(row) - 1.0 for row in vapor_fractions),
+        flow_scale,
+    )
+
+
+def column_energy_residual_w(
+    inlet_mass_enthalpy_kj_s: tuple[tuple[float, float], ...],
+    outlet_mass_enthalpy_kj_s: tuple[tuple[float, float], ...],
+    heat_input_w: float = 0.0,
+    heat_output_w: float = 0.0,
+) -> float:
+    """Return steady column energy residual from kg/s and kJ/kg streams."""
+    try:
+        inlets = tuple((float(flow), float(enthalpy)) for flow, enthalpy in inlet_mass_enthalpy_kj_s)
+        outlets = tuple((float(flow), float(enthalpy)) for flow, enthalpy in outlet_mass_enthalpy_kj_s)
+    except (TypeError, ValueError) as error:
+        raise ValidationError("column energy streams must be flow-enthalpy pairs") from error
+    if (
+        not inlets
+        or not outlets
+        or any(
+            not _finite_number(value)
+            for pair in inlets + outlets
+            for value in pair
+        )
+        or any(flow < 0.0 for flow, _ in inlets + outlets)
+        or not _finite_number(heat_input_w)
+        or not _finite_number(heat_output_w)
+    ):
+        raise ValidationError("column energy inputs are invalid")
+    return (
+        1000.0 * math.fsum(flow * enthalpy for flow, enthalpy in inlets)
+        + float(heat_input_w)
+        - 1000.0 * math.fsum(flow * enthalpy for flow, enthalpy in outlets)
+        - float(heat_output_w)
+    )
+
+
+def column_profile_energy_residuals(
+    feed_energy_by_stage_w: tuple[float, ...],
+    liquid_flows_kmol_s: tuple[float, ...],
+    vapor_flows_kmol_s: tuple[float, ...],
+    liquid_molar_enthalpies_j_kmol: tuple[float, ...],
+    vapor_molar_enthalpies_j_kmol: tuple[float, ...],
+    heat_duties_by_stage_w: tuple[float, ...] | None = None,
+    liquid_product_flows_by_stage_kmol_s: tuple[float, ...] | None = None,
+    vapor_product_flows_by_stage_kmol_s: tuple[float, ...] | None = None,
+) -> tuple[float, ...]:
+    """Evaluate the steady energy balance on every column stage.
+
+    Internal liquid flows point toward increasing stage index and internal
+    vapor flows point toward decreasing stage index, matching
+    :func:`fixed_k_column_profile_residuals`. Positive stage duties add heat.
+    Molar flows and molar enthalpies use one coherent kmol basis, so their
+    products are watts.
+    """
+    try:
+        feeds = tuple(float(value) for value in feed_energy_by_stage_w)
+        liquid = tuple(float(value) for value in liquid_flows_kmol_s)
+        vapor = tuple(float(value) for value in vapor_flows_kmol_s)
+        liquid_enthalpy = tuple(float(value) for value in liquid_molar_enthalpies_j_kmol)
+        vapor_enthalpy = tuple(float(value) for value in vapor_molar_enthalpies_j_kmol)
+        stage_count = len(feeds)
+        duties = (
+            (0.0,) * stage_count
+            if heat_duties_by_stage_w is None
+            else tuple(float(value) for value in heat_duties_by_stage_w)
+        )
+        liquid_products = (
+            (0.0,) * stage_count
+            if liquid_product_flows_by_stage_kmol_s is None
+            else tuple(float(value) for value in liquid_product_flows_by_stage_kmol_s)
+        )
+        vapor_products = (
+            (0.0,) * stage_count
+            if vapor_product_flows_by_stage_kmol_s is None
+            else tuple(float(value) for value in vapor_product_flows_by_stage_kmol_s)
+        )
+    except (TypeError, ValueError) as error:
+        raise ValidationError("column stage energy inputs must be finite sequences") from error
+    vectors = (
+        feeds,
+        liquid,
+        vapor,
+        liquid_enthalpy,
+        vapor_enthalpy,
+        duties,
+        liquid_products,
+        vapor_products,
+    )
+    if (
+        stage_count < 2
+        or any(len(values) != stage_count for values in vectors)
+        or any(not _finite_number(value) for values in vectors for value in values)
+        or any(
+            value < 0.0
+            for values in (liquid, vapor, liquid_products, vapor_products)
+            for value in values
+        )
+    ):
+        raise ValidationError("column stage energy inputs are invalid")
+
+    residuals = []
+    for stage in range(stage_count):
+        residual = feeds[stage] + duties[stage]
+        if stage > 0:
+            residual += liquid[stage - 1] * liquid_enthalpy[stage - 1]
+        if stage < stage_count - 1:
+            residual += vapor[stage + 1] * vapor_enthalpy[stage + 1]
+        residual -= (
+            liquid[stage] + liquid_products[stage]
+        ) * liquid_enthalpy[stage]
+        residual -= (
+            vapor[stage] + vapor_products[stage]
+        ) * vapor_enthalpy[stage]
+        residuals.append(residual)
+    return tuple(residuals)
+
+
+@dataclass(frozen=True, slots=True)
 class SumRatesIteration:
     iteration: int
     maximum_vapor_flow_change_kmol_s: float
@@ -296,12 +553,16 @@ def fixed_k_material_column(
     maximum_iterations: int = 30,
     jacobian_step: float = 1.0e-6,
     minimum_damping: float = 2.0**-24,
+    liquid_product_flows_by_stage_kmol_s: tuple[float, ...] | None = None,
+    vapor_product_flows_by_stage_kmol_s: tuple[float, ...] | None = None,
 ) -> FixedKColumnProfile:
     """Close fixed-K stage material balances and both phase summations.
 
     Positive phase flows are represented logarithmically and each liquid
-    composition uses reduced softmax coordinates. Vapor compositions follow
-    ``y = K*x``; their summation equations complete the square Newton system.
+    composition uses reduced softmax coordinates. A zero initial vapor flow
+    fixes that phase flow at zero, as required by a total condenser, and omits
+    its otherwise redundant vapor-summation equation. Vapor compositions
+    follow ``y = K*x`` on active vapor stages.
     """
     try:
         feeds = tuple(
@@ -317,6 +578,16 @@ def fixed_k_material_column(
         initial_fractions = tuple(
             tuple(float(value) for value in row) for row in initial_liquid_mole_fractions
         )
+        liquid_products = (
+            (0.0,) * len(feeds)
+            if liquid_product_flows_by_stage_kmol_s is None
+            else tuple(float(value) for value in liquid_product_flows_by_stage_kmol_s)
+        )
+        vapor_products = (
+            (0.0,) * len(feeds)
+            if vapor_product_flows_by_stage_kmol_s is None
+            else tuple(float(value) for value in vapor_product_flows_by_stage_kmol_s)
+        )
     except (TypeError, ValueError) as error:
         raise ValidationError("fixed-K column inputs must be finite sequences") from error
     stage_count = len(feeds)
@@ -329,15 +600,19 @@ def fixed_k_material_column(
         or len(initial_liquid) != stage_count
         or len(initial_vapor) != stage_count
         or len(initial_fractions) != stage_count
+        or len(liquid_products) != stage_count
+        or len(vapor_products) != stage_count
         or any(
             len(row) != component_count
             for row in feeds + ratios + initial_fractions
         )
         or any(not _finite_number(value) or value < 0.0 for row in feeds for value in row)
         or any(not _finite_number(value) or value <= 0.0 for row in ratios for value in row)
+        or any(not _finite_number(value) or value <= 0.0 for value in initial_liquid)
+        or any(not _finite_number(value) or value < 0.0 for value in initial_vapor)
         or any(
-            not _finite_number(value) or value <= 0.0
-            for value in initial_liquid + initial_vapor
+            not _finite_number(value) or value < 0.0
+            for value in liquid_products + vapor_products
         )
         or any(
             not _finite_number(value) or value <= 0.0
@@ -356,9 +631,13 @@ def fixed_k_material_column(
     if flow_scale <= 0.0:
         raise ValidationError("fixed-K column requires at least one feed")
 
+    active_vapor_stages = tuple(
+        stage for stage, value in enumerate(initial_vapor) if value > 0.0
+    )
+    flow_variable_count = stage_count + len(active_vapor_stages)
     variables = (
         [math.log(value) for value in initial_liquid]
-        + [math.log(value) for value in initial_vapor]
+        + [math.log(initial_vapor[stage]) for stage in active_vapor_stages]
         + [
             math.log(row[component] / row[-1])
             for row in initial_fractions
@@ -369,14 +648,16 @@ def fixed_k_material_column(
     def decode(
         values: list[float],
     ) -> tuple[list[float], list[float], list[list[float]]]:
-        if any(value < -700.0 or value > 700.0 for value in values[: 2 * stage_count]):
+        if any(value < -700.0 or value > 700.0 for value in values[:flow_variable_count]):
             raise ValidationError(
                 "fixed-K column trial flows are outside the representable range"
             )
         liquid = [math.exp(value) for value in values[:stage_count]]
-        vapor = [math.exp(value) for value in values[stage_count : 2 * stage_count]]
+        vapor = [0.0] * stage_count
+        for index, stage in enumerate(active_vapor_stages, start=stage_count):
+            vapor[stage] = math.exp(values[index])
         liquid_fractions: list[list[float]] = []
-        offset = 2 * stage_count
+        offset = flow_variable_count
         reduced_count = component_count - 1
         for stage in range(stage_count):
             start = offset + stage * reduced_count
@@ -403,10 +684,17 @@ def fixed_k_material_column(
                     residual += liquid[stage - 1] * liquid_fractions[stage - 1][component]
                 if stage < stage_count - 1:
                     residual += vapor[stage + 1] * vapor_fractions[stage + 1][component]
-                residual -= liquid[stage] * liquid_fractions[stage][component]
-                residual -= vapor[stage] * vapor_fractions[stage][component]
+                residual -= (
+                    liquid[stage] + liquid_products[stage]
+                ) * liquid_fractions[stage][component]
+                residual -= (
+                    vapor[stage] + vapor_products[stage]
+                ) * vapor_fractions[stage][component]
                 residuals.append(residual / flow_scale)
-        residuals.extend(math.fsum(row) - 1.0 for row in vapor_fractions)
+        residuals.extend(
+            math.fsum(vapor_fractions[stage]) - 1.0
+            for stage in active_vapor_stages
+        )
         return residuals, liquid, liquid_fractions, vapor_fractions
 
     history: list[ColumnNewtonIteration] = []

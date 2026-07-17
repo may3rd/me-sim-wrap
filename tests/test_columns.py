@@ -19,7 +19,10 @@ from mesim.unitops.columns import (
     ColumnConvergenceError,
     ColumnNewtonConvergenceError,
     column_balance_residuals,
+    column_energy_residual_w,
+    column_profile_energy_residuals,
     equilibrium_stage_residuals,
+    fixed_k_column_profile_residuals,
     fixed_k_material_column,
     fixed_k_sum_rates_absorber,
     shortcut_column,
@@ -555,6 +558,236 @@ class ReboiledAbsorberGoldenGateTest(unittest.TestCase):
                 maximum_iterations=1,
             )
         self.assertEqual(len(caught.exception.history), 1)
+
+
+class RigorousDistillationGoldenGateTest(unittest.TestCase):
+    NAMES = ("Methanol", "Acetone")
+
+    @classmethod
+    def setUpClass(cls):
+        cls.golden = json.loads(
+            (ROOT / "tests/golden/u7-distillation-acetone-nrtl.json").read_text(
+                encoding="utf-8-sig"
+            )
+        )
+        cls.objects = {
+            record["tag"]: record
+            for record in cls.golden["outputs"]["objects_after"]
+        }
+        cls.properties = {
+            tag: {
+                item["property"]: item["value"]["value"]
+                for item in record["properties"]
+            }
+            for tag, record in cls.objects.items()
+        }
+
+    def test_reference_is_repeatable_solved_and_error_free(self):
+        repeat = json.loads(
+            (
+                ROOT / "tests/golden/u7-distillation-acetone-nrtl-repeat.json"
+            ).read_text(encoding="utf-8-sig")
+        )
+        normalized_golden = copy.deepcopy(self.golden)
+        normalized_repeat = copy.deepcopy(repeat)
+        normalized_golden["source"].pop("captured_utc")
+        normalized_repeat["source"].pop("captured_utc")
+        self.assertEqual(normalized_golden, normalized_repeat)
+        self.assertTrue(self.golden["outputs"]["solve"]["success"])
+        self.assertFalse(self.golden["outputs"]["solve"]["errors"])
+        self.assertFalse(any(
+            record["error"] or prop["read_error"]
+            for record in self.golden["outputs"]["objects_after"]
+            for prop in record["properties"]
+        ))
+
+    def test_saved_total_condenser_specs_and_connections_are_authoritative(self):
+        with ZipFile(ROOT / "tests/u7-distillation-acetone-nrtl.dwxmz") as archive:
+            root = ElementTree.fromstring(
+                archive.read(
+                    next(name for name in archive.namelist() if name.endswith(".xml"))
+                )
+            )
+        graphic_ids = {
+            graphic.findtext("Tag"): graphic.findtext("Name")
+            for graphic in root.findall(".//GraphicObject")
+        }
+        saved_tags = {value: key for key, value in graphic_ids.items()}
+        saved = next(
+            record
+            for record in root.findall(".//SimulationObject")
+            if record.findtext("Name") == graphic_ids["Acetone Column (6 atm)"]
+        )
+        streams = {
+            stream.findtext("StreamBehavior"): saved_tags[stream.findtext("StreamID")]
+            for stream in saved.findall("./MaterialStreams/MaterialStream")
+            if stream.findtext("StreamBehavior") != "Feed"
+        }
+        specs = {
+            spec.get("ID"): spec for spec in saved.findall("./Specs/Spec")
+        }
+        self.assertEqual(saved.findtext("ReboiledAbsorber"), "false")
+        self.assertEqual(saved.findtext("CondenserType"), "Total_Condenser")
+        self.assertEqual(saved.findtext("NumberOfStages"), "20")
+        self.assertEqual(saved.findtext("SolvingMethodName"), "Wang-Henke (Bubble Point)")
+        self.assertEqual(saved.findtext("InitialEstimatesProvider"), "Internal 2 (Experimental)")
+        self.assertEqual(saved.findtext("MaxIterations"), "1000")
+        self.assertEqual(saved.findtext("InternalLoopTolerance"), "0.001")
+        self.assertEqual(saved.findtext("ExternalLoopTolerance"), "0.001")
+        self.assertEqual(streams["Distillate"], "HP Azeotrope")
+        self.assertEqual(streams["BottomsLiquid"], "Acetone Rich Product")
+        self.assertEqual(specs["C"].findtext("SType"), "Stream_Ratio")
+        self.assertEqual(specs["C"].findtext("SpecValue"), "40")
+        self.assertEqual(specs["R"].findtext("SType"), "Product_Molar_Flow_Rate")
+        self.assertEqual(specs["R"].findtext("SpecUnit"), "mol/s")
+        self.assertEqual(specs["R"].findtext("SpecValue"), "0.5")
+
+    def test_captured_profile_closes_mesh_with_saved_solver_tolerance(self):
+        captured = self.objects["Acetone Column (6 atm)"]["column_profile"]
+        feeds = [[0.0] * len(self.NAMES) for _ in range(20)]
+        feeds[10] = [
+            self.properties["HP Feed"][f"PROP_MS_104/{name}"] / 1000.0
+            for name in self.NAMES
+        ]
+        liquid_products = [0.0] * 20
+        liquid_products[0] = self.properties["HP Azeotrope"]["PROP_MS_3"] / 1000.0
+        residuals = fixed_k_column_profile_residuals(
+            tuple(tuple(row) for row in feeds),
+            tuple(value / 1000.0 for value in captured["Lf"]),
+            tuple(value / 1000.0 for value in captured["Vf"]),
+            tuple(tuple(row) for row in captured["xf"]),
+            tuple(tuple(row) for row in captured["yf"]),
+            tuple(tuple(row) for row in captured["Kf"]),
+            liquid_product_flows_by_stage_kmol_s=tuple(liquid_products),
+        )
+
+        self.assertTrue(residuals.is_closed(0.001, 0.001, 1.0e-12))
+        self.assertLess(residuals.maximum_scaled_component_residual, 3.3e-4)
+        self.assertEqual(captured["Tf"][0], self.properties["HP Azeotrope"]["PROP_MS_0"])
+        self.assertTrue(math.isclose(
+            captured["Tf"][-1],
+            self.properties["Acetone Rich Product"]["PROP_MS_0"],
+            abs_tol=2.0e-10,
+        ))
+
+    def test_total_condenser_profile_meets_newton_acceptance_gate(self):
+        captured = self.objects["Acetone Column (6 atm)"]["column_profile"]
+        feeds = [[0.0] * len(self.NAMES) for _ in range(20)]
+        feeds[10] = [
+            self.properties["HP Feed"][f"PROP_MS_104/{name}"] / 1000.0
+            for name in self.NAMES
+        ]
+        liquid_products = [0.0] * 20
+        liquid_products[0] = self.properties["HP Azeotrope"]["PROP_MS_3"] / 1000.0
+        effective_ratios = tuple(
+            tuple(vapor / liquid for vapor, liquid in zip(vapor_row, liquid_row))
+            for vapor_row, liquid_row in zip(captured["yf"], captured["xf"])
+        )
+        accepted = fixed_k_material_column(
+            tuple(tuple(row) for row in feeds),
+            effective_ratios,
+            tuple(value / 1000.0 for value in captured["Lf"]),
+            tuple(value / 1000.0 for value in captured["Vf"]),
+            tuple(tuple(row) for row in captured["xf"]),
+            residual_tolerance=0.001,
+            maximum_iterations=1000,
+            liquid_product_flows_by_stage_kmol_s=tuple(liquid_products),
+        )
+
+        self.assertFalse(accepted.history)
+        self.assertEqual(accepted.vapor_flows_kmol_s[0], 0.0)
+        self.assertLess(
+            max(
+                abs(actual - expected / 1000.0)
+                for actual, expected in zip(
+                    accepted.liquid_flows_kmol_s, captured["Lf"]
+                )
+            ),
+            2.0e-16,
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected)
+                for actual_row, expected_row in zip(
+                    accepted.liquid_mole_fractions, captured["xf"]
+                )
+                for actual, expected in zip(actual_row, expected_row)
+            ),
+            2.0e-16,
+        )
+
+    def test_total_column_energy_balance_closes_in_watts(self):
+        residual_w = column_energy_residual_w(
+            ((
+                self.properties["HP Feed"]["PROP_MS_2"],
+                self.properties["HP Feed"]["PROP_MS_7"],
+            ),),
+            tuple(
+                (
+                    self.properties[tag]["PROP_MS_2"],
+                    self.properties[tag]["PROP_MS_7"],
+                )
+                for tag in ("HP Azeotrope", "Acetone Rich Product")
+            ),
+            heat_input_w=self.properties["Reboiler Duty (2)"]["PROP_ES_0"] * 1000.0,
+            heat_output_w=self.properties["Condenser Duty (2)"]["PROP_ES_0"] * 1000.0,
+        )
+        self.assertLess(abs(residual_w), 2.0e-5)
+
+    def test_every_stage_energy_balance_closes_with_saved_solver_tolerance(self):
+        captured = self.objects["Acetone Column (6 atm)"]["column_profile"]
+        molecular_weights = {
+            record["id"]: record["molecular_weight"]["value"]
+            for record in self.golden["inputs"]["compounds"]
+        }
+        liquid_enthalpies = tuple(
+            mass_enthalpy * 1000.0 * math.fsum(
+                fraction * molecular_weights[name]
+                for fraction, name in zip(composition, self.NAMES)
+            )
+            for mass_enthalpy, composition in zip(captured["Hlf"], captured["xf"])
+        )
+        vapor_enthalpies = tuple(
+            mass_enthalpy * 1000.0 * math.fsum(
+                fraction * molecular_weights[name]
+                for fraction, name in zip(composition, self.NAMES)
+            )
+            for mass_enthalpy, composition in zip(captured["Hvf"], captured["yf"])
+        )
+        feed_energy = [0.0] * 20
+        feed_energy[10] = (
+            self.properties["HP Feed"]["PROP_MS_2"]
+            * self.properties["HP Feed"]["PROP_MS_7"]
+            * 1000.0
+        )
+        duties = [0.0] * 20
+        duties[0] = -self.properties["Condenser Duty (2)"]["PROP_ES_0"] * 1000.0
+        duties[-1] = self.properties["Reboiler Duty (2)"]["PROP_ES_0"] * 1000.0
+        liquid_products = [0.0] * 20
+        liquid_products[0] = self.properties["HP Azeotrope"]["PROP_MS_3"] / 1000.0
+        residuals = column_profile_energy_residuals(
+            tuple(feed_energy),
+            tuple(value / 1000.0 for value in captured["Lf"]),
+            tuple(value / 1000.0 for value in captured["Vf"]),
+            liquid_enthalpies,
+            vapor_enthalpies,
+            heat_duties_by_stage_w=tuple(duties),
+            liquid_product_flows_by_stage_kmol_s=tuple(liquid_products),
+        )
+        energy_scale = max(abs(value) for value in duties)
+
+        self.assertLessEqual(max(abs(value) for value in residuals) / energy_scale, 0.001)
+        self.assertLess(max(abs(value) for value in residuals), 31.0)
+
+    def test_profile_and_energy_residuals_reject_invalid_shapes(self):
+        with self.assertRaises(ValidationError):
+            fixed_k_column_profile_residuals(
+                ((1.0,),), (1.0,), (1.0,), ((1.0,),), ((1.0,),), ((1.0,),)
+            )
+        with self.assertRaises(ValidationError):
+            column_energy_residual_w((), ((1.0, 1.0),))
+        with self.assertRaises(ValidationError):
+            column_profile_energy_residuals((1.0,), (1.0,), (1.0,), (1.0,), (1.0,))
 
 
 if __name__ == "__main__":

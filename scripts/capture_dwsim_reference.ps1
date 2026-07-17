@@ -34,6 +34,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 
 public static class DwsimCaptureReflection
@@ -48,8 +49,10 @@ public static class DwsimCaptureReflection
             return null;
         }
 
-        PropertyInfo property =
-            target.GetType().GetProperty(name, PublicInstance);
+        PropertyInfo property = target.GetType().GetProperties(PublicInstance)
+            .FirstOrDefault(candidate =>
+                candidate.Name == name &&
+                candidate.GetIndexParameters().Length == 0);
 
         if (property != null)
         {
@@ -130,6 +133,116 @@ public static class DwsimCaptureReflection
         }
 
         return null;
+    }
+
+    public static object ColumnEnthalpyArray(
+        object target,
+        string compositionField,
+        string stateName)
+    {
+        object propertyPackage = Get(target, "PropertyPackage");
+        object temperatures = Get(target, "Tf");
+        object pressures = Get(target, "P0");
+        object compositions = Get(target, compositionField);
+        if (
+            propertyPackage == null ||
+            !(temperatures is IEnumerable) ||
+            !(pressures is IEnumerable) ||
+            !(compositions is IEnumerable))
+        {
+            return null;
+        }
+
+        MethodInfo method = propertyPackage.GetType().GetMethods(PublicInstance)
+            .FirstOrDefault(candidate =>
+                candidate.Name == "DW_CalcEnthalpy" &&
+                candidate.GetParameters().Length == 4 &&
+                candidate.GetParameters()[0].ParameterType == typeof(Array));
+        if (method == null)
+        {
+            return null;
+        }
+        Type stateType = method.GetParameters()[3].ParameterType;
+        object state = Enum.Parse(stateType, stateName, true);
+        PropertyInfo currentStreamProperty = propertyPackage.GetType()
+            .GetProperties(PublicInstance)
+            .FirstOrDefault(candidate =>
+                candidate.Name == "CurrentMaterialStream" &&
+                candidate.CanRead &&
+                candidate.CanWrite);
+        object originalStream = currentStreamProperty == null
+            ? null
+            : currentStreamProperty.GetValue(propertyPackage, null);
+        try
+        {
+            if (currentStreamProperty != null && originalStream == null)
+            {
+                object flowsheet = Get(target, "FlowSheet");
+                object simulationObjects = Get(flowsheet, "SimulationObjects");
+                if (simulationObjects is IEnumerable)
+                {
+                    foreach (object entry in (IEnumerable)simulationObjects)
+                    {
+                        object candidate = Get(entry, "Value");
+                        if (
+                            candidate != null &&
+                            candidate.GetType().FullName ==
+                                "DWSIM.Thermodynamics.Streams.MaterialStream")
+                        {
+                            currentStreamProperty.SetValue(
+                                propertyPackage,
+                                candidate,
+                                null);
+                            break;
+                        }
+                    }
+                }
+            }
+            List<double> temperatureValues = ((IEnumerable)temperatures)
+                .Cast<object>()
+                .Select(item => Convert.ToDouble(item, CultureInfo.InvariantCulture))
+                .ToList();
+            List<double> pressureValues = ((IEnumerable)pressures)
+                .Cast<object>()
+                .Select(item => Convert.ToDouble(item, CultureInfo.InvariantCulture))
+                .ToList();
+            List<object> compositionValues = ((IEnumerable)compositions)
+                .Cast<object>()
+                .ToList();
+            if (
+                temperatureValues.Count != pressureValues.Count ||
+                temperatureValues.Count != compositionValues.Count)
+            {
+                return null;
+            }
+
+            object[] result = new object[temperatureValues.Count];
+            for (int index = 0; index < result.Length; index++)
+            {
+                double[] composition = ((IEnumerable)compositionValues[index])
+                    .Cast<object>()
+                    .Select(item => Convert.ToDouble(item, CultureInfo.InvariantCulture))
+                    .ToArray();
+                result[index] = Convert.ToDouble(
+                    method.Invoke(
+                        propertyPackage,
+                        new object[] {
+                            composition,
+                            temperatureValues[index],
+                            pressureValues[index],
+                            state
+                        }),
+                    CultureInfo.InvariantCulture);
+            }
+            return result;
+        }
+        finally
+        {
+            if (currentStreamProperty != null)
+            {
+                currentStreamProperty.SetValue(propertyPackage, originalStream, null);
+            }
+        }
     }
 
     public static int SetFlashSetting(
@@ -571,6 +684,21 @@ function Get-ObjectStates {
 
                 if ($null -ne $profileValue) {
                     $columnProfile[$profileName] = $profileValue
+                }
+            }
+
+            foreach ($profile in @(
+                @("Hlf", "xf", "Liquid"),
+                @("Hvf", "yf", "Vapor")
+            )) {
+                $enthalpyProfile = [DwsimCaptureReflection]::ColumnEnthalpyArray(
+                    $object,
+                    $profile[1],
+                    $profile[2]
+                )
+
+                if ($null -ne $enthalpyProfile) {
+                    $columnProfile[$profile[0]] = $enthalpyProfile
                 }
             }
         }
