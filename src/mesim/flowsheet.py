@@ -1,8 +1,9 @@
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+import math
 from types import MappingProxyType
 
-from .errors import ValidationError
+from .errors import ConvergenceError, ValidationError
 
 
 PortValues = Mapping[str, object]
@@ -46,6 +47,93 @@ class Flowsheet:
 @dataclass(frozen=True, slots=True)
 class FlowsheetResult:
     values: Mapping[tuple[str, str], object]
+
+
+@dataclass(frozen=True, slots=True)
+class RecycleIteration:
+    iteration: int
+    guess: tuple[float, ...]
+    calculated: tuple[float, ...]
+    residual: tuple[float, ...]
+    scaled_norm: float
+    damping: float
+
+
+@dataclass(frozen=True, slots=True)
+class RecycleResult:
+    values: tuple[float, ...]
+    history: tuple[RecycleIteration, ...]
+    algorithm: str = "direct_substitution"
+
+
+class RecycleConvergenceError(ConvergenceError):
+    def __init__(self, message: str, history: tuple[RecycleIteration, ...]):
+        super().__init__(message)
+        self.history = history
+
+
+def solve_recycle(
+    evaluate: Callable[[tuple[float, ...]], tuple[float, ...]],
+    initial_guess: tuple[float, ...],
+    scales: tuple[float, ...],
+    tolerances: tuple[float, ...],
+    damping: float = 1.0,
+    max_iterations: int = 100,
+) -> RecycleResult:
+    """Solve explicit tear variables by damped direct substitution with full history."""
+    if not callable(evaluate):
+        raise ValidationError("recycle evaluation must be callable")
+    try:
+        guess = tuple(initial_guess)
+        scale_values = tuple(scales)
+        tolerance_values = tuple(tolerances)
+    except TypeError as error:
+        raise ValidationError("recycle vectors must be finite sequences") from error
+    if not guess or len(guess) != len(scale_values) or len(guess) != len(tolerance_values):
+        raise ValidationError("recycle guess, scales, and tolerances must have the same non-zero length")
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+        for value in guess
+    ) or any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value <= 0.0
+        for value in scale_values + tolerance_values
+    ):
+        raise ValidationError("recycle vectors must contain finite values and positive scales and tolerances")
+    if (
+        isinstance(damping, bool) or not isinstance(damping, (int, float))
+        or not math.isfinite(damping) or not 0.0 < damping <= 1.0
+        or isinstance(max_iterations, bool) or not isinstance(max_iterations, int) or max_iterations <= 0
+    ):
+        raise ValidationError("recycle damping and maximum iterations are invalid")
+
+    guess = tuple(float(value) for value in guess)
+    scale_values = tuple(float(value) for value in scale_values)
+    tolerance_values = tuple(float(value) for value in tolerance_values)
+    history: list[RecycleIteration] = []
+    for iteration in range(1, max_iterations + 1):
+        try:
+            calculated = tuple(evaluate(guess))
+        except TypeError as error:
+            raise ValidationError("recycle evaluation must return a finite sequence") from error
+        if len(calculated) != len(guess) or any(
+            isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+            for value in calculated
+        ):
+            raise ValidationError("recycle evaluation returned an invalid vector")
+        calculated = tuple(float(value) for value in calculated)
+        residual = tuple(value - prior for value, prior in zip(calculated, guess))
+        scaled_norm = max(abs(value) / scale for value, scale in zip(residual, scale_values))
+        history.append(RecycleIteration(
+            iteration, guess, calculated, residual, scaled_norm, float(damping),
+        ))
+        if all(abs(value) <= tolerance for value, tolerance in zip(residual, tolerance_values)):
+            return RecycleResult(calculated, tuple(history))
+        guess = tuple(prior + damping * value for prior, value in zip(guess, residual))
+
+    raise RecycleConvergenceError(
+        "recycle direct substitution did not converge", tuple(history),
+    )
 
 
 def _validate(flowsheet: Flowsheet) -> dict[str, UnitOperation]:
