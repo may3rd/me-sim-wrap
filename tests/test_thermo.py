@@ -4,6 +4,7 @@ import sys
 import unittest
 from xml.etree import ElementTree
 from pathlib import Path
+from zipfile import ZipFile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -11,7 +12,7 @@ from mesim import OutOfRangeError, ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.thermo.ideal import ideal_gas_density, load_correlations
 from mesim.thermo.peng_robinson import R, PengRobinson, PengRobinsonMixture
-from mesim.thermo.transport import load_transport_correlations, translated_vapor_density, vapor_transport
+from mesim.thermo.transport import liquid_transport, load_transport_correlations, translated_vapor_density, vapor_transport
 from mesim.thermo.flash import mixture_heat_capacity
 
 
@@ -311,7 +312,7 @@ class PengRobinsonMixtureTest(unittest.TestCase):
             self.assertTrue(math.isclose(enthalpy_delta, (liquid["PROP_MS_9"] - vapor["PROP_MS_9"]) * 1_000, rel_tol=DWSIM_PR_CALORIC_DELTA_REL_TOL))
             self.assertTrue(math.isclose(entropy_delta, (liquid["PROP_MS_10"] - vapor["PROP_MS_10"]) * 1_000, rel_tol=DWSIM_PR_CALORIC_DELTA_REL_TOL))
 
-class VaporTransportTest(unittest.TestCase):
+class TransportTest(unittest.TestCase):
     def test_mixture_heat_capacity_matches_captured_pr_reference(self):
         golden = json.loads((ROOT / "tests/golden/pr-t1.json").read_text(encoding="utf-8-sig"))
         properties = {
@@ -375,6 +376,44 @@ class VaporTransportTest(unittest.TestCase):
                 )
                 self.assertTrue(math.isclose(result.dynamic_viscosity_pa_s, properties["PROP_MS_20"], rel_tol=2e-6))
                 self.assertTrue(math.isclose(result.thermal_conductivity_w_per_m_k, properties["PROP_MS_18"], rel_tol=2e-6))
+
+    def test_liquid_transport_matches_captured_dwsim_pipe_states(self):
+        golden = json.loads((ROOT / "tests/golden/u3-pipe-thermal-tabulated-htc-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
+        pipe_object = next(item for item in golden["outputs"]["objects_after"] if item["tag"] == "PIPE-1")
+        pipe = {item["property"]: item["value"]["value"] for item in pipe_object["properties"]}
+        with ZipFile(ROOT / "tests/u3-pipe-thermal-tabulated-htc-liquid-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
+        self.assertEqual(root.findtext(".//LiquidViscosityCalculationMode_Subcritical"), "ExpData")
+        self.assertEqual(root.findtext(".//LiquidViscosity_CorrectExpDataForPressure"), "false")
+        self.assertEqual(root.findtext(".//LiquidViscosity_MixingRule"), "MoleAverage")
+        self.assertEqual(root.findtext(".//LiquidDensityCalculationMode_Subcritical"), "EOS")
+        self.assertEqual(root.findtext(".//LiquidDensity_UsePenelouxVolumeTranslation"), "false")
+        compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        records = {record.compound_id: record for record in load_transport_correlations(ROOT / "data/correlations/transport-v1.json")}
+        selected = (compounds["N-pentane"], compounds["Ethane"])
+        selected_records = (records["N-pentane"], records["Ethane"])
+        composition = (0.952380952380952, 0.0476190476190476)
+
+        for index in range(1, 7):
+            temperature = pipe[f"HydraulicSegment,1,Results,{index},InitialTemperature"]
+            result = liquid_transport(
+                selected, composition, selected_records, temperature,
+                allow_extrapolation=True,
+            )
+            self.assertTrue(math.isclose(
+                result.dynamic_viscosity_pa_s,
+                pipe[f"HydraulicSegment,1,Results,{index},ViscosityLiquid"],
+                rel_tol=1e-12,
+            ))
+            self.assertTrue(math.isclose(
+                result.thermal_conductivity_w_per_m_k,
+                pipe[f"HydraulicSegment,1,Results,{index},ThermalConductivityLiquid"],
+                rel_tol=1e-12,
+            ))
+        with self.assertRaises(OutOfRangeError):
+            liquid_transport(selected, composition, selected_records, 301.0)
+        with self.assertRaises(ValidationError):
+            liquid_transport(selected, (0.5, 0.4), selected_records, 300.0)
 
 
 if __name__ == "__main__":

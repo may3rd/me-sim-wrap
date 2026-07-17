@@ -37,15 +37,57 @@ class TransportCorrelation:
 
 
 @dataclass(frozen=True)
+class LiquidTransportCorrelation:
+    equation: int
+    coefficients: tuple[float, float, float, float, float]
+    minimum_k: float | None
+    maximum_k: float | None
+    unit: str
+
+    def value(self, temperature_k: float, allow_extrapolation: bool = False) -> float:
+        if not math.isfinite(temperature_k) or temperature_k <= 0:
+            raise ValidationError("absolute temperature must be finite and positive")
+        if (
+            self.minimum_k is not None and self.maximum_k is not None
+            and not self.minimum_k <= temperature_k <= self.maximum_k
+            and not allow_extrapolation
+        ):
+            raise OutOfRangeError(
+                f"liquid transport correlation extrapolated outside {self.minimum_k:g}..{self.maximum_k:g} K",
+            )
+        a, b, c, d, e = self.coefficients
+        try:
+            if self.equation == 101:
+                value = math.exp(a + b / temperature_k + c * math.log(temperature_k) + d * temperature_k**e)
+            elif self.equation == 16:
+                value = a + math.exp(b / temperature_k + c + d * temperature_k + e * temperature_k**2)
+            else:
+                raise ValidationError(f"unsupported liquid transport equation {self.equation}")
+        except (OverflowError, ZeroDivisionError) as error:
+            raise ValidationError("liquid transport correlation is outside the representable range") from error
+        if not math.isfinite(value) or value <= 0:
+            raise ValidationError("liquid transport correlation produced a non-positive value")
+        return value
+
+
+@dataclass(frozen=True)
 class TransportRecord:
     compound_id: str
     critical_volume_m3_per_kmol: float
     vapor_viscosity: TransportCorrelation
     vapor_thermal_conductivity: TransportCorrelation
+    liquid_viscosity: LiquidTransportCorrelation
+    liquid_thermal_conductivity: LiquidTransportCorrelation
 
 
 @dataclass(frozen=True)
 class VaporTransport:
+    dynamic_viscosity_pa_s: float
+    thermal_conductivity_w_per_m_k: float
+
+
+@dataclass(frozen=True)
+class LiquidTransport:
     dynamic_viscosity_pa_s: float
     thermal_conductivity_w_per_m_k: float
 
@@ -65,6 +107,8 @@ def load_transport_correlations(path: str | Path) -> tuple[TransportRecord, ...]
                 _positive(record["critical_volume"], "m3/kmol", "critical volume"),
                 _correlation(record["vapor_viscosity"], "Pa.s"),
                 _correlation(record["vapor_thermal_conductivity"], "W/m/K"),
+                _liquid_correlation(record["liquid_viscosity"], 101, "Pa.s", False),
+                _liquid_correlation(record["liquid_thermal_conductivity"], 16, "W/m/K", True),
             )
             for record in data["correlations"]
         )
@@ -92,6 +136,27 @@ def _correlation(data: dict, unit: str) -> TransportCorrelation:
     return TransportCorrelation(values, minimum, maximum, unit)
 
 
+def _liquid_correlation(
+    data: dict, equation: int, unit: str, bounded: bool,
+) -> LiquidTransportCorrelation:
+    values = tuple(data[key] for key in "ABCDE")
+    minimum = data.get("minimum_k")
+    maximum = data.get("maximum_k")
+    if (
+        data["equation"] != equation or data["unit"] != unit
+        or any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) for value in values)
+        or not bounded and (minimum is not None or maximum is not None)
+        or bounded and (
+            isinstance(minimum, bool) or isinstance(maximum, bool)
+            or not isinstance(minimum, (int, float)) or not isinstance(maximum, (int, float))
+            or not math.isfinite(minimum) or not math.isfinite(maximum)
+            or minimum <= 0 or maximum <= minimum
+        )
+    ):
+        raise ValidationError(f"invalid equation {equation} liquid transport correlation in {unit}")
+    return LiquidTransportCorrelation(equation, values, minimum, maximum, unit)
+
+
 def vapor_transport(compounds: tuple[Compound, ...], mole_fractions: tuple[float, ...], records: tuple[TransportRecord, ...], temperature_k: float, density_kg_per_m3: float) -> VaporTransport:
     if len(compounds) != len(mole_fractions) or len(compounds) != len(records) or not compounds:
         raise ValidationError("transport components, mole fractions, and records must have equal non-zero lengths")
@@ -114,6 +179,49 @@ def vapor_transport(compounds: tuple[Compound, ...], mole_fractions: tuple[float
     if not all(math.isfinite(value) and value > 0 for value in (viscosity, conductivity)):
         raise ValidationError("vapor transport is outside the representable range")
     return VaporTransport(viscosity, conductivity)
+
+
+def liquid_transport(
+    compounds: tuple[Compound, ...], mole_fractions: tuple[float, ...],
+    records: tuple[TransportRecord, ...], temperature_k: float,
+    allow_extrapolation: bool = False,
+) -> LiquidTransport:
+    """Calculate DWSIM's mole-average viscosity and Li liquid conductivity."""
+    if len(compounds) != len(mole_fractions) or len(compounds) != len(records) or not compounds:
+        raise ValidationError("liquid transport components, mole fractions, and records must have equal non-zero lengths")
+    if any(compound.id != record.compound_id for compound, record in zip(compounds, records)):
+        raise ValidationError("liquid transport records must match component order")
+    if not isinstance(allow_extrapolation, bool):
+        raise ValidationError("liquid transport extrapolation flag must be boolean")
+    if (
+        not all(math.isfinite(value) and value >= 0 for value in mole_fractions)
+        or not math.isclose(sum(mole_fractions), 1.0, rel_tol=0.0, abs_tol=1e-12)
+    ):
+        raise ValidationError("liquid transport fractions must be finite, non-negative, and sum to one")
+    viscosities = tuple(record.liquid_viscosity.value(temperature_k) for record in records)
+    conductivities = tuple(
+        record.liquid_thermal_conductivity.value(temperature_k, allow_extrapolation)
+        for record in records
+    )
+    viscosity = math.fsum(
+        fraction * value for fraction, value in zip(mole_fractions, viscosities)
+    )
+    volume_weights = tuple(
+        fraction * record.critical_volume_m3_per_kmol
+        for fraction, record in zip(mole_fractions, records)
+    )
+    weight_total = math.fsum(volume_weights)
+    if not math.isfinite(weight_total) or weight_total <= 0:
+        raise ValidationError("liquid transport critical-volume weighting is non-positive")
+    volume_fractions = tuple(weight / weight_total for weight in volume_weights)
+    conductivity = math.fsum(
+        left_fraction * right_fraction * 2.0 / (1.0 / left_value + 1.0 / right_value)
+        for left_fraction, left_value in zip(volume_fractions, conductivities)
+        for right_fraction, right_value in zip(volume_fractions, conductivities)
+    )
+    if not all(math.isfinite(value) and value > 0 for value in (viscosity, conductivity)):
+        raise ValidationError("liquid transport is outside the representable range")
+    return LiquidTransport(viscosity, conductivity)
 
 
 def translated_vapor_density(compounds: tuple[Compound, ...], mole_fractions: tuple[float, ...], temperature_k: float, pressure_pa: float, compressibility: float) -> float:
