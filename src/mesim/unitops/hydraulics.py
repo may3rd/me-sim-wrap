@@ -1062,7 +1062,7 @@ def pipe_estimated_htc_air_profile(
     )
 
 
-def _pipe_estimated_htc_air_pr_calculated_profile(
+def _pipe_estimated_htc_pr_calculated_profile(
     inlet_temperature_k: float, inlet_pressure_pa: float,
     external_temperatures_k: tuple[float, ...],
     compounds: tuple[Compound, ...], composition: tuple[float, ...],
@@ -1070,9 +1070,8 @@ def _pipe_estimated_htc_air_pr_calculated_profile(
     transport_records: tuple[TransportRecord, ...], molar_flow_kmol_s: float,
     outlet_pressures_pa: tuple[float, ...], inner_diameter_m: float,
     outer_diameter_m: float, roughness_m: float,
-    segment_lengths_m: tuple[float, ...], external_air_velocity_m_s: float,
-    insulation_thickness_m: float = 0.0,
-    insulation_conductivity_w_m_k: float | None = None,
+    segment_lengths_m: tuple[float, ...],
+    htc_builder: Callable[[float, float, float, float, float, float, float], PipeEstimatedHtc],
     *, allow_transport_extrapolation: bool = False,
     segment_start_distances_m: tuple[float, ...] = (),
     segment_absorbed_radiation_w: tuple[float, ...] = (),
@@ -1093,19 +1092,6 @@ def _pipe_estimated_htc_air_pr_calculated_profile(
         raise ValidationError("calculated pipe radiation values must match the segment count")
     if not radiation:
         radiation = (0.0,) * len(lengths)
-
-    def htc_builder(
-        external_temperature: float, temperature: float,
-        velocity: float, heat_capacity: float,
-        conductivity: float, viscosity: float, density: float,
-    ) -> PipeEstimatedHtc:
-        return pipe_estimated_htc_air(
-            temperature, external_temperature,
-            inner_diameter_m, outer_diameter_m, roughness_m,
-            velocity, heat_capacity, conductivity, viscosity, density,
-            external_air_velocity_m_s, insulation_thickness_m,
-            insulation_conductivity_w_m_k,
-        )
 
     temperature = inlet_temperature_k
     pressure = inlet_pressure_pa
@@ -1142,6 +1128,45 @@ def _pipe_estimated_htc_air_pr_calculated_profile(
         math.fsum(item.heat_transfer_w for item in results),
         radiation, math.fsum(radiation),
         external_temperatures, start_distances, tuple(property_results),
+    )
+
+
+def _pipe_estimated_htc_air_pr_calculated_profile(
+    inlet_temperature_k: float, inlet_pressure_pa: float,
+    external_temperatures_k: tuple[float, ...],
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
+    transport_records: tuple[TransportRecord, ...], molar_flow_kmol_s: float,
+    outlet_pressures_pa: tuple[float, ...], inner_diameter_m: float,
+    outer_diameter_m: float, roughness_m: float,
+    segment_lengths_m: tuple[float, ...], external_air_velocity_m_s: float,
+    insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+    *, allow_transport_extrapolation: bool = False,
+    segment_start_distances_m: tuple[float, ...] = (),
+    segment_absorbed_radiation_w: tuple[float, ...] = (),
+) -> PipeEstimatedHtcProfileResult:
+    def htc_builder(
+        external_temperature: float, temperature: float,
+        velocity: float, heat_capacity: float,
+        conductivity: float, viscosity: float, density: float,
+    ) -> PipeEstimatedHtc:
+        return pipe_estimated_htc_air(
+            temperature, external_temperature,
+            inner_diameter_m, outer_diameter_m, roughness_m,
+            velocity, heat_capacity, conductivity, viscosity, density,
+            external_air_velocity_m_s, insulation_thickness_m,
+            insulation_conductivity_w_m_k,
+        )
+
+    return _pipe_estimated_htc_pr_calculated_profile(
+        inlet_temperature_k, inlet_pressure_pa, external_temperatures_k,
+        compounds, composition, interactions, correlations, transport_records,
+        molar_flow_kmol_s, outlet_pressures_pa, inner_diameter_m,
+        outer_diameter_m, roughness_m, segment_lengths_m, htc_builder,
+        allow_transport_extrapolation=allow_transport_extrapolation,
+        segment_start_distances_m=segment_start_distances_m,
+        segment_absorbed_radiation_w=segment_absorbed_radiation_w,
     )
 
 
@@ -1397,6 +1422,51 @@ def _pipe_estimated_htc_pr_profile(
         math.fsum(item.heat_transfer_w for item in segment_results),
         radiation, math.fsum(radiation),
         tuple(external_temperatures), start_distances,
+    )
+
+
+def pipe_estimated_htc_water_pr_calculated_profile(
+    inlet_temperature_k: float, inlet_pressure_pa: float, external_temperature_k: float,
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
+    transport_records: tuple[TransportRecord, ...], molar_flow_kmol_s: float,
+    outlet_pressures_pa: tuple[float, ...], inner_diameter_m: float,
+    outer_diameter_m: float, roughness_m: float,
+    segment_lengths_m: tuple[float, ...], external_water_velocity_m_s: float,
+    external_water_heat_capacity_j_kg_k: float,
+    external_water_thermal_conductivity_w_m_k: float,
+    external_water_viscosity_pa_s: float, external_water_density_kg_m3: float,
+    insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+    *, allow_transport_extrapolation: bool = False,
+) -> PipeEstimatedHtcProfileResult:
+    """Advance external-water HTC while recalculating liquid properties per segment."""
+    try:
+        lengths = tuple(segment_lengths_m)
+    except TypeError as exc:
+        raise ValidationError("calculated water-pipe lengths must be a finite sequence") from exc
+
+    def htc_builder(
+        _external_temperature: float, temperature: float,
+        velocity: float, heat_capacity: float,
+        conductivity: float, viscosity: float, density: float,
+    ) -> PipeEstimatedHtc:
+        return pipe_estimated_htc_water(
+            temperature, inner_diameter_m, outer_diameter_m, roughness_m,
+            velocity, heat_capacity, conductivity, viscosity, density,
+            external_water_velocity_m_s, external_water_heat_capacity_j_kg_k,
+            external_water_thermal_conductivity_w_m_k,
+            external_water_viscosity_pa_s, external_water_density_kg_m3,
+            insulation_thickness_m, insulation_conductivity_w_m_k,
+        )
+
+    return _pipe_estimated_htc_pr_calculated_profile(
+        inlet_temperature_k, inlet_pressure_pa,
+        (external_temperature_k,) * len(lengths),
+        compounds, composition, interactions, correlations, transport_records,
+        molar_flow_kmol_s, outlet_pressures_pa, inner_diameter_m,
+        outer_diameter_m, roughness_m, lengths, htc_builder,
+        allow_transport_extrapolation=allow_transport_extrapolation,
     )
 
 
