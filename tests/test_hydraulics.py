@@ -10,7 +10,7 @@ from zipfile import ZipFile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_pressure_drop, pipe_pressure_drop_profile
+from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_pressure_drop, pipe_pressure_drop_profile
 
 
 class HydraulicsTest(unittest.TestCase):
@@ -207,8 +207,11 @@ class HydraulicsTest(unittest.TestCase):
             root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
         source = next(item for item in root.findall("./SimulationObjects/SimulationObject") if item.findtext("CalculateHeatBalance") == "true")
         section = source.find("./Profile/Sections/Section")
+        increments = int(section.findtext("Incrementos"))
+        inner_diameter_m = float(section.findtext("DI")) * 0.0254
         outer_diameter_m = float(section.findtext("DE")) * 0.0254
-        segment_length_m = float(section.findtext("Comprimento")) / int(section.findtext("Incrementos"))
+        segment_length_m = float(section.findtext("Comprimento")) / increments
+        segment_elevation_m = float(section.findtext("Elevacao")) / increments
         overall_htc = pipe["ThermalProfile,OverallHTC"]
         external_temperature = pipe["ThermalProfile,ExternalTemperatureDefinedHTC"]
 
@@ -221,16 +224,25 @@ class HydraulicsTest(unittest.TestCase):
             )
             self.assertTrue(math.isclose(result.heat_transfer_w, pipe[prefix + "HeatTransfer"] * 1_000.0, rel_tol=3e-3))
 
-        profile = pipe_defined_htc_profile(
-            pipe["HydraulicSegment,1,Results,2,InitialTemperature"], external_temperature,
-            overall_htc, outer_diameter_m, (segment_length_m,) * 4, feed["PROP_MS_2"],
+        profile = liquid_pipe_supplied_state_profile(
+            feed["PROP_MS_1"], pipe["HydraulicSegment,1,Results,2,InitialTemperature"],
+            inner_diameter_m, outer_diameter_m, 4.5e-5,
+            (segment_length_m,) * increments, (segment_elevation_m,) * increments,
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},VolumetricFlowLiquid"] for index in range(1, increments + 1)),
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},DensityLiquid"] for index in range(1, increments + 1)),
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},ViscosityLiquid"] for index in range(1, increments + 1)),
+            external_temperature, overall_htc, (segment_length_m,) * 4, feed["PROP_MS_2"],
             tuple(pipe[f"HydraulicSegment,1,Results,{index},HeatCapacityLiquid"] * 1_000.0 for index in range(2, 6)),
         )
 
-        self.assertEqual(len(profile.segment_results), 4)
-        self.assertTrue(math.isclose(profile.total_area_m2, 4.0 * math.pi * outer_diameter_m * segment_length_m, rel_tol=1e-12))
-        self.assertTrue(math.isclose(profile.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
-        self.assertTrue(math.isclose(profile.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3))
+        self.assertEqual(len(profile.pressure.segment_results), increments)
+        self.assertTrue(math.isclose(profile.pressure.friction_drop_pa, pipe["PressureDropFriction"], rel_tol=1e-5))
+        self.assertTrue(math.isclose(profile.pressure.static_drop_pa, pipe["PressureDropStatic"], rel_tol=1e-5))
+        self.assertTrue(math.isclose(profile.pressure.outlet_pressure_pa, product["PROP_MS_1"], rel_tol=1e-5))
+        self.assertEqual(len(profile.thermal.segment_results), 4)
+        self.assertTrue(math.isclose(profile.thermal.total_area_m2, 4.0 * math.pi * outer_diameter_m * segment_length_m, rel_tol=1e-12))
+        self.assertTrue(math.isclose(profile.thermal.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(profile.thermal.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3))
 
     def test_defined_htc_pipe_rejects_invalid_inputs(self):
         with self.assertRaises(ValidationError):
@@ -241,6 +253,11 @@ class HydraulicsTest(unittest.TestCase):
             pipe_defined_htc_profile(300.0, 350.0, 25.0, 0.1, (), 10.0, ())
         with self.assertRaises(ValidationError):
             pipe_defined_htc_profile(300.0, 350.0, 25.0, 0.1, (20.0,), 10.0, (2_000.0, 2_000.0))
+        with self.assertRaises(ValidationError):
+            liquid_pipe_supplied_state_profile(
+                500_000.0, 300.0, 0.1, 0.11, 4.5e-5, (20.0,), (2.0,),
+                (0.01,), (1_000.0,), (0.001,), 350.0, 25.0, (20.0,), 9.0, (2_000.0,),
+            )
 
     def test_single_phase_pipe_rejects_invalid_geometry_and_properties(self):
         with self.assertRaises(ValidationError):

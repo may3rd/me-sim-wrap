@@ -53,6 +53,12 @@ class PipeThermalProfileResult:
 
 
 @dataclass(frozen=True, slots=True)
+class LiquidPipeProfileResult:
+    pressure: PipePressureProfileResult
+    thermal: PipeThermalProfileResult
+
+
+@dataclass(frozen=True, slots=True)
 class OrificePressureDrop:
     reynolds: float
     discharge_coefficient: float
@@ -562,3 +568,38 @@ def pipe_pressure_drop_profile(
         static_drop,
         total_drop,
     )
+
+
+def liquid_pipe_supplied_state_profile(
+    inlet_pressure_pa: float, inlet_temperature_k: float,
+    inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
+    hydraulic_segment_lengths_m: tuple[float, ...], hydraulic_segment_elevations_m: tuple[float, ...],
+    liquid_flows_m3_s: tuple[float, ...], liquid_densities_kg_m3: tuple[float, ...],
+    liquid_viscosities_pa_s: tuple[float, ...], external_temperature_k: float,
+    overall_htc_w_m2_k: float, thermal_segment_lengths_m: tuple[float, ...],
+    mass_flow_kg_s: float, heat_capacities_j_kg_k: tuple[float, ...],
+) -> LiquidPipeProfileResult:
+    """Couple supplied-state liquid pressure and defined-HTC thermal profiles."""
+    try:
+        flows = tuple(liquid_flows_m3_s)
+        densities = tuple(liquid_densities_kg_m3)
+    except TypeError as exc:
+        raise ValidationError("liquid pipe flow and density inputs must be finite sequences") from exc
+    pressure = pipe_pressure_drop_profile(
+        inlet_pressure_pa, inner_diameter_m, roughness_m,
+        hydraulic_segment_lengths_m, hydraulic_segment_elevations_m,
+        flows, densities, liquid_viscosities_pa_s,
+    )
+    thermal = pipe_defined_htc_profile(
+        inlet_temperature_k, external_temperature_k, overall_htc_w_m2_k,
+        outer_diameter_m, thermal_segment_lengths_m, mass_flow_kg_s,
+        heat_capacities_j_kg_k,
+    )
+    if outer_diameter_m <= inner_diameter_m:
+        raise ValidationError("pipe outer diameter must exceed inner diameter")
+    if any(
+        not math.isclose(flow_m3_s * density_kg_m3, mass_flow_kg_s, rel_tol=1e-6, abs_tol=1e-12)
+        for flow_m3_s, density_kg_m3 in zip(flows, densities)
+    ):
+        raise ValidationError("pipe hydraulic and thermal profiles must use one coherent mass-flow basis")
+    return LiquidPipeProfileResult(pressure, thermal)
