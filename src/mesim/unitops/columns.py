@@ -207,6 +207,174 @@ def column_balance_residuals(
     return ColumnBalanceResiduals(residuals, math.fsum(residuals))
 
 
+@dataclass(frozen=True, slots=True)
+class SumRatesIteration:
+    iteration: int
+    maximum_vapor_flow_change_kmol_s: float
+
+
+@dataclass(frozen=True, slots=True)
+class SumRatesProfile:
+    liquid_flows_kmol_s: tuple[float, ...]
+    vapor_flows_kmol_s: tuple[float, ...]
+    liquid_mole_fractions: tuple[tuple[float, ...], ...]
+    vapor_mole_fractions: tuple[tuple[float, ...], ...]
+    history: tuple[SumRatesIteration, ...]
+
+
+class ColumnConvergenceError(RuntimeError):
+    def __init__(self, message: str, history: tuple[SumRatesIteration, ...]):
+        super().__init__(message)
+        self.history = history
+
+
+def _tridiagonal_solve(
+    lower: list[float], diagonal: list[float], upper: list[float], right: list[float],
+) -> list[float]:
+    count = len(right)
+    upper_work = [0.0] * count
+    right_work = [0.0] * count
+    if abs(diagonal[0]) <= 1.0e-300:
+        raise ValidationError("column tridiagonal matrix is singular")
+    upper_work[0] = upper[0] / diagonal[0]
+    right_work[0] = right[0] / diagonal[0]
+    for index in range(1, count):
+        denominator = diagonal[index] - lower[index] * upper_work[index - 1]
+        if abs(denominator) <= 1.0e-300 or not math.isfinite(denominator):
+            raise ValidationError("column tridiagonal matrix is singular")
+        if index < count - 1:
+            upper_work[index] = upper[index] / denominator
+        right_work[index] = (
+            right[index] - lower[index] * right_work[index - 1]
+        ) / denominator
+    result = [0.0] * count
+    result[-1] = right_work[-1]
+    for index in range(count - 2, -1, -1):
+        result[index] = right_work[index] - upper_work[index] * result[index + 1]
+    return result
+
+
+def fixed_k_sum_rates_absorber(
+    feed_component_flows_by_stage_kmol_s: tuple[tuple[float, ...], ...],
+    equilibrium_ratios_by_stage: tuple[tuple[float, ...], ...],
+    initial_liquid_flows_kmol_s: tuple[float, ...],
+    initial_vapor_flows_kmol_s: tuple[float, ...],
+    flow_tolerance_kmol_s: float = 1.0e-12,
+    maximum_iterations: int = 200,
+    component_floor_kmol_s: float = 1.0e-10,
+) -> SumRatesProfile:
+    """Solve the fixed-K material loop of DWSIM's Burningham–Otto method."""
+    try:
+        feeds = tuple(tuple(row) for row in feed_component_flows_by_stage_kmol_s)
+        ratios = tuple(tuple(row) for row in equilibrium_ratios_by_stage)
+        liquid = [float(value) for value in initial_liquid_flows_kmol_s]
+        vapor = [float(value) for value in initial_vapor_flows_kmol_s]
+    except (TypeError, ValueError) as error:
+        raise ValidationError("sum-rates inputs must be finite sequences") from error
+    stage_count = len(feeds)
+    component_count = len(feeds[0]) if feeds else 0
+    if (
+        stage_count < 2
+        or component_count < 2
+        or len(ratios) != stage_count
+        or len(liquid) != stage_count
+        or len(vapor) != stage_count
+        or any(len(row) != component_count for row in feeds + ratios)
+        or any(not _finite_number(value) or value < 0.0 for row in feeds for value in row)
+        or any(not _finite_number(value) or value <= 0.0 for row in ratios for value in row)
+        or any(not _finite_number(value) or value <= 0.0 for value in liquid + vapor)
+        or not _finite_number(flow_tolerance_kmol_s)
+        or flow_tolerance_kmol_s <= 0.0
+        or not _finite_number(component_floor_kmol_s)
+        or component_floor_kmol_s <= 0.0
+        or isinstance(maximum_iterations, bool)
+        or not isinstance(maximum_iterations, int)
+        or maximum_iterations <= 0
+    ):
+        raise ValidationError("sum-rates absorber inputs are invalid")
+
+    feed_flows = [math.fsum(row) for row in feeds]
+    if math.fsum(feed_flows) <= 0.0:
+        raise ValidationError("sum-rates absorber requires at least one feed")
+    feed_fractions = [
+        tuple(value / flow for value in row) if flow > 0.0 else (0.0,) * component_count
+        for row, flow in zip(feeds, feed_flows)
+    ]
+    history: list[SumRatesIteration] = []
+    liquid_fractions: list[list[float]] = []
+    vapor_fractions: list[list[float]] = []
+
+    for iteration in range(1, maximum_iterations + 1):
+        cumulative_feed = [math.fsum(feed_flows[: index + 1]) for index in range(stage_count)]
+        preceding_feed = [math.fsum(feed_flows[:index]) for index in range(stage_count)]
+        liquid_components = [[0.0] * component_count for _ in range(stage_count)]
+        for component in range(component_count):
+            lower = [0.0] * stage_count
+            diagonal = [0.0] * stage_count
+            upper = [0.0] * stage_count
+            right = [
+                -feed_flows[stage] * feed_fractions[stage][component]
+                for stage in range(stage_count)
+            ]
+            for stage in range(stage_count):
+                next_vapor = vapor[stage + 1] if stage < stage_count - 1 else 0.0
+                diagonal[stage] = -(
+                    next_vapor
+                    + cumulative_feed[stage]
+                    - vapor[0]
+                    + vapor[stage] * ratios[stage][component]
+                )
+                if stage < stage_count - 1:
+                    upper[stage] = vapor[stage + 1] * ratios[stage + 1][component]
+                if stage > 0:
+                    lower[stage] = vapor[stage] + preceding_feed[stage] - vapor[0]
+            solution = _tridiagonal_solve(lower, diagonal, upper, right)
+            for stage, value in enumerate(solution):
+                liquid_components[stage][component] = max(value, component_floor_kmol_s)
+
+        liquid_sums = [math.fsum(row) for row in liquid_components]
+        liquid = [flow * total for flow, total in zip(liquid, liquid_sums)]
+        liquid_fractions = [
+            [value / total for value in row]
+            for row, total in zip(liquid_components, liquid_sums)
+        ]
+        vapor_fractions = []
+        for stage in range(stage_count):
+            trial = [
+                liquid_fractions[stage][component] * ratios[stage][component]
+                for component in range(component_count)
+            ]
+            total = math.fsum(trial)
+            vapor_fractions.append([value / total for value in trial])
+
+        following_feed = [math.fsum(feed_flows[index:]) for index in range(stage_count)]
+        previous_vapor = vapor
+        vapor = [
+            abs(
+                (liquid[stage - 1] if stage > 0 else 0.0)
+                - liquid[-1]
+                + following_feed[stage]
+            )
+            for stage in range(stage_count)
+        ]
+        maximum_change = max(
+            abs(value - previous) for value, previous in zip(vapor, previous_vapor)
+        )
+        history.append(SumRatesIteration(iteration, maximum_change))
+        if maximum_change <= flow_tolerance_kmol_s:
+            return SumRatesProfile(
+                tuple(liquid),
+                tuple(vapor),
+                tuple(tuple(row) for row in liquid_fractions),
+                tuple(tuple(row) for row in vapor_fractions),
+                tuple(history),
+            )
+
+    raise ColumnConvergenceError(
+        "fixed-K sum-rates absorber did not converge", tuple(history)
+    )
+
+
 def _underwood_value(
     theta: float,
     relative_volatilities: tuple[float, ...],

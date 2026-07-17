@@ -16,8 +16,10 @@ from mesim.errors import ValidationError
 from mesim.unitops.columns import (
     EquilibriumStageState,
     StageStream,
+    ColumnConvergenceError,
     column_balance_residuals,
     equilibrium_stage_residuals,
+    fixed_k_sum_rates_absorber,
     shortcut_column,
 )
 
@@ -324,6 +326,78 @@ class AbsorberGoldenGateTest(unittest.TestCase):
     def test_column_balance_rejects_inconsistent_vectors(self):
         with self.assertRaises(ValidationError):
             column_balance_residuals(((1.0, 2.0),), ((1.0,),))
+
+    def test_fixed_k_sum_rates_reproduces_dwsim_stage_profiles(self):
+        golden = json.loads(
+            (ROOT / "tests/golden/u6-absorber-simple-pr-eos.json").read_text(
+                encoding="utf-8-sig"
+            )
+        )
+        properties = {
+            record["tag"]: {
+                item["property"]: item["value"]["value"]
+                for item in record["properties"]
+            }
+            for record in golden["outputs"]["objects_after"]
+        }
+        with ZipFile(ROOT / "tests/u6-absorber-simple-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(
+                archive.read(next(name for name in archive.namelist() if name.endswith(".xml")))
+            )
+        graphic_ids = {
+            graphic.findtext("Tag"): graphic.findtext("Name")
+            for graphic in root.findall(".//GraphicObject")
+        }
+        saved = next(
+            record for record in root.findall(".//SimulationObject")
+            if record.findtext("Name") == graphic_ids["ABS-000"]
+        )
+        results = saved.find("Results")
+
+        def vector(tag):
+            return tuple(float(value) / 1000.0 for value in results.findtext(tag).strip("{}").split(";"))
+
+        def matrix(tag):
+            return tuple(
+                tuple(float(value) for value in row.text.strip("{}").split(";"))
+                for row in results.find(tag)
+            )
+
+        feeds = [[0.0] * len(self.NAMES) for _ in range(12)]
+        for stage, tag in ((0, "Liquid Solvent"), (11, "Gas")):
+            feeds[stage] = [
+                properties[tag][f"PROP_MS_104/{name}"] / 1000.0
+                for name in self.NAMES
+            ]
+        profile = fixed_k_sum_rates_absorber(
+            tuple(tuple(row) for row in feeds),
+            matrix("Kf"),
+            vector("L0"),
+            vector("V0"),
+            flow_tolerance_kmol_s=1.0e-15,
+        )
+        self.assertLess(len(profile.history), 100)
+        for actual, expected in zip(profile.liquid_flows_kmol_s, vector("Lf")):
+            self.assertTrue(math.isclose(actual, expected, abs_tol=5.2e-7))
+        for actual, expected in zip(profile.vapor_flows_kmol_s, vector("Vf")):
+            self.assertTrue(math.isclose(actual, expected, abs_tol=1.4e-7))
+        for actual_row, expected_row in zip(profile.liquid_mole_fractions, matrix("xf")):
+            for actual, expected in zip(actual_row, expected_row):
+                self.assertTrue(math.isclose(actual, expected, abs_tol=5.0e-7))
+        for actual_row, expected_row in zip(profile.vapor_mole_fractions, matrix("yf")):
+            for actual, expected in zip(actual_row, expected_row):
+                self.assertTrue(math.isclose(actual, expected, abs_tol=5.0e-6))
+
+    def test_fixed_k_sum_rates_validates_and_preserves_failure_history(self):
+        with self.assertRaises(ValidationError):
+            fixed_k_sum_rates_absorber(((1.0,),), ((1.0,),), (1.0,), (1.0,))
+        feeds = ((0.5, 0.0), (0.0, 0.5))
+        with self.assertRaises(ColumnConvergenceError) as caught:
+            fixed_k_sum_rates_absorber(
+                feeds, ((2.0, 0.5), (2.0, 0.5)), (1.0, 1.0), (1.0, 1.0),
+                flow_tolerance_kmol_s=1.0e-30, maximum_iterations=1,
+            )
+        self.assertEqual(len(caught.exception.history), 1)
 
 
 if __name__ == "__main__":
