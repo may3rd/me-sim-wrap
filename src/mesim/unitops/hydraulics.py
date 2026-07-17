@@ -158,6 +158,20 @@ class ApiRp520Area:
 
 _API_526_ORIFICES = ("D", 0.11), ("E", 0.196), ("F", 0.307), ("G", 0.503), ("H", 0.785), ("J", 1.287), ("K", 1.838), ("L", 2.853), ("M", 3.6), ("N", 4.34), ("P", 6.38), ("Q", 11.05), ("R", 16.0), ("T", 26.0)
 
+_DWSIM_TERRAIN_CONDUCTIVITY_W_M_K = {
+    "gravel": 1.1,
+    "stones": 1.95,
+    "dry_soil": 0.5,
+    "moist_soil": 2.2,
+}
+
+
+def dwsim_terrain_thermal_conductivity(terrain: str) -> float:
+    """Return DWSIM's fixed conductivity for a canonical terrain identifier."""
+    if not isinstance(terrain, str) or terrain not in _DWSIM_TERRAIN_CONDUCTIVITY_W_M_K:
+        raise ValidationError("terrain must be gravel, stones, dry_soil, or moist_soil")
+    return _DWSIM_TERRAIN_CONDUCTIVITY_W_M_K[terrain]
+
 
 def api_rp520_vapor_required_area(
     temperature_k: float, set_pressure_pa: float, back_pressure_pa: float, mass_flow_kg_s: float,
