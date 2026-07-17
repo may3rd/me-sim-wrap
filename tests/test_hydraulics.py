@@ -11,8 +11,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
+from mesim.thermo.flash import flash_enthalpy, tp_flash
 from mesim.thermo.ideal import load_correlations
-from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, dwsim_terrain_thermal_conductivity, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_absorbed_solar_radiation, pipe_defined_htc_gradient_profile, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_estimated_htc_air, pipe_estimated_htc_air_pr_gradient_profile, pipe_estimated_htc_air_profile, pipe_estimated_htc_soil, pipe_estimated_htc_soil_pr_profile, pipe_estimated_htc_water, pipe_estimated_htc_water_pr_profile, pipe_irradiated_heat_transfer, pipe_pressure_drop, pipe_pressure_drop_profile, pipe_solar_irradiation_source
+from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, dwsim_terrain_thermal_conductivity, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_absorbed_solar_radiation, pipe_defined_heat_pr_profile, pipe_defined_htc_gradient_profile, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_estimated_htc_air, pipe_estimated_htc_air_pr_gradient_profile, pipe_estimated_htc_air_profile, pipe_estimated_htc_soil, pipe_estimated_htc_soil_pr_profile, pipe_estimated_htc_water, pipe_estimated_htc_water_pr_profile, pipe_irradiated_heat_transfer, pipe_pressure_drop, pipe_pressure_drop_profile, pipe_solar_irradiation_source
 
 
 class HydraulicsTest(unittest.TestCase):
@@ -299,6 +300,61 @@ class HydraulicsTest(unittest.TestCase):
         self.assertTrue(math.isclose(profile.pressure.outlet_pressure_pa, product["PROP_MS_1"], rel_tol=1e-5))
         self.assertTrue(math.isclose(profile.thermal.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
         self.assertTrue(math.isclose(profile.thermal.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3))
+
+    def test_defined_heat_pipe_matches_captured_dwsim_case(self):
+        root_path = Path(__file__).parents[1]
+        golden = json.loads((root_path / "tests/golden/u3-pipe-thermal-defined-heat-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        pipe = {item["property"]: item["value"]["value"] for item in objects["PIPE-1"]["properties"]}
+        feed = {item["property"]: item["value"]["value"] for item in objects["PIPE-FEED"]["properties"]}
+        product = {item["property"]: item["value"]["value"] for item in objects["PIPE-PRODUCT"]["properties"]}
+        energy = {item["property"]: item["value"]["value"] for item in objects["E1"]["properties"]}
+        with ZipFile(root_path / "tests/u3-pipe-thermal-defined-heat-liquid-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
+        source = next(item for item in root.findall("./SimulationObjects/SimulationObject") if item.findtext("CalculateHeatBalance") == "true")
+        section = source.find("./Profile/Sections/Section")
+        thermal = source.find("./ThermalProfile")
+        increments = int(section.findtext("Incrementos"))
+        outer_diameter_m = float(section.findtext("DE")) * 0.0254
+        segment_length_m = float(section.findtext("Comprimento")) / increments
+        specified_heat_transfer_w = float(thermal.findtext("Calor_trocado")) * 1_000.0
+
+        self.assertEqual(thermal.findtext("TipoPerfil"), "Definir_Q")
+        self.assertEqual(specified_heat_transfer_w, 10_000.0)
+        self.assertEqual(thermal.findtext("IncludeSolarRadiation"), "false")
+        catalog = {compound.id: compound for compound in load_compounds(root_path / "data/compounds/v1.json")}
+        compounds = (catalog["N-pentane"], catalog["Ethane"])
+        composition = (0.952380952380952, 0.0476190476190476)
+        interactions = load_pr_interactions(root_path / "data/interactions/pr-v1.json")
+        correlations = load_correlations(root_path / "data/correlations/ideal-v1.json")
+        molar_flow_kmol_s = feed["PROP_MS_3"] / 1_000.0
+        profile = pipe_defined_heat_pr_profile(
+            pipe["HydraulicSegment,1,Results,2,InitialTemperature"],
+            pipe["HydraulicSegment,1,Results,2,InitialPressure"],
+            compounds, composition, interactions, correlations, molar_flow_kmol_s,
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},InitialPressure"] for index in range(3, 7)),
+            outer_diameter_m, (segment_length_m,) * 4,
+            specified_heat_transfer_w, increments, (250.0, 350.0),
+        )
+
+        for index, result in enumerate(profile.segment_results, 2):
+            self.assertEqual(result.heat_transfer_w, pipe[f"HydraulicSegment,1,Results,{index},HeatTransfer"] * 1_000.0)
+            self.assertTrue(math.isclose(
+                result.outlet_temperature_k,
+                pipe[f"HydraulicSegment,1,Results,{index + 1},InitialTemperature"],
+                rel_tol=2e-8,
+            ))
+        self.assertEqual(profile.heat_transfer_w, 8_000.0)
+        self.assertTrue(math.isclose(profile.outlet_temperature_k, product["PROP_MS_0"], rel_tol=2e-8))
+
+        inlet_flash = tp_flash(compounds, composition, interactions, feed["PROP_MS_0"], feed["PROP_MS_1"])
+        outlet_flash = tp_flash(compounds, composition, interactions, product["PROP_MS_0"], product["PROP_MS_1"])
+        stream_energy_w = molar_flow_kmol_s * (
+            flash_enthalpy(compounds, correlations, outlet_flash)
+            - flash_enthalpy(compounds, correlations, inlet_flash)
+        )
+        self.assertTrue(math.isclose(stream_energy_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=1e-5))
+        self.assertGreater(profile.heat_transfer_w - stream_energy_w, 400.0)
 
     def test_estimated_htc_air_matches_captured_dwsim_case(self):
         golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-thermal-estimated-htc-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
@@ -898,6 +954,11 @@ class HydraulicsTest(unittest.TestCase):
             pipe_defined_htc_gradient_profile(300.0, 350.0, math.nan, 25.0, 0.1, (20.0,), 10.0, (2_000.0,))
         with self.assertRaises(ValidationError):
             pipe_defined_htc_gradient_profile(300.0, 350.0, 0.1, 25.0, 0.1, (20.0,), 10.0, (2_000.0,), -1.0)
+        with self.assertRaises(ValidationError):
+            pipe_defined_heat_pr_profile(
+                300.0, 500_000.0, (), (), {}, (), 0.2, (480_000.0,),
+                0.11, (), 10_000.0, 5, (250.0, 350.0),
+            )
         with self.assertRaises(ValidationError):
             liquid_pipe_supplied_state_profile(
                 500_000.0, 300.0, 0.1, 0.11, 4.5e-5, (20.0,), (2.0,),

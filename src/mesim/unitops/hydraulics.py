@@ -4,8 +4,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from ..compounds import Compound, PRInteractions
-from ..errors import ValidationError
-from ..thermo.flash import flash_enthalpy, tp_flash
+from ..errors import ConvergenceError, ValidationError
+from ..thermo.flash import flash_enthalpy, ph_flash, tp_flash
 from ..thermo.ideal import IdealCorrelations
 
 
@@ -1272,6 +1272,73 @@ def pipe_estimated_htc_air_pr_gradient_profile(
         lengths, liquid_velocities_m_s, heat_capacities_j_kg_k,
         thermal_conductivities_w_m_k, viscosities_pa_s, densities_kg_m3,
         htc_builder, tuple(start_distances),
+    )
+
+
+def pipe_defined_heat_pr_profile(
+    inlet_temperature_k: float, inlet_pressure_pa: float,
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
+    molar_flow_kmol_s: float, outlet_pressures_pa: tuple[float, ...],
+    outer_diameter_m: float, segment_lengths_m: tuple[float, ...],
+    specified_heat_transfer_w: float, saved_increment_count: int,
+    temperature_bracket_k: tuple[float, float],
+) -> PipeThermalProfileResult:
+    """Advance DWSIM's defined-heat PR profile across the active saved rows."""
+    try:
+        pressures = tuple(outlet_pressures_pa)
+        lengths = tuple(segment_lengths_m)
+    except TypeError as exc:
+        raise ValidationError("defined-heat pipe pressures and lengths must be finite sequences") from exc
+    if not pressures or len(pressures) != len(lengths):
+        raise ValidationError("defined-heat pipe pressures and lengths must have equal non-zero counts")
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value <= 0.0
+        for value in (*pressures, *lengths, outer_diameter_m, molar_flow_kmol_s)
+    ):
+        raise ValidationError("defined-heat pipe pressure, geometry, flow, and lengths must be finite and positive")
+    if (
+        isinstance(specified_heat_transfer_w, bool)
+        or not isinstance(specified_heat_transfer_w, (int, float))
+        or not math.isfinite(specified_heat_transfer_w)
+    ):
+        raise ValidationError("defined pipe heat transfer must be finite")
+    if isinstance(saved_increment_count, bool) or not isinstance(saved_increment_count, int) or saved_increment_count <= 0:
+        raise ValidationError("defined-heat pipe saved increment count must be a positive integer")
+
+    inlet_flash = tp_flash(
+        compounds, composition, interactions, inlet_temperature_k, inlet_pressure_pa,
+    )
+    if not inlet_flash.report.converged or inlet_flash.phase != "liquid":
+        raise ValidationError("defined-heat pipe PR profile requires a converged liquid inlet flash")
+    enthalpy = flash_enthalpy(compounds, correlations, inlet_flash)
+    segment_heat_transfer_w = specified_heat_transfer_w / saved_increment_count
+    results = []
+    for pressure, length in zip(pressures, lengths):
+        target_enthalpy = enthalpy + segment_heat_transfer_w / molar_flow_kmol_s
+        flash = ph_flash(
+            compounds, composition, interactions, correlations, pressure,
+            target_enthalpy, temperature_bracket_k,
+        )
+        if not flash.report.converged or flash.flash is None or flash.enthalpy_j_per_kmol is None:
+            raise ConvergenceError(
+                flash.report.failure_reason or "defined-heat pipe PH flash did not converge",
+            )
+        if flash.flash.phase != "liquid":
+            raise ValidationError("defined-heat pipe PR profile left its liquid domain")
+        results.append(PipeThermalResult(
+            math.pi * outer_diameter_m * length,
+            flash.temperature_k,
+            segment_heat_transfer_w,
+        ))
+        enthalpy = flash.enthalpy_j_per_kmol
+    segment_results = tuple(results)
+    return PipeThermalProfileResult(
+        segment_results,
+        math.fsum(result.area_m2 for result in segment_results),
+        segment_results[-1].outlet_temperature_k,
+        math.fsum(result.heat_transfer_w for result in segment_results),
     )
 
 
