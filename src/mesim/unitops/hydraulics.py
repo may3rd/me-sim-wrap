@@ -63,6 +63,27 @@ class PipeThermalGradientProfileResult:
 
 
 @dataclass(frozen=True, slots=True)
+class PipeEstimatedHtc:
+    overall_htc_w_m2_k: float
+    internal_htc_w_m2_k: float
+    wall_htc_w_m2_k: float
+    external_htc_w_m2_k: float
+    internal_reynolds: float
+    internal_prandtl: float
+    external_reynolds: float
+    external_prandtl: float
+
+
+@dataclass(frozen=True, slots=True)
+class PipeEstimatedHtcProfileResult:
+    htc_results: tuple[PipeEstimatedHtc, ...]
+    segment_results: tuple[PipeThermalResult, ...]
+    total_area_m2: float
+    outlet_temperature_k: float
+    heat_transfer_w: float
+
+
+@dataclass(frozen=True, slots=True)
 class LiquidPipeProfileResult:
     pressure: PipePressureProfileResult
     thermal: PipeThermalGradientProfileResult
@@ -473,6 +494,148 @@ def pipe_defined_htc_heat_transfer(
         area,
         inlet_temperature_k + temperature_change,
         capacity_rate * temperature_change,
+    )
+
+
+def pipe_estimated_htc_air(
+    fluid_temperature_k: float, external_temperature_k: float,
+    inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
+    liquid_velocity_m_s: float, heat_capacity_j_kg_k: float,
+    thermal_conductivity_w_m_k: float, viscosity_pa_s: float, density_kg_m3: float,
+    external_air_velocity_m_s: float,
+) -> PipeEstimatedHtc:
+    """Estimate liquid-pipe HTC with DWSIM's Petukhov, carbon-steel, and air correlations."""
+    positive = (
+        fluid_temperature_k, external_temperature_k, inner_diameter_m, outer_diameter_m,
+        liquid_velocity_m_s, heat_capacity_j_kg_k, thermal_conductivity_w_m_k,
+        viscosity_pa_s, density_kg_m3, external_air_velocity_m_s,
+    )
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value <= 0.0
+        for value in positive
+    ):
+        raise ValidationError("estimated pipe HTC inputs must be finite and positive")
+    if (
+        isinstance(roughness_m, bool) or not isinstance(roughness_m, (int, float))
+        or not math.isfinite(roughness_m) or roughness_m < 0.0
+    ):
+        raise ValidationError("estimated pipe HTC roughness must be finite and non-negative")
+    if outer_diameter_m <= inner_diameter_m or roughness_m >= inner_diameter_m:
+        raise ValidationError("estimated pipe HTC requires outer diameter > inner diameter > roughness")
+
+    internal_reynolds = density_kg_m3 * liquid_velocity_m_s * inner_diameter_m / viscosity_pa_s
+    if internal_reynolds > 3250.0:
+        a1 = math.log10(
+            ((roughness_m / inner_diameter_m) ** 1.1096) / 2.8257
+            + (7.149 / internal_reynolds) ** 0.8961
+        )
+        b1 = -2.0 * math.log10(
+            roughness_m / inner_diameter_m / 3.7065 - 5.0452 * a1 / internal_reynolds
+        )
+        friction_factor = (1.0 / b1) ** 2
+    else:
+        friction_factor = 64.0 / internal_reynolds
+    internal_prandtl = heat_capacity_j_kg_k * viscosity_pa_s / thermal_conductivity_w_m_k
+    if internal_reynolds > 1000.0:
+        internal_htc = (
+            thermal_conductivity_w_m_k / inner_diameter_m
+            * (friction_factor / 8.0) * (internal_reynolds - 1000.0) * internal_prandtl
+            / (1.0 + 12.7 * math.sqrt(friction_factor / 8.0) * (internal_prandtl ** (2.0 / 3.0) - 1.0))
+        )
+    else:
+        internal_htc = 0.0
+
+    wall_conductivity = (
+        7.0e-9 * fluid_temperature_k**3 - 2.0e-5 * fluid_temperature_k**2
+        - 0.0291 * fluid_temperature_k + 70.765
+    )
+    if wall_conductivity <= 0.0:
+        raise ValidationError("carbon-steel pipe wall conductivity must be positive")
+    # The deployed DWSIM 9.0.5 executable and captured results use this resistance.
+    # The vendored Pipe.vb snapshot includes an additional /2 factor and is not parity-authoritative.
+    wall_htc = wall_conductivity / (math.log(outer_diameter_m / inner_diameter_m) * inner_diameter_m)
+
+    air_density = 314.56 * external_temperature_k**-0.9812
+    air_viscosity = air_density * 1.0e-6 * (
+        0.00009 * external_temperature_k**2 + 0.035 * external_temperature_k - 2.9346
+    )
+    air_heat_capacity = 1000.0 * (
+        1.0e-12 * external_temperature_k**4 - 3.0e-9 * external_temperature_k**3
+        + 2.0e-6 * external_temperature_k**2 - 0.0008 * external_temperature_k + 1.091
+    )
+    air_conductivity = (
+        -2.0e-8 * external_temperature_k**2 + 0.00009 * external_temperature_k + 0.0012
+    )
+    if min(air_density, air_viscosity, air_heat_capacity, air_conductivity) <= 0.0:
+        raise ValidationError("DWSIM air correlation produced a non-positive property")
+    external_reynolds = air_density * external_air_velocity_m_s * outer_diameter_m / air_viscosity
+    external_prandtl = air_heat_capacity * air_viscosity / air_conductivity
+    external_surface_htc = (
+        air_conductivity / outer_diameter_m
+        * 0.25 * external_reynolds**0.6 * external_prandtl**0.38
+    )
+    external_htc = external_surface_htc * outer_diameter_m / inner_diameter_m
+
+    internal_resistance = 1.0 / internal_htc if internal_htc != 0.0 else 1.0e30
+    overall_htc = 1.0 / (internal_resistance + 1.0 / wall_htc + 1.0 / external_htc)
+    return PipeEstimatedHtc(
+        overall_htc, internal_htc, wall_htc, external_htc,
+        internal_reynolds, internal_prandtl, external_reynolds, external_prandtl,
+    )
+
+
+def pipe_estimated_htc_air_profile(
+    inlet_temperature_k: float, external_temperature_k: float,
+    inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
+    segment_lengths_m: tuple[float, ...], mass_flow_kg_s: float,
+    liquid_velocities_m_s: tuple[float, ...], heat_capacities_j_kg_k: tuple[float, ...],
+    thermal_conductivities_w_m_k: tuple[float, ...], viscosities_pa_s: tuple[float, ...],
+    densities_kg_m3: tuple[float, ...], external_air_velocity_m_s: float,
+) -> PipeEstimatedHtcProfileResult:
+    """Advance a supplied-property liquid profile with estimated HTC to external air."""
+    try:
+        sequences = tuple(tuple(values) for values in (
+            segment_lengths_m, liquid_velocities_m_s, heat_capacities_j_kg_k,
+            thermal_conductivities_w_m_k, viscosities_pa_s, densities_kg_m3,
+        ))
+    except TypeError as exc:
+        raise ValidationError("estimated pipe HTC profile inputs must be finite sequences") from exc
+    if not sequences[0]:
+        raise ValidationError("estimated pipe HTC profile must contain at least one segment")
+    if len({len(values) for values in sequences}) != 1:
+        raise ValidationError("estimated pipe HTC profile property sequences must have equal counts")
+
+    lengths, velocities, heat_capacities, conductivities, viscosities, densities = sequences
+    temperature = inlet_temperature_k
+    htc_results = []
+    thermal_results = []
+    for length, velocity, heat_capacity, conductivity, viscosity, density in zip(
+        lengths, velocities, heat_capacities, conductivities, viscosities, densities,
+    ):
+        mean_temperature = temperature
+        for _ in range(20):
+            htc = pipe_estimated_htc_air(
+                mean_temperature, external_temperature_k, inner_diameter_m, outer_diameter_m,
+                roughness_m, velocity, heat_capacity, conductivity, viscosity, density,
+                external_air_velocity_m_s,
+            )
+            thermal = pipe_defined_htc_heat_transfer(
+                temperature, external_temperature_k, htc.overall_htc_w_m2_k,
+                outer_diameter_m, length, mass_flow_kg_s, heat_capacity,
+            )
+            updated_mean = (temperature + thermal.outlet_temperature_k) / 2.0
+            if math.isclose(updated_mean, mean_temperature, rel_tol=0.0, abs_tol=1.0e-12):
+                break
+            mean_temperature = updated_mean
+        htc_results.append(htc)
+        thermal_results.append(thermal)
+        temperature = thermal.outlet_temperature_k
+    segment_results = tuple(thermal_results)
+    return PipeEstimatedHtcProfileResult(
+        tuple(htc_results), segment_results,
+        math.fsum(item.area_m2 for item in segment_results), temperature,
+        math.fsum(item.heat_transfer_w for item in segment_results),
     )
 
 

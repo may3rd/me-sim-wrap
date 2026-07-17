@@ -10,7 +10,7 @@ from zipfile import ZipFile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_gradient_profile, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_pressure_drop, pipe_pressure_drop_profile
+from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_gradient_profile, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_estimated_htc_air, pipe_estimated_htc_air_profile, pipe_pressure_drop, pipe_pressure_drop_profile
 
 
 class HydraulicsTest(unittest.TestCase):
@@ -297,6 +297,75 @@ class HydraulicsTest(unittest.TestCase):
         self.assertTrue(math.isclose(profile.pressure.outlet_pressure_pa, product["PROP_MS_1"], rel_tol=1e-5))
         self.assertTrue(math.isclose(profile.thermal.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
         self.assertTrue(math.isclose(profile.thermal.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3))
+
+    def test_estimated_htc_air_matches_captured_dwsim_case(self):
+        golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-thermal-estimated-htc-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        pipe = {item["property"]: item["value"]["value"] for item in objects["PIPE-1"]["properties"]}
+        feed = {item["property"]: item["value"]["value"] for item in objects["PIPE-FEED"]["properties"]}
+        product = {item["property"]: item["value"]["value"] for item in objects["PIPE-PRODUCT"]["properties"]}
+        energy = {item["property"]: item["value"]["value"] for item in objects["E1"]["properties"]}
+        with ZipFile(Path(__file__).parents[1] / "tests/u3-pipe-thermal-estimated-htc-liquid-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
+        source = next(item for item in root.findall("./SimulationObjects/SimulationObject") if item.findtext("CalculateHeatBalance") == "true")
+        section = source.find("./Profile/Sections/Section")
+        thermal = source.find("./ThermalProfile")
+        increments = int(section.findtext("Incrementos"))
+        inner_diameter_m = float(section.findtext("DI")) * 0.0254
+        outer_diameter_m = float(section.findtext("DE")) * 0.0254
+        segment_length_m = float(section.findtext("Comprimento")) / increments
+        external_temperature = float(thermal.findtext("Temp_amb_estimar"))
+        external_air_velocity = float(thermal.findtext("Velocidade"))
+
+        self.assertEqual(thermal.findtext("TipoPerfil"), "Estimar_CGTC")
+        self.assertEqual(thermal.findtext("Meio"), "0")
+        self.assertEqual(thermal.findtext("Incluir_cti"), "true")
+        self.assertEqual(thermal.findtext("Incluir_paredes"), "true")
+        self.assertEqual(thermal.findtext("Incluir_cte"), "true")
+        self.assertEqual(thermal.findtext("Incluir_isolamento"), "false")
+        for index in range(1, increments + 1):
+            prefix = f"HydraulicSegment,1,Results,{index},"
+            next_prefix = f"HydraulicSegment,1,Results,{index + 1},"
+            result = pipe_estimated_htc_air(
+                (pipe[prefix + "InitialTemperature"] + pipe[next_prefix + "InitialTemperature"]) / 2.0,
+                external_temperature, inner_diameter_m, outer_diameter_m, 4.5e-5,
+                pipe[prefix + "VelocityLiquid"], pipe[prefix + "HeatCapacityLiquid"] * 1_000.0,
+                pipe[prefix + "ThermalConductivityLiquid"], pipe[prefix + "ViscosityLiquid"],
+                pipe[prefix + "DensityLiquid"], external_air_velocity,
+            )
+            self.assertTrue(math.isclose(result.internal_htc_w_m2_k, pipe[prefix + "HTCinternal"], rel_tol=1e-12))
+            self.assertTrue(math.isclose(result.wall_htc_w_m2_k, pipe[prefix + "HTCpipewall"], rel_tol=5e-6))
+            self.assertTrue(math.isclose(result.external_htc_w_m2_k, pipe[prefix + "HTCexternal"], rel_tol=1e-12))
+            self.assertTrue(math.isclose(result.overall_htc_w_m2_k, pipe[prefix + "HTCoverall"], rel_tol=1e-7))
+
+        profile = pipe_estimated_htc_air_profile(
+            pipe["HydraulicSegment,1,Results,2,InitialTemperature"], external_temperature,
+            inner_diameter_m, outer_diameter_m, 4.5e-5, (segment_length_m,) * 4,
+            feed["PROP_MS_2"],
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},VelocityLiquid"] for index in range(2, 6)),
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},HeatCapacityLiquid"] * 1_000.0 for index in range(2, 6)),
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},ThermalConductivityLiquid"] for index in range(2, 6)),
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},ViscosityLiquid"] for index in range(2, 6)),
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},DensityLiquid"] for index in range(2, 6)),
+            external_air_velocity,
+        )
+
+        self.assertEqual(len(profile.segment_results), 4)
+        for index, result in enumerate(profile.segment_results, 2):
+            self.assertTrue(math.isclose(result.heat_transfer_w, pipe[f"HydraulicSegment,1,Results,{index},HeatTransfer"] * 1_000.0, rel_tol=3e-3))
+        self.assertTrue(math.isclose(profile.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(profile.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3))
+
+    def test_estimated_htc_air_rejects_invalid_inputs(self):
+        with self.assertRaises(ValidationError):
+            pipe_estimated_htc_air(300.0, 350.0, 0.1, 0.09, 4.5e-5, 2.0, 2_000.0, 0.1, 0.001, 700.0, 2.0)
+        with self.assertRaises(ValidationError):
+            pipe_estimated_htc_air(300.0, 350.0, 0.1, 0.11, 4.5e-5, 2.0, 2_000.0, 0.1, 0.001, 700.0, 0.0)
+        with self.assertRaises(ValidationError):
+            pipe_estimated_htc_air_profile(
+                300.0, 350.0, 0.1, 0.11, 4.5e-5, (20.0,), 10.0,
+                (2.0,), (2_000.0, 2_000.0), (0.1,), (0.001,), (700.0,), 2.0,
+            )
 
     def test_defined_htc_pipe_rejects_invalid_inputs(self):
         with self.assertRaises(ValidationError):
