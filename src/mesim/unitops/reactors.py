@@ -40,6 +40,22 @@ class EquilibriumReactorResult:
         return math.fsum(flow for _, flow in self.outlet_component_flows_kmol_s)
 
 
+@dataclass(frozen=True, slots=True)
+class GibbsReactorResult:
+    outlet_component_flows_kmol_s: tuple[tuple[str, float], ...]
+    component_conversions: tuple[tuple[str, float], ...]
+    element_balance_residuals_kmol_s: tuple[tuple[str, float], ...]
+    stationarity_residual: float
+    initial_gibbs_energy_w: float
+    final_gibbs_energy_w: float
+    isothermal_duty_w: float
+    iterations: int
+
+    @property
+    def total_molar_flow_kmol_s(self) -> float:
+        return math.fsum(flow for _, flow in self.outlet_component_flows_kmol_s)
+
+
 def conversion_reactor(
     inlet_component_flows_kmol_s: tuple[tuple[str, float], ...],
     reaction: ReactionDefinition,
@@ -354,5 +370,191 @@ def equilibrium_reactor(
         tuple((reaction.id, value) for reaction, value in zip(reactions, last_residual or ())),
         reference_heat,
         duty,
+        iteration,
+    )
+
+
+def gibbs_reactor(
+    inlet_component_flows_kmol_s: tuple[tuple[str, float], ...],
+    thermochemistry: tuple[CompoundThermochemistry, ...],
+    compounds: tuple[Compound, ...],
+    correlations: tuple[IdealCorrelations, ...],
+    interactions: PRInteractions,
+    temperature_k: float,
+    pressure_pa: float,
+    tolerance: float = 1.0e-10,
+    max_iterations: int = 80,
+) -> GibbsReactorResult:
+    """Minimize vapor Gibbs energy subject to exact elemental balances."""
+    inlet_items = tuple(inlet_component_flows_kmol_s)
+    if not inlet_items or len({compound for compound, _ in inlet_items}) != len(inlet_items):
+        raise ValidationError("Gibbs reactor inlet compound IDs must be non-empty and unique")
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value <= 0.0
+        for value in (temperature_k, pressure_pa, tolerance)
+    ) or isinstance(max_iterations, bool) or not isinstance(max_iterations, int) or max_iterations <= 0:
+        raise ValidationError("Gibbs reactor state and solver controls must be finite and positive")
+
+    inlet = {}
+    for compound_id, flow in inlet_items:
+        if not isinstance(compound_id, str) or not compound_id:
+            raise ValidationError("Gibbs reactor compound IDs must be non-empty strings")
+        if isinstance(flow, bool) or not isinstance(flow, (int, float)) or not math.isfinite(flow) or flow < 0.0:
+            raise ValidationError("Gibbs reactor component flows must be finite and non-negative")
+        inlet[compound_id] = float(flow)
+    compound_ids = tuple(inlet)
+    if tuple(compound.id for compound in compounds) != compound_ids:
+        raise ValidationError("Gibbs reactor compound order must match the inlet flow order")
+    thermo_by_id = {record.compound_id: record for record in thermochemistry}
+    correlation_by_id = {record.compound_id: record for record in correlations}
+    if any(compound_id not in thermo_by_id or compound_id not in correlation_by_id for compound_id in compound_ids):
+        raise ValidationError("Gibbs reactor is missing thermochemistry or heat-capacity data")
+    total_inlet = math.fsum(inlet.values())
+    if total_inlet <= 0.0:
+        raise ValidationError("Gibbs reactor requires positive inlet molar flow")
+
+    elements = tuple(sorted({element for compound_id in compound_ids for element, _ in thermo_by_id[compound_id].elements}))
+    element_matrix = tuple(
+        tuple(dict(thermo_by_id[compound_id].elements).get(element, 0.0) for compound_id in compound_ids)
+        for element in elements
+    )
+    inlet_vector = tuple(inlet.values())
+    element_totals = tuple(
+        math.fsum(coefficient * flow for coefficient, flow in zip(row, inlet_vector))
+        for row in element_matrix
+    )
+    if any(total <= 0.0 for total in element_totals):
+        raise ValidationError("Gibbs reactor elements must have positive inlet totals")
+    standard_gibbs_rt = tuple(
+        _standard_gibbs_rt(thermo_by_id[compound_id], correlation_by_id[compound_id], temperature_k)
+        for compound_id in compound_ids
+    )
+
+    def chemical_potentials_rt(component_flows: tuple[float, ...]) -> tuple[float, ...]:
+        total = math.fsum(component_flows)
+        composition = tuple(flow / total for flow in component_flows)
+        state = PengRobinsonMixture(compounds, composition, interactions).state(
+            temperature_k, pressure_pa, "vapor",
+        )
+        return tuple(
+            standard + math.log(fraction) + math.log(fugacity)
+            + math.log(pressure_pa / DWSIM_REFERENCE_PRESSURE_PA)
+            for standard, fraction, fugacity in zip(
+                standard_gibbs_rt, composition, state.fugacity_coefficients,
+            )
+        )
+
+    floor = max(total_inlet * 1.0e-10, 1.0e-18)
+    variables = [math.log(max(flow, floor)) for flow in inlet_vector] + [0.0] * len(elements)
+
+    def evaluate(values: list[float]) -> tuple[tuple[float, ...], tuple[float, ...]]:
+        try:
+            component_flows = tuple(math.exp(value) for value in values[:len(compound_ids)])
+        except OverflowError as error:
+            raise ValidationError("Gibbs reactor trial flows are outside the representable range") from error
+        if not all(math.isfinite(flow) and flow > 0.0 for flow in component_flows):
+            raise ValidationError("Gibbs reactor trial flows must be finite and positive")
+        multipliers = values[len(compound_ids):]
+        chemical_potentials = chemical_potentials_rt(component_flows)
+        stationarity = tuple(
+            chemical_potentials[index] - math.fsum(
+                element_matrix[element_index][index] * multipliers[element_index]
+                for element_index in range(len(elements))
+            )
+            for index in range(len(compound_ids))
+        )
+        balances = tuple(
+            (math.fsum(coefficient * flow for coefficient, flow in zip(row, component_flows)) - total) / total
+            for row, total in zip(element_matrix, element_totals)
+        )
+        return stationarity + balances, component_flows
+
+    final_residual: tuple[float, ...] | None = None
+    outlet_vector: tuple[float, ...] | None = None
+    for iteration in range(1, max_iterations + 1):
+        current, current_flows = evaluate(variables)
+        norm = max(abs(value) for value in current)
+        final_residual, outlet_vector = current, current_flows
+        if norm <= tolerance:
+            break
+        size = len(variables)
+        jacobian = [[0.0] * size for _ in range(size)]
+        for column in range(size):
+            step = 1.0e-6 * max(1.0, abs(variables[column]))
+            trial = variables[:]
+            trial[column] += step
+            shifted, _ = evaluate(trial)
+            for row in range(size):
+                jacobian[row][column] = (shifted[row] - current[row]) / step
+        direction = _solve_linear(jacobian, [-value for value in current])
+        scale = 1.0
+        accepted = False
+        while scale >= 2.0**-24:
+            trial = [value + scale * delta for value, delta in zip(variables, direction)]
+            try:
+                shifted, _ = evaluate(trial)
+            except ValidationError:
+                scale *= 0.5
+                continue
+            if max(abs(value) for value in shifted) < norm:
+                variables = trial
+                accepted = True
+                break
+            scale *= 0.5
+        if not accepted:
+            raise ConvergenceError("Gibbs reactor line search did not reduce the residual")
+    else:
+        raise ConvergenceError("Gibbs reactor did not converge")
+
+    if outlet_vector is None or final_residual is None:
+        raise ConvergenceError("Gibbs reactor produced no converged state")
+    outlet = tuple(zip(compound_ids, outlet_vector))
+    conversions = tuple(
+        (compound_id, (inlet[compound_id] - outlet_vector[index]) / inlet[compound_id])
+        for index, compound_id in enumerate(compound_ids)
+        if inlet[compound_id] > 0.0 and outlet_vector[index] < inlet[compound_id]
+    )
+    element_residuals = tuple(
+        (
+            element,
+            math.fsum(coefficient * flow for coefficient, flow in zip(row, outlet_vector)) - total,
+        )
+        for element, row, total in zip(elements, element_matrix, element_totals)
+    )
+
+    def gibbs_energy_flow(component_flows: tuple[float, ...]) -> float:
+        potentials = chemical_potentials_rt(tuple(max(flow, floor) for flow in component_flows))
+        return DWSIM_EQUILIBRIUM_R * temperature_k * math.fsum(
+            flow * potential for flow, potential in zip(component_flows, potentials) if flow > 0.0
+        )
+
+    def enthalpy_flow(component_flows: tuple[float, ...]) -> float:
+        total = math.fsum(component_flows)
+        composition = tuple(flow / total for flow in component_flows)
+        state = PengRobinsonMixture(compounds, composition, interactions).state(
+            temperature_k, pressure_pa, "vapor",
+        )
+        ideal = math.fsum(
+            flow * (
+                thermo_by_id[compound_id].ideal_gas_formation_enthalpy_j_per_kmol
+                + _dwsim_midpoint_integrals(
+                    correlation_by_id[compound_id],
+                    thermo_by_id[compound_id].formation_temperature_k,
+                    temperature_k,
+                )[0]
+            )
+            for compound_id, flow in zip(compound_ids, component_flows)
+        )
+        return ideal + total * state.departure_enthalpy_j_per_kmol
+
+    return GibbsReactorResult(
+        outlet,
+        conversions,
+        element_residuals,
+        max(abs(value) for value in final_residual[:len(compound_ids)]),
+        gibbs_energy_flow(inlet_vector),
+        gibbs_energy_flow(outlet_vector),
+        enthalpy_flow(outlet_vector) - enthalpy_flow(inlet_vector),
         iteration,
     )

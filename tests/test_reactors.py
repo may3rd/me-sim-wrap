@@ -15,7 +15,7 @@ from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.errors import ValidationError
 from mesim.reactions import load_reaction_data
 from mesim.thermo.ideal import load_correlations
-from mesim.unitops.reactors import conversion_reactor, equilibrium_reactor
+from mesim.unitops.reactors import conversion_reactor, equilibrium_reactor, gibbs_reactor
 
 
 ROOT = Path(__file__).parents[1]
@@ -23,6 +23,8 @@ DWSIM_REACTOR_PHASE_AGGREGATE_REL_TOL = 2e-7
 DWSIM_EQUILIBRIUM_COMPONENT_REL_TOL = 2e-5
 DWSIM_EQUILIBRIUM_EXTENT_REL_TOL = 2e-6
 DWSIM_EQUILIBRIUM_DUTY_REL_TOL = 2e-6
+DWSIM_GIBBS_COMPONENT_REL_TOL = 1.2e-3
+DWSIM_GIBBS_DUTY_REL_TOL = 2e-4
 
 
 class ReactionDataTest(unittest.TestCase):
@@ -204,6 +206,83 @@ class EquilibriumReactorTest(unittest.TestCase):
                 (data.reactions[0],), data.thermochemistry, (), (),
                 load_pr_interactions(ROOT / "data/interactions/pr-v1.json"), 400.0, 101325.0,
             )
+
+
+class GibbsReactorTest(unittest.TestCase):
+    def test_steam_reforming_minimization_matches_dwsim_and_closes_elements(self):
+        data = load_reaction_data(ROOT / "data/reactions/v1.json")
+        catalog = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        correlation_catalog = {
+            record.compound_id: record for record in load_correlations(ROOT / "data/correlations/ideal-v1.json")
+        }
+        golden = json.loads(
+            (ROOT / "tests/golden/u4-gibbs-reactor-steam-reforming-pr-eos.json").read_text(encoding="utf-8-sig")
+        )
+        repeat = json.loads(
+            (ROOT / "tests/golden/u4-gibbs-reactor-steam-reforming-pr-eos-repeat.json").read_text(encoding="utf-8-sig")
+        )
+        normalized_golden, normalized_repeat = copy.deepcopy(golden), copy.deepcopy(repeat)
+        normalized_golden["source"].pop("captured_utc")
+        normalized_repeat["source"].pop("captured_utc")
+        self.assertEqual(normalized_golden, normalized_repeat)
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {item["property"]: item["value"]["value"] for item in objects[tag]["properties"]}
+            for tag in ("1", "2", "e1", "RG-000")
+        }
+        compound_ids = ("Methane", "Water", "Carbon monoxide", "Carbon dioxide", "Hydrogen")
+        inlet = tuple(
+            (compound_id, properties["1"][f"PROP_MS_104/{compound_id}"] / 1_000.0)
+            for compound_id in compound_ids
+        )
+        result = gibbs_reactor(
+            inlet,
+            data.thermochemistry,
+            tuple(catalog[compound_id] for compound_id in compound_ids),
+            tuple(correlation_catalog[compound_id] for compound_id in compound_ids),
+            load_pr_interactions(ROOT / "data/interactions/pr-v1.json"),
+            properties["1"]["PROP_MS_0"],
+            properties["1"]["PROP_MS_1"],
+        )
+
+        expected_outlet = {
+            compound_id: properties["2"][f"PROP_MS_104/{compound_id}"] / 1_000.0
+            for compound_id in compound_ids
+        }
+        for compound_id, actual in result.outlet_component_flows_kmol_s:
+            self.assertTrue(math.isclose(
+                actual, expected_outlet[compound_id],
+                rel_tol=DWSIM_GIBBS_COMPONENT_REL_TOL, abs_tol=1.0e-10,
+            ))
+        conversions = dict(result.component_conversions)
+        self.assertTrue(math.isclose(
+            conversions["Methane"] * 100.0, properties["RG-000"]["Methane: Conversion"],
+            rel_tol=DWSIM_GIBBS_COMPONENT_REL_TOL,
+        ))
+        self.assertTrue(math.isclose(
+            conversions["Water"] * 100.0, properties["RG-000"]["Water: Conversion"],
+            rel_tol=DWSIM_GIBBS_COMPONENT_REL_TOL,
+        ))
+        self.assertTrue(math.isclose(
+            result.isothermal_duty_w / 1_000.0, properties["e1"]["PROP_ES_0"],
+            rel_tol=DWSIM_GIBBS_DUTY_REL_TOL,
+        ))
+        self.assertLess(max(abs(value) for _, value in result.element_balance_residuals_kmol_s), 1.0e-11)
+        self.assertLess(result.stationarity_residual, 1.0e-9)
+        self.assertLess(result.final_gibbs_energy_w, result.initial_gibbs_energy_w)
+
+        captured_oxygen = (
+            expected_outlet["Water"] + expected_outlet["Carbon monoxide"]
+            + 2.0 * expected_outlet["Carbon dioxide"]
+        )
+        inlet_oxygen = dict(inlet)["Water"]
+        self.assertGreater(abs(captured_oxygen - inlet_oxygen), 1.0e-7)
+
+    def test_gibbs_reactor_rejects_zero_flow_and_missing_data(self):
+        data = load_reaction_data(ROOT / "data/reactions/v1.json")
+        interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
+        with self.assertRaises(ValidationError):
+            gibbs_reactor((("Methane", 0.0), ("Water", 0.0)), data.thermochemistry, (), (), interactions, 1000.0, 101325.0)
 
 
 if __name__ == "__main__":
