@@ -220,6 +220,12 @@ The saved global solar irradiation of `0.810493563416576 kW/m2`, one square-metr
 
 These gates are source-equation parity, not equipment design or energy-yield forecasts. Site resource distributions, wind power curves and cut-in/cut-out behavior, PV temperature/angle/degradation effects, hydraulic losses beyond the supplied efficiency, water electrolyzers, and PEM fuel cells remain unsupported. Manufacturer-specific constants must be versioned inputs before any of those models are added.
 
+## Phase 19 performance status
+
+`benchmarks/benchmark_release.py` measures representative TP, PH, dynamic, and HTTP flows with explicit p95 thresholds below half of the API's five-second calculation deadline. The initial run showed 2.0–2.3 second endpoint latency despite millisecond-scale TP and dynamics kernels because the API started a fresh Windows Python interpreter for every request. The API now reuses a two-worker spawned-process pool; a timeout terminates and discards the pool before returning HTTP 408, and the next calculation recreates it. This preserves the hard process boundary while removing per-request interpreter startup.
+
+After that change, the Windows CPython 3.12.2 reference run measured p95 values of 14.82 ms for the TP endpoint, 154.66 ms for the PH-valve endpoint, and 332.93 ms for the complete U0 endpoint. All direct-kernel and endpoint gates pass, so Phase 19 adds no native extension. Deployed concurrent-load targets and macOS/Linux baselines still require measurements on their actual hosts; native acceleration remains conditional on one of those approved workloads missing its target after Python profiling.
+
 ## Phase 7 and 8 U0 status
 
 The Python kernel implements immutable material and energy streams; mixer, splitter, heater, cooler, valve, and equilibrium separator calculations; and deterministic acyclic flowsheet execution. `tests/golden/u0-pr-c1-c5.json` is a repeatable DWSIM 9.0.4 PR flowsheet capture covering methane and n-pentane feeds, mixer, heater, valve, and separator. `tests/test_flowsheets.py` matches the mixer, heater, valve, and phase-product stream temperature, pressure, and total molar flow to `1e-5` relative. Phase-product flow uses `1e-4` relative because DWSIM's default flash convergence leaves a documented phase-split difference. The Python catalog key is `N-pentane`; it is mapped explicitly to DWSIM's captured `n-Pentane` record.

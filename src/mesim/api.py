@@ -1,6 +1,8 @@
+import atexit
 from dataclasses import asdict
-from multiprocessing import get_context
+from multiprocessing import TimeoutError as MultiprocessingTimeoutError, get_context
 from pathlib import Path
+from threading import Lock
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -21,6 +23,10 @@ INTERACTIONS = load_pr_interactions(DATA / "interactions/pr-v1.json")
 CORRELATIONS = load_correlations(DATA / "correlations/ideal-v1.json")
 CALCULATION_TIMEOUT_S = 5.0
 MAX_REQUEST_BYTES = 1_048_576
+CALCULATION_WORKERS = 2
+
+_CALCULATION_POOL = None
+_CALCULATION_POOL_LOCK = Lock()
 
 app = FastAPI(title="me-sim", version="0.1.0a0")
 
@@ -118,31 +124,59 @@ async def validation_error(_: Request, error: ValidationError) -> JSONResponse:
     return JSONResponse(status_code=422, content={"detail": str(error)})
 
 
-def _calculation_child(connection, function, request) -> None:
+def _calculation_result(function, request) -> tuple:
     try:
-        connection.send(("ok", function(request)))
+        return "ok", function(request)
     except HTTPException as error:
-        connection.send(("http", error.status_code, error.detail))
+        return "http", error.status_code, error.detail
     except ValidationError as error:
-        connection.send(("validation", str(error)))
-    finally:
-        connection.close()
+        return "validation", str(error)
+
+
+def _calculation_pool():
+    global _CALCULATION_POOL
+    with _CALCULATION_POOL_LOCK:
+        if _CALCULATION_POOL is None:
+            _CALCULATION_POOL = get_context("spawn").Pool(processes=CALCULATION_WORKERS)
+        return _CALCULATION_POOL
+
+
+def _discard_calculation_pool(pool) -> None:
+    global _CALCULATION_POOL
+    discard = False
+    with _CALCULATION_POOL_LOCK:
+        if _CALCULATION_POOL is pool:
+            _CALCULATION_POOL = None
+            discard = True
+    if discard:
+        pool.terminate()
+        pool.join()
+
+
+def _close_calculation_pool() -> None:
+    global _CALCULATION_POOL
+    with _CALCULATION_POOL_LOCK:
+        pool = _CALCULATION_POOL
+        _CALCULATION_POOL = None
+    if pool is not None:
+        pool.close()
+        pool.join()
+
+
+atexit.register(_close_calculation_pool)
 
 
 def _limited(function, request) -> dict[str, object]:
-    parent, child = get_context("spawn").Pipe(duplex=False)
-    process = get_context("spawn").Process(target=_calculation_child, args=(child, function, request))
-    process.start()
-    child.close()
-    process.join(CALCULATION_TIMEOUT_S)
-    if process.is_alive():
-        process.terminate()
-        process.join()
+    pool = _calculation_pool()
+    pending = pool.apply_async(_calculation_result, (function, request))
+    try:
+        result = pending.get(CALCULATION_TIMEOUT_S)
+    except MultiprocessingTimeoutError:
+        _discard_calculation_pool(pool)
         raise HTTPException(status_code=408, detail="calculation time limit exceeded")
-    if not parent.poll():
-        raise HTTPException(status_code=500, detail="calculation worker exited without a result")
-    result = parent.recv()
-    parent.close()
+    except (EOFError, OSError) as error:
+        _discard_calculation_pool(pool)
+        raise HTTPException(status_code=500, detail="calculation worker exited without a result") from error
     if result[0] == "ok":
         return result[1]
     if result[0] == "http":

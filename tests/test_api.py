@@ -19,6 +19,10 @@ def _slow(_: object) -> dict[str, object]:
     return {}
 
 
+def _ok(_: object) -> dict[str, object]:
+    return {"ok": True}
+
+
 class ApiTest(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
@@ -42,6 +46,15 @@ class ApiTest(unittest.TestCase):
         finally:
             api.CALCULATION_TIMEOUT_S = original
         self.assertEqual(error.exception.status_code, 408)
+        self.assertIsNone(api._CALCULATION_POOL)
+        self.assertEqual(api._limited(_ok, None), {"ok": True})
+        self.assertIsNotNone(api._CALCULATION_POOL)
+
+    def test_calculation_workers_are_reused_between_successful_requests(self):
+        self.assertEqual(api._limited(_ok, None), {"ok": True})
+        first = api._CALCULATION_POOL
+        self.assertEqual(api._limited(_ok, None), {"ok": True})
+        self.assertIs(api._CALCULATION_POOL, first)
 
     def test_tp_flash_preserves_submitted_units_and_returns_phase(self):
         response = self.client.post("/v1/flash/tp", json={
