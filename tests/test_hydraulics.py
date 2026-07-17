@@ -357,6 +357,68 @@ class HydraulicsTest(unittest.TestCase):
         self.assertTrue(math.isclose(stream_energy_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=1e-5))
         self.assertGreater(profile.heat_transfer_w - stream_energy_w, 400.0)
 
+    def test_defined_heat_pipe_crosses_phase_against_captured_dwsim_case(self):
+        root_path = Path(__file__).parents[1]
+        golden = json.loads((root_path / "tests/golden/u3-pipe-thermal-phase-change-pr-eos.json").read_text(encoding="utf-8-sig"))
+        repeat_path = root_path / "tests/golden/u3-pipe-thermal-phase-change-pr-eos-repeat.json"
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        pipe = {item["property"]: item["value"]["value"] for item in objects["PIPE-1"]["properties"]}
+        feed = {item["property"]: item["value"]["value"] for item in objects["PIPE-FEED"]["properties"]}
+        product = {item["property"]: item["value"]["value"] for item in objects["PIPE-PRODUCT"]["properties"]}
+        energy = {item["property"]: item["value"]["value"] for item in objects["E1"]["properties"]}
+        with ZipFile(root_path / "tests/u3-pipe-thermal-phase-change-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
+        source = next(item for item in root.findall("./SimulationObjects/SimulationObject") if item.findtext("CalculateHeatBalance") == "true")
+        section = source.find("./Profile/Sections/Section")
+        thermal = source.find("./ThermalProfile")
+        increments = int(section.findtext("Incrementos"))
+        outer_diameter_m = float(section.findtext("DE")) * 0.0254
+        segment_length_m = float(section.findtext("Comprimento")) / increments
+        specified_heat_transfer_w = float(thermal.findtext("Calor_trocado")) * 1_000.0
+
+        self.assertEqual(thermal.findtext("TipoPerfil"), "Definir_Q")
+        self.assertEqual(specified_heat_transfer_w, 2_000_000.0)
+        self.assertTrue(repeat_path.is_file())
+        self.assertEqual(feed["PROP_MS_3"], product["PROP_MS_3"])
+        catalog = {compound.id: compound for compound in load_compounds(root_path / "data/compounds/v1.json")}
+        compounds = (catalog["N-pentane"], catalog["Ethane"])
+        composition = (0.952380952380952, 0.0476190476190476)
+        interactions = load_pr_interactions(root_path / "data/interactions/pr-v1.json")
+        correlations = load_correlations(root_path / "data/correlations/ideal-v1.json")
+        molar_flow_kmol_s = feed["PROP_MS_3"] / 1_000.0
+        profile = pipe_defined_heat_pr_profile(
+            pipe["HydraulicSegment,1,Results,2,InitialTemperature"],
+            pipe["HydraulicSegment,1,Results,2,InitialPressure"],
+            compounds, composition, interactions, correlations, molar_flow_kmol_s,
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},InitialPressure"] for index in range(3, 7)),
+            outer_diameter_m, (segment_length_m,) * 4,
+            specified_heat_transfer_w, increments, (250.0, 450.0),
+        )
+
+        self.assertEqual(tuple(result.phase for result in profile.segment_results), ("liquid", "liquid", "two-phase", "two-phase"))
+        for index, result in enumerate(profile.segment_results, 2):
+            self.assertEqual(result.heat_transfer_w, pipe[f"HydraulicSegment,1,Results,{index},HeatTransfer"] * 1_000.0)
+            self.assertTrue(math.isclose(
+                result.outlet_temperature_k,
+                pipe[f"HydraulicSegment,1,Results,{index + 1},InitialTemperature"],
+                rel_tol=3e-6,
+            ))
+        self.assertTrue(math.isclose(
+            profile.segment_results[-1].vapor_fraction,
+            product["PROP_MS_27"],
+            rel_tol=5e-4,
+        ))
+        self.assertTrue(math.isclose(profile.outlet_temperature_k, product["PROP_MS_0"], rel_tol=3e-6))
+
+        inlet_flash = tp_flash(compounds, composition, interactions, feed["PROP_MS_0"], feed["PROP_MS_1"])
+        outlet_flash = tp_flash(compounds, composition, interactions, product["PROP_MS_0"], product["PROP_MS_1"])
+        stream_energy_w = molar_flow_kmol_s * (
+            flash_enthalpy(compounds, correlations, outlet_flash)
+            - flash_enthalpy(compounds, correlations, inlet_flash)
+        )
+        self.assertTrue(math.isclose(stream_energy_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=5e-5))
+        self.assertGreater(profile.heat_transfer_w - stream_energy_w, 400.0)
+
     def test_tabulated_defined_htc_pipe_matches_captured_dwsim_case(self):
         root_path = Path(__file__).parents[1]
         golden = json.loads((root_path / "tests/golden/u3-pipe-thermal-tabulated-htc-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))

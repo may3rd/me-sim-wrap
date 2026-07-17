@@ -49,6 +49,9 @@ class PipeThermalResult:
     area_m2: float
     outlet_temperature_k: float
     heat_transfer_w: float
+    phase: str | None = None
+    vapor_fraction: float | None = None
+    enthalpy_j_per_kmol: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -1677,7 +1680,7 @@ def pipe_defined_heat_pr_profile(
     specified_heat_transfer_w: float, saved_increment_count: int,
     temperature_bracket_k: tuple[float, float],
 ) -> PipeThermalProfileResult:
-    """Advance DWSIM's defined-heat PR profile across the active saved rows."""
+    """Advance DWSIM's defined-heat PR profile, including phase-crossing rows."""
     try:
         pressures = tuple(outlet_pressures_pa)
         lengths = tuple(segment_lengths_m)
@@ -1718,12 +1721,13 @@ def pipe_defined_heat_pr_profile(
             raise ConvergenceError(
                 flash.report.failure_reason or "defined-heat pipe PH flash did not converge",
             )
-        if flash.flash.phase != "liquid":
-            raise ValidationError("defined-heat pipe PR profile left its liquid domain")
         results.append(PipeThermalResult(
             math.pi * outer_diameter_m * length,
             flash.temperature_k,
             segment_heat_transfer_w,
+            flash.flash.phase,
+            flash.flash.vapor_fraction,
+            flash.enthalpy_j_per_kmol,
         ))
         enthalpy = flash.enthalpy_j_per_kmol
     segment_results = tuple(results)
