@@ -520,6 +520,27 @@ def pipe_defined_htc_heat_transfer(
     )
 
 
+def pipe_solar_irradiation_source(
+    local_solar_irradiation_kwh_m2: float, use_global_solar_irradiation: bool,
+    global_solar_irradiation_kwh_m2: float,
+) -> float:
+    """Select DWSIM's saved local or flowsheet-global pipe irradiation value."""
+    if not isinstance(use_global_solar_irradiation, bool):
+        raise ValidationError("pipe global-solar selector must be boolean")
+    values = (local_solar_irradiation_kwh_m2, global_solar_irradiation_kwh_m2)
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value < 0.0
+        for value in values
+    ):
+        raise ValidationError("pipe local and global irradiation must be finite and non-negative")
+    return (
+        global_solar_irradiation_kwh_m2
+        if use_global_solar_irradiation
+        else local_solar_irradiation_kwh_m2
+    )
+
+
 def pipe_absorbed_solar_radiation(
     solar_irradiation_kwh_m2: float, absorption_efficiency: float,
     outer_diameter_m: float, length_m: float, inlet_volumetric_flow_m3_s: float,
