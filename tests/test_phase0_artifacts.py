@@ -113,6 +113,24 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertIn('"GetIdealGasHeatCapacity"', script)
         self.assertIn('"GetVaporPressure"', script)
 
+    def test_capture_script_records_explicit_elements_and_formation_values(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("StringDoubleDictionary", script)
+        self.assertIn('Get(entry, "Key")', script)
+        self.assertIn('Get(entry, "Value")', script)
+        self.assertIn("elements = $elements", script)
+        self.assertIn('"IG_Enthalpy_of_Formation_25C"', script)
+        self.assertIn('"IG_Gibbs_Energy_of_Formation_25C"', script)
+        self.assertIn('"IG_Entropy_of_Formation_25C"', script)
+
+    def test_capture_script_can_bound_flowsheet_objects_by_tag(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("[string[]]$ObjectTags = @()", script)
+        self.assertIn("$ObjectTags -notcontains $tag", script)
+        self.assertEqual(script.count("-ObjectTags $ObjectTags"), 2)
+
     def test_capture_script_uses_dwsim_canonical_compound_id(self):
         script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
 

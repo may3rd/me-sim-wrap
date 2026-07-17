@@ -14,6 +14,7 @@ param(
     [string]$PropertyPackage = "unknown",
     [string]$FlashAlgorithm = "unknown",
     [switch]$CalculateBubbleAndDewPoints,
+    [string[]]$ObjectTags = @(),
     [string[]]$CompoundNames = @(
         "Methane",
         "Ethane",
@@ -29,6 +30,8 @@ Set-StrictMode -Version Latest
 Add-Type -TypeDefinition @"
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 
 public static class DwsimCaptureReflection
@@ -74,6 +77,31 @@ public static class DwsimCaptureReflection
         return target == null
             ? null
             : target.GetType().Name;
+    }
+
+    public static IDictionary StringDoubleDictionary(object target)
+    {
+        SortedDictionary<string, double> result =
+            new SortedDictionary<string, double>(StringComparer.Ordinal);
+
+        if (!(target is IEnumerable))
+        {
+            return result;
+        }
+
+        foreach (object entry in (IEnumerable)target)
+        {
+            object key = Get(entry, "Key");
+            object value = Get(entry, "Value");
+
+            if (key != null && value != null)
+            {
+                result[Convert.ToString(key, CultureInfo.InvariantCulture)] =
+                    Convert.ToDouble(value, CultureInfo.InvariantCulture);
+            }
+        }
+
+        return result;
     }
 
     public static int SetFlashSetting(
@@ -428,7 +456,9 @@ function Get-ObjectStates {
         [object]$Flowsheet,
 
         [Parameter(Mandatory = $true)]
-        [hashtable]$SavedUtilityStates
+        [hashtable]$SavedUtilityStates,
+
+        [string[]]$ObjectTags = @()
     )
 
     $states = @()
@@ -465,6 +495,10 @@ function Get-ObjectStates {
             [string]$graphicTag
         )) {
             $tag = [string]$graphicTag
+        }
+
+        if ($ObjectTags.Count -gt 0 -and $ObjectTags -notcontains $tag) {
+            continue
         }
 
         $properties = @()
@@ -566,6 +600,10 @@ function New-CompoundRecord {
         [object[]]@($normalBoilingPoint, $null)
     )
 
+    $elements = [DwsimCaptureReflection]::StringDoubleDictionary(
+        (Get-MemberValue -Object $Constant -Name "Elements")
+    )
+
     return @{
         id = $canonicalName
 
@@ -582,6 +620,8 @@ function New-CompoundRecord {
                 -Object $Constant `
                 -Name "Formula"
         )
+
+        elements = $elements
 
         molecular_weight = New-ValueRecord `
             -Value (
@@ -618,6 +658,36 @@ function New-CompoundRecord {
         normal_boiling_point = New-ValueRecord `
             -Value $normalBoilingPoint `
             -Unit "K"
+
+        ideal_gas_formation = @{
+            temperature = New-ValueRecord `
+                -Value 298.15 `
+                -Unit "K"
+
+            enthalpy = New-ValueRecord `
+                -Value (
+                    Get-MemberValue `
+                        -Object $Constant `
+                        -Name "IG_Enthalpy_of_Formation_25C"
+                ) `
+                -Unit "kJ/kg"
+
+            gibbs_energy = New-ValueRecord `
+                -Value (
+                    Get-MemberValue `
+                        -Object $Constant `
+                        -Name "IG_Gibbs_Energy_of_Formation_25C"
+                ) `
+                -Unit "kJ/kg"
+
+            entropy = New-ValueRecord `
+                -Value (
+                    Get-MemberValue `
+                        -Object $Constant `
+                        -Name "IG_Entropy_of_Formation_25C"
+                ) `
+                -Unit "kJ/kg/K"
+        }
 
         ideal_reference = @{
             heat_capacity_temperature = New-ValueRecord `
@@ -788,7 +858,8 @@ if (-not [string]::IsNullOrWhiteSpace($CasePath)) {
     $before = @(
         Get-ObjectStates `
             -Flowsheet $flowsheet `
-            -SavedUtilityStates $savedUtilityStates
+            -SavedUtilityStates $savedUtilityStates `
+            -ObjectTags $ObjectTags
     )
 
     $errors = @()
@@ -819,7 +890,8 @@ if (-not [string]::IsNullOrWhiteSpace($CasePath)) {
     $after = @(
         Get-ObjectStates `
             -Flowsheet $flowsheet `
-            -SavedUtilityStates $savedUtilityStates
+            -SavedUtilityStates $savedUtilityStates `
+            -ObjectTags $ObjectTags
     )
 }
 

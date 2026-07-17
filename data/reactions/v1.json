@@ -1,0 +1,38 @@
+{
+  "schema_version": "reaction-data-1",
+  "provenance": {
+    "source": "DWSIM tests/Isomerisation.dwxmz",
+    "source_revision": "9.0.5.0",
+    "selection": "saved N-butane isomerisation conversion reaction and ChemSep compound records",
+    "imported_utc": "2026-07-17T06:25:41Z"
+  },
+  "thermochemistry": [
+    {
+      "compound_id": "N-butane",
+      "elements": {"C": 4, "H": 10},
+      "formation_temperature": {"value": 298.15, "unit": "K"},
+      "ideal_gas_formation_enthalpy": {"value": -125790000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_gibbs_energy": {"value": -16700000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_entropy": {"value": -365889.6528592991, "unit": "J/kmol/K"}
+    },
+    {
+      "compound_id": "Isobutane",
+      "elements": {"C": 4, "H": 10},
+      "formation_temperature": {"value": 298.15, "unit": "K"},
+      "ideal_gas_formation_enthalpy": {"value": -134990000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_gibbs_energy": {"value": -21440000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_entropy": {"value": -380848.5661579742, "unit": "J/kmol/K"}
+    }
+  ],
+  "reactions": [
+    {
+      "id": "isomerisation",
+      "name": "isomerisation",
+      "base_reactant": "N-butane",
+      "phase": "vapor",
+      "stoichiometry": {"N-butane": -1.0, "Isobutane": 1.0},
+      "reaction_heat": {"value": -9200000.0, "unit": "J/kmol"},
+      "conversion_percent": 33.0
+    }
+  ]
+}

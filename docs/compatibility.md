@@ -164,6 +164,10 @@ The same estimated-air reference now gates automatic liquid-property updates. `d
 
 Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
 
+## Phase 14 U4 reaction status
+
+`tests/golden/u4-conversion-reactor-isomerization.json` and its normalized repeat freeze DWSIM 9.0.5's official Chao-Seader isomerization test after a clean executable solve. The active conversion reaction is N-butane to Isobutane at 33% base-reactant conversion with a saved -9.2 MJ/kmol reaction heat. `data/reactions/v1.json` stores explicit C4H10 element counts plus ideal-gas formation enthalpy, Gibbs energy, and entropy on one J/kmol basis; the loader rejects unbalanced stoichiometry and reaction heats inconsistent with those formation records. `conversion_reactor` reproduces the component material balance before product flashing. DWSIM writes separate vapor and liquid reactor outlets, so their aggregated trace-component flows use a documented `2e-7` reference-flash tolerance while aggregate total molar flow retains a `1e-9` gate. Reactor phase splitting, Chao-Seader thermodynamics, and adiabatic outlet-temperature parity remain separate unsupported calculations.
+
 ## Phase 7 and 8 U0 status
 
 The Python kernel implements immutable material and energy streams; mixer, splitter, heater, cooler, valve, and equilibrium separator calculations; and deterministic acyclic flowsheet execution. `tests/golden/u0-pr-c1-c5.json` is a repeatable DWSIM 9.0.4 PR flowsheet capture covering methane and n-pentane feeds, mixer, heater, valve, and separator. `tests/test_flowsheets.py` matches the mixer, heater, valve, and phase-product stream temperature, pressure, and total molar flow to `1e-5` relative. Phase-product flow uses `1e-4` relative because DWSIM's default flash convergence leaves a documented phase-split difference. The Python catalog key is `N-pentane`; it is mapped explicitly to DWSIM's captured `n-Pentane` record.

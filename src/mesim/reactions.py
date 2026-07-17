@@ -1,0 +1,140 @@
+"""Versioned reaction definitions and thermochemistry."""
+import json
+import math
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from pathlib import Path
+
+from .errors import ValidationError
+
+
+@dataclass(frozen=True, slots=True)
+class ReactionProvenance:
+    source: str
+    source_revision: str
+    selection: str
+    imported_utc: str
+
+
+@dataclass(frozen=True, slots=True)
+class CompoundThermochemistry:
+    compound_id: str
+    elements: tuple[tuple[str, float], ...]
+    formation_temperature_k: float
+    ideal_gas_formation_enthalpy_j_per_kmol: float
+    ideal_gas_formation_gibbs_energy_j_per_kmol: float
+    ideal_gas_formation_entropy_j_per_kmol_k: float
+
+
+@dataclass(frozen=True, slots=True)
+class ReactionDefinition:
+    id: str
+    name: str
+    base_reactant: str
+    phase: str
+    stoichiometry: tuple[tuple[str, float], ...]
+    reaction_heat_j_per_kmol: float
+    conversion_fraction: float
+
+
+@dataclass(frozen=True, slots=True)
+class ReactionData:
+    thermochemistry: tuple[CompoundThermochemistry, ...]
+    reactions: tuple[ReactionDefinition, ...]
+    provenance: ReactionProvenance
+
+
+def _property(record: dict, name: str, unit: str) -> float:
+    value = record[name]["value"]
+    if record[name]["unit"] != unit:
+        raise ValidationError(f"{name} must use {unit}")
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        raise ValidationError(f"{name} must be finite numeric data")
+    return float(value)
+
+
+def load_reaction_data(path: str | Path) -> ReactionData:
+    try:
+        raw = json.loads(Path(path).read_text(encoding="utf-8-sig"))
+        if raw["schema_version"] != "reaction-data-1":
+            raise ValidationError("unsupported reaction data schema")
+        provenance = ReactionProvenance(**raw["provenance"])
+        thermochemistry = tuple(
+            CompoundThermochemistry(
+                record["compound_id"],
+                tuple((element, float(count)) for element, count in record["elements"].items()),
+                _property(record, "formation_temperature", "K"),
+                _property(record, "ideal_gas_formation_enthalpy", "J/kmol"),
+                _property(record, "ideal_gas_formation_gibbs_energy", "J/kmol"),
+                _property(record, "ideal_gas_formation_entropy", "J/kmol/K"),
+            )
+            for record in raw["thermochemistry"]
+        )
+        reactions = tuple(
+            ReactionDefinition(
+                record["id"], record["name"], record["base_reactant"], record["phase"],
+                tuple((compound, float(coefficient)) for compound, coefficient in record["stoichiometry"].items()),
+                _property(record, "reaction_heat", "J/kmol"),
+                float(record["conversion_percent"]) / 100.0,
+            )
+            for record in raw["reactions"]
+        )
+    except ValidationError:
+        raise
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValidationError(f"invalid reaction data: {error}") from error
+
+    provenance_values = (
+        provenance.source, provenance.source_revision,
+        provenance.selection, provenance.imported_utc,
+    )
+    if not all(isinstance(value, str) and value for value in provenance_values):
+        raise ValidationError("reaction provenance fields must be non-empty strings")
+    try:
+        imported = datetime.fromisoformat(provenance.imported_utc)
+    except ValueError as error:
+        raise ValidationError("reaction provenance imported_utc must be an ISO 8601 timestamp") from error
+    if not provenance.imported_utc.endswith("Z") or imported.utcoffset() != timedelta(0):
+        raise ValidationError("reaction provenance imported_utc must be UTC")
+    if len({record.compound_id for record in thermochemistry}) != len(thermochemistry):
+        raise ValidationError("reaction thermochemistry compound IDs must be unique")
+
+    thermo_by_id = {record.compound_id: record for record in thermochemistry}
+    for record in thermochemistry:
+        if not record.compound_id or not record.elements:
+            raise ValidationError("reaction thermochemistry requires a compound ID and explicit elements")
+        if record.formation_temperature_k <= 0.0:
+            raise ValidationError("formation temperature must be positive")
+        for element, count in record.elements:
+            if not element or not math.isfinite(count) or count <= 0.0 or not count.is_integer():
+                raise ValidationError("element counts must be positive integers")
+
+    if len({reaction.id for reaction in reactions}) != len(reactions):
+        raise ValidationError("reaction IDs must be unique")
+    for reaction in reactions:
+        stoichiometry = dict(reaction.stoichiometry)
+        if not reaction.id or not reaction.name or reaction.phase not in {"mixture", "vapor", "liquid", "solid"}:
+            raise ValidationError("reaction identity and phase are invalid")
+        if len(stoichiometry) < 2 or any(not math.isfinite(value) or value == 0.0 for value in stoichiometry.values()):
+            raise ValidationError("reaction stoichiometry requires finite non-zero coefficients")
+        if reaction.base_reactant not in stoichiometry or stoichiometry[reaction.base_reactant] >= 0.0:
+            raise ValidationError("reaction base reactant must have a negative coefficient")
+        if not 0.0 <= reaction.conversion_fraction <= 1.0:
+            raise ValidationError("reaction conversion must be between zero and one")
+        if any(compound not in thermo_by_id for compound in stoichiometry):
+            raise ValidationError("reaction stoichiometry is missing explicit thermochemistry")
+        elements = {element for compound in stoichiometry for element, _ in thermo_by_id[compound].elements}
+        for element in elements:
+            balance = math.fsum(
+                coefficient * dict(thermo_by_id[compound].elements).get(element, 0.0)
+                for compound, coefficient in reaction.stoichiometry
+            )
+            if not math.isclose(balance, 0.0, rel_tol=0.0, abs_tol=1.0e-12):
+                raise ValidationError(f"reaction {reaction.id} is not balanced for {element}")
+        calculated_heat = math.fsum(
+            coefficient * thermo_by_id[compound].ideal_gas_formation_enthalpy_j_per_kmol
+            for compound, coefficient in reaction.stoichiometry
+        )
+        if not math.isclose(calculated_heat, reaction.reaction_heat_j_per_kmol, rel_tol=1.0e-12, abs_tol=1.0e-6):
+            raise ValidationError(f"reaction {reaction.id} heat does not match formation enthalpies")
+    return ReactionData(thermochemistry, reactions, provenance)
