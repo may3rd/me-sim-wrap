@@ -1119,6 +1119,39 @@ class HydraulicsTest(unittest.TestCase):
         self.assertTrue(math.isclose(profile.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
         self.assertTrue(math.isclose(profile.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3, abs_tol=35.0))
 
+        catalog = {compound.id: compound for compound in load_compounds(root_path / "data/compounds/v1.json")}
+        correlation_catalog = {record.compound_id: record for record in load_correlations(root_path / "data/correlations/ideal-v1.json")}
+        transport_catalog = {record.compound_id: record for record in load_transport_correlations(root_path / "data/correlations/transport-v1.json")}
+        calculated = pipe_estimated_htc_air_pr_calculated_profile(
+            pipe["HydraulicSegment,1,Results,2,InitialTemperature"],
+            pipe["HydraulicSegment,1,Results,2,InitialPressure"], external_temperature,
+            (catalog["N-pentane"], catalog["Ethane"]),
+            (0.952380952380952, 0.0476190476190476),
+            load_pr_interactions(root_path / "data/interactions/pr-v1.json"),
+            (correlation_catalog["N-pentane"], correlation_catalog["Ethane"]),
+            (transport_catalog["N-pentane"], transport_catalog["Ethane"]),
+            feed["PROP_MS_3"] / 1000.0,
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},InitialPressure"] for index in range(3, 7)),
+            inner_diameter_m, outer_diameter_m, 4.5e-5,
+            (segment_length_m,) * 4, external_air_velocity,
+            insulation_thickness_m, insulation_conductivity,
+            solar_irradiation, absorption_efficiency, feed["PROP_MS_4"],
+            allow_transport_extrapolation=True,
+        )
+        self.assertEqual(calculated.segment_absorbed_radiation_w, (absorbed_radiation,) * 4)
+        self.assertEqual(len(calculated.liquid_properties), 4)
+        for index, result in enumerate(calculated.segment_results, 2):
+            self.assertTrue(math.isclose(
+                result.heat_transfer_w,
+                pipe[f"HydraulicSegment,1,Results,{index},HeatTransfer"] * 1000.0,
+                rel_tol=3e-3,
+            ))
+        self.assertTrue(math.isclose(calculated.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(
+            calculated.heat_transfer_w, -energy["PROP_ES_0"] * 1000.0,
+            rel_tol=2e-3, abs_tol=35.0,
+        ))
+
     def test_estimated_htc_air_rejects_invalid_inputs(self):
         with self.assertRaises(ValidationError):
             pipe_estimated_htc_air(300.0, 350.0, 0.1, 0.09, 4.5e-5, 2.0, 2_000.0, 0.1, 0.001, 700.0, 2.0)
