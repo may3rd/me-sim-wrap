@@ -29,6 +29,13 @@ class PipePressureDrop:
 
 
 @dataclass(frozen=True, slots=True)
+class PipeThermalResult:
+    area_m2: float
+    outlet_temperature_k: float
+    heat_transfer_w: float
+
+
+@dataclass(frozen=True, slots=True)
 class OrificePressureDrop:
     reynolds: float
     discharge_coefficient: float
@@ -307,6 +314,45 @@ def minor_loss_pressure_drop(loss_coefficient: float, density_kg_m3: float, velo
     if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0.0 for value, _ in values):
         raise ValidationError("fitting loss coefficient, density, and velocity must be finite and non-negative")
     return loss_coefficient * density_kg_m3 * velocity_m_s**2 / 2.0
+
+
+def pipe_defined_htc_heat_transfer(
+    inlet_temperature_k: float, external_temperature_k: float, overall_htc_w_m2_k: float,
+    outer_diameter_m: float, length_m: float, mass_flow_kg_s: float, heat_capacity_j_kg_k: float,
+) -> PipeThermalResult:
+    """Constant-property pipe heat transfer for a defined external temperature and overall HTC."""
+    positive = (
+        (inlet_temperature_k, "pipe inlet temperature"),
+        (external_temperature_k, "pipe external temperature"),
+        (outer_diameter_m, "pipe outer diameter"),
+        (length_m, "pipe length"),
+        (mass_flow_kg_s, "pipe mass flow"),
+        (heat_capacity_j_kg_k, "pipe heat capacity"),
+    )
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0.0
+        for value, _ in positive
+    ):
+        raise ValidationError("pipe thermal temperatures, geometry, flow, and heat capacity must be finite and positive")
+    if (
+        isinstance(overall_htc_w_m2_k, bool)
+        or not isinstance(overall_htc_w_m2_k, (int, float))
+        or not math.isfinite(overall_htc_w_m2_k)
+        or overall_htc_w_m2_k < 0.0
+    ):
+        raise ValidationError("pipe overall heat-transfer coefficient must be finite and non-negative")
+
+    area = math.pi * outer_diameter_m * length_m
+    if overall_htc_w_m2_k == 0.0 or inlet_temperature_k == external_temperature_k:
+        return PipeThermalResult(area, inlet_temperature_k, 0.0)
+    capacity_rate = mass_flow_kg_s * heat_capacity_j_kg_k
+    effectiveness = -math.expm1(-overall_htc_w_m2_k * area / capacity_rate)
+    temperature_change = (external_temperature_k - inlet_temperature_k) * effectiveness
+    return PipeThermalResult(
+        area,
+        inlet_temperature_k + temperature_change,
+        capacity_rate * temperature_change,
+    )
 
 
 def pipe_pressure_drop(

@@ -10,7 +10,7 @@ from zipfile import ZipFile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_pressure_drop
+from mesim.unitops.hydraulics import api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_heat_transfer, pipe_pressure_drop
 
 
 class HydraulicsTest(unittest.TestCase):
@@ -149,6 +149,51 @@ class HydraulicsTest(unittest.TestCase):
 
         self.assertTrue(math.isclose(friction, values["PressureDropFriction"], rel_tol=1e-5))
         self.assertTrue(math.isclose(static, values["PressureDropStatic"], rel_tol=1e-5))
+
+    def test_defined_htc_pipe_matches_captured_dwsim_thermal_case(self):
+        golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-thermal-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        pipe = {item["property"]: item["value"]["value"] for item in objects["PIPE-1"]["properties"]}
+        feed = {item["property"]: item["value"]["value"] for item in objects["PIPE-FEED"]["properties"]}
+        product = {item["property"]: item["value"]["value"] for item in objects["PIPE-PRODUCT"]["properties"]}
+        energy = {item["property"]: item["value"]["value"] for item in objects["E1"]["properties"]}
+        with ZipFile(Path(__file__).parents[1] / "tests/u3-pipe-thermal-liquid-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
+        source = next(item for item in root.findall("./SimulationObjects/SimulationObject") if item.findtext("CalculateHeatBalance") == "true")
+        section = source.find("./Profile/Sections/Section")
+        outer_diameter_m = float(section.findtext("DE")) * 0.0254
+        segment_length_m = float(section.findtext("Comprimento")) / int(section.findtext("Incrementos"))
+        overall_htc = pipe["ThermalProfile,OverallHTC"]
+        external_temperature = pipe["ThermalProfile,ExternalTemperatureDefinedHTC"]
+
+        for index in range(1, 6):
+            prefix = f"HydraulicSegment,1,Results,{index},"
+            result = pipe_defined_htc_heat_transfer(
+                pipe[prefix + "InitialTemperature"], external_temperature, overall_htc,
+                outer_diameter_m, segment_length_m, feed["PROP_MS_2"],
+                pipe[prefix + "HeatCapacityLiquid"] * 1_000.0,
+            )
+            self.assertTrue(math.isclose(result.heat_transfer_w, pipe[prefix + "HeatTransfer"] * 1_000.0, rel_tol=3e-3))
+
+        temperature = pipe["HydraulicSegment,1,Results,2,InitialTemperature"]
+        total_heat = 0.0
+        for index in range(2, 6):
+            prefix = f"HydraulicSegment,1,Results,{index},"
+            result = pipe_defined_htc_heat_transfer(
+                temperature, external_temperature, overall_htc, outer_diameter_m,
+                segment_length_m, feed["PROP_MS_2"], pipe[prefix + "HeatCapacityLiquid"] * 1_000.0,
+            )
+            temperature = result.outlet_temperature_k
+            total_heat += result.heat_transfer_w
+
+        self.assertTrue(math.isclose(temperature, product["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(total_heat, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3))
+
+    def test_defined_htc_pipe_rejects_invalid_inputs(self):
+        with self.assertRaises(ValidationError):
+            pipe_defined_htc_heat_transfer(300.0, 350.0, 25.0, 0.0, 20.0, 10.0, 2_000.0)
+        with self.assertRaises(ValidationError):
+            pipe_defined_htc_heat_transfer(300.0, 350.0, -1.0, 0.1, 20.0, 10.0, 2_000.0)
 
     def test_single_phase_pipe_rejects_invalid_geometry_and_properties(self):
         with self.assertRaises(ValidationError):

@@ -62,7 +62,8 @@ thermodynamics.
 | Streams, mixer, splitter, heater, cooler, valve, equilibrium separator | Done (U0) |
 | Acyclic flowsheet execution | Done |
 | HTTP API (`/v1/*`) | Done (internal alpha) |
-| Reactors, columns, hydraulics, dynamics | Not yet |
+| Hydraulics | Partial (U3: pipes, fittings, orifice, two-phase correlations, relief sizing) |
+| Reactors, columns, dynamics | Not yet |
 
 See [`docs/compatibility.md`](docs/compatibility.md) for the full matrix and current
 parity/difference notes.
