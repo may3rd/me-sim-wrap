@@ -66,6 +66,7 @@ thermodynamics.
 | Reactors | Partial (U4: conversion, simultaneous vapor equilibrium reactions, and vapor Gibbs minimization) |
 | Columns | Partial (U6/U7: shortcut, fixed-K absorber, and fixed-thermodynamic rigorous-column gates) |
 | Dynamics and controls | Partial (U9: holdup balances, fixed/adaptive ODE paths, tank/PID DWSIM parity, lumped HX, dynamic CSTR) |
+| Specialty energy | Partial (U10: solar panel, wind turbine, and hydroelectric turbine source-equation parity) |
 
 See [`docs/compatibility.md`](docs/compatibility.md) for the full matrix and current
 parity/difference notes.

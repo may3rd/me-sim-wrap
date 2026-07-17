@@ -212,6 +212,14 @@ The optional `-CaptureColumnProfiles` reference-capture switch preserves DWSIM's
 
 The same phase adds equal-and-opposite UA heat transfer for a two-holdup lumped heat exchanger and a dynamic CSTR step driven by explicit stoichiometry, reaction extents, and reaction enthalpies. Unit gates close their total energy and component balances at floating-point precision. Multiphase dynamic flashes, pressure-flow networks, equipment geometry beyond this lumped tank, adaptive event location, and a production DAE solver remain unsupported.
 
+## Phase 18 specialty energy status
+
+`tests/u10-solar-panel.dwxmz`, `tests/u10-wind-turbine.dwxmz`, and `tests/u10-hydroelectric-turbine.dwxmz` freeze DWSIM 10's official renewable-energy samples; the solar case was solved and saved again through the executable before the gate was added. `specialty.py` implements the corresponding vendored DWSIM source equations with all weather and thermodynamic properties passed explicitly. It contains no live weather lookup or hidden manufacturer curve.
+
+The saved global solar irradiation of `0.810493563416576 kW/m2`, one square-metre panel, and 15% efficiency produce `0.121574034512486 kW`. The wind gate uses the saved `1.17454042760979 kg/m3` humid-air density and `5.6 km/h` wind speed with DWSIM's `8/27` coefficient, ten square metres of disk area, 50 turbines, and 80% downstream efficiency to reproduce `0.654969046052182 kW` theoretical and `0.523975236841745 kW` generated power. The hydro gate derives volumetric flow from the saved mass flow and liquid density, adds static and velocity head with DWSIM's `9.8 m/s2` gravity, and matches `7.60872279398433 kW`; its outlet enthalpy decrement closes shaft power at floating-point precision.
+
+These gates are source-equation parity, not equipment design or energy-yield forecasts. Site resource distributions, wind power curves and cut-in/cut-out behavior, PV temperature/angle/degradation effects, hydraulic losses beyond the supplied efficiency, water electrolyzers, and PEM fuel cells remain unsupported. Manufacturer-specific constants must be versioned inputs before any of those models are added.
+
 ## Phase 7 and 8 U0 status
 
 The Python kernel implements immutable material and energy streams; mixer, splitter, heater, cooler, valve, and equilibrium separator calculations; and deterministic acyclic flowsheet execution. `tests/golden/u0-pr-c1-c5.json` is a repeatable DWSIM 9.0.4 PR flowsheet capture covering methane and n-pentane feeds, mixer, heater, valve, and separator. `tests/test_flowsheets.py` matches the mixer, heater, valve, and phase-product stream temperature, pressure, and total molar flow to `1e-5` relative. Phase-product flow uses `1e-4` relative because DWSIM's default flash convergence leaves a documented phase-split difference. The Python catalog key is `N-pentane`; it is mapped explicitly to DWSIM's captured `n-Pentane` record.
