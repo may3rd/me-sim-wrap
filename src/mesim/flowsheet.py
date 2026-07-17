@@ -136,6 +136,31 @@ def solve_recycle(
     )
 
 
+def solve_energy_recycle(
+    evaluate_duty_w: Callable[[float], float],
+    initial_duty_w: float,
+    scale_w: float,
+    tolerance_w: float,
+    damping: float = 1.0,
+    max_iterations: int = 100,
+) -> RecycleResult:
+    """Solve a scalar energy-stream tear in watts by direct substitution."""
+    if not callable(evaluate_duty_w):
+        raise ValidationError("energy recycle evaluation must be callable")
+
+    def evaluate(values: tuple[float, ...]) -> tuple[float, ...]:
+        return (evaluate_duty_w(values[0]),)
+
+    return solve_recycle(
+        evaluate,
+        initial_guess=(initial_duty_w,),
+        scales=(scale_w,),
+        tolerances=(tolerance_w,),
+        damping=damping,
+        max_iterations=max_iterations,
+    )
+
+
 def _validate(flowsheet: Flowsheet) -> dict[str, UnitOperation]:
     units = {unit.tag: unit for unit in flowsheet.units}
     if not units or len(units) != len(flowsheet.units):

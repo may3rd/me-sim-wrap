@@ -11,7 +11,7 @@ from zipfile import ZipFile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim.errors import ValidationError
-from mesim.flowsheet import RecycleConvergenceError, solve_recycle
+from mesim.flowsheet import RecycleConvergenceError, solve_energy_recycle, solve_recycle
 
 
 ROOT = Path(__file__).parents[1]
@@ -120,6 +120,92 @@ class DWSIMMaterialRecycleTest(unittest.TestCase):
         self.assertEqual(saved.findtext("ConvergenceParameters/Temperatura"), "1")
         self.assertEqual(saved.findtext("ConvergenceParameters/Pressao"), "0.1")
         self.assertEqual(saved.findtext("ConvergenceParameters/VazaoMassica"), "0.01")
+
+
+class DWSIMEnergyRecycleTest(unittest.TestCase):
+    def test_scalar_energy_recycle_records_complete_watt_basis_history(self):
+        result = solve_energy_recycle(
+            lambda duty_w: 200_000.0 + 0.25 * duty_w,
+            initial_duty_w=0.0,
+            scale_w=300_000.0,
+            tolerance_w=1.0e-6,
+            damping=0.8,
+        )
+
+        self.assertTrue(math.isclose(result.values[0], 800_000.0 / 3.0, abs_tol=1.0e-6))
+        self.assertEqual(result.algorithm, "direct_substitution")
+        self.assertGreater(len(result.history), 1)
+        self.assertEqual(
+            tuple(item.iteration for item in result.history),
+            tuple(range(1, len(result.history) + 1)),
+        )
+        self.assertTrue(all(item.damping == 0.8 for item in result.history))
+        self.assertLessEqual(abs(result.history[-1].residual[0]), 1.0e-6)
+
+    def test_turboexpander_energy_recycle_is_repeatable_and_closed(self):
+        golden = json.loads(
+            (ROOT / "tests/golden/u8-energy-recycle-turboexpander.json").read_text(
+                encoding="utf-8-sig"
+            )
+        )
+        repeat = json.loads(
+            (ROOT / "tests/golden/u8-energy-recycle-turboexpander-repeat.json").read_text(
+                encoding="utf-8-sig"
+            )
+        )
+        normalized_golden, normalized_repeat = copy.deepcopy(golden), copy.deepcopy(repeat)
+        normalized_golden["source"].pop("captured_utc")
+        normalized_repeat["source"].pop("captured_utc")
+        self.assertEqual(normalized_golden, normalized_repeat)
+        self.assertTrue(golden["outputs"]["solve"]["success"])
+        self.assertFalse(golden["outputs"]["solve"]["errors"])
+        self.assertFalse(any(
+            property_record["read_error"]
+            for object_record in golden["outputs"]["objects_after"]
+            for property_record in object_record["properties"]
+        ))
+
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {item["property"]: item["value"]["value"] for item in record["properties"]}
+            for tag, record in objects.items()
+        }
+        inlet_kw = properties["ESTR-004"]["PROP_ES_0"]
+        outlet_kw = properties["ESTR-003"]["PROP_ES_0"]
+        expander_kw = properties["X-1 (TE)"]["PROP_TU_3"]
+        compressor_kw = properties["C-1 (TE)"]["PROP_CO_3"]
+        tolerance_kw = properties["EREC-116"]["PROP_ER_1"]
+        residual_kw = properties["EREC-116"]["PROP_ER_2"]
+
+        self.assertEqual(inlet_kw, outlet_kw)
+        self.assertTrue(math.isclose(
+            residual_kw, expander_kw - compressor_kw, rel_tol=0.0, abs_tol=1.0e-10,
+        ))
+        self.assertLessEqual(abs(residual_kw), tolerance_kw)
+
+        result = solve_energy_recycle(
+            lambda _: inlet_kw * 1000.0,
+            initial_duty_w=outlet_kw * 1000.0,
+            scale_w=400_000.0,
+            tolerance_w=tolerance_kw * 1000.0,
+            max_iterations=100,
+        )
+        self.assertEqual(result.values, (inlet_kw * 1000.0,))
+        self.assertEqual(len(result.history), 1)
+        self.assertEqual(result.history[0].residual, (0.0,))
+
+        with ZipFile(ROOT / "tests/u8-energy-recycle-turboexpander.dwxmz") as archive:
+            root = ElementTree.fromstring(
+                archive.read(next(name for name in archive.namelist() if name.endswith(".xml")))
+            )
+        saved = next(
+            record for record in root.findall(".//SimulationObject")
+            if record.findtext("Type") == "DWSIM.UnitOperations.SpecialOps.EnergyRecycle"
+        )
+        self.assertEqual(saved.findtext("AccelerationMethod"), "None")
+        self.assertEqual(saved.findtext("IterationsTaken"), "1")
+        self.assertEqual(saved.findtext("MaximumIterations"), "100")
+        self.assertLessEqual(abs(float(saved.find("ConvHist").attrib["EnergyE"])), tolerance_kw)
 
 
 if __name__ == "__main__":
