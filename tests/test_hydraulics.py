@@ -10,7 +10,7 @@ from zipfile import ZipFile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_pressure_drop
+from mesim.unitops.hydraulics import api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_pressure_drop, pipe_pressure_drop_profile
 
 
 class HydraulicsTest(unittest.TestCase):
@@ -138,17 +138,25 @@ class HydraulicsTest(unittest.TestCase):
 
     def test_single_phase_pipe_matches_captured_dwsim_segment_drops(self):
         golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
-        pipe = next(item for item in golden["inputs"]["objects_before"] if item["tag"] == "PIPE-1")
-        values = {item["property"]: item["value"]["value"] for item in pipe["properties"]}
-        friction = static = 0.0
-        for index in range(1, 6):
-            prefix = f"HydraulicSegment,1,Results,{index},"
-            result = pipe_pressure_drop(0.10226, 20.0, 2.0, 4.5e-5, values[prefix + "VolumetricFlowLiquid"], values[prefix + "DensityLiquid"], values[prefix + "ViscosityLiquid"])
-            friction += result.friction_drop_pa
-            static += result.static_drop_pa
+        objects = {item["tag"]: item for item in golden["inputs"]["objects_before"]}
+        pipe = {item["property"]: item["value"]["value"] for item in objects["PIPE-1"]["properties"]}
+        feed = {item["property"]: item["value"]["value"] for item in objects["PIPE-FEED"]["properties"]}
+        product = {item["property"]: item["value"]["value"] for item in objects["PIPE-PRODUCT"]["properties"]}
+        profile = pipe_pressure_drop_profile(
+            feed["PROP_MS_1"], 0.10226, 4.5e-5, (20.0,) * 5, (2.0,) * 5,
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},VolumetricFlowLiquid"] for index in range(1, 6)),
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},DensityLiquid"] for index in range(1, 6)),
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},ViscosityLiquid"] for index in range(1, 6)),
+        )
 
-        self.assertTrue(math.isclose(friction, values["PressureDropFriction"], rel_tol=1e-5))
-        self.assertTrue(math.isclose(static, values["PressureDropStatic"], rel_tol=1e-5))
+        self.assertEqual(len(profile.segment_results), 5)
+        for index, result in enumerate(profile.segment_results, 1):
+            prefix = f"HydraulicSegment,1,Results,{index},"
+            self.assertTrue(math.isclose(result.friction_drop_pa, pipe[prefix + "PressureDropFriction"], rel_tol=1e-5))
+            self.assertTrue(math.isclose(result.static_drop_pa, pipe[prefix + "PressureDropHydrostatic"], rel_tol=1e-5))
+        self.assertTrue(math.isclose(profile.friction_drop_pa, pipe["PressureDropFriction"], rel_tol=1e-5))
+        self.assertTrue(math.isclose(profile.static_drop_pa, pipe["PressureDropStatic"], rel_tol=1e-5))
+        self.assertTrue(math.isclose(profile.outlet_pressure_pa, product["PROP_MS_1"], rel_tol=1e-5))
 
     def test_defined_htc_pipe_matches_captured_dwsim_thermal_case(self):
         golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-thermal-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
@@ -203,3 +211,9 @@ class HydraulicsTest(unittest.TestCase):
             pipe_pressure_drop(0.1, 100.0, 101.0, 0.0, 0.01, 1000.0, 0.001)
         with self.assertRaises(ValidationError):
             pipe_pressure_drop(0.1, 100.0, 0.0, 0.0, 0.01, 1000.0, 0.0)
+        with self.assertRaises(ValidationError):
+            pipe_pressure_drop_profile(500_000.0, 0.1, 4.5e-5, (), (), (), (), ())
+        with self.assertRaises(ValidationError):
+            pipe_pressure_drop_profile(500_000.0, 0.1, 4.5e-5, (20.0,), (2.0,), (0.01,), (700.0,), (0.001, 0.001))
+        with self.assertRaises(ValidationError):
+            pipe_pressure_drop_profile(100.0, 0.1, 4.5e-5, (20.0,), (2.0,), (0.01,), (700.0,), (0.001,))

@@ -29,6 +29,15 @@ class PipePressureDrop:
 
 
 @dataclass(frozen=True, slots=True)
+class PipePressureProfileResult:
+    segment_results: tuple[PipePressureDrop, ...]
+    outlet_pressure_pa: float
+    friction_drop_pa: float
+    static_drop_pa: float
+    total_drop_pa: float
+
+
+@dataclass(frozen=True, slots=True)
 class PipeThermalResult:
     area_m2: float
     outlet_temperature_k: float
@@ -418,3 +427,50 @@ def pipe_pressure_drop(
         friction_drop = friction * length_m / diameter_m * velocity**2 * density_kg_m3 / 2.0
     static_drop = density_kg_m3 * 9.8 * elevation_m
     return PipePressureDrop(velocity, reynolds, friction, friction_drop, static_drop, friction_drop + static_drop)
+
+
+def pipe_pressure_drop_profile(
+    inlet_pressure_pa: float, diameter_m: float, roughness_m: float,
+    segment_lengths_m: tuple[float, ...], segment_elevations_m: tuple[float, ...],
+    volumetric_flows_m3_s: tuple[float, ...], densities_kg_m3: tuple[float, ...],
+    viscosities_pa_s: tuple[float, ...],
+) -> PipePressureProfileResult:
+    """Aggregate a single-phase pressure profile from supplied segment states."""
+    if (
+        isinstance(inlet_pressure_pa, bool)
+        or not isinstance(inlet_pressure_pa, (int, float))
+        or not math.isfinite(inlet_pressure_pa)
+        or inlet_pressure_pa <= 0.0
+    ):
+        raise ValidationError("pipe inlet pressure must be finite and positive")
+    try:
+        sequences = tuple(
+            tuple(values)
+            for values in (
+                segment_lengths_m, segment_elevations_m, volumetric_flows_m3_s,
+                densities_kg_m3, viscosities_pa_s,
+            )
+        )
+    except TypeError as exc:
+        raise ValidationError("pipe pressure profile inputs must be finite sequences") from exc
+    if not sequences[0]:
+        raise ValidationError("pipe pressure profile must contain at least one segment")
+    if any(len(values) != len(sequences[0]) for values in sequences[1:]):
+        raise ValidationError("pipe pressure profile inputs must have equal segment counts")
+
+    results = tuple(
+        pipe_pressure_drop(diameter_m, length_m, elevation_m, roughness_m, flow_m3_s, density_kg_m3, viscosity_pa_s)
+        for length_m, elevation_m, flow_m3_s, density_kg_m3, viscosity_pa_s in zip(*sequences)
+    )
+    friction_drop = math.fsum(item.friction_drop_pa for item in results)
+    static_drop = math.fsum(item.static_drop_pa for item in results)
+    total_drop = friction_drop + static_drop
+    if total_drop >= inlet_pressure_pa:
+        raise ValidationError("pipe pressure drop must remain below inlet absolute pressure")
+    return PipePressureProfileResult(
+        results,
+        inlet_pressure_pa - total_drop,
+        friction_drop,
+        static_drop,
+        total_drop,
+    )
