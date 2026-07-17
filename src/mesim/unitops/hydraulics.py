@@ -88,6 +88,8 @@ class PipeEstimatedHtcProfileResult:
     heat_transfer_w: float
     segment_absorbed_radiation_w: tuple[float, ...] = ()
     absorbed_radiation_w: float = 0.0
+    external_temperatures_k: tuple[float, ...] = ()
+    segment_start_distances_m: tuple[float, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -968,7 +970,8 @@ def pipe_estimated_htc_air_profile(
 
 
 def _pipe_estimated_htc_pr_profile(
-    inlet_temperature_k: float, inlet_pressure_pa: float, external_temperature_k: float,
+    inlet_temperature_k: float, inlet_pressure_pa: float,
+    external_temperatures_k: tuple[float, ...],
     compounds: tuple[Compound, ...], composition: tuple[float, ...],
     interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
     molar_flow_kmol_s: float, outlet_pressures_pa: tuple[float, ...],
@@ -977,12 +980,14 @@ def _pipe_estimated_htc_pr_profile(
     liquid_velocities_m_s: tuple[float, ...], heat_capacities_j_kg_k: tuple[float, ...],
     thermal_conductivities_w_m_k: tuple[float, ...], viscosities_pa_s: tuple[float, ...],
     densities_kg_m3: tuple[float, ...],
-    htc_builder: Callable[[float, float, float, float, float, float], PipeEstimatedHtc],
+    htc_builder: Callable[[float, float, float, float, float, float, float], PipeEstimatedHtc],
+    segment_start_distances_m: tuple[float, ...] = (),
 ) -> PipeEstimatedHtcProfileResult:
     """Advance a liquid PR enthalpy profile using a medium-specific HTC builder."""
     try:
         sequences = tuple(tuple(values) for values in (
-            outlet_pressures_pa, segment_lengths_m, liquid_velocities_m_s, heat_capacities_j_kg_k,
+            external_temperatures_k, outlet_pressures_pa, segment_lengths_m,
+            liquid_velocities_m_s, heat_capacities_j_kg_k,
             thermal_conductivities_w_m_k, viscosities_pa_s, densities_kg_m3,
         ))
     except TypeError as exc:
@@ -991,6 +996,12 @@ def _pipe_estimated_htc_pr_profile(
         raise ValidationError("estimated pipe HTC profile must contain at least one segment")
     if len({len(values) for values in sequences}) != 1:
         raise ValidationError("estimated pipe HTC profile property sequences must have equal counts")
+    try:
+        start_distances = tuple(segment_start_distances_m)
+    except TypeError as exc:
+        raise ValidationError("estimated pipe HTC profile start distances must be a finite sequence") from exc
+    if start_distances and len(start_distances) != len(sequences[0]):
+        raise ValidationError("estimated pipe HTC profile start distances must match the segment count")
     if (
         isinstance(molar_flow_kmol_s, bool)
         or not isinstance(molar_flow_kmol_s, (int, float))
@@ -999,7 +1010,7 @@ def _pipe_estimated_htc_pr_profile(
     ):
         raise ValidationError("pipe PR profile molar flow must be finite and positive")
 
-    pressures, lengths, velocities, heat_capacities, conductivities, viscosities, densities = sequences
+    external_temperatures, pressures, lengths, velocities, heat_capacities, conductivities, viscosities, densities = sequences
     temperature = inlet_temperature_k
     htc_results = []
     thermal_results = []
@@ -1007,8 +1018,9 @@ def _pipe_estimated_htc_pr_profile(
     if not inlet_flash.report.converged or inlet_flash.phase != "liquid":
         raise ValidationError("estimated pipe HTC PR profile requires a converged liquid inlet flash")
     enthalpy = flash_enthalpy(compounds, correlations, inlet_flash)
-    for outlet_pressure, length, velocity, heat_capacity, conductivity, viscosity, density in zip(
-        pressures, lengths, velocities, heat_capacities, conductivities, viscosities, densities,
+    for external_temperature, outlet_pressure, length, velocity, heat_capacity, conductivity, viscosity, density in zip(
+        external_temperatures, pressures, lengths, velocities, heat_capacities,
+        conductivities, viscosities, densities,
     ):
         area = math.pi * outer_diameter_m * length
 
@@ -1020,27 +1032,44 @@ def _pipe_estimated_htc_pr_profile(
                 raise ValidationError("estimated pipe HTC PR profile left its converged liquid domain")
             trial_enthalpy = flash_enthalpy(compounds, correlations, trial_flash)
             trial_htc = htc_builder(
-                (temperature + trial_temperature) / 2.0, velocity, heat_capacity,
-                conductivity, viscosity, density,
+                external_temperature, (temperature + trial_temperature) / 2.0,
+                velocity, heat_capacity, conductivity, viscosity, density,
             )
             if trial_temperature == temperature:
-                lmtd = external_temperature_k - temperature
-            elif trial_temperature == external_temperature_k:
+                lmtd = external_temperature - temperature
+            elif trial_temperature == external_temperature:
                 lmtd = 0.0
             else:
                 lmtd = (trial_temperature - temperature) / math.log(
-                    (external_temperature_k - temperature)
-                    / (external_temperature_k - trial_temperature)
+                    (external_temperature - temperature)
+                    / (external_temperature - trial_temperature)
                 )
             heat_transfer = trial_htc.overall_htc_w_m2_k * area * lmtd
             residual = molar_flow_kmol_s * (trial_enthalpy - enthalpy) - heat_transfer
             return trial_flash, trial_enthalpy, trial_htc, residual
 
-        low, high = sorted((temperature, external_temperature_k))
-        low_state = state_and_residual(low)
-        high_state = state_and_residual(high)
-        if low_state[3] * high_state[3] > 0.0:
-            raise ValidationError("pipe water PR energy balance has no temperature bracket")
+        bracket_temperature = temperature
+        bracket_state = state_and_residual(bracket_temperature)
+        bracket = None
+        for step in range(1, 129):
+            trial_temperature = temperature + (
+                external_temperature - temperature
+            ) * step / 128.0
+            try:
+                trial_state = state_and_residual(trial_temperature)
+            except ValidationError:
+                break
+            if bracket_state[3] * trial_state[3] <= 0.0:
+                endpoints = sorted(
+                    ((bracket_temperature, bracket_state), (trial_temperature, trial_state)),
+                    key=lambda item: item[0],
+                )
+                (low, low_state), (high, high_state) = endpoints
+                bracket = endpoints
+                break
+            bracket_temperature, bracket_state = trial_temperature, trial_state
+        if bracket is None:
+            raise ValidationError("estimated pipe HTC PR energy balance has no temperature bracket")
         for _ in range(80):
             midpoint = (low + high) / 2.0
             midpoint_state = state_and_residual(midpoint)
@@ -1064,6 +1093,7 @@ def _pipe_estimated_htc_pr_profile(
         math.fsum(item.area_m2 for item in segment_results), temperature,
         math.fsum(item.heat_transfer_w for item in segment_results),
         (0.0,) * len(segment_results), 0.0,
+        tuple(external_temperatures), start_distances,
     )
 
 
@@ -1085,7 +1115,8 @@ def pipe_estimated_htc_water_pr_profile(
 ) -> PipeEstimatedHtcProfileResult:
     """Advance a liquid PR enthalpy profile through external water."""
     def htc_builder(
-        temperature: float, velocity: float, heat_capacity: float,
+        _external_temperature: float, temperature: float,
+        velocity: float, heat_capacity: float,
         conductivity: float, viscosity: float, density: float,
     ) -> PipeEstimatedHtc:
         return pipe_estimated_htc_water(
@@ -1098,7 +1129,8 @@ def pipe_estimated_htc_water_pr_profile(
         )
 
     return _pipe_estimated_htc_pr_profile(
-        inlet_temperature_k, inlet_pressure_pa, external_temperature_k,
+        inlet_temperature_k, inlet_pressure_pa,
+        (external_temperature_k,) * len(segment_lengths_m),
         compounds, composition, interactions, correlations, molar_flow_kmol_s,
         outlet_pressures_pa, inner_diameter_m, outer_diameter_m, roughness_m,
         segment_lengths_m, liquid_velocities_m_s, heat_capacities_j_kg_k,
@@ -1122,7 +1154,8 @@ def pipe_estimated_htc_soil_pr_profile(
 ) -> PipeEstimatedHtcProfileResult:
     """Advance a buried liquid-pipe profile with PR enthalpy coupling."""
     def htc_builder(
-        temperature: float, velocity: float, heat_capacity: float,
+        _external_temperature: float, temperature: float,
+        velocity: float, heat_capacity: float,
         conductivity: float, viscosity: float, density: float,
     ) -> PipeEstimatedHtc:
         return pipe_estimated_htc_soil(
@@ -1133,12 +1166,91 @@ def pipe_estimated_htc_soil_pr_profile(
         )
 
     return _pipe_estimated_htc_pr_profile(
-        inlet_temperature_k, inlet_pressure_pa, external_temperature_k,
+        inlet_temperature_k, inlet_pressure_pa,
+        (external_temperature_k,) * len(segment_lengths_m),
         compounds, composition, interactions, correlations, molar_flow_kmol_s,
         outlet_pressures_pa, inner_diameter_m, outer_diameter_m, roughness_m,
         segment_lengths_m, liquid_velocities_m_s, heat_capacities_j_kg_k,
         thermal_conductivities_w_m_k, viscosities_pa_s, densities_kg_m3,
         htc_builder,
+    )
+
+
+def pipe_estimated_htc_air_pr_gradient_profile(
+    inlet_temperature_k: float, inlet_pressure_pa: float,
+    base_external_temperature_k: float, external_temperature_gradient_k_m: float,
+    start_distance_m: float,
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
+    molar_flow_kmol_s: float, outlet_pressures_pa: tuple[float, ...],
+    inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
+    segment_lengths_m: tuple[float, ...],
+    liquid_velocities_m_s: tuple[float, ...], heat_capacities_j_kg_k: tuple[float, ...],
+    thermal_conductivities_w_m_k: tuple[float, ...], viscosities_pa_s: tuple[float, ...],
+    densities_kg_m3: tuple[float, ...], external_air_velocity_m_s: float,
+    insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+) -> PipeEstimatedHtcProfileResult:
+    """Advance an estimated-air-HTC PR profile with DWSIM's ambient gradient rule."""
+    scalar_values = (
+        base_external_temperature_k, external_temperature_gradient_k_m, start_distance_m,
+    )
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value)
+        for value in scalar_values
+    ):
+        raise ValidationError("pipe ambient-gradient inputs must be finite numbers")
+    if base_external_temperature_k <= 0.0:
+        raise ValidationError("pipe base external temperature must be positive")
+    if start_distance_m < 0.0:
+        raise ValidationError("pipe ambient-gradient start distance must be non-negative")
+    try:
+        lengths = tuple(segment_lengths_m)
+    except TypeError as exc:
+        raise ValidationError("estimated pipe HTC segment lengths must be a finite sequence") from exc
+    if not lengths:
+        raise ValidationError("estimated pipe HTC profile must contain at least one segment")
+    if any(
+        isinstance(length, bool) or not isinstance(length, (int, float))
+        or not math.isfinite(length) or length <= 0.0
+        for length in lengths
+    ):
+        raise ValidationError("estimated pipe HTC segment lengths must be finite and positive")
+
+    distance = start_distance_m
+    start_distances = []
+    for index, length in enumerate(lengths):
+        if index:
+            distance += lengths[index - 1]
+        start_distances.append(distance)
+    external_temperatures = tuple(
+        base_external_temperature_k + external_temperature_gradient_k_m * distance
+        for distance in start_distances
+    )
+    if any(not math.isfinite(value) or value <= 0.0 for value in external_temperatures):
+        raise ValidationError("pipe ambient gradient produced a non-positive temperature")
+
+    def htc_builder(
+        external_temperature: float, temperature: float,
+        velocity: float, heat_capacity: float,
+        conductivity: float, viscosity: float, density: float,
+    ) -> PipeEstimatedHtc:
+        return pipe_estimated_htc_air(
+            temperature, external_temperature,
+            inner_diameter_m, outer_diameter_m, roughness_m,
+            velocity, heat_capacity, conductivity, viscosity, density,
+            external_air_velocity_m_s, insulation_thickness_m,
+            insulation_conductivity_w_m_k,
+        )
+
+    return _pipe_estimated_htc_pr_profile(
+        inlet_temperature_k, inlet_pressure_pa, external_temperatures,
+        compounds, composition, interactions, correlations, molar_flow_kmol_s,
+        outlet_pressures_pa, inner_diameter_m, outer_diameter_m, roughness_m,
+        lengths, liquid_velocities_m_s, heat_capacities_j_kg_k,
+        thermal_conductivities_w_m_k, viscosities_pa_s, densities_kg_m3,
+        htc_builder, tuple(start_distances),
     )
 
 
