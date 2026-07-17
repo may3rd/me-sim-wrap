@@ -20,6 +20,7 @@ from mesim.unitops.reactors import (
     conversion_reactor,
     equilibrium_reactor,
     gibbs_reactor,
+    plug_flow_reactor,
 )
 
 
@@ -32,6 +33,7 @@ DWSIM_GIBBS_COMPONENT_REL_TOL = 1.2e-3
 DWSIM_GIBBS_DUTY_REL_TOL = 2e-4
 DWSIM_CSTR_RATE_REL_TOL = 3e-5
 DWSIM_CSTR_STREAM_REL_TOL = 1.1e-3
+DWSIM_PFR_REL_TOL = 2e-4
 
 
 class ReactionDataTest(unittest.TestCase):
@@ -347,6 +349,94 @@ class CSTRReactorTest(unittest.TestCase):
                 (("Ethylene oxide", 1.0), ("Water", 1.0), ("Ethylene glycol", 0.0)),
                 kinetic, 350.0, 1.0, 0.0,
             )
+
+
+class PFRReactorTest(unittest.TestCase):
+    def test_ethylene_glycol_pfr_matches_repeatable_dwsim_case(self):
+        data = load_reaction_data(ROOT / "data/reactions/v1.json")
+        reaction = next(record for record in data.reactions if record.reaction_type == "kinetic")
+        golden = json.loads(
+            (ROOT / "tests/golden/u5-pfr-ethylene-glycol-raoult.json").read_text(encoding="utf-8-sig")
+        )
+        repeat = json.loads(
+            (ROOT / "tests/golden/u5-pfr-ethylene-glycol-raoult-repeat.json").read_text(encoding="utf-8-sig")
+        )
+        normalized_golden, normalized_repeat = copy.deepcopy(golden), copy.deepcopy(repeat)
+        normalized_golden["source"].pop("captured_utc")
+        normalized_repeat["source"].pop("captured_utc")
+        self.assertEqual(normalized_golden, normalized_repeat)
+        self.assertFalse(any(
+            property_record["read_error"]
+            for object_record in golden["outputs"]["objects_after"]
+            for property_record in object_record["properties"]
+        ))
+
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {item["property"]: item["value"]["value"] for item in objects[tag]["properties"]}
+            for tag in ("Feed", "Product", "Energy", "PFR-001")
+        }
+        compound_ids = ("Ethylene oxide", "Water", "Ethylene glycol")
+        inlet = tuple(
+            (compound_id, properties["Feed"][f"PROP_MS_104/{compound_id}"] / 1_000.0)
+            for compound_id in compound_ids
+        )
+        result = plug_flow_reactor(
+            inlet,
+            reaction,
+            properties["Feed"]["PROP_MS_0"],
+            properties["Product"]["PROP_MS_0"],
+            properties["PFR-001"]["PROP_PF_2"],
+            properties["Feed"]["PROP_MS_4"],
+            properties["Product"]["PROP_MS_4"],
+        )
+
+        expected_outlet = {
+            compound_id: properties["Product"][f"PROP_MS_104/{compound_id}"] / 1_000.0
+            for compound_id in compound_ids
+        }
+        for compound_id, actual in result.outlet_component_flows_kmol_s:
+            self.assertTrue(math.isclose(
+                actual, expected_outlet[compound_id],
+                rel_tol=DWSIM_PFR_REL_TOL, abs_tol=1.0e-12,
+            ))
+        # DWSIM labels these two properties as mol units, but their numeric values
+        # close the material and heat balances only when read as kmol/s and kmol/m3/s.
+        self.assertTrue(math.isclose(
+            result.extent_kmol_s,
+            properties["PFR-001"]["Ethylene Glycol Production: Reaction Extent"],
+            rel_tol=DWSIM_PFR_REL_TOL,
+        ))
+        self.assertTrue(math.isclose(
+            result.average_reaction_rate_kmol_m3_s,
+            properties["PFR-001"]["Ethylene Glycol Production: Reaction Rate"],
+            rel_tol=DWSIM_PFR_REL_TOL,
+        ))
+        self.assertTrue(math.isclose(
+            result.reference_reaction_heat_w / 1_000.0,
+            properties["PFR-001"]["Ethylene Glycol Production: Reaction Heat"],
+            rel_tol=DWSIM_PFR_REL_TOL,
+        ))
+        self.assertTrue(math.isclose(
+            dict(result.component_conversions)["Ethylene oxide"] * 100.0,
+            properties["PFR-001"]["Ethylene oxide: Conversion"],
+            rel_tol=DWSIM_PFR_REL_TOL,
+        ))
+        self.assertLess(result.material_balance_residual_kmol_s, 1.0e-15)
+        self.assertTrue(math.isclose(
+            result.total_molar_flow_kmol_s,
+            math.fsum(flow for _, flow in inlet) - result.extent_kmol_s,
+            rel_tol=0.0, abs_tol=1.0e-15,
+        ))
+
+    def test_pfr_rejects_nonkinetic_reaction_and_invalid_profile(self):
+        data = load_reaction_data(ROOT / "data/reactions/v1.json")
+        kinetic = next(record for record in data.reactions if record.reaction_type == "kinetic")
+        inlet = (("Ethylene oxide", 1.0), ("Water", 1.0), ("Ethylene glycol", 0.0))
+        with self.assertRaises(ValidationError):
+            plug_flow_reactor(inlet, data.reactions[0], 350.0, 350.0, 1.0, 0.001, 0.001)
+        with self.assertRaises(ValidationError):
+            plug_flow_reactor(inlet, kinetic, 350.0, 350.0, 1.0, 0.001, 0.0)
 
 
 class GibbsReactorTest(unittest.TestCase):

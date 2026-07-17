@@ -3,6 +3,7 @@ import math
 import sys
 from dataclasses import dataclass
 
+from scipy.integrate import solve_ivp
 from scipy.optimize import least_squares
 
 from ..compounds import Compound, PRInteractions
@@ -69,6 +70,21 @@ class CSTRResult:
     reference_reaction_heat_w: float
     material_rate_residual_kmol_s: float
     evaluations: int
+
+    @property
+    def total_molar_flow_kmol_s(self) -> float:
+        return math.fsum(flow for _, flow in self.outlet_component_flows_kmol_s)
+
+
+@dataclass(frozen=True, slots=True)
+class PFRResult:
+    outlet_component_flows_kmol_s: tuple[tuple[str, float], ...]
+    extent_kmol_s: float
+    average_reaction_rate_kmol_m3_s: float
+    component_conversions: tuple[tuple[str, float], ...]
+    reference_reaction_heat_w: float
+    material_balance_residual_kmol_s: float
+    integration_steps: int
 
     @property
     def total_molar_flow_kmol_s(self) -> float:
@@ -266,6 +282,112 @@ def continuous_stirred_tank_reactor(
         extent * reaction.reaction_heat_j_per_kmol,
         material_residual,
         solved.nfev,
+    )
+
+
+def plug_flow_reactor(
+    inlet_component_flows_kmol_s: tuple[tuple[str, float], ...],
+    reaction: ReactionDefinition,
+    inlet_temperature_k: float,
+    outlet_temperature_k: float,
+    reactor_volume_m3: float,
+    inlet_volumetric_flow_m3_s: float,
+    outlet_volumetric_flow_m3_s: float,
+    relative_tolerance: float = 1.0e-10,
+    absolute_tolerance: float = 1.0e-14,
+    max_step_m3: float | None = None,
+) -> PFRResult:
+    """Integrate one kinetic reaction over reactor volume with supplied T/Q endpoints."""
+    inlet_items = tuple(inlet_component_flows_kmol_s)
+    if not inlet_items or len({compound for compound, _ in inlet_items}) != len(inlet_items):
+        raise ValidationError("PFR inlet compound IDs must be non-empty and unique")
+    inlet: dict[str, float] = {}
+    for compound, flow in inlet_items:
+        if not isinstance(compound, str) or not compound:
+            raise ValidationError("PFR compound IDs must be non-empty strings")
+        if isinstance(flow, bool) or not isinstance(flow, (int, float)) or not math.isfinite(flow) or flow < 0.0:
+            raise ValidationError("PFR component flows must be finite and non-negative")
+        inlet[compound] = float(flow)
+    if reaction.reaction_type != "kinetic" or reaction.kinetics is None:
+        raise ValidationError("PFR requires a kinetic reaction")
+    if reaction.phase not in {"mixture", "liquid"}:
+        raise ValidationError("PFR currently supports mixture or liquid kinetic reactions")
+    scalars = (
+        inlet_temperature_k, outlet_temperature_k, reactor_volume_m3,
+        inlet_volumetric_flow_m3_s, outlet_volumetric_flow_m3_s,
+        relative_tolerance, absolute_tolerance,
+    )
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value <= 0.0
+        for value in scalars
+    ):
+        raise ValidationError("PFR state and integration tolerances must be finite and positive")
+    if max_step_m3 is not None and (
+        isinstance(max_step_m3, bool) or not isinstance(max_step_m3, (int, float))
+        or not math.isfinite(max_step_m3) or max_step_m3 <= 0.0
+    ):
+        raise ValidationError("PFR maximum step must be finite and positive")
+
+    stoichiometry = dict(reaction.stoichiometry)
+    if any(inlet.get(compound, 0.0) <= 0.0 for compound, coefficient in stoichiometry.items() if coefficient < 0.0):
+        raise ValidationError("PFR reaction requires every consumed compound to have positive inlet flow")
+    ordered_compounds = tuple(inlet) + tuple(compound for compound in stoichiometry if compound not in inlet)
+    initial = tuple(inlet.get(compound, 0.0) for compound in ordered_compounds)
+
+    def derivative(volume: float, flows) -> tuple[float, ...]:
+        fraction = volume / reactor_volume_m3
+        temperature = inlet_temperature_k + fraction * (outlet_temperature_k - inlet_temperature_k)
+        volumetric_flow = inlet_volumetric_flow_m3_s + fraction * (
+            outlet_volumetric_flow_m3_s - inlet_volumetric_flow_m3_s
+        )
+        concentrations = {
+            compound: max(float(flow), 0.0) / volumetric_flow
+            for compound, flow in zip(ordered_compounds, flows)
+        }
+        rate = _kinetic_rate_kmol_m3_s(reaction, concentrations, temperature)
+        if rate < 0.0:
+            raise ValidationError("PFR reverse-rate-dominated solutions are outside the current domain")
+        return tuple(stoichiometry.get(compound, 0.0) * rate for compound in ordered_compounds)
+
+    integration = solve_ivp(
+        derivative,
+        (0.0, reactor_volume_m3),
+        initial,
+        method="RK45",
+        rtol=relative_tolerance,
+        atol=absolute_tolerance,
+        max_step=reactor_volume_m3 if max_step_m3 is None else max_step_m3,
+    )
+    if not integration.success:
+        raise ConvergenceError(f"PFR integration failed: {integration.message}")
+    outlet_values = tuple(float(value) for value in integration.y[:, -1])
+    if any(value < -absolute_tolerance for value in outlet_values):
+        raise ConvergenceError("PFR integration produced a negative component flow")
+    outlet_values = tuple(max(value, 0.0) for value in outlet_values)
+    base_coefficient = stoichiometry[reaction.base_reactant]
+    base_index = ordered_compounds.index(reaction.base_reactant)
+    extent = (outlet_values[base_index] - initial[base_index]) / base_coefficient
+    residual = max(
+        abs(
+            outlet_values[index]
+            - (initial[index] + stoichiometry.get(compound, 0.0) * extent)
+        )
+        for index, compound in enumerate(ordered_compounds)
+    )
+    conversions = tuple(
+        (compound, (flow - outlet_values[index]) / flow)
+        for index, (compound, flow) in enumerate(inlet.items())
+        if flow > 0.0 and outlet_values[index] < flow
+    )
+    return PFRResult(
+        tuple(zip(ordered_compounds, outlet_values)),
+        extent,
+        extent / reactor_volume_m3,
+        conversions,
+        extent * reaction.reaction_heat_j_per_kmol,
+        residual,
+        len(integration.t) - 1,
     )
 
 
