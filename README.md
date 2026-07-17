@@ -62,7 +62,7 @@ thermodynamics.
 | Streams, mixer, splitter, heater, cooler, valve, equilibrium separator | Done (U0) |
 | Acyclic flowsheet execution | Done |
 | HTTP API (`/v1/*`) | Done (internal alpha) |
-| Hydraulics | Partial (U3: pipes, defined heat-load and defined/estimated air/water/soil-HTC liquid thermal profiles with PR enthalpy coupling and ambient gradients, optional insulation and local/global irradiation, fittings, orifice, two-phase correlations, relief sizing) |
+| Hydraulics | Partial (U3: pipes, defined heat-load and constant/gradient/tabulated defined-HTC plus estimated air/water/soil-HTC liquid thermal profiles with PR enthalpy coupling, optional insulation and local/global irradiation, fittings, orifice, two-phase correlations, relief sizing) |
 | Reactors, columns, dynamics | Not yet |
 
 See [`docs/compatibility.md`](docs/compatibility.md) for the full matrix and current

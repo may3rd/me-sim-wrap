@@ -13,7 +13,7 @@ from mesim import ValidationError
 from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.thermo.flash import flash_enthalpy, tp_flash
 from mesim.thermo.ideal import load_correlations
-from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, dwsim_terrain_thermal_conductivity, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_absorbed_solar_radiation, pipe_defined_heat_pr_profile, pipe_defined_htc_gradient_profile, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_estimated_htc_air, pipe_estimated_htc_air_pr_gradient_profile, pipe_estimated_htc_air_profile, pipe_estimated_htc_soil, pipe_estimated_htc_soil_pr_profile, pipe_estimated_htc_water, pipe_estimated_htc_water_pr_profile, pipe_irradiated_heat_transfer, pipe_pressure_drop, pipe_pressure_drop_profile, pipe_solar_irradiation_source
+from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, dwsim_terrain_thermal_conductivity, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_absorbed_solar_radiation, pipe_defined_heat_pr_profile, pipe_defined_htc_gradient_profile, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_estimated_htc_air, pipe_estimated_htc_air_pr_gradient_profile, pipe_estimated_htc_air_profile, pipe_estimated_htc_soil, pipe_estimated_htc_soil_pr_profile, pipe_estimated_htc_water, pipe_estimated_htc_water_pr_profile, pipe_irradiated_heat_transfer, pipe_pressure_drop, pipe_pressure_drop_profile, pipe_solar_irradiation_source, pipe_tabulated_defined_htc_pr_profile
 
 
 class HydraulicsTest(unittest.TestCase):
@@ -355,6 +355,66 @@ class HydraulicsTest(unittest.TestCase):
         )
         self.assertTrue(math.isclose(stream_energy_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=1e-5))
         self.assertGreater(profile.heat_transfer_w - stream_energy_w, 400.0)
+
+    def test_tabulated_defined_htc_pipe_matches_captured_dwsim_case(self):
+        root_path = Path(__file__).parents[1]
+        golden = json.loads((root_path / "tests/golden/u3-pipe-thermal-tabulated-htc-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        pipe = {item["property"]: item["value"]["value"] for item in objects["PIPE-1"]["properties"]}
+        feed = {item["property"]: item["value"]["value"] for item in objects["PIPE-FEED"]["properties"]}
+        product = {item["property"]: item["value"]["value"] for item in objects["PIPE-PRODUCT"]["properties"]}
+        energy = {item["property"]: item["value"]["value"] for item in objects["E1"]["properties"]}
+        with ZipFile(root_path / "tests/u3-pipe-thermal-tabulated-htc-liquid-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
+        source = next(item for item in root.findall("./SimulationObjects/SimulationObject") if item.findtext("CalculateHeatBalance") == "true")
+        section = source.find("./Profile/Sections/Section")
+        thermal = source.find("./ThermalProfile")
+        increments = int(section.findtext("Incrementos"))
+        outer_diameter_m = float(section.findtext("DE")) * 0.0254
+        segment_length_m = float(section.findtext("Comprimento")) / increments
+        table_distances = tuple(float(item.text) for item in thermal.findall("./UserDefinedU_Length/Item"))
+        table_temperatures = tuple(float(item.text) for item in thermal.findall("./UserDefinedU_Temp/Item"))
+        table_htcs = tuple(float(item.text) for item in thermal.findall("./UserDefinedU_U/Item"))
+
+        self.assertEqual(thermal.findtext("TipoPerfil"), "Definir_CGTC")
+        self.assertEqual(thermal.findtext("UseUserDefinedU"), "true")
+        self.assertEqual(table_distances, (0.0, 50.0, 100.0))
+        self.assertEqual(table_temperatures, (350.0, 360.0, 370.0))
+        self.assertEqual(table_htcs, (25.0, 30.0, 35.0))
+        self.assertEqual(thermal.findtext("IncludeSolarRadiation"), "false")
+        catalog = {compound.id: compound for compound in load_compounds(root_path / "data/compounds/v1.json")}
+        profile = pipe_tabulated_defined_htc_pr_profile(
+            pipe["HydraulicSegment,1,Results,2,InitialTemperature"],
+            pipe["HydraulicSegment,1,Results,2,InitialPressure"], segment_length_m,
+            table_distances, table_temperatures, table_htcs,
+            (catalog["N-pentane"], catalog["Ethane"]),
+            (0.952380952380952, 0.0476190476190476),
+            load_pr_interactions(root_path / "data/interactions/pr-v1.json"),
+            load_correlations(root_path / "data/correlations/ideal-v1.json"),
+            feed["PROP_MS_3"] / 1_000.0,
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},InitialPressure"] for index in range(3, 7)),
+            outer_diameter_m, (segment_length_m,) * 4,
+        )
+
+        self.assertEqual(profile.segment_start_distances_m, (20.0, 40.0, 60.0, 80.0))
+        self.assertEqual(profile.external_temperatures_k, (354.0, 358.0, 362.0, 366.0))
+        self.assertEqual(profile.overall_htcs_w_m2_k, (25.0, 25.0, 30.0, 30.0))
+        for index, result in enumerate(profile.segment_results, 2):
+            self.assertTrue(math.isclose(
+                result.heat_transfer_w,
+                pipe[f"HydraulicSegment,1,Results,{index},HeatTransfer"] * 1_000.0,
+                rel_tol=3e-3,
+            ))
+            self.assertTrue(math.isclose(
+                result.outlet_temperature_k,
+                pipe[f"HydraulicSegment,1,Results,{index + 1},InitialTemperature"],
+                rel_tol=1e-4,
+            ))
+        self.assertTrue(math.isclose(profile.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(
+            profile.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0,
+            rel_tol=2e-3, abs_tol=35.0,
+        ))
 
     def test_estimated_htc_air_matches_captured_dwsim_case(self):
         golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-thermal-estimated-htc-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
@@ -958,6 +1018,11 @@ class HydraulicsTest(unittest.TestCase):
             pipe_defined_heat_pr_profile(
                 300.0, 500_000.0, (), (), {}, (), 0.2, (480_000.0,),
                 0.11, (), 10_000.0, 5, (250.0, 350.0),
+            )
+        with self.assertRaises(ValidationError):
+            pipe_tabulated_defined_htc_pr_profile(
+                300.0, 500_000.0, 20.0, (0.0, 0.0), (350.0, 360.0),
+                (25.0, 30.0), (), (), {}, (), 0.2, (480_000.0,), 0.11, (20.0,),
             )
         with self.assertRaises(ValidationError):
             liquid_pipe_supplied_state_profile(

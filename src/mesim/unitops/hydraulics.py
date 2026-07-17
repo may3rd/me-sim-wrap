@@ -1,5 +1,6 @@
 """Single-phase hydraulic calculations."""
 import math
+from bisect import bisect_right
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -61,6 +62,17 @@ class PipeThermalGradientProfileResult:
     segment_results: tuple[PipeThermalResult, ...]
     segment_start_distances_m: tuple[float, ...]
     external_temperatures_k: tuple[float, ...]
+    total_area_m2: float
+    outlet_temperature_k: float
+    heat_transfer_w: float
+
+
+@dataclass(frozen=True, slots=True)
+class PipeTabulatedHtcProfileResult:
+    segment_results: tuple[PipeThermalResult, ...]
+    segment_start_distances_m: tuple[float, ...]
+    external_temperatures_k: tuple[float, ...]
+    overall_htcs_w_m2_k: tuple[float, ...]
     total_area_m2: float
     outlet_temperature_k: float
     heat_transfer_w: float
@@ -1338,6 +1350,147 @@ def pipe_defined_heat_pr_profile(
         segment_results,
         math.fsum(result.area_m2 for result in segment_results),
         segment_results[-1].outlet_temperature_k,
+        math.fsum(result.heat_transfer_w for result in segment_results),
+    )
+
+
+def _linear_interpolate(values_x: tuple[float, ...], values_y: tuple[float, ...], x: float) -> float:
+    index = bisect_right(values_x, x) - 1
+    index = min(max(index, 0), len(values_x) - 2)
+    fraction = (x - values_x[index]) / (values_x[index + 1] - values_x[index])
+    return values_y[index] + fraction * (values_y[index + 1] - values_y[index])
+
+
+def _step_interpolate(values_x: tuple[float, ...], values_y: tuple[float, ...], x: float) -> float:
+    return values_y[min(max(bisect_right(values_x, x) - 1, 0), len(values_y) - 1)]
+
+
+def pipe_tabulated_defined_htc_pr_profile(
+    inlet_temperature_k: float, inlet_pressure_pa: float, start_distance_m: float,
+    table_distances_m: tuple[float, ...], table_external_temperatures_k: tuple[float, ...],
+    table_overall_htcs_w_m2_k: tuple[float, ...],
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
+    molar_flow_kmol_s: float, outlet_pressures_pa: tuple[float, ...],
+    outer_diameter_m: float, segment_lengths_m: tuple[float, ...],
+) -> PipeTabulatedHtcProfileResult:
+    """Advance DWSIM's tabulated defined-HTC profile with PR enthalpy coupling."""
+    try:
+        distances = tuple(table_distances_m)
+        table_temperatures = tuple(table_external_temperatures_k)
+        table_htcs = tuple(table_overall_htcs_w_m2_k)
+        pressures = tuple(outlet_pressures_pa)
+        lengths = tuple(segment_lengths_m)
+    except TypeError as exc:
+        raise ValidationError("tabulated pipe HTC inputs must be finite sequences") from exc
+    if len(distances) < 2 or len({len(distances), len(table_temperatures), len(table_htcs)}) != 1:
+        raise ValidationError("tabulated pipe HTC tables must have equal counts of at least two")
+    if not pressures or len(pressures) != len(lengths):
+        raise ValidationError("tabulated pipe HTC pressures and lengths must have equal non-zero counts")
+    scalar_values = (inlet_temperature_k, inlet_pressure_pa, start_distance_m, molar_flow_kmol_s, outer_diameter_m)
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+        for value in (*scalar_values, *distances, *table_temperatures, *table_htcs, *pressures, *lengths)
+    ):
+        raise ValidationError("tabulated pipe HTC inputs must be finite numbers")
+    if inlet_temperature_k <= 0.0 or inlet_pressure_pa <= 0.0 or molar_flow_kmol_s <= 0.0 or outer_diameter_m <= 0.0:
+        raise ValidationError("tabulated pipe HTC temperature, pressure, flow, and diameter must be positive")
+    if start_distance_m < 0.0 or any(length <= 0.0 for length in lengths) or any(pressure <= 0.0 for pressure in pressures):
+        raise ValidationError("tabulated pipe HTC distances must be non-negative and segments and pressures positive")
+    if any(right <= left for left, right in zip(distances, distances[1:])):
+        raise ValidationError("tabulated pipe HTC distances must be strictly increasing")
+    if any(temperature <= 0.0 for temperature in table_temperatures):
+        raise ValidationError("tabulated pipe external temperatures must be positive")
+    if any(htc <= 0.0 for htc in table_htcs):
+        raise ValidationError("tabulated pipe overall HTCs must be positive")
+
+    start_distances = []
+    distance = start_distance_m
+    for index, length in enumerate(lengths):
+        if index:
+            distance += lengths[index - 1]
+        start_distances.append(distance)
+    external_temperatures = tuple(
+        _linear_interpolate(distances, table_temperatures, distance)
+        for distance in start_distances
+    )
+    overall_htcs = tuple(
+        _step_interpolate(distances, table_htcs, distance)
+        for distance in start_distances
+    )
+    if any(not math.isfinite(value) or value <= 0.0 for value in external_temperatures):
+        raise ValidationError("tabulated pipe interpolation produced a non-positive temperature")
+
+    inlet_flash = tp_flash(
+        compounds, composition, interactions, inlet_temperature_k, inlet_pressure_pa,
+    )
+    if not inlet_flash.report.converged or inlet_flash.phase != "liquid":
+        raise ValidationError("tabulated pipe HTC PR profile requires a converged liquid inlet flash")
+    enthalpy = flash_enthalpy(compounds, correlations, inlet_flash)
+    temperature = inlet_temperature_k
+    results = []
+    for external_temperature, overall_htc, pressure, length in zip(
+        external_temperatures, overall_htcs, pressures, lengths,
+    ):
+        area = math.pi * outer_diameter_m * length
+
+        def state_and_residual(trial_temperature: float):
+            trial_flash = tp_flash(
+                compounds, composition, interactions, trial_temperature, pressure,
+            )
+            if not trial_flash.report.converged or trial_flash.phase != "liquid":
+                raise ValidationError("tabulated pipe HTC PR profile left its converged liquid domain")
+            trial_enthalpy = flash_enthalpy(compounds, correlations, trial_flash)
+            if trial_temperature == temperature:
+                lmtd = external_temperature - temperature
+            elif trial_temperature == external_temperature:
+                lmtd = 0.0
+            else:
+                lmtd = (trial_temperature - temperature) / math.log(
+                    (external_temperature - temperature)
+                    / (external_temperature - trial_temperature)
+                )
+            heat_transfer = overall_htc * area * lmtd
+            return trial_enthalpy, molar_flow_kmol_s * (trial_enthalpy - enthalpy) - heat_transfer
+
+        bracket_temperature = temperature
+        bracket_state = state_and_residual(bracket_temperature)
+        bracket = None
+        for step in range(1, 129):
+            trial_temperature = temperature + (external_temperature - temperature) * step / 128.0
+            try:
+                trial_state = state_and_residual(trial_temperature)
+            except ValidationError:
+                break
+            if bracket_state[1] * trial_state[1] <= 0.0:
+                bracket = sorted(
+                    ((bracket_temperature, bracket_state), (trial_temperature, trial_state)),
+                    key=lambda item: item[0],
+                )
+                break
+            bracket_temperature, bracket_state = trial_temperature, trial_state
+        if bracket is None:
+            raise ValidationError("tabulated pipe HTC PR energy balance has no temperature bracket")
+        (low, low_state), (high, high_state) = bracket
+        for _ in range(80):
+            midpoint = (low + high) / 2.0
+            midpoint_state = state_and_residual(midpoint)
+            if low_state[1] * midpoint_state[1] <= 0.0:
+                high, high_state = midpoint, midpoint_state
+            else:
+                low, low_state = midpoint, midpoint_state
+            if high - low <= 1.0e-12 * max(1.0, abs(midpoint)):
+                break
+        temperature = (low + high) / 2.0
+        final_enthalpy, _ = state_and_residual(temperature)
+        results.append(PipeThermalResult(
+            area, temperature, molar_flow_kmol_s * (final_enthalpy - enthalpy),
+        ))
+        enthalpy = final_enthalpy
+    segment_results = tuple(results)
+    return PipeTabulatedHtcProfileResult(
+        segment_results, tuple(start_distances), external_temperatures, overall_htcs,
+        math.fsum(result.area_m2 for result in segment_results), temperature,
         math.fsum(result.heat_transfer_w for result in segment_results),
     )
 
