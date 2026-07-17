@@ -67,6 +67,7 @@ class PipeEstimatedHtc:
     overall_htc_w_m2_k: float
     internal_htc_w_m2_k: float
     wall_htc_w_m2_k: float
+    insulation_htc_w_m2_k: float
     external_htc_w_m2_k: float
     internal_reynolds: float
     internal_prandtl: float
@@ -502,9 +503,10 @@ def pipe_estimated_htc_air(
     inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
     liquid_velocity_m_s: float, heat_capacity_j_kg_k: float,
     thermal_conductivity_w_m_k: float, viscosity_pa_s: float, density_kg_m3: float,
-    external_air_velocity_m_s: float,
+    external_air_velocity_m_s: float, insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
 ) -> PipeEstimatedHtc:
-    """Estimate liquid-pipe HTC with DWSIM's Petukhov, carbon-steel, and air correlations."""
+    """Estimate liquid-pipe HTC with DWSIM's Petukhov, wall, insulation, and air correlations."""
     positive = (
         fluid_temperature_k, external_temperature_k, inner_diameter_m, outer_diameter_m,
         liquid_velocity_m_s, heat_capacity_j_kg_k, thermal_conductivity_w_m_k,
@@ -523,6 +525,22 @@ def pipe_estimated_htc_air(
         raise ValidationError("estimated pipe HTC roughness must be finite and non-negative")
     if outer_diameter_m <= inner_diameter_m or roughness_m >= inner_diameter_m:
         raise ValidationError("estimated pipe HTC requires outer diameter > inner diameter > roughness")
+    if (
+        isinstance(insulation_thickness_m, bool)
+        or not isinstance(insulation_thickness_m, (int, float))
+        or not math.isfinite(insulation_thickness_m)
+        or insulation_thickness_m < 0.0
+    ):
+        raise ValidationError("pipe insulation thickness must be finite and non-negative")
+    if insulation_conductivity_w_m_k is not None and (
+        isinstance(insulation_conductivity_w_m_k, bool)
+        or not isinstance(insulation_conductivity_w_m_k, (int, float))
+        or not math.isfinite(insulation_conductivity_w_m_k)
+        or insulation_conductivity_w_m_k <= 0.0
+    ):
+        raise ValidationError("pipe insulation conductivity must be finite and positive")
+    if insulation_thickness_m > 0.0 and insulation_conductivity_w_m_k is None:
+        raise ValidationError("pipe insulation conductivity is required when insulation thickness is positive")
 
     internal_reynolds = density_kg_m3 * liquid_velocity_m_s * inner_diameter_m / viscosity_pa_s
     if internal_reynolds > 3250.0:
@@ -556,6 +574,17 @@ def pipe_estimated_htc_air(
     # The vendored Pipe.vb snapshot includes an additional /2 factor and is not parity-authoritative.
     wall_htc = wall_conductivity / (math.log(outer_diameter_m / inner_diameter_m) * inner_diameter_m)
 
+    if insulation_thickness_m > 0.0:
+        insulated_diameter_m = outer_diameter_m + 2.0 * insulation_thickness_m
+        # The deployed 9.0.5 insulation result follows the same no-/2 resistance
+        # convention as its captured wall result, unlike the vendored source snapshot.
+        insulation_htc = insulation_conductivity_w_m_k / (
+            math.log(insulated_diameter_m / outer_diameter_m) * outer_diameter_m
+        )
+    else:
+        insulated_diameter_m = outer_diameter_m
+        insulation_htc = 0.0
+
     air_density = 314.56 * external_temperature_k**-0.9812
     air_viscosity = air_density * 1.0e-6 * (
         0.00009 * external_temperature_k**2 + 0.035 * external_temperature_k - 2.9346
@@ -569,18 +598,21 @@ def pipe_estimated_htc_air(
     )
     if min(air_density, air_viscosity, air_heat_capacity, air_conductivity) <= 0.0:
         raise ValidationError("DWSIM air correlation produced a non-positive property")
-    external_reynolds = air_density * external_air_velocity_m_s * outer_diameter_m / air_viscosity
+    external_reynolds = air_density * external_air_velocity_m_s * insulated_diameter_m / air_viscosity
     external_prandtl = air_heat_capacity * air_viscosity / air_conductivity
     external_surface_htc = (
-        air_conductivity / outer_diameter_m
+        air_conductivity / insulated_diameter_m
         * 0.25 * external_reynolds**0.6 * external_prandtl**0.38
     )
-    external_htc = external_surface_htc * outer_diameter_m / inner_diameter_m
+    external_htc = external_surface_htc * insulated_diameter_m / inner_diameter_m
 
     internal_resistance = 1.0 / internal_htc if internal_htc != 0.0 else 1.0e30
-    overall_htc = 1.0 / (internal_resistance + 1.0 / wall_htc + 1.0 / external_htc)
+    insulation_resistance = 1.0 / insulation_htc if insulation_htc != 0.0 else 0.0
+    overall_htc = 1.0 / (
+        internal_resistance + 1.0 / wall_htc + insulation_resistance + 1.0 / external_htc
+    )
     return PipeEstimatedHtc(
-        overall_htc, internal_htc, wall_htc, external_htc,
+        overall_htc, internal_htc, wall_htc, insulation_htc, external_htc,
         internal_reynolds, internal_prandtl, external_reynolds, external_prandtl,
     )
 
@@ -592,6 +624,8 @@ def pipe_estimated_htc_air_profile(
     liquid_velocities_m_s: tuple[float, ...], heat_capacities_j_kg_k: tuple[float, ...],
     thermal_conductivities_w_m_k: tuple[float, ...], viscosities_pa_s: tuple[float, ...],
     densities_kg_m3: tuple[float, ...], external_air_velocity_m_s: float,
+    insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
 ) -> PipeEstimatedHtcProfileResult:
     """Advance a supplied-property liquid profile with estimated HTC to external air."""
     try:
@@ -618,7 +652,8 @@ def pipe_estimated_htc_air_profile(
             htc = pipe_estimated_htc_air(
                 mean_temperature, external_temperature_k, inner_diameter_m, outer_diameter_m,
                 roughness_m, velocity, heat_capacity, conductivity, viscosity, density,
-                external_air_velocity_m_s,
+                external_air_velocity_m_s, insulation_thickness_m,
+                insulation_conductivity_w_m_k,
             )
             thermal = pipe_defined_htc_heat_transfer(
                 temperature, external_temperature_k, htc.overall_htc_w_m2_k,
