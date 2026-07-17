@@ -2,7 +2,10 @@
 import math
 from dataclasses import dataclass
 
+from ..compounds import Compound, PRInteractions
 from ..errors import ValidationError
+from ..thermo.flash import flash_enthalpy, tp_flash
+from ..thermo.ideal import IdealCorrelations
 
 
 def _dwsim_friction_factor(reynolds: float, diameter_m: float, roughness_m: float) -> float:
@@ -599,19 +602,23 @@ def pipe_irradiated_heat_transfer(
     )
 
 
-def pipe_estimated_htc_air(
-    fluid_temperature_k: float, external_temperature_k: float,
+def _pipe_estimated_htc_external_fluid(
+    fluid_temperature_k: float,
     inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
     liquid_velocity_m_s: float, heat_capacity_j_kg_k: float,
     thermal_conductivity_w_m_k: float, viscosity_pa_s: float, density_kg_m3: float,
-    external_air_velocity_m_s: float, insulation_thickness_m: float = 0.0,
+    external_velocity_m_s: float, external_heat_capacity_j_kg_k: float,
+    external_thermal_conductivity_w_m_k: float, external_viscosity_pa_s: float,
+    external_density_kg_m3: float, insulation_thickness_m: float = 0.0,
     insulation_conductivity_w_m_k: float | None = None,
 ) -> PipeEstimatedHtc:
-    """Estimate liquid-pipe HTC with DWSIM's Petukhov, wall, insulation, and air correlations."""
+    """DWSIM liquid-pipe HTC stack with supplied external-fluid properties."""
     positive = (
-        fluid_temperature_k, external_temperature_k, inner_diameter_m, outer_diameter_m,
+        fluid_temperature_k, inner_diameter_m, outer_diameter_m,
         liquid_velocity_m_s, heat_capacity_j_kg_k, thermal_conductivity_w_m_k,
-        viscosity_pa_s, density_kg_m3, external_air_velocity_m_s,
+        viscosity_pa_s, density_kg_m3, external_velocity_m_s,
+        external_heat_capacity_j_kg_k, external_thermal_conductivity_w_m_k,
+        external_viscosity_pa_s, external_density_kg_m3,
     )
     if any(
         isinstance(value, bool) or not isinstance(value, (int, float))
@@ -686,6 +693,47 @@ def pipe_estimated_htc_air(
         insulated_diameter_m = outer_diameter_m
         insulation_htc = 0.0
 
+    external_reynolds = (
+        external_density_kg_m3 * external_velocity_m_s * insulated_diameter_m
+        / external_viscosity_pa_s
+    )
+    external_prandtl = (
+        external_heat_capacity_j_kg_k * external_viscosity_pa_s
+        / external_thermal_conductivity_w_m_k
+    )
+    external_surface_htc = (
+        external_thermal_conductivity_w_m_k / insulated_diameter_m
+        * 0.25 * external_reynolds**0.6 * external_prandtl**0.38
+    )
+    external_htc = external_surface_htc * insulated_diameter_m / inner_diameter_m
+
+    internal_resistance = 1.0 / internal_htc if internal_htc != 0.0 else 1.0e30
+    insulation_resistance = 1.0 / insulation_htc if insulation_htc != 0.0 else 0.0
+    overall_htc = 1.0 / (
+        internal_resistance + 1.0 / wall_htc + insulation_resistance + 1.0 / external_htc
+    )
+    return PipeEstimatedHtc(
+        overall_htc, internal_htc, wall_htc, insulation_htc, external_htc,
+        internal_reynolds, internal_prandtl, external_reynolds, external_prandtl,
+    )
+
+
+def pipe_estimated_htc_air(
+    fluid_temperature_k: float, external_temperature_k: float,
+    inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
+    liquid_velocity_m_s: float, heat_capacity_j_kg_k: float,
+    thermal_conductivity_w_m_k: float, viscosity_pa_s: float, density_kg_m3: float,
+    external_air_velocity_m_s: float, insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+) -> PipeEstimatedHtc:
+    """Estimate liquid-pipe HTC with DWSIM's air-property and Holman correlations."""
+    if (
+        isinstance(external_temperature_k, bool)
+        or not isinstance(external_temperature_k, (int, float))
+        or not math.isfinite(external_temperature_k)
+        or external_temperature_k <= 0.0
+    ):
+        raise ValidationError("external air temperature must be finite and positive")
     air_density = 314.56 * external_temperature_k**-0.9812
     air_viscosity = air_density * 1.0e-6 * (
         0.00009 * external_temperature_k**2 + 0.035 * external_temperature_k - 2.9346
@@ -699,22 +747,35 @@ def pipe_estimated_htc_air(
     )
     if min(air_density, air_viscosity, air_heat_capacity, air_conductivity) <= 0.0:
         raise ValidationError("DWSIM air correlation produced a non-positive property")
-    external_reynolds = air_density * external_air_velocity_m_s * insulated_diameter_m / air_viscosity
-    external_prandtl = air_heat_capacity * air_viscosity / air_conductivity
-    external_surface_htc = (
-        air_conductivity / insulated_diameter_m
-        * 0.25 * external_reynolds**0.6 * external_prandtl**0.38
+    return _pipe_estimated_htc_external_fluid(
+        fluid_temperature_k, inner_diameter_m, outer_diameter_m, roughness_m,
+        liquid_velocity_m_s, heat_capacity_j_kg_k, thermal_conductivity_w_m_k,
+        viscosity_pa_s, density_kg_m3, external_air_velocity_m_s, air_heat_capacity,
+        air_conductivity, air_viscosity, air_density, insulation_thickness_m,
+        insulation_conductivity_w_m_k,
     )
-    external_htc = external_surface_htc * insulated_diameter_m / inner_diameter_m
 
-    internal_resistance = 1.0 / internal_htc if internal_htc != 0.0 else 1.0e30
-    insulation_resistance = 1.0 / insulation_htc if insulation_htc != 0.0 else 0.0
-    overall_htc = 1.0 / (
-        internal_resistance + 1.0 / wall_htc + insulation_resistance + 1.0 / external_htc
-    )
-    return PipeEstimatedHtc(
-        overall_htc, internal_htc, wall_htc, insulation_htc, external_htc,
-        internal_reynolds, internal_prandtl, external_reynolds, external_prandtl,
+
+def pipe_estimated_htc_water(
+    fluid_temperature_k: float,
+    inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
+    liquid_velocity_m_s: float, heat_capacity_j_kg_k: float,
+    thermal_conductivity_w_m_k: float, viscosity_pa_s: float, density_kg_m3: float,
+    external_water_velocity_m_s: float, external_water_heat_capacity_j_kg_k: float,
+    external_water_thermal_conductivity_w_m_k: float,
+    external_water_viscosity_pa_s: float, external_water_density_kg_m3: float,
+    insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+) -> PipeEstimatedHtc:
+    """Estimate liquid-pipe HTC in water using supplied DWSIM/IAPWS properties."""
+    return _pipe_estimated_htc_external_fluid(
+        fluid_temperature_k, inner_diameter_m, outer_diameter_m, roughness_m,
+        liquid_velocity_m_s, heat_capacity_j_kg_k, thermal_conductivity_w_m_k,
+        viscosity_pa_s, density_kg_m3, external_water_velocity_m_s,
+        external_water_heat_capacity_j_kg_k,
+        external_water_thermal_conductivity_w_m_k,
+        external_water_viscosity_pa_s, external_water_density_kg_m3,
+        insulation_thickness_m, insulation_conductivity_w_m_k,
     )
 
 
@@ -803,6 +864,115 @@ def pipe_estimated_htc_air_profile(
         math.fsum(item.area_m2 for item in segment_results), temperature,
         math.fsum(item.heat_transfer_w for item in segment_results),
         tuple(radiation_results), math.fsum(radiation_results),
+    )
+
+
+def pipe_estimated_htc_water_pr_profile(
+    inlet_temperature_k: float, inlet_pressure_pa: float, external_temperature_k: float,
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
+    molar_flow_kmol_s: float, outlet_pressures_pa: tuple[float, ...],
+    inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
+    segment_lengths_m: tuple[float, ...],
+    liquid_velocities_m_s: tuple[float, ...], heat_capacities_j_kg_k: tuple[float, ...],
+    thermal_conductivities_w_m_k: tuple[float, ...], viscosities_pa_s: tuple[float, ...],
+    densities_kg_m3: tuple[float, ...], external_water_velocity_m_s: float,
+    external_water_heat_capacity_j_kg_k: float,
+    external_water_thermal_conductivity_w_m_k: float,
+    external_water_viscosity_pa_s: float, external_water_density_kg_m3: float,
+    insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+) -> PipeEstimatedHtcProfileResult:
+    """Advance a liquid PR enthalpy profile through external water."""
+    try:
+        sequences = tuple(tuple(values) for values in (
+            outlet_pressures_pa, segment_lengths_m, liquid_velocities_m_s, heat_capacities_j_kg_k,
+            thermal_conductivities_w_m_k, viscosities_pa_s, densities_kg_m3,
+        ))
+    except TypeError as exc:
+        raise ValidationError("estimated pipe HTC profile inputs must be finite sequences") from exc
+    if not sequences[0]:
+        raise ValidationError("estimated pipe HTC profile must contain at least one segment")
+    if len({len(values) for values in sequences}) != 1:
+        raise ValidationError("estimated pipe HTC profile property sequences must have equal counts")
+    if (
+        isinstance(molar_flow_kmol_s, bool)
+        or not isinstance(molar_flow_kmol_s, (int, float))
+        or not math.isfinite(molar_flow_kmol_s)
+        or molar_flow_kmol_s <= 0.0
+    ):
+        raise ValidationError("pipe PR profile molar flow must be finite and positive")
+
+    pressures, lengths, velocities, heat_capacities, conductivities, viscosities, densities = sequences
+    temperature = inlet_temperature_k
+    htc_results = []
+    thermal_results = []
+    inlet_flash = tp_flash(compounds, composition, interactions, temperature, inlet_pressure_pa)
+    if not inlet_flash.report.converged or inlet_flash.phase != "liquid":
+        raise ValidationError("pipe water PR profile requires a converged liquid inlet flash")
+    enthalpy = flash_enthalpy(compounds, correlations, inlet_flash)
+    for outlet_pressure, length, velocity, heat_capacity, conductivity, viscosity, density in zip(
+        pressures, lengths, velocities, heat_capacities, conductivities, viscosities, densities,
+    ):
+        area = math.pi * outer_diameter_m * length
+
+        def state_and_residual(trial_temperature: float):
+            trial_flash = tp_flash(
+                compounds, composition, interactions, trial_temperature, outlet_pressure,
+            )
+            if not trial_flash.report.converged or trial_flash.phase != "liquid":
+                raise ValidationError("pipe water PR profile left its converged liquid domain")
+            trial_enthalpy = flash_enthalpy(compounds, correlations, trial_flash)
+            trial_htc = pipe_estimated_htc_water(
+                (temperature + trial_temperature) / 2.0,
+                inner_diameter_m, outer_diameter_m, roughness_m,
+                velocity, heat_capacity, conductivity, viscosity, density,
+                external_water_velocity_m_s, external_water_heat_capacity_j_kg_k,
+                external_water_thermal_conductivity_w_m_k,
+                external_water_viscosity_pa_s, external_water_density_kg_m3,
+                insulation_thickness_m, insulation_conductivity_w_m_k,
+            )
+            if trial_temperature == temperature:
+                lmtd = external_temperature_k - temperature
+            elif trial_temperature == external_temperature_k:
+                lmtd = 0.0
+            else:
+                lmtd = (trial_temperature - temperature) / math.log(
+                    (external_temperature_k - temperature)
+                    / (external_temperature_k - trial_temperature)
+                )
+            heat_transfer = trial_htc.overall_htc_w_m2_k * area * lmtd
+            residual = molar_flow_kmol_s * (trial_enthalpy - enthalpy) - heat_transfer
+            return trial_flash, trial_enthalpy, trial_htc, residual
+
+        low, high = sorted((temperature, external_temperature_k))
+        low_state = state_and_residual(low)
+        high_state = state_and_residual(high)
+        if low_state[3] * high_state[3] > 0.0:
+            raise ValidationError("pipe water PR energy balance has no temperature bracket")
+        for _ in range(80):
+            midpoint = (low + high) / 2.0
+            midpoint_state = state_and_residual(midpoint)
+            if low_state[3] * midpoint_state[3] <= 0.0:
+                high, high_state = midpoint, midpoint_state
+            else:
+                low, low_state = midpoint, midpoint_state
+            if high - low <= 1.0e-12 * max(1.0, abs(midpoint)):
+                break
+        temperature = (low + high) / 2.0
+        _, final_enthalpy, htc, _ = state_and_residual(temperature)
+        thermal = PipeThermalResult(
+            area, temperature, molar_flow_kmol_s * (final_enthalpy - enthalpy),
+        )
+        htc_results.append(htc)
+        thermal_results.append(thermal)
+        enthalpy = final_enthalpy
+    segment_results = tuple(thermal_results)
+    return PipeEstimatedHtcProfileResult(
+        tuple(htc_results), segment_results,
+        math.fsum(item.area_m2 for item in segment_results), temperature,
+        math.fsum(item.heat_transfer_w for item in segment_results),
+        (0.0,) * len(segment_results), 0.0,
     )
 
 
