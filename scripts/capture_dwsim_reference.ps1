@@ -14,6 +14,7 @@ param(
     [string]$PropertyPackage = "unknown",
     [string]$FlashAlgorithm = "unknown",
     [switch]$CalculateBubbleAndDewPoints,
+    [switch]$CaptureColumnProfiles,
     [string[]]$ObjectTags = @(),
     [string[]]$PropertyNames = @(),
     [string[]]$CompoundNames = @(
@@ -50,9 +51,13 @@ public static class DwsimCaptureReflection
         PropertyInfo property =
             target.GetType().GetProperty(name, PublicInstance);
 
-        return property == null
-            ? null
-            : property.GetValue(target, null);
+        if (property != null)
+        {
+            return property.GetValue(target, null);
+        }
+
+        FieldInfo field = target.GetType().GetField(name, PublicInstance);
+        return field == null ? null : field.GetValue(target);
     }
 
     public static object Invoke(
@@ -103,6 +108,28 @@ public static class DwsimCaptureReflection
         }
 
         return result;
+    }
+
+    public static object NumericArray(object target)
+    {
+        if (target == null || target is string)
+        {
+            return null;
+        }
+
+        if (target is IEnumerable)
+        {
+            List<object> result = new List<object>();
+            foreach (object item in (IEnumerable)target)
+            {
+                result.Add(item is IEnumerable && !(item is string)
+                    ? NumericArray(item)
+                    : (object)Convert.ToDouble(item, CultureInfo.InvariantCulture));
+            }
+            return result.ToArray();
+        }
+
+        return null;
     }
 
     public static int SetFlashSetting(
@@ -469,7 +496,9 @@ function Get-ObjectStates {
 
         [string[]]$ObjectTags = @(),
 
-        [string[]]$PropertyNames = @()
+        [string[]]$PropertyNames = @(),
+
+        [switch]$CaptureColumnProfiles
     )
 
     $states = @()
@@ -532,6 +561,20 @@ function Get-ObjectStates {
                 -PropertyName ([string]$propertyName)
         }
 
+        $columnProfile = [ordered]@{}
+
+        if ($CaptureColumnProfiles) {
+            foreach ($profileName in @("Tf", "Lf", "Vf", "xf", "yf", "Kf")) {
+                $profileValue = [DwsimCaptureReflection]::NumericArray(
+                    [DwsimCaptureReflection]::Get($object, $profileName)
+                )
+
+                if ($null -ne $profileValue) {
+                    $columnProfile[$profileName] = $profileValue
+                }
+            }
+        }
+
         $states += @{
             tag        = $tag
             name       = [string]$name
@@ -557,6 +600,7 @@ function Get-ObjectStates {
             properties = @(
                 $properties | Sort-Object property
             )
+            column_profile = $columnProfile
         }
     }
 
@@ -875,7 +919,8 @@ if (-not [string]::IsNullOrWhiteSpace($CasePath)) {
             -Flowsheet $flowsheet `
             -SavedUtilityStates $savedUtilityStates `
             -ObjectTags $ObjectTags `
-            -PropertyNames $PropertyNames
+            -PropertyNames $PropertyNames `
+            -CaptureColumnProfiles:$CaptureColumnProfiles
     )
 
     $errors = @()
@@ -908,7 +953,8 @@ if (-not [string]::IsNullOrWhiteSpace($CasePath)) {
             -Flowsheet $flowsheet `
             -SavedUtilityStates $savedUtilityStates `
             -ObjectTags $ObjectTags `
-            -PropertyNames $PropertyNames
+            -PropertyNames $PropertyNames `
+            -CaptureColumnProfiles:$CaptureColumnProfiles
     )
 }
 
@@ -944,6 +990,7 @@ $document = [ordered]@{
         property_package  = $PropertyPackage
         flash_algorithm   = $FlashAlgorithm
         bubble_dew_calculation = [bool]$CalculateBubbleAndDewPoints
+        column_profiles_captured = [bool]$CaptureColumnProfiles
         property_packages_updated = $propertyPackagesUpdated
 
         notes = (

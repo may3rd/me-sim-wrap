@@ -17,8 +17,10 @@ from mesim.unitops.columns import (
     EquilibriumStageState,
     StageStream,
     ColumnConvergenceError,
+    ColumnNewtonConvergenceError,
     column_balance_residuals,
     equilibrium_stage_residuals,
+    fixed_k_material_column,
     fixed_k_sum_rates_absorber,
     shortcut_column,
 )
@@ -486,6 +488,73 @@ class ReboiledAbsorberGoldenGateTest(unittest.TestCase):
         self.assertNotIn("Distillate", streams)
         self.assertEqual(streams["OverheadVapor"], "HP Azeotrope")
         self.assertEqual(streams["BottomsLiquid"], "Acetone Rich Product")
+
+        feed = next(
+            stream
+            for stream in saved.findall("./MaterialStreams/MaterialStream")
+            if saved_tags[stream.findtext("StreamID")] == "HP Feed"
+        )
+        self.assertEqual(feed.findtext("StreamBehavior"), "Feed")
+        self.assertEqual(feed.findtext("AssociatedStage"), "Estágio_10")
+
+    def test_fixed_k_material_solver_reproduces_dwsim_stage_profiles(self):
+        column = next(
+            record
+            for record in self.golden["outputs"]["objects_after"]
+            if record["tag"] == "Acetone Column (6 atm)"
+        )
+        captured = column["column_profile"]
+        self.assertEqual(set(captured), {"Tf", "Lf", "Vf", "xf", "yf", "Kf"})
+        self.assertEqual(len(captured["Lf"]), 20)
+
+        feeds = [[0.0] * len(self.NAMES) for _ in range(20)]
+        feeds[10] = [
+            self.properties["HP Feed"][f"PROP_MS_104/{name}"] / 1000.0
+            for name in self.NAMES
+        ]
+        profile = fixed_k_material_column(
+            tuple(tuple(row) for row in feeds),
+            tuple(tuple(row) for row in captured["Kf"]),
+            tuple(value / 1000.0 for value in captured["Lf"]),
+            tuple(value / 1000.0 for value in captured["Vf"]),
+            tuple(tuple(row) for row in captured["xf"]),
+            residual_tolerance=1.0e-12,
+        )
+
+        self.assertLessEqual(len(profile.history), 5)
+        self.assertLessEqual(profile.history[-1].scaled_residual_norm, 1.0e-12)
+        for actual, expected in zip(profile.liquid_flows_kmol_s, captured["Lf"]):
+            self.assertTrue(math.isclose(actual, expected / 1000.0, abs_tol=2.1e-7))
+        for actual, expected in zip(profile.vapor_flows_kmol_s, captured["Vf"]):
+            self.assertTrue(math.isclose(actual, expected / 1000.0, abs_tol=2.2e-7))
+        for actual_row, expected_row in zip(
+            profile.liquid_mole_fractions, captured["xf"]
+        ):
+            for actual, expected in zip(actual_row, expected_row):
+                self.assertTrue(math.isclose(actual, expected, abs_tol=4.0e-14))
+        for actual_row, expected_row in zip(
+            profile.vapor_mole_fractions, captured["yf"]
+        ):
+            for actual, expected in zip(actual_row, expected_row):
+                self.assertTrue(math.isclose(actual, expected, abs_tol=4.0e-14))
+
+    def test_fixed_k_material_solver_validates_and_preserves_failure_history(self):
+        with self.assertRaises(ValidationError):
+            fixed_k_material_column(
+                ((1.0,),), ((1.0,),), (1.0,), (1.0,), ((1.0,),)
+            )
+        feeds = ((0.5, 0.0), (0.0, 0.5))
+        with self.assertRaises(ColumnNewtonConvergenceError) as caught:
+            fixed_k_material_column(
+                feeds,
+                ((2.0, 0.5), (2.0, 0.5)),
+                (1.0, 1.0),
+                (1.0, 1.0),
+                ((0.5, 0.5), (0.5, 0.5)),
+                residual_tolerance=1.0e-30,
+                maximum_iterations=1,
+            )
+        self.assertEqual(len(caught.exception.history), 1)
 
 
 if __name__ == "__main__":

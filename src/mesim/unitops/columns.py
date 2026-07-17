@@ -228,6 +228,254 @@ class ColumnConvergenceError(RuntimeError):
         self.history = history
 
 
+@dataclass(frozen=True, slots=True)
+class ColumnNewtonIteration:
+    iteration: int
+    scaled_residual_norm: float
+    damping: float
+
+
+@dataclass(frozen=True, slots=True)
+class FixedKColumnProfile:
+    liquid_flows_kmol_s: tuple[float, ...]
+    vapor_flows_kmol_s: tuple[float, ...]
+    liquid_mole_fractions: tuple[tuple[float, ...], ...]
+    vapor_mole_fractions: tuple[tuple[float, ...], ...]
+    history: tuple[ColumnNewtonIteration, ...]
+
+
+class ColumnNewtonConvergenceError(RuntimeError):
+    def __init__(self, message: str, history: tuple[ColumnNewtonIteration, ...]):
+        super().__init__(message)
+        self.history = history
+
+
+def _dense_linear_solve(matrix: list[list[float]], right: list[float]) -> list[float]:
+    """Solve a dense square system with scaled partial pivoting."""
+    count = len(right)
+    augmented = [row[:] + [value] for row, value in zip(matrix, right)]
+    scales = [max(abs(value) for value in row) for row in matrix]
+    if any(scale == 0.0 or not math.isfinite(scale) for scale in scales):
+        raise ValidationError("column Newton Jacobian is singular")
+    for column in range(count):
+        pivot = max(
+            range(column, count),
+            key=lambda row: abs(augmented[row][column]) / scales[row],
+        )
+        if abs(augmented[pivot][column]) <= 1.0e-14 * scales[pivot]:
+            raise ValidationError("column Newton Jacobian is singular")
+        augmented[column], augmented[pivot] = augmented[pivot], augmented[column]
+        scales[column], scales[pivot] = scales[pivot], scales[column]
+        divisor = augmented[column][column]
+        for row in range(column + 1, count):
+            factor = augmented[row][column] / divisor
+            if factor == 0.0:
+                continue
+            augmented[row][column] = 0.0
+            for index in range(column + 1, count + 1):
+                augmented[row][index] -= factor * augmented[column][index]
+    solution = [0.0] * count
+    for row in range(count - 1, -1, -1):
+        value = augmented[row][-1] - math.fsum(
+            augmented[row][column] * solution[column]
+            for column in range(row + 1, count)
+        )
+        solution[row] = value / augmented[row][row]
+    if any(not math.isfinite(value) for value in solution):
+        raise ValidationError("column Newton direction is not finite")
+    return solution
+
+
+def fixed_k_material_column(
+    feed_component_flows_by_stage_kmol_s: tuple[tuple[float, ...], ...],
+    equilibrium_ratios_by_stage: tuple[tuple[float, ...], ...],
+    initial_liquid_flows_kmol_s: tuple[float, ...],
+    initial_vapor_flows_kmol_s: tuple[float, ...],
+    initial_liquid_mole_fractions: tuple[tuple[float, ...], ...],
+    residual_tolerance: float = 1.0e-10,
+    maximum_iterations: int = 30,
+    jacobian_step: float = 1.0e-6,
+    minimum_damping: float = 2.0**-24,
+) -> FixedKColumnProfile:
+    """Close fixed-K stage material balances and both phase summations.
+
+    Positive phase flows are represented logarithmically and each liquid
+    composition uses reduced softmax coordinates. Vapor compositions follow
+    ``y = K*x``; their summation equations complete the square Newton system.
+    """
+    try:
+        feeds = tuple(
+            tuple(float(value) for value in row)
+            for row in feed_component_flows_by_stage_kmol_s
+        )
+        ratios = tuple(
+            tuple(float(value) for value in row)
+            for row in equilibrium_ratios_by_stage
+        )
+        initial_liquid = tuple(float(value) for value in initial_liquid_flows_kmol_s)
+        initial_vapor = tuple(float(value) for value in initial_vapor_flows_kmol_s)
+        initial_fractions = tuple(
+            tuple(float(value) for value in row) for row in initial_liquid_mole_fractions
+        )
+    except (TypeError, ValueError) as error:
+        raise ValidationError("fixed-K column inputs must be finite sequences") from error
+    stage_count = len(feeds)
+    component_count = len(feeds[0]) if feeds else 0
+    scalar_controls = (residual_tolerance, jacobian_step, minimum_damping)
+    if (
+        stage_count < 2
+        or component_count < 2
+        or len(ratios) != stage_count
+        or len(initial_liquid) != stage_count
+        or len(initial_vapor) != stage_count
+        or len(initial_fractions) != stage_count
+        or any(
+            len(row) != component_count
+            for row in feeds + ratios + initial_fractions
+        )
+        or any(not _finite_number(value) or value < 0.0 for row in feeds for value in row)
+        or any(not _finite_number(value) or value <= 0.0 for row in ratios for value in row)
+        or any(
+            not _finite_number(value) or value <= 0.0
+            for value in initial_liquid + initial_vapor
+        )
+        or any(
+            not _finite_number(value) or value <= 0.0
+            for row in initial_fractions
+            for value in row
+        )
+        or any(abs(math.fsum(row) - 1.0) > 1.0e-8 for row in initial_fractions)
+        or any(not _finite_number(value) or value <= 0.0 for value in scalar_controls)
+        or minimum_damping > 1.0
+        or isinstance(maximum_iterations, bool)
+        or not isinstance(maximum_iterations, int)
+        or maximum_iterations <= 0
+    ):
+        raise ValidationError("fixed-K column inputs are invalid")
+    flow_scale = math.fsum(value for row in feeds for value in row)
+    if flow_scale <= 0.0:
+        raise ValidationError("fixed-K column requires at least one feed")
+
+    variables = (
+        [math.log(value) for value in initial_liquid]
+        + [math.log(value) for value in initial_vapor]
+        + [
+            math.log(row[component] / row[-1])
+            for row in initial_fractions
+            for component in range(component_count - 1)
+        ]
+    )
+
+    def decode(
+        values: list[float],
+    ) -> tuple[list[float], list[float], list[list[float]]]:
+        if any(value < -700.0 or value > 700.0 for value in values[: 2 * stage_count]):
+            raise ValidationError(
+                "fixed-K column trial flows are outside the representable range"
+            )
+        liquid = [math.exp(value) for value in values[:stage_count]]
+        vapor = [math.exp(value) for value in values[stage_count : 2 * stage_count]]
+        liquid_fractions: list[list[float]] = []
+        offset = 2 * stage_count
+        reduced_count = component_count - 1
+        for stage in range(stage_count):
+            start = offset + stage * reduced_count
+            logits = values[start : start + reduced_count] + [0.0]
+            maximum = max(logits)
+            exponentials = [math.exp(value - maximum) for value in logits]
+            total = math.fsum(exponentials)
+            liquid_fractions.append([value / total for value in exponentials])
+        return liquid, vapor, liquid_fractions
+
+    def evaluate(
+        values: list[float],
+    ) -> tuple[list[float], list[float], list[list[float]], list[list[float]]]:
+        liquid, vapor, liquid_fractions = decode(values)
+        vapor_fractions = [
+            [ratio * fraction for ratio, fraction in zip(ratio_row, fraction_row)]
+            for ratio_row, fraction_row in zip(ratios, liquid_fractions)
+        ]
+        residuals: list[float] = []
+        for stage in range(stage_count):
+            for component in range(component_count):
+                residual = feeds[stage][component]
+                if stage > 0:
+                    residual += liquid[stage - 1] * liquid_fractions[stage - 1][component]
+                if stage < stage_count - 1:
+                    residual += vapor[stage + 1] * vapor_fractions[stage + 1][component]
+                residual -= liquid[stage] * liquid_fractions[stage][component]
+                residual -= vapor[stage] * vapor_fractions[stage][component]
+                residuals.append(residual / flow_scale)
+        residuals.extend(math.fsum(row) - 1.0 for row in vapor_fractions)
+        return residuals, liquid, liquid_fractions, vapor_fractions
+
+    history: list[ColumnNewtonIteration] = []
+    for iteration in range(1, maximum_iterations + 1):
+        current, _, _, _ = evaluate(variables)
+        norm = max(abs(value) for value in current)
+        if norm <= residual_tolerance:
+            liquid, vapor, liquid_fractions = decode(variables)
+            vapor_fractions = [
+                [ratio * fraction for ratio, fraction in zip(ratio_row, fraction_row)]
+                for ratio_row, fraction_row in zip(ratios, liquid_fractions)
+            ]
+            return FixedKColumnProfile(
+                tuple(liquid),
+                tuple(vapor),
+                tuple(tuple(row) for row in liquid_fractions),
+                tuple(tuple(row) for row in vapor_fractions),
+                tuple(history),
+            )
+        size = len(variables)
+        jacobian = [[0.0] * size for _ in range(size)]
+        for column in range(size):
+            step = jacobian_step * max(1.0, abs(variables[column]))
+            trial = variables[:]
+            trial[column] += step
+            shifted, _, _, _ = evaluate(trial)
+            for row in range(size):
+                jacobian[row][column] = (shifted[row] - current[row]) / step
+        try:
+            direction = _dense_linear_solve(jacobian, [-value for value in current])
+        except ValidationError as error:
+            raise ColumnNewtonConvergenceError(str(error), tuple(history)) from error
+        damping = 1.0
+        accepted = False
+        while damping >= minimum_damping:
+            trial = [value + damping * delta for value, delta in zip(variables, direction)]
+            try:
+                shifted, _, _, _ = evaluate(trial)
+            except ValidationError:
+                damping *= 0.5
+                continue
+            shifted_norm = max(abs(value) for value in shifted)
+            if shifted_norm < norm:
+                variables = trial
+                history.append(ColumnNewtonIteration(iteration, shifted_norm, damping))
+                accepted = True
+                break
+            damping *= 0.5
+        if not accepted:
+            raise ColumnNewtonConvergenceError(
+                "fixed-K column line search did not reduce the residual", tuple(history)
+            )
+    final_residuals, final_liquid, final_liquid_fractions, final_vapor_fractions = evaluate(
+        variables
+    )
+    if max(abs(value) for value in final_residuals) <= residual_tolerance:
+        _, final_vapor, _ = decode(variables)
+        return FixedKColumnProfile(
+            tuple(final_liquid),
+            tuple(final_vapor),
+            tuple(tuple(row) for row in final_liquid_fractions),
+            tuple(tuple(row) for row in final_vapor_fractions),
+            tuple(history),
+        )
+    raise ColumnNewtonConvergenceError(
+        "fixed-K column did not converge", tuple(history)
+    )
+
+
 def _tridiagonal_solve(
     lower: list[float], diagonal: list[float], upper: list[float], right: list[float],
 ) -> list[float]:

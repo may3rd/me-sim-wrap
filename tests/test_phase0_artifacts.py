@@ -43,6 +43,14 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertLess(setting, before)
         self.assertLess(setting, solve)
 
+    def test_capture_script_can_preserve_full_precision_column_profiles(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("[switch]$CaptureColumnProfiles", script)
+        self.assertIn("public static object NumericArray", script)
+        self.assertIn('foreach ($profileName in @("Tf", "Lf", "Vf", "xf", "yf", "Kf"))', script)
+        self.assertIn("column_profiles_captured", script)
+
     def test_compatibility_record_requires_source_revision(self):
         text = (ROOT / "docs/compatibility.md").read_text()
 
