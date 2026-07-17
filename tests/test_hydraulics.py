@@ -263,6 +263,41 @@ class HydraulicsTest(unittest.TestCase):
         self.assertEqual(zero_gradient.outlet_temperature_k, constant.outlet_temperature_k)
         self.assertEqual(zero_gradient.heat_transfer_w, constant.heat_transfer_w)
 
+    def test_defined_htc_gradient_matches_captured_dwsim_case(self):
+        golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-thermal-gradient-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        pipe = {item["property"]: item["value"]["value"] for item in objects["PIPE-1"]["properties"]}
+        feed = {item["property"]: item["value"]["value"] for item in objects["PIPE-FEED"]["properties"]}
+        product = {item["property"]: item["value"]["value"] for item in objects["PIPE-PRODUCT"]["properties"]}
+        energy = {item["property"]: item["value"]["value"] for item in objects["E1"]["properties"]}
+        with ZipFile(Path(__file__).parents[1] / "tests/u3-pipe-thermal-gradient-liquid-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
+        source = next(item for item in root.findall("./SimulationObjects/SimulationObject") if item.findtext("CalculateHeatBalance") == "true")
+        section = source.find("./Profile/Sections/Section")
+        increments = int(section.findtext("Incrementos"))
+        segment_length_m = float(section.findtext("Comprimento")) / increments
+        segment_elevation_m = float(section.findtext("Elevacao")) / increments
+        profile = liquid_pipe_supplied_state_profile(
+            feed["PROP_MS_1"], pipe["HydraulicSegment,1,Results,2,InitialTemperature"],
+            float(section.findtext("DI")) * 0.0254, float(section.findtext("DE")) * 0.0254, 4.5e-5,
+            (segment_length_m,) * increments, (segment_elevation_m,) * increments,
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},VolumetricFlowLiquid"] for index in range(1, increments + 1)),
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},DensityLiquid"] for index in range(1, increments + 1)),
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},ViscosityLiquid"] for index in range(1, increments + 1)),
+            pipe["ThermalProfile,ExternalTemperatureDefinedHTC"], pipe["ThermalProfile,OverallHTC"],
+            (segment_length_m,) * 4, feed["PROP_MS_2"],
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},HeatCapacityLiquid"] * 1_000.0 for index in range(2, 6)),
+            pipe["ThermalProfile,ExternalTemperatureGradientDefinedHTC"], segment_length_m,
+        )
+
+        self.assertEqual(profile.thermal.segment_start_distances_m, (20.0, 40.0, 60.0, 80.0))
+        self.assertEqual(profile.thermal.external_temperatures_k, (352.0, 354.0, 356.0, 358.0))
+        for index, result in enumerate(profile.thermal.segment_results, 2):
+            self.assertTrue(math.isclose(result.heat_transfer_w, pipe[f"HydraulicSegment,1,Results,{index},HeatTransfer"] * 1_000.0, rel_tol=3e-3))
+        self.assertTrue(math.isclose(profile.pressure.outlet_pressure_pa, product["PROP_MS_1"], rel_tol=1e-5))
+        self.assertTrue(math.isclose(profile.thermal.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(profile.thermal.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3))
+
     def test_defined_htc_pipe_rejects_invalid_inputs(self):
         with self.assertRaises(ValidationError):
             pipe_defined_htc_heat_transfer(300.0, 350.0, 25.0, 0.0, 20.0, 10.0, 2_000.0)

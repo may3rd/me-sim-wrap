@@ -84,6 +84,21 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass `
   -OutputPath '.\tests\golden\pr-t1-repeat.json'
 ```
 
+### Clone a case with one verified property change
+
+For a derived parity case, use the headless clone helper rather than changing the source case in place. It refuses to overwrite an existing output, solves before saving, reloads the saved file, and verifies that pipe heat balance and defined-HTC mode remain enabled.
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File .\scripts\clone_dwsim_case_with_property.ps1 `
+  -EngineBin $engine `
+  -SourceCasePath '.\tests\u3-pipe-thermal-liquid-pr-eos.dwxmz' `
+  -OutputCasePath '.\tests\u3-pipe-thermal-gradient-liquid-pr-eos.dwxmz' `
+  -ObjectTag 'PIPE-1' `
+  -PropertyName 'ThermalProfile,ExternalTemperatureGradientDefinedHTC' `
+  -PropertyValue 0.1
+```
+
 ## 4. Verify and publish
 
 ```powershell
