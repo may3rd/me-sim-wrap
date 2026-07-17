@@ -36,6 +36,14 @@ class PipeThermalResult:
 
 
 @dataclass(frozen=True, slots=True)
+class PipeThermalProfileResult:
+    segment_results: tuple[PipeThermalResult, ...]
+    total_area_m2: float
+    outlet_temperature_k: float
+    heat_transfer_w: float
+
+
+@dataclass(frozen=True, slots=True)
 class OrificePressureDrop:
     reynolds: float
     discharge_coefficient: float
@@ -352,6 +360,40 @@ def pipe_defined_htc_heat_transfer(
         area,
         inlet_temperature_k + temperature_change,
         capacity_rate * temperature_change,
+    )
+
+
+def pipe_defined_htc_profile(
+    inlet_temperature_k: float, external_temperature_k: float, overall_htc_w_m2_k: float,
+    outer_diameter_m: float, segment_lengths_m: tuple[float, ...], mass_flow_kg_s: float,
+    heat_capacities_j_kg_k: tuple[float, ...],
+) -> PipeThermalProfileResult:
+    """Advance a defined-HTC thermal state across supplied pipe segments."""
+    try:
+        lengths = tuple(segment_lengths_m)
+        heat_capacities = tuple(heat_capacities_j_kg_k)
+    except TypeError as exc:
+        raise ValidationError("pipe thermal segment lengths and heat capacities must be finite sequences") from exc
+    if not lengths:
+        raise ValidationError("pipe thermal profile must contain at least one segment")
+    if len(lengths) != len(heat_capacities):
+        raise ValidationError("pipe thermal segment lengths and heat capacities must have equal counts")
+
+    temperature = inlet_temperature_k
+    results = []
+    for length_m, heat_capacity_j_kg_k in zip(lengths, heat_capacities):
+        result = pipe_defined_htc_heat_transfer(
+            temperature, external_temperature_k, overall_htc_w_m2_k, outer_diameter_m,
+            length_m, mass_flow_kg_s, heat_capacity_j_kg_k,
+        )
+        results.append(result)
+        temperature = result.outlet_temperature_k
+    segment_results = tuple(results)
+    return PipeThermalProfileResult(
+        segment_results,
+        math.fsum(item.area_m2 for item in segment_results),
+        temperature,
+        math.fsum(item.heat_transfer_w for item in segment_results),
     )
 
 

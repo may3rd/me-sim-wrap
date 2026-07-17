@@ -10,7 +10,7 @@ from zipfile import ZipFile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_heat_transfer, pipe_pressure_drop
+from mesim.unitops.hydraulics import api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_pressure_drop
 
 
 class HydraulicsTest(unittest.TestCase):
@@ -175,25 +175,26 @@ class HydraulicsTest(unittest.TestCase):
             )
             self.assertTrue(math.isclose(result.heat_transfer_w, pipe[prefix + "HeatTransfer"] * 1_000.0, rel_tol=3e-3))
 
-        temperature = pipe["HydraulicSegment,1,Results,2,InitialTemperature"]
-        total_heat = 0.0
-        for index in range(2, 6):
-            prefix = f"HydraulicSegment,1,Results,{index},"
-            result = pipe_defined_htc_heat_transfer(
-                temperature, external_temperature, overall_htc, outer_diameter_m,
-                segment_length_m, feed["PROP_MS_2"], pipe[prefix + "HeatCapacityLiquid"] * 1_000.0,
-            )
-            temperature = result.outlet_temperature_k
-            total_heat += result.heat_transfer_w
+        profile = pipe_defined_htc_profile(
+            pipe["HydraulicSegment,1,Results,2,InitialTemperature"], external_temperature,
+            overall_htc, outer_diameter_m, (segment_length_m,) * 4, feed["PROP_MS_2"],
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},HeatCapacityLiquid"] * 1_000.0 for index in range(2, 6)),
+        )
 
-        self.assertTrue(math.isclose(temperature, product["PROP_MS_0"], rel_tol=1e-4))
-        self.assertTrue(math.isclose(total_heat, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3))
+        self.assertEqual(len(profile.segment_results), 4)
+        self.assertTrue(math.isclose(profile.total_area_m2, 4.0 * math.pi * outer_diameter_m * segment_length_m, rel_tol=1e-12))
+        self.assertTrue(math.isclose(profile.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(profile.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3))
 
     def test_defined_htc_pipe_rejects_invalid_inputs(self):
         with self.assertRaises(ValidationError):
             pipe_defined_htc_heat_transfer(300.0, 350.0, 25.0, 0.0, 20.0, 10.0, 2_000.0)
         with self.assertRaises(ValidationError):
             pipe_defined_htc_heat_transfer(300.0, 350.0, -1.0, 0.1, 20.0, 10.0, 2_000.0)
+        with self.assertRaises(ValidationError):
+            pipe_defined_htc_profile(300.0, 350.0, 25.0, 0.1, (), 10.0, ())
+        with self.assertRaises(ValidationError):
+            pipe_defined_htc_profile(300.0, 350.0, 25.0, 0.1, (20.0,), 10.0, (2_000.0, 2_000.0))
 
     def test_single_phase_pipe_rejects_invalid_geometry_and_properties(self):
         with self.assertRaises(ValidationError):
