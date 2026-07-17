@@ -1,5 +1,6 @@
 """Single-phase hydraulic calculations."""
 import math
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from ..compounds import Compound, PRInteractions
@@ -602,23 +603,20 @@ def pipe_irradiated_heat_transfer(
     )
 
 
-def _pipe_estimated_htc_external_fluid(
+def _pipe_estimated_htc_stack(
     fluid_temperature_k: float,
     inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
     liquid_velocity_m_s: float, heat_capacity_j_kg_k: float,
     thermal_conductivity_w_m_k: float, viscosity_pa_s: float, density_kg_m3: float,
-    external_velocity_m_s: float, external_heat_capacity_j_kg_k: float,
-    external_thermal_conductivity_w_m_k: float, external_viscosity_pa_s: float,
-    external_density_kg_m3: float, insulation_thickness_m: float = 0.0,
+    external_htc_w_m2_k: float, external_reynolds: float, external_prandtl: float,
+    insulation_thickness_m: float = 0.0,
     insulation_conductivity_w_m_k: float | None = None,
 ) -> PipeEstimatedHtc:
-    """DWSIM liquid-pipe HTC stack with supplied external-fluid properties."""
+    """DWSIM liquid-pipe resistance stack with a supplied external contribution."""
     positive = (
         fluid_temperature_k, inner_diameter_m, outer_diameter_m,
         liquid_velocity_m_s, heat_capacity_j_kg_k, thermal_conductivity_w_m_k,
-        viscosity_pa_s, density_kg_m3, external_velocity_m_s,
-        external_heat_capacity_j_kg_k, external_thermal_conductivity_w_m_k,
-        external_viscosity_pa_s, external_density_kg_m3,
+        viscosity_pa_s, density_kg_m3, external_htc_w_m2_k,
     )
     if any(
         isinstance(value, bool) or not isinstance(value, (int, float))
@@ -649,6 +647,12 @@ def _pipe_estimated_htc_external_fluid(
         raise ValidationError("pipe insulation conductivity must be finite and positive")
     if insulation_thickness_m > 0.0 and insulation_conductivity_w_m_k is None:
         raise ValidationError("pipe insulation conductivity is required when insulation thickness is positive")
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value < 0.0
+        for value in (external_reynolds, external_prandtl)
+    ):
+        raise ValidationError("estimated pipe external dimensionless groups must be finite and non-negative")
 
     internal_reynolds = density_kg_m3 * liquid_velocity_m_s * inner_diameter_m / viscosity_pa_s
     if internal_reynolds > 3250.0:
@@ -693,8 +697,52 @@ def _pipe_estimated_htc_external_fluid(
         insulated_diameter_m = outer_diameter_m
         insulation_htc = 0.0
 
+    internal_resistance = 1.0 / internal_htc if internal_htc != 0.0 else 1.0e30
+    insulation_resistance = 1.0 / insulation_htc if insulation_htc != 0.0 else 0.0
+    overall_htc = 1.0 / (
+        internal_resistance + 1.0 / wall_htc + insulation_resistance + 1.0 / external_htc_w_m2_k
+    )
+    return PipeEstimatedHtc(
+        overall_htc, internal_htc, wall_htc, insulation_htc, external_htc_w_m2_k,
+        internal_reynolds, internal_prandtl, external_reynolds, external_prandtl,
+    )
+
+
+def _pipe_estimated_htc_external_fluid(
+    fluid_temperature_k: float,
+    inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
+    liquid_velocity_m_s: float, heat_capacity_j_kg_k: float,
+    thermal_conductivity_w_m_k: float, viscosity_pa_s: float, density_kg_m3: float,
+    external_velocity_m_s: float, external_heat_capacity_j_kg_k: float,
+    external_thermal_conductivity_w_m_k: float, external_viscosity_pa_s: float,
+    external_density_kg_m3: float, insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+) -> PipeEstimatedHtc:
+    """DWSIM Holman external-fluid correlation around the common pipe stack."""
+    external_values = (
+        external_velocity_m_s, external_heat_capacity_j_kg_k,
+        external_thermal_conductivity_w_m_k, external_viscosity_pa_s,
+        external_density_kg_m3,
+    )
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value <= 0.0
+        for value in external_values
+    ):
+        raise ValidationError("estimated pipe external-fluid inputs must be finite and positive")
+    if (
+        isinstance(inner_diameter_m, bool) or not isinstance(inner_diameter_m, (int, float))
+        or not math.isfinite(inner_diameter_m) or inner_diameter_m <= 0.0
+        or isinstance(outer_diameter_m, bool) or not isinstance(outer_diameter_m, (int, float))
+        or not math.isfinite(outer_diameter_m) or outer_diameter_m <= inner_diameter_m
+        or isinstance(insulation_thickness_m, bool)
+        or not isinstance(insulation_thickness_m, (int, float))
+        or not math.isfinite(insulation_thickness_m) or insulation_thickness_m < 0.0
+    ):
+        raise ValidationError("estimated pipe external-fluid geometry is invalid")
+    effective_diameter_m = outer_diameter_m + 2.0 * insulation_thickness_m
     external_reynolds = (
-        external_density_kg_m3 * external_velocity_m_s * insulated_diameter_m
+        external_density_kg_m3 * external_velocity_m_s * effective_diameter_m
         / external_viscosity_pa_s
     )
     external_prandtl = (
@@ -702,19 +750,15 @@ def _pipe_estimated_htc_external_fluid(
         / external_thermal_conductivity_w_m_k
     )
     external_surface_htc = (
-        external_thermal_conductivity_w_m_k / insulated_diameter_m
+        external_thermal_conductivity_w_m_k / effective_diameter_m
         * 0.25 * external_reynolds**0.6 * external_prandtl**0.38
     )
-    external_htc = external_surface_htc * insulated_diameter_m / inner_diameter_m
-
-    internal_resistance = 1.0 / internal_htc if internal_htc != 0.0 else 1.0e30
-    insulation_resistance = 1.0 / insulation_htc if insulation_htc != 0.0 else 0.0
-    overall_htc = 1.0 / (
-        internal_resistance + 1.0 / wall_htc + insulation_resistance + 1.0 / external_htc
-    )
-    return PipeEstimatedHtc(
-        overall_htc, internal_htc, wall_htc, insulation_htc, external_htc,
-        internal_reynolds, internal_prandtl, external_reynolds, external_prandtl,
+    external_htc = external_surface_htc * effective_diameter_m / inner_diameter_m
+    return _pipe_estimated_htc_stack(
+        fluid_temperature_k, inner_diameter_m, outer_diameter_m, roughness_m,
+        liquid_velocity_m_s, heat_capacity_j_kg_k, thermal_conductivity_w_m_k,
+        viscosity_pa_s, density_kg_m3, external_htc, external_reynolds,
+        external_prandtl, insulation_thickness_m, insulation_conductivity_w_m_k,
     )
 
 
@@ -775,6 +819,48 @@ def pipe_estimated_htc_water(
         external_water_heat_capacity_j_kg_k,
         external_water_thermal_conductivity_w_m_k,
         external_water_viscosity_pa_s, external_water_density_kg_m3,
+        insulation_thickness_m, insulation_conductivity_w_m_k,
+    )
+
+
+def pipe_estimated_htc_soil(
+    fluid_temperature_k: float,
+    inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
+    liquid_velocity_m_s: float, heat_capacity_j_kg_k: float,
+    thermal_conductivity_w_m_k: float, viscosity_pa_s: float, density_kg_m3: float,
+    burial_depth_m: float, soil_thermal_conductivity_w_m_k: float,
+    insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+) -> PipeEstimatedHtc:
+    """Estimate buried liquid-pipe HTC with DWSIM's soil resistance equation."""
+    soil_values = (burial_depth_m, soil_thermal_conductivity_w_m_k)
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value <= 0.0
+        for value in soil_values
+    ):
+        raise ValidationError("pipe burial depth and soil conductivity must be finite and positive")
+    if (
+        isinstance(outer_diameter_m, bool) or not isinstance(outer_diameter_m, (int, float))
+        or not math.isfinite(outer_diameter_m) or outer_diameter_m <= 0.0
+        or isinstance(insulation_thickness_m, bool)
+        or not isinstance(insulation_thickness_m, (int, float))
+        or not math.isfinite(insulation_thickness_m) or insulation_thickness_m < 0.0
+    ):
+        raise ValidationError("buried pipe external geometry is invalid")
+    effective_diameter_m = outer_diameter_m + 2.0 * insulation_thickness_m
+    radicand = 4.0 * burial_depth_m**2 - effective_diameter_m**2
+    if radicand <= 0.0:
+        raise ValidationError("pipe burial depth must exceed half the effective diameter")
+    soil_resistance = effective_diameter_m / (2.0 * soil_thermal_conductivity_w_m_k) * math.log(
+        (2.0 * burial_depth_m + math.sqrt(radicand)) / effective_diameter_m
+    )
+    if not math.isfinite(soil_resistance) or soil_resistance <= 0.0:
+        raise ValidationError("DWSIM soil correlation produced a non-positive resistance")
+    return _pipe_estimated_htc_stack(
+        fluid_temperature_k, inner_diameter_m, outer_diameter_m, roughness_m,
+        liquid_velocity_m_s, heat_capacity_j_kg_k, thermal_conductivity_w_m_k,
+        viscosity_pa_s, density_kg_m3, 1.0 / soil_resistance, 0.0, 0.0,
         insulation_thickness_m, insulation_conductivity_w_m_k,
     )
 
@@ -867,7 +953,7 @@ def pipe_estimated_htc_air_profile(
     )
 
 
-def pipe_estimated_htc_water_pr_profile(
+def _pipe_estimated_htc_pr_profile(
     inlet_temperature_k: float, inlet_pressure_pa: float, external_temperature_k: float,
     compounds: tuple[Compound, ...], composition: tuple[float, ...],
     interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
@@ -876,14 +962,10 @@ def pipe_estimated_htc_water_pr_profile(
     segment_lengths_m: tuple[float, ...],
     liquid_velocities_m_s: tuple[float, ...], heat_capacities_j_kg_k: tuple[float, ...],
     thermal_conductivities_w_m_k: tuple[float, ...], viscosities_pa_s: tuple[float, ...],
-    densities_kg_m3: tuple[float, ...], external_water_velocity_m_s: float,
-    external_water_heat_capacity_j_kg_k: float,
-    external_water_thermal_conductivity_w_m_k: float,
-    external_water_viscosity_pa_s: float, external_water_density_kg_m3: float,
-    insulation_thickness_m: float = 0.0,
-    insulation_conductivity_w_m_k: float | None = None,
+    densities_kg_m3: tuple[float, ...],
+    htc_builder: Callable[[float, float, float, float, float, float], PipeEstimatedHtc],
 ) -> PipeEstimatedHtcProfileResult:
-    """Advance a liquid PR enthalpy profile through external water."""
+    """Advance a liquid PR enthalpy profile using a medium-specific HTC builder."""
     try:
         sequences = tuple(tuple(values) for values in (
             outlet_pressures_pa, segment_lengths_m, liquid_velocities_m_s, heat_capacities_j_kg_k,
@@ -909,7 +991,7 @@ def pipe_estimated_htc_water_pr_profile(
     thermal_results = []
     inlet_flash = tp_flash(compounds, composition, interactions, temperature, inlet_pressure_pa)
     if not inlet_flash.report.converged or inlet_flash.phase != "liquid":
-        raise ValidationError("pipe water PR profile requires a converged liquid inlet flash")
+        raise ValidationError("estimated pipe HTC PR profile requires a converged liquid inlet flash")
     enthalpy = flash_enthalpy(compounds, correlations, inlet_flash)
     for outlet_pressure, length, velocity, heat_capacity, conductivity, viscosity, density in zip(
         pressures, lengths, velocities, heat_capacities, conductivities, viscosities, densities,
@@ -921,16 +1003,11 @@ def pipe_estimated_htc_water_pr_profile(
                 compounds, composition, interactions, trial_temperature, outlet_pressure,
             )
             if not trial_flash.report.converged or trial_flash.phase != "liquid":
-                raise ValidationError("pipe water PR profile left its converged liquid domain")
+                raise ValidationError("estimated pipe HTC PR profile left its converged liquid domain")
             trial_enthalpy = flash_enthalpy(compounds, correlations, trial_flash)
-            trial_htc = pipe_estimated_htc_water(
-                (temperature + trial_temperature) / 2.0,
-                inner_diameter_m, outer_diameter_m, roughness_m,
-                velocity, heat_capacity, conductivity, viscosity, density,
-                external_water_velocity_m_s, external_water_heat_capacity_j_kg_k,
-                external_water_thermal_conductivity_w_m_k,
-                external_water_viscosity_pa_s, external_water_density_kg_m3,
-                insulation_thickness_m, insulation_conductivity_w_m_k,
+            trial_htc = htc_builder(
+                (temperature + trial_temperature) / 2.0, velocity, heat_capacity,
+                conductivity, viscosity, density,
             )
             if trial_temperature == temperature:
                 lmtd = external_temperature_k - temperature
@@ -973,6 +1050,81 @@ def pipe_estimated_htc_water_pr_profile(
         math.fsum(item.area_m2 for item in segment_results), temperature,
         math.fsum(item.heat_transfer_w for item in segment_results),
         (0.0,) * len(segment_results), 0.0,
+    )
+
+
+def pipe_estimated_htc_water_pr_profile(
+    inlet_temperature_k: float, inlet_pressure_pa: float, external_temperature_k: float,
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
+    molar_flow_kmol_s: float, outlet_pressures_pa: tuple[float, ...],
+    inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
+    segment_lengths_m: tuple[float, ...],
+    liquid_velocities_m_s: tuple[float, ...], heat_capacities_j_kg_k: tuple[float, ...],
+    thermal_conductivities_w_m_k: tuple[float, ...], viscosities_pa_s: tuple[float, ...],
+    densities_kg_m3: tuple[float, ...], external_water_velocity_m_s: float,
+    external_water_heat_capacity_j_kg_k: float,
+    external_water_thermal_conductivity_w_m_k: float,
+    external_water_viscosity_pa_s: float, external_water_density_kg_m3: float,
+    insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+) -> PipeEstimatedHtcProfileResult:
+    """Advance a liquid PR enthalpy profile through external water."""
+    def htc_builder(
+        temperature: float, velocity: float, heat_capacity: float,
+        conductivity: float, viscosity: float, density: float,
+    ) -> PipeEstimatedHtc:
+        return pipe_estimated_htc_water(
+            temperature, inner_diameter_m, outer_diameter_m, roughness_m,
+            velocity, heat_capacity, conductivity, viscosity, density,
+            external_water_velocity_m_s, external_water_heat_capacity_j_kg_k,
+            external_water_thermal_conductivity_w_m_k,
+            external_water_viscosity_pa_s, external_water_density_kg_m3,
+            insulation_thickness_m, insulation_conductivity_w_m_k,
+        )
+
+    return _pipe_estimated_htc_pr_profile(
+        inlet_temperature_k, inlet_pressure_pa, external_temperature_k,
+        compounds, composition, interactions, correlations, molar_flow_kmol_s,
+        outlet_pressures_pa, inner_diameter_m, outer_diameter_m, roughness_m,
+        segment_lengths_m, liquid_velocities_m_s, heat_capacities_j_kg_k,
+        thermal_conductivities_w_m_k, viscosities_pa_s, densities_kg_m3,
+        htc_builder,
+    )
+
+
+def pipe_estimated_htc_soil_pr_profile(
+    inlet_temperature_k: float, inlet_pressure_pa: float, external_temperature_k: float,
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
+    molar_flow_kmol_s: float, outlet_pressures_pa: tuple[float, ...],
+    inner_diameter_m: float, outer_diameter_m: float, roughness_m: float,
+    segment_lengths_m: tuple[float, ...],
+    liquid_velocities_m_s: tuple[float, ...], heat_capacities_j_kg_k: tuple[float, ...],
+    thermal_conductivities_w_m_k: tuple[float, ...], viscosities_pa_s: tuple[float, ...],
+    densities_kg_m3: tuple[float, ...], burial_depth_m: float,
+    soil_thermal_conductivity_w_m_k: float, insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+) -> PipeEstimatedHtcProfileResult:
+    """Advance a buried liquid-pipe profile with PR enthalpy coupling."""
+    def htc_builder(
+        temperature: float, velocity: float, heat_capacity: float,
+        conductivity: float, viscosity: float, density: float,
+    ) -> PipeEstimatedHtc:
+        return pipe_estimated_htc_soil(
+            temperature, inner_diameter_m, outer_diameter_m, roughness_m,
+            velocity, heat_capacity, conductivity, viscosity, density,
+            burial_depth_m, soil_thermal_conductivity_w_m_k,
+            insulation_thickness_m, insulation_conductivity_w_m_k,
+        )
+
+    return _pipe_estimated_htc_pr_profile(
+        inlet_temperature_k, inlet_pressure_pa, external_temperature_k,
+        compounds, composition, interactions, correlations, molar_flow_kmol_s,
+        outlet_pressures_pa, inner_diameter_m, outer_diameter_m, roughness_m,
+        segment_lengths_m, liquid_velocities_m_s, heat_capacities_j_kg_k,
+        thermal_conductivities_w_m_k, viscosities_pa_s, densities_kg_m3,
+        htc_builder,
     )
 
 
