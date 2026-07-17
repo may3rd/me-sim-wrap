@@ -81,6 +81,28 @@ class BeggsBrillPressureDrop:
 
 
 @dataclass(frozen=True, slots=True)
+class TwoPhasePipeSegment:
+    length_m: float
+    elevation_m: float
+    vapor_flow_m3_s: float
+    liquid_flow_m3_s: float
+    vapor_density_kg_m3: float
+    liquid_density_kg_m3: float
+    vapor_viscosity_pa_s: float
+    liquid_viscosity_pa_s: float
+    surface_tension_n_m: float = 0.0
+
+
+@dataclass(frozen=True, slots=True)
+class TwoPhasePressureProfileResult:
+    segment_results: tuple[BeggsBrillPressureDrop | LockhartMartinelliPressureDrop, ...]
+    outlet_pressure_pa: float
+    friction_drop_pa: float
+    static_drop_pa: float
+    total_drop_pa: float
+
+
+@dataclass(frozen=True, slots=True)
 class ApiRp520Area:
     relieving_pressure_pa: float
     critical_pressure_pa: float
@@ -289,6 +311,72 @@ def lockhart_martinelli_pressure_drop(
     static_drop = (vapor_fraction * vapor_density_kg_m3 + (1.0 - vapor_fraction) * liquid_density_kg_m3) * 9.8 * elevation_m
     friction_drop = max(liquid_multiplier * liquid.friction_drop_pa, vapor_multiplier * vapor.friction_drop_pa)
     return LockhartMartinelliPressureDrop(vapor.reynolds, liquid.reynolds, x, (1.0 / liquid_multiplier) ** 0.5, friction_drop, static_drop, friction_drop + static_drop)
+
+
+def _two_phase_pressure_profile(
+    inlet_pressure_pa: float,
+    results: tuple[BeggsBrillPressureDrop | LockhartMartinelliPressureDrop, ...],
+) -> TwoPhasePressureProfileResult:
+    if (
+        isinstance(inlet_pressure_pa, bool)
+        or not isinstance(inlet_pressure_pa, (int, float))
+        or not math.isfinite(inlet_pressure_pa)
+        or inlet_pressure_pa <= 0.0
+    ):
+        raise ValidationError("pipe inlet pressure must be finite and positive")
+    friction_drop = math.fsum(item.friction_drop_pa for item in results)
+    static_drop = math.fsum(item.static_drop_pa for item in results)
+    total_drop = friction_drop + static_drop
+    if total_drop >= inlet_pressure_pa:
+        raise ValidationError("pipe pressure drop must remain below inlet absolute pressure")
+    return TwoPhasePressureProfileResult(
+        results, inlet_pressure_pa - total_drop, friction_drop, static_drop, total_drop,
+    )
+
+
+def beggs_brill_pressure_drop_profile(
+    inlet_pressure_pa: float, diameter_m: float, roughness_m: float,
+    segments: tuple[TwoPhasePipeSegment, ...],
+) -> TwoPhasePressureProfileResult:
+    """Aggregate DWSIM Beggs-Brill drops over supplied two-phase segment states."""
+    try:
+        segment_states = tuple(segments)
+    except TypeError as exc:
+        raise ValidationError("Beggs-Brill profile segments must be a finite sequence") from exc
+    if not segment_states or any(not isinstance(item, TwoPhasePipeSegment) for item in segment_states):
+        raise ValidationError("Beggs-Brill profile requires at least one two-phase segment")
+    results = tuple(
+        beggs_brill_pressure_drop(
+            diameter_m, item.length_m, item.elevation_m, roughness_m,
+            item.vapor_flow_m3_s, item.liquid_flow_m3_s, item.vapor_density_kg_m3,
+            item.liquid_density_kg_m3, item.vapor_viscosity_pa_s,
+            item.liquid_viscosity_pa_s, item.surface_tension_n_m,
+        )
+        for item in segment_states
+    )
+    return _two_phase_pressure_profile(inlet_pressure_pa, results)
+
+
+def lockhart_martinelli_pressure_drop_profile(
+    inlet_pressure_pa: float, diameter_m: float, roughness_m: float,
+    segments: tuple[TwoPhasePipeSegment, ...],
+) -> TwoPhasePressureProfileResult:
+    """Aggregate DWSIM Lockhart-Martinelli drops over supplied two-phase segment states."""
+    try:
+        segment_states = tuple(segments)
+    except TypeError as exc:
+        raise ValidationError("Lockhart-Martinelli profile segments must be a finite sequence") from exc
+    if not segment_states or any(not isinstance(item, TwoPhasePipeSegment) for item in segment_states):
+        raise ValidationError("Lockhart-Martinelli profile requires at least one two-phase segment")
+    results = tuple(
+        lockhart_martinelli_pressure_drop(
+            diameter_m, item.length_m, item.elevation_m, roughness_m,
+            item.vapor_flow_m3_s, item.liquid_flow_m3_s, item.vapor_density_kg_m3,
+            item.liquid_density_kg_m3, item.vapor_viscosity_pa_s, item.liquid_viscosity_pa_s,
+        )
+        for item in segment_states
+    )
+    return _two_phase_pressure_profile(inlet_pressure_pa, results)
 
 
 def orifice_pressure_drop(

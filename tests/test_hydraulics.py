@@ -10,7 +10,7 @@ from zipfile import ZipFile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, lockhart_martinelli_pressure_drop, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_pressure_drop, pipe_pressure_drop_profile
+from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_pressure_drop, pipe_pressure_drop_profile
 
 
 class HydraulicsTest(unittest.TestCase):
@@ -50,25 +50,41 @@ class HydraulicsTest(unittest.TestCase):
 
     def test_beggs_brill_matches_captured_dwsim_two_phase_pipe(self):
         golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-two-phase-beggs-brill-pr-eos.json").read_text(encoding="utf-8-sig"))
-        pipe = next(item for item in golden["outputs"]["objects_after"] if item["tag"] == "PIPE-001")
-        values = {item["property"]: item["value"]["value"] for item in pipe["properties"]}
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        values = {item["property"]: item["value"]["value"] for item in objects["PIPE-001"]["properties"]}
+        feed = {item["property"]: item["value"]["value"] for item in objects["TPPIPE-FEED"]["properties"]}
+        product = {item["property"]: item["value"]["value"] for item in objects["TPPIPE-PROD"]["properties"]}
         with ZipFile(Path(__file__).parents[1] / "tests/u3-pipe-two-phase-beggs-brill-pr-eos.dwxmz") as archive:
             root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
         source = next(item for item in root.findall("./SimulationObjects/SimulationObject") if item.findtext("SelectedFlowPackage") == "Beggs_Brill")
-        diameter_m = float(source.findtext("./Profile/Sections/Section/DI")) * 0.0254
-        prefix = "HydraulicSegment,1,Results,1,"
-        result = beggs_brill_pressure_drop(
-            diameter_m, 2.0, 0.2, 4.5e-5,
-            values[prefix + "VolumetricFlowVapor"], values[prefix + "VolumetricFlowLiquid"],
-            values[prefix + "DensityVapor"], values[prefix + "DensityLiquid"],
-            values[prefix + "ViscosityVapor"], values[prefix + "ViscosityLiquid"],
-            values[prefix + "SurfaceTension"],
+        section = source.find("./Profile/Sections/Section")
+        diameter_m = float(section.findtext("DI")) * 0.0254
+        increments = int(section.findtext("Incrementos"))
+        profile = beggs_brill_pressure_drop_profile(
+            feed["PROP_MS_1"], diameter_m, 4.5e-5,
+            tuple(TwoPhasePipeSegment(
+                float(section.findtext("Comprimento")) / increments,
+                float(section.findtext("Elevacao")) / increments,
+                values[f"HydraulicSegment,1,Results,{index},VolumetricFlowVapor"],
+                values[f"HydraulicSegment,1,Results,{index},VolumetricFlowLiquid"],
+                values[f"HydraulicSegment,1,Results,{index},DensityVapor"],
+                values[f"HydraulicSegment,1,Results,{index},DensityLiquid"],
+                values[f"HydraulicSegment,1,Results,{index},ViscosityVapor"],
+                values[f"HydraulicSegment,1,Results,{index},ViscosityLiquid"],
+                values[f"HydraulicSegment,1,Results,{index},SurfaceTension"],
+            ) for index in range(1, increments + 1)),
         )
 
-        self.assertEqual(result.flow_regime, values[prefix + "FlowRegime"])
-        self.assertTrue(math.isclose(result.liquid_holdup, values[prefix + "LiquidHoldup"], rel_tol=1e-6))
-        self.assertTrue(math.isclose(result.friction_drop_pa, values[prefix + "PressureDropFriction"], rel_tol=1e-6))
-        self.assertTrue(math.isclose(result.static_drop_pa, values[prefix + "PressureDropHydrostatic"], rel_tol=1e-6))
+        self.assertEqual(len(profile.segment_results), increments)
+        for index, result in enumerate(profile.segment_results, 1):
+            prefix = f"HydraulicSegment,1,Results,{index},"
+            self.assertEqual(result.flow_regime, values[prefix + "FlowRegime"])
+            self.assertTrue(math.isclose(result.liquid_holdup, values[prefix + "LiquidHoldup"], rel_tol=1e-6))
+            self.assertTrue(math.isclose(result.friction_drop_pa, values[prefix + "PressureDropFriction"], rel_tol=1e-6))
+            self.assertTrue(math.isclose(result.static_drop_pa, values[prefix + "PressureDropHydrostatic"], rel_tol=1e-6))
+        self.assertTrue(math.isclose(profile.friction_drop_pa, values["PressureDropFriction"], rel_tol=1e-6))
+        self.assertTrue(math.isclose(profile.static_drop_pa, values["PressureDropStatic"], rel_tol=1e-6))
+        self.assertTrue(math.isclose(profile.outlet_pressure_pa, product["PROP_MS_1"], rel_tol=1e-6))
 
     def test_lockhart_martinelli_matches_dwsim_two_phase_equations(self):
         result = lockhart_martinelli_pressure_drop(0.05, 100.0, 10.0, 4.5e-5, 0.001, 0.002, 10.0, 800.0, 1e-5, 0.001)
@@ -82,23 +98,45 @@ class HydraulicsTest(unittest.TestCase):
 
     def test_lockhart_martinelli_matches_captured_dwsim_two_phase_pipe(self):
         golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-two-phase-lockhart-martinelli-pr-eos.json").read_text(encoding="utf-8-sig"))
-        pipe = next(item for item in golden["outputs"]["objects_after"] if item["tag"] == "PIPE-001")
-        values = {item["property"]: item["value"]["value"] for item in pipe["properties"]}
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        values = {item["property"]: item["value"]["value"] for item in objects["PIPE-001"]["properties"]}
+        feed = {item["property"]: item["value"]["value"] for item in objects["TPPIPE-FEED"]["properties"]}
+        product = {item["property"]: item["value"]["value"] for item in objects["TPPIPE-PROD"]["properties"]}
         with ZipFile(Path(__file__).parents[1] / "tests/u3-pipe-two-phase-lockhart-martinelli-pr-eos.dwxmz") as archive:
             root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
         source = next(item for item in root.findall("./SimulationObjects/SimulationObject") if item.findtext("SelectedFlowPackage") == "Lockhart_Martinelli")
-        diameter_m = float(source.findtext("./Profile/Sections/Section/DI")) * 0.0254
-        prefix = "HydraulicSegment,1,Results,1,"
-        result = lockhart_martinelli_pressure_drop(
-            diameter_m, 2.0, 0.2, 4.5e-5,
-            values[prefix + "VolumetricFlowVapor"], values[prefix + "VolumetricFlowLiquid"],
-            values[prefix + "DensityVapor"], values[prefix + "DensityLiquid"],
-            values[prefix + "ViscosityVapor"], values[prefix + "ViscosityLiquid"],
+        section = source.find("./Profile/Sections/Section")
+        diameter_m = float(section.findtext("DI")) * 0.0254
+        increments = int(section.findtext("Incrementos"))
+        profile = lockhart_martinelli_pressure_drop_profile(
+            feed["PROP_MS_1"], diameter_m, 4.5e-5,
+            tuple(TwoPhasePipeSegment(
+                float(section.findtext("Comprimento")) / increments,
+                float(section.findtext("Elevacao")) / increments,
+                values[f"HydraulicSegment,1,Results,{index},VolumetricFlowVapor"],
+                values[f"HydraulicSegment,1,Results,{index},VolumetricFlowLiquid"],
+                values[f"HydraulicSegment,1,Results,{index},DensityVapor"],
+                values[f"HydraulicSegment,1,Results,{index},DensityLiquid"],
+                values[f"HydraulicSegment,1,Results,{index},ViscosityVapor"],
+                values[f"HydraulicSegment,1,Results,{index},ViscosityLiquid"],
+            ) for index in range(1, increments + 1)),
         )
 
-        self.assertTrue(math.isclose(result.liquid_holdup, values[prefix + "LiquidHoldup"], rel_tol=1e-12))
-        self.assertTrue(math.isclose(result.friction_drop_pa, values[prefix + "PressureDropFriction"], rel_tol=1e-12))
-        self.assertTrue(math.isclose(result.static_drop_pa, values[prefix + "PressureDropHydrostatic"], rel_tol=1e-12))
+        self.assertEqual(len(profile.segment_results), increments)
+        for index, result in enumerate(profile.segment_results, 1):
+            prefix = f"HydraulicSegment,1,Results,{index},"
+            self.assertTrue(math.isclose(result.liquid_holdup, values[prefix + "LiquidHoldup"], rel_tol=1e-12))
+            self.assertTrue(math.isclose(result.friction_drop_pa, values[prefix + "PressureDropFriction"], rel_tol=1e-12))
+            self.assertTrue(math.isclose(result.static_drop_pa, values[prefix + "PressureDropHydrostatic"], rel_tol=1e-12))
+        self.assertTrue(math.isclose(profile.friction_drop_pa, values["PressureDropFriction"], rel_tol=1e-12))
+        self.assertTrue(math.isclose(profile.static_drop_pa, values["PressureDropStatic"], rel_tol=1e-12))
+        self.assertTrue(math.isclose(profile.outlet_pressure_pa, product["PROP_MS_1"], rel_tol=1e-12))
+
+    def test_two_phase_pipe_profiles_reject_empty_segments(self):
+        with self.assertRaises(ValidationError):
+            beggs_brill_pressure_drop_profile(1_100_000.0, 0.05, 4.5e-5, ())
+        with self.assertRaises(ValidationError):
+            lockhart_martinelli_pressure_drop_profile(1_100_000.0, 0.05, 4.5e-5, ())
 
     def test_flange_tap_orifice_matches_dwsim_iso_5167_equations(self):
         result = orifice_pressure_drop(0.2, 0.1, 10.0, 1000.0, 0.001, "flange")
