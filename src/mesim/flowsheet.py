@@ -72,6 +72,33 @@ class RecycleConvergenceError(ConvergenceError):
         self.history = history
 
 
+@dataclass(frozen=True, slots=True)
+class AdjustIteration:
+    iteration: int
+    manipulated: float
+    controlled: float
+    target: float
+    residual: float
+    scaled_norm: float
+    derivative: float | None
+    step: float
+    damping: float
+
+
+@dataclass(frozen=True, slots=True)
+class AdjustResult:
+    manipulated: float
+    controlled: float
+    history: tuple[AdjustIteration, ...]
+    algorithm: str = "bounded_newton"
+
+
+class AdjustConvergenceError(ConvergenceError):
+    def __init__(self, message: str, history: tuple[AdjustIteration, ...]):
+        super().__init__(message)
+        self.history = history
+
+
 def solve_recycle(
     evaluate: Callable[[tuple[float, ...]], tuple[float, ...]],
     initial_guess: tuple[float, ...],
@@ -159,6 +186,96 @@ def solve_energy_recycle(
         damping=damping,
         max_iterations=max_iterations,
     )
+
+
+def solve_adjust(
+    evaluate_controlled: Callable[[float], float],
+    target: float,
+    initial_guess: float,
+    lower_bound: float,
+    upper_bound: float,
+    controlled_scale: float,
+    tolerance: float,
+    step_size: float,
+    damping: float = 1.0,
+    max_iterations: int = 25,
+) -> AdjustResult:
+    """Solve one bounded manipulated variable with finite-difference Newton steps."""
+    values = (
+        target, initial_guess, lower_bound, upper_bound,
+        controlled_scale, tolerance, step_size, damping,
+    )
+    if not callable(evaluate_controlled):
+        raise ValidationError("adjust evaluation must be callable")
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+        for value in values
+    ) or not lower_bound < upper_bound or not lower_bound <= initial_guess <= upper_bound:
+        raise ValidationError("adjust values and bounds are invalid")
+    if (
+        controlled_scale <= 0.0 or tolerance <= 0.0 or step_size <= 0.0
+        or not 0.0 < damping <= 1.0
+        or isinstance(max_iterations, bool) or not isinstance(max_iterations, int)
+        or max_iterations <= 0
+    ):
+        raise ValidationError("adjust scales, tolerance, damping, and iterations are invalid")
+
+    target = float(target)
+    manipulated = float(initial_guess)
+    controlled_scale = float(controlled_scale)
+    tolerance = float(tolerance)
+    step_size = float(step_size)
+    damping = float(damping)
+    history: list[AdjustIteration] = []
+
+    def evaluate(value: float) -> float:
+        controlled = evaluate_controlled(value)
+        if (
+            isinstance(controlled, bool) or not isinstance(controlled, (int, float))
+            or not math.isfinite(controlled)
+        ):
+            raise ValidationError("adjust evaluation returned an invalid controlled value")
+        return float(controlled)
+
+    for iteration in range(1, max_iterations + 1):
+        controlled = evaluate(manipulated)
+        residual = target - controlled
+        scaled_norm = abs(residual) / controlled_scale
+        if abs(residual) <= tolerance:
+            history.append(AdjustIteration(
+                iteration, manipulated, controlled, target, residual,
+                scaled_norm, None, 0.0, damping,
+            ))
+            return AdjustResult(manipulated, controlled, tuple(history))
+
+        low_probe = max(float(lower_bound), manipulated - step_size)
+        high_probe = min(float(upper_bound), manipulated + step_size)
+        if high_probe <= low_probe:
+            history.append(AdjustIteration(
+                iteration, manipulated, controlled, target, residual,
+                scaled_norm, None, 0.0, damping,
+            ))
+            raise AdjustConvergenceError("adjust has no finite-difference interval", tuple(history))
+        derivative = (evaluate(high_probe) - evaluate(low_probe)) / (high_probe - low_probe)
+        if not math.isfinite(derivative) or derivative == 0.0:
+            history.append(AdjustIteration(
+                iteration, manipulated, controlled, target, residual,
+                scaled_norm, derivative, 0.0, damping,
+            ))
+            raise AdjustConvergenceError("adjust derivative is singular", tuple(history))
+
+        proposed = manipulated + damping * residual / derivative
+        bounded = min(float(upper_bound), max(float(lower_bound), proposed))
+        applied_step = bounded - manipulated
+        history.append(AdjustIteration(
+            iteration, manipulated, controlled, target, residual,
+            scaled_norm, derivative, applied_step, damping,
+        ))
+        if applied_step == 0.0:
+            raise AdjustConvergenceError("adjust is pinned at a bound", tuple(history))
+        manipulated = bounded
+
+    raise AdjustConvergenceError("adjust bounded Newton solve did not converge", tuple(history))
 
 
 def _validate(flowsheet: Flowsheet) -> dict[str, UnitOperation]:

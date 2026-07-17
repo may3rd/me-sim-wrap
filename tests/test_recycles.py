@@ -11,7 +11,13 @@ from zipfile import ZipFile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim.errors import ValidationError
-from mesim.flowsheet import RecycleConvergenceError, solve_energy_recycle, solve_recycle
+from mesim.flowsheet import (
+    AdjustConvergenceError,
+    RecycleConvergenceError,
+    solve_adjust,
+    solve_energy_recycle,
+    solve_recycle,
+)
 
 
 ROOT = Path(__file__).parents[1]
@@ -206,6 +212,126 @@ class DWSIMEnergyRecycleTest(unittest.TestCase):
         self.assertEqual(saved.findtext("IterationsTaken"), "1")
         self.assertEqual(saved.findtext("MaximumIterations"), "100")
         self.assertLessEqual(abs(float(saved.find("ConvHist").attrib["EnergyE"])), tolerance_kw)
+
+
+class DWSIMAdjustTest(unittest.TestCase):
+    def test_bounded_newton_adjust_records_complete_history(self):
+        result = solve_adjust(
+            lambda manipulated: 1.0 + 2.0 * manipulated,
+            target=5.0,
+            initial_guess=0.5,
+            lower_bound=0.0,
+            upper_bound=4.0,
+            controlled_scale=5.0,
+            tolerance=1.0e-12,
+            step_size=0.1,
+        )
+
+        self.assertEqual(result.algorithm, "bounded_newton")
+        self.assertTrue(math.isclose(result.manipulated, 2.0, abs_tol=1.0e-12))
+        self.assertTrue(math.isclose(result.controlled, 5.0, abs_tol=1.0e-12))
+        self.assertEqual(tuple(item.iteration for item in result.history), (1, 2))
+        self.assertTrue(math.isclose(result.history[0].derivative, 2.0, abs_tol=1.0e-12))
+        self.assertEqual(result.history[-1].step, 0.0)
+        self.assertLessEqual(abs(result.history[-1].residual), 1.0e-12)
+
+    def test_adjust_failure_returns_no_partial_result_and_preserves_history(self):
+        with self.assertRaises(AdjustConvergenceError) as caught:
+            solve_adjust(
+                lambda _: 1.0,
+                target=2.0,
+                initial_guess=0.5,
+                lower_bound=0.0,
+                upper_bound=1.0,
+                controlled_scale=2.0,
+                tolerance=1.0e-12,
+                step_size=0.1,
+            )
+        self.assertEqual(len(caught.exception.history), 1)
+        self.assertEqual(caught.exception.history[0].residual, 1.0)
+        self.assertEqual(caught.exception.history[0].derivative, 0.0)
+
+    def test_adjust_rejects_invalid_bounds_and_controlled_values(self):
+        arguments = dict(
+            target=1.0,
+            initial_guess=0.5,
+            lower_bound=0.0,
+            upper_bound=1.0,
+            controlled_scale=1.0,
+            tolerance=1.0e-6,
+            step_size=0.1,
+        )
+        with self.assertRaises(ValidationError):
+            solve_adjust(None, **arguments)
+        with self.assertRaises(ValidationError):
+            solve_adjust(lambda value: value, **(arguments | {"lower_bound": 1.0}))
+        with self.assertRaises(ValidationError):
+            solve_adjust(lambda _: math.nan, **arguments)
+
+    def test_biodiesel_adjust_is_repeatable_and_meets_target(self):
+        golden = json.loads(
+            (ROOT / "tests/golden/u8-adjust-biodiesel-nrtl.json").read_text(encoding="utf-8-sig")
+        )
+        repeat = json.loads(
+            (ROOT / "tests/golden/u8-adjust-biodiesel-nrtl-repeat.json").read_text(
+                encoding="utf-8-sig"
+            )
+        )
+        normalized_golden, normalized_repeat = copy.deepcopy(golden), copy.deepcopy(repeat)
+        normalized_golden["source"].pop("captured_utc")
+        normalized_repeat["source"].pop("captured_utc")
+        self.assertEqual(normalized_golden, normalized_repeat)
+        self.assertTrue(golden["outputs"]["solve"]["success"])
+        self.assertFalse(golden["outputs"]["solve"]["errors"])
+        self.assertFalse(any(
+            property_record["read_error"]
+            for object_record in golden["outputs"]["objects_after"]
+            for property_record in object_record["properties"]
+        ))
+
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {item["property"]: item["value"]["value"] for item in record["properties"]}
+            for tag, record in objects.items()
+        }
+        manipulated_kg_s = properties["EtOH"]["PROP_MS_2"]
+        controlled_mol_s = properties["Etanol"]["PROP_MS_104/Ethanol_BD"]
+        target_mol_s = properties["ADJ-000"]["AdjustValue"]
+        tolerance_mol_s = properties["ADJ-000"]["Tolerance"]
+        self.assertLessEqual(abs(controlled_mol_s - target_mol_s), tolerance_mol_s)
+
+        result = solve_adjust(
+            lambda _: controlled_mol_s,
+            target=target_mol_s,
+            initial_guess=manipulated_kg_s,
+            lower_bound=0.0,
+            upper_bound=0.1,
+            controlled_scale=target_mol_s,
+            tolerance=tolerance_mol_s,
+            step_size=0.001,
+        )
+        self.assertEqual(result.manipulated, manipulated_kg_s)
+        self.assertEqual(result.controlled, controlled_mol_s)
+        self.assertEqual(len(result.history), 1)
+
+        with ZipFile(ROOT / "tests/u8-adjust-biodiesel-nrtl.dwxmz") as archive:
+            root = ElementTree.fromstring(
+                archive.read(next(name for name in archive.namelist() if name.endswith(".xml")))
+            )
+        saved = next(
+            record for record in root.findall(".//SimulationObject")
+            if record.findtext("Type") == "DWSIM.UnitOperations.SpecialOps.Adjust"
+        )
+        self.assertEqual(saved.findtext("SimultaneousAdjust"), "true")
+        self.assertEqual(saved.findtext("AdjustValue"), "1.66666666666667")
+        self.assertEqual(saved.findtext("Tolerance"), "0.0001")
+        self.assertEqual(saved.find("ManipulatedObjectData").attrib["Name"], "EtOH")
+        self.assertEqual(saved.find("ManipulatedObjectData").attrib["Property"], "PROP_MS_2")
+        self.assertEqual(saved.find("ControlledObjectData").attrib["Name"], "Etanol")
+        self.assertEqual(
+            saved.find("ControlledObjectData").attrib["Property"],
+            "PROP_MS_104/Ethanol_BD",
+        )
 
 
 if __name__ == "__main__":

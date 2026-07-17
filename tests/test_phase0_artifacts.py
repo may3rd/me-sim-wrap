@@ -138,6 +138,13 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertIn("$ObjectTags -notcontains $tag", script)
         self.assertEqual(script.count("-ObjectTags $ObjectTags"), 2)
 
+    def test_capture_script_can_bound_properties_by_name(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("[string[]]$PropertyNames = @()", script)
+        self.assertIn("$PropertyNames -notcontains $propertyName", script)
+        self.assertEqual(script.count("-PropertyNames $PropertyNames"), 2)
+
     def test_capture_script_uses_dwsim_canonical_compound_id(self):
         script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
 

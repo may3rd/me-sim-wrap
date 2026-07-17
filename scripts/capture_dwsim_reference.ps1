@@ -15,6 +15,7 @@ param(
     [string]$FlashAlgorithm = "unknown",
     [switch]$CalculateBubbleAndDewPoints,
     [string[]]$ObjectTags = @(),
+    [string[]]$PropertyNames = @(),
     [string[]]$CompoundNames = @(
         "Methane",
         "Ethane",
@@ -466,7 +467,9 @@ function Get-ObjectStates {
         [Parameter(Mandatory = $true)]
         [hashtable]$SavedUtilityStates,
 
-        [string[]]$ObjectTags = @()
+        [string[]]$ObjectTags = @(),
+
+        [string[]]$PropertyNames = @()
     )
 
     $states = @()
@@ -511,7 +514,7 @@ function Get-ObjectStates {
 
         $properties = @()
 
-        $propertyNames = [DwsimCaptureReflection]::Invoke(
+        $availablePropertyNames = [DwsimCaptureReflection]::Invoke(
             $object,
             "GetProperties",
             [object[]]@(
@@ -519,7 +522,11 @@ function Get-ObjectStates {
             )
         )
 
-        foreach ($propertyName in $propertyNames) {
+        foreach ($propertyName in $availablePropertyNames) {
+            if ($PropertyNames.Count -gt 0 -and $PropertyNames -notcontains $propertyName) {
+                continue
+            }
+
             $properties += Get-PropertyRecord `
                 -Object $object `
                 -PropertyName ([string]$propertyName)
@@ -867,7 +874,8 @@ if (-not [string]::IsNullOrWhiteSpace($CasePath)) {
         Get-ObjectStates `
             -Flowsheet $flowsheet `
             -SavedUtilityStates $savedUtilityStates `
-            -ObjectTags $ObjectTags
+            -ObjectTags $ObjectTags `
+            -PropertyNames $PropertyNames
     )
 
     $errors = @()
@@ -899,7 +907,8 @@ if (-not [string]::IsNullOrWhiteSpace($CasePath)) {
         Get-ObjectStates `
             -Flowsheet $flowsheet `
             -SavedUtilityStates $savedUtilityStates `
-            -ObjectTags $ObjectTags
+            -ObjectTags $ObjectTags `
+            -PropertyNames $PropertyNames
     )
 }
 
