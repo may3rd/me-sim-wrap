@@ -1,3 +1,4 @@
+import ast
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 import math
@@ -97,6 +98,83 @@ class AdjustConvergenceError(ConvergenceError):
     def __init__(self, message: str, history: tuple[AdjustIteration, ...]):
         super().__init__(message)
         self.history = history
+
+
+@dataclass(frozen=True, slots=True)
+class SpecificationResult:
+    expression: str
+    source_value: float
+    target_before: float
+    unconstrained_value: float
+    target_value: float
+    minimum_value: float | None
+    maximum_value: float | None
+    clamped: bool
+
+
+_SPEC_FUNCTIONS: Mapping[str, Callable[..., float]] = MappingProxyType({
+    "abs": abs,
+    "acos": math.acos,
+    "asin": math.asin,
+    "atan": math.atan,
+    "atan2": math.atan2,
+    "ceiling": math.ceil,
+    "cos": math.cos,
+    "cosh": math.cosh,
+    "exp": math.exp,
+    "floor": math.floor,
+    "log": math.log,
+    "log10": math.log10,
+    "max": max,
+    "min": min,
+    "pow": math.pow,
+    "round": round,
+    "sin": math.sin,
+    "sinh": math.sinh,
+    "sqrt": math.sqrt,
+    "tan": math.tan,
+    "tanh": math.tanh,
+})
+
+
+def _evaluate_spec_node(node: ast.AST, variables: Mapping[str, float]) -> float:
+    if isinstance(node, ast.Constant):
+        if isinstance(node.value, bool) or not isinstance(node.value, (int, float)):
+            raise ValidationError("specification constants must be numeric")
+        return float(node.value)
+    if isinstance(node, ast.Name):
+        try:
+            return variables[node.id.lower()]
+        except KeyError as error:
+            raise ValidationError(f"unsupported specification name: {node.id}") from error
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.UAdd, ast.USub)):
+        value = _evaluate_spec_node(node.operand, variables)
+        return value if isinstance(node.op, ast.UAdd) else -value
+    if isinstance(node, ast.BinOp):
+        left = _evaluate_spec_node(node.left, variables)
+        right = _evaluate_spec_node(node.right, variables)
+        if isinstance(node.op, ast.Add):
+            return left + right
+        if isinstance(node.op, ast.Sub):
+            return left - right
+        if isinstance(node.op, ast.Mult):
+            return left * right
+        if isinstance(node.op, ast.Div):
+            return left / right
+        if isinstance(node.op, (ast.Pow, ast.BitXor)):
+            return left**right
+        if isinstance(node.op, ast.Mod):
+            return left % right
+        raise ValidationError("unsupported specification operator")
+    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and not node.keywords:
+        try:
+            function = _SPEC_FUNCTIONS[node.func.id.lower()]
+        except KeyError as error:
+            raise ValidationError(
+                f"unsupported specification function: {node.func.id}"
+            ) from error
+        return float(function(*(_evaluate_spec_node(argument, variables) for argument in node.args)))
+    raise ValidationError("unsupported specification expression")
 
 
 def solve_recycle(
@@ -276,6 +354,71 @@ def solve_adjust(
         manipulated = bounded
 
     raise AdjustConvergenceError("adjust bounded Newton solve did not converge", tuple(history))
+
+
+def apply_specification(
+    expression: str,
+    source_value: float,
+    target_value: float,
+    minimum_value: float | None = None,
+    maximum_value: float | None = None,
+) -> SpecificationResult:
+    """Evaluate a DWSIM-style X/Y scalar expression and apply optional bounds."""
+    if not isinstance(expression, str) or not expression.strip():
+        raise ValidationError("specification expression must be a non-empty string")
+    if len(expression) > 1000:
+        raise ValidationError("specification expression is too long")
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+        for value in (source_value, target_value)
+    ):
+        raise ValidationError("specification source and target values must be finite numbers")
+    if (minimum_value is None) != (maximum_value is None):
+        raise ValidationError("specification bounds must be supplied together")
+    if minimum_value is not None and (
+        isinstance(minimum_value, bool) or not isinstance(minimum_value, (int, float))
+        or isinstance(maximum_value, bool) or not isinstance(maximum_value, (int, float))
+        or not math.isfinite(minimum_value) or not math.isfinite(maximum_value)
+        or minimum_value > maximum_value
+    ):
+        raise ValidationError("specification bounds are invalid")
+
+    try:
+        parsed = ast.parse(expression, mode="eval")
+    except (SyntaxError, ValueError) as error:
+        raise ValidationError("specification expression is invalid") from error
+    if sum(1 for _ in ast.walk(parsed)) > 64:
+        raise ValidationError("specification expression is too complex")
+    variables = MappingProxyType({
+        "x": float(source_value),
+        "y": float(target_value),
+        "pi": math.pi,
+        "e": math.e,
+    })
+    try:
+        unconstrained = _evaluate_spec_node(parsed.body, variables)
+    except ValidationError:
+        raise
+    except (ArithmeticError, OverflowError, TypeError, ValueError) as error:
+        raise ValidationError("specification expression could not be evaluated") from error
+    if not math.isfinite(unconstrained):
+        raise ValidationError("specification expression returned a non-finite value")
+
+    minimum = None if minimum_value is None else float(minimum_value)
+    maximum = None if maximum_value is None else float(maximum_value)
+    calculated = unconstrained
+    if minimum is not None and maximum is not None:
+        calculated = min(maximum, max(minimum, unconstrained))
+    return SpecificationResult(
+        expression=expression,
+        source_value=float(source_value),
+        target_before=float(target_value),
+        unconstrained_value=unconstrained,
+        target_value=calculated,
+        minimum_value=minimum,
+        maximum_value=maximum,
+        clamped=calculated != unconstrained,
+    )
 
 
 def _validate(flowsheet: Flowsheet) -> dict[str, UnitOperation]:

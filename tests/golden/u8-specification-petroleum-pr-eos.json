@@ -1,0 +1,840 @@
+﻿{
+    "schema_version":  "golden-case-1",
+    "case_id":  "u8-specification-petroleum-pr-eos",
+    "case_kind":  "flowsheet",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "captured_utc":  "2026-07-17T09:17:42.7974110Z",
+                   "platform":  "Microsoft Windows NT 10.0.22631.0",
+                   "architecture":  "AMD64",
+                   "engine_bin":  "C:\\Users\\may3r\\AppData\\Local\\DWSIM",
+                   "input_file":  "C:\\Users\\may3r\\Code\\me-sim-wrap-live\\tests\\u8-specification-petroleum-pr-eos.dwxmz",
+                   "input_file_sha256":  "05ad08dcb25cf2b60c867367b550513ffa91e6e686c5cc7f90a7349c1b85fe4e",
+                   "property_package":  "Peng-Robinson (PR)",
+                   "flash_algorithm":  "DWSIM default",
+                   "bubble_dew_calculation":  false,
+                   "property_packages_updated":  0,
+                   "notes":  "Values are captured before and after CalculateFlowsheet4; numeric_text preserves invariant-culture source formatting."
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     {
+                                         "id":  "N-butane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-6.29517899975051",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -6.29517899975051
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-2164.23328779709",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -2164.23328779709
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-287.32566902147545",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -287.32566902147545
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  4,
+                                                          "H":  10
+                                                      },
+                                         "cas":  "106-97-8",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101779.79340489578",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101779.79340489578
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "272.66",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  272.66
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.7502053394113617",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.7502053394113617
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "3796000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  3796000
+                                                               },
+                                         "name":  "N-butane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "58.1222",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  58.1222
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "425.12",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  425.12
+                                                                  },
+                                         "formula":  "CH3(CH2)2CH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "272.66",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  272.66
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.199",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.199
+                                                             }
+                                     },
+                                     {
+                                         "id":  "N-pentane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-6.4128112092106768",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -6.4128112092106768
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-2034.1300296415268",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -2034.1300296415268
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-122.15036761536369",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -122.15036761536369
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  5,
+                                                          "H":  12
+                                                      },
+                                         "cas":  "109-66-0",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101385.79585520517",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101385.79585520517
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "309.22",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  309.22
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.6749807643575136",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.6749807643575136
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "3370000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  3370000
+                                                               },
+                                         "name":  "N-pentane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "72.14878",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  72.14878
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "469.7",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  469.7
+                                                                  },
+                                         "formula":  "CH3(CH2)3CH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "309.22",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  309.22
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.251",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.251
+                                                             }
+                                     },
+                                     {
+                                         "id":  "Propane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-6.1070459955092993",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -6.1070459955092993
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-2373.9319233973806",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -2373.9319233973806
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-553.11615983628315",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -553.11615983628315
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  3,
+                                                          "H":  8
+                                                      },
+                                         "cas":  "74-98-6",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101661.3294957499",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101661.3294957499
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "231.02",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  231.02
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.7065970330901676",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.7065970330901676
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "4248000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  4248000
+                                                               },
+                                         "name":  "Propane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "44.09562",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  44.09562
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "369.83",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  369.83
+                                                                  },
+                                         "formula":  "CH3CH2CH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "231.02",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  231.02
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.152",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.152
+                                                             }
+                                     },
+                                     {
+                                         "id":  "Methane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-5.0239810431425829",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -5.0239810431425829
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-4645.1728724896311",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -4645.1728724896311
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-3147.27292447667",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -3147.27292447667
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  1,
+                                                          "H":  4
+                                                      },
+                                         "cas":  "74-82-8",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101732.75995261119",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101732.75995261119
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "111.66",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  111.66
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "2.237611858493282",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  2.237611858493282
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "4599000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  4599000
+                                                               },
+                                         "name":  "Methane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "16.04246",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  16.04246
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "190.56",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  190.56
+                                                                  },
+                                         "formula":  "CH4",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "111.66",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  111.66
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.011",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.011
+                                                             }
+                                     },
+                                     {
+                                         "id":  "Ethane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-5.7891257239978229",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -5.7891257239978229
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-2787.5848380926027",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -2787.5848380926027
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-1061.5570034826519",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -1061.5570034826519
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  2,
+                                                          "H":  6
+                                                      },
+                                         "cas":  "74-84-0",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "102592.42304721203",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  102592.42304721203
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "184.55",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  184.55
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.7644241539438332",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.7644241539438332
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "4872000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  4872000
+                                                               },
+                                         "name":  "Ethane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "30.06904",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  30.06904
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "305.32",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  305.32
+                                                                  },
+                                         "formula":  "CH3CH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "184.55",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  184.55
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.099",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.099
+                                                             }
+                                     }
+                                 ],
+                   "objects_before":  [
+                                          {
+                                              "tag":  "SPEC-AFFINE-TARGET",
+                                              "name":  "EN-d7b413c8-4317-49ef-8e51-6b69e75177f1",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_ES_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "1861.851835",
+                                                                                   "unit":  "kW",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1861.851835
+                                                                               },
+                                                                     "unit":  "kW"
+                                                                 }
+                                                             ],
+                                              "type":  "EnergyStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "SPEC-SOURCE",
+                                              "name":  "EN-b71929c3-14a0-4190-9f4a-4f6766dfc7e3",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_ES_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "1234.56789",
+                                                                                   "unit":  "kW",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1234.56789
+                                                                               },
+                                                                     "unit":  "kW"
+                                                                 }
+                                                             ],
+                                              "type":  "EnergyStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "SPEC-CLAMPED-TARGET",
+                                              "name":  "EN-5ec6ad79-3ce5-4c41-b022-aed908f24a76",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_ES_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "-1000",
+                                                                                   "unit":  "kW",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -1000
+                                                                               },
+                                                                     "unit":  "kW"
+                                                                 }
+                                                             ],
+                                              "type":  "EnergyStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "SPEC-CLAMPED",
+                                              "name":  "ES-35044aff-fac5-4eb9-91d4-5a5cea8f6387",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "Expression",
+                                                                     "value":  {
+                                                                                   "value_text":  "-X",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "string",
+                                                                                   "value":  "-X"
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "SpecMax",
+                                                                     "value":  {
+                                                                                   "value_text":  "1000",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1000
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "SpecMin",
+                                                                     "value":  {
+                                                                                   "value_text":  "-1000",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -1000
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 }
+                                                             ],
+                                              "type":  "Spec",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  false
+                                          },
+                                          {
+                                              "tag":  "SPEC-AFFINE",
+                                              "name":  "ES-2a1de3ad-0aa3-4eb6-9b52-b00e4982218b",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "Expression",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.5 * X + 10.0",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "string",
+                                                                                   "value":  "1.5 * X + 10.0"
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "SpecMax",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "SpecMin",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 }
+                                                             ],
+                                              "type":  "Spec",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  false
+                                          }
+                                      ]
+               },
+    "outputs":  {
+                    "solve":  {
+                                  "errors":  [
+
+                                             ],
+                                  "success":  true,
+                                  "executed":  true
+                              },
+                    "objects_after":  [
+                                          {
+                                              "tag":  "SPEC-AFFINE-TARGET",
+                                              "name":  "EN-d7b413c8-4317-49ef-8e51-6b69e75177f1",
+                                              "error":  "",
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_ES_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "1861.851835",
+                                                                                   "unit":  "kW",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1861.851835
+                                                                               },
+                                                                     "unit":  "kW"
+                                                                 }
+                                                             ],
+                                              "type":  "EnergyStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "SPEC-SOURCE",
+                                              "name":  "EN-b71929c3-14a0-4190-9f4a-4f6766dfc7e3",
+                                              "error":  "",
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_ES_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "1234.56789",
+                                                                                   "unit":  "kW",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1234.56789
+                                                                               },
+                                                                     "unit":  "kW"
+                                                                 }
+                                                             ],
+                                              "type":  "EnergyStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "SPEC-CLAMPED-TARGET",
+                                              "name":  "EN-5ec6ad79-3ce5-4c41-b022-aed908f24a76",
+                                              "error":  "",
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_ES_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "-1000",
+                                                                                   "unit":  "kW",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -1000
+                                                                               },
+                                                                     "unit":  "kW"
+                                                                 }
+                                                             ],
+                                              "type":  "EnergyStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "SPEC-CLAMPED",
+                                              "name":  "ES-35044aff-fac5-4eb9-91d4-5a5cea8f6387",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "Expression",
+                                                                     "value":  {
+                                                                                   "value_text":  "-X",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "string",
+                                                                                   "value":  "-X"
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "SpecMax",
+                                                                     "value":  {
+                                                                                   "value_text":  "1000",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1000
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "SpecMin",
+                                                                     "value":  {
+                                                                                   "value_text":  "-1000",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -1000
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 }
+                                                             ],
+                                              "type":  "Spec",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  false
+                                          },
+                                          {
+                                              "tag":  "SPEC-AFFINE",
+                                              "name":  "ES-2a1de3ad-0aa3-4eb6-9b52-b00e4982218b",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "Expression",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.5 * X + 10.0",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "string",
+                                                                                   "value":  "1.5 * X + 10.0"
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "SpecMax",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "SpecMin",
+                                                                     "value":  {
+                                                                                   "value_text":  "0",
+                                                                                   "unit":  "dimensionless",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0
+                                                                               },
+                                                                     "unit":  "dimensionless"
+                                                                 }
+                                                             ],
+                                              "type":  "Spec",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  false
+                                          }
+                                      ]
+                }
+}

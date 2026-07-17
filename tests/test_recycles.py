@@ -14,6 +14,7 @@ from mesim.errors import ValidationError
 from mesim.flowsheet import (
     AdjustConvergenceError,
     RecycleConvergenceError,
+    apply_specification,
     solve_adjust,
     solve_energy_recycle,
     solve_recycle,
@@ -332,6 +333,103 @@ class DWSIMAdjustTest(unittest.TestCase):
             saved.find("ControlledObjectData").attrib["Property"],
             "PROP_MS_104/Ethanol_BD",
         )
+
+
+class DWSIMSpecificationTest(unittest.TestCase):
+    def test_expression_uses_source_target_math_and_optional_clamp(self):
+        result = apply_specification("Sqrt(X) + Y / 2", 9.0, 4.0)
+
+        self.assertEqual(result.unconstrained_value, 5.0)
+        self.assertEqual(result.target_value, 5.0)
+        self.assertFalse(result.clamped)
+        self.assertIsNone(result.minimum_value)
+        self.assertIsNone(result.maximum_value)
+
+        clamped = apply_specification("-X", 1234.56789, 0.0, -1000.0, 1000.0)
+        self.assertEqual(clamped.unconstrained_value, -1234.56789)
+        self.assertEqual(clamped.target_value, -1000.0)
+        self.assertTrue(clamped.clamped)
+
+    def test_invalid_or_unsafe_expressions_are_rejected(self):
+        for expression in ("", "1 / 0", "__import__('os')", "X.real", "lambda: X"):
+            with self.subTest(expression=expression), self.assertRaises(ValidationError):
+                apply_specification(expression, 1.0, 0.0)
+        with self.assertRaises(ValidationError):
+            apply_specification("X", math.nan, 0.0)
+        with self.assertRaises(ValidationError):
+            apply_specification("X", 1.0, 0.0, minimum_value=0.0)
+        with self.assertRaises(ValidationError):
+            apply_specification("X", 1.0, 0.0, 2.0, 1.0)
+
+    def test_dwsim_specification_is_repeatable_and_matches_affine_and_clamp_vectors(self):
+        golden = json.loads(
+            (ROOT / "tests/golden/u8-specification-petroleum-pr-eos.json").read_text(
+                encoding="utf-8-sig"
+            )
+        )
+        repeat = json.loads(
+            (ROOT / "tests/golden/u8-specification-petroleum-pr-eos-repeat.json").read_text(
+                encoding="utf-8-sig"
+            )
+        )
+        normalized_golden, normalized_repeat = copy.deepcopy(golden), copy.deepcopy(repeat)
+        normalized_golden["source"].pop("captured_utc")
+        normalized_repeat["source"].pop("captured_utc")
+        self.assertEqual(normalized_golden, normalized_repeat)
+        self.assertTrue(golden["outputs"]["solve"]["success"])
+        self.assertFalse(golden["outputs"]["solve"]["errors"])
+        self.assertFalse(any(
+            object_record["error"] or property_record["read_error"]
+            for object_record in golden["outputs"]["objects_after"]
+            for property_record in object_record["properties"]
+        ))
+
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {item["property"]: item["value"]["value"] for item in record["properties"]}
+            for tag, record in objects.items()
+        }
+        source_kw = properties["SPEC-SOURCE"]["PROP_ES_0"]
+        affine = apply_specification(
+            properties["SPEC-AFFINE"]["Expression"], source_kw, 0.0,
+        )
+        clamped = apply_specification(
+            properties["SPEC-CLAMPED"]["Expression"], source_kw, 0.0,
+            properties["SPEC-CLAMPED"]["SpecMin"],
+            properties["SPEC-CLAMPED"]["SpecMax"],
+        )
+        self.assertEqual(
+            affine.target_value, properties["SPEC-AFFINE-TARGET"]["PROP_ES_0"]
+        )
+        self.assertEqual(
+            clamped.target_value, properties["SPEC-CLAMPED-TARGET"]["PROP_ES_0"]
+        )
+
+        with ZipFile(ROOT / "tests/u8-specification-petroleum-pr-eos.dwxmz") as archive:
+            root = ElementTree.fromstring(
+                archive.read(next(name for name in archive.namelist() if name.endswith(".xml")))
+            )
+        graphic_ids = {
+            graphic.findtext("Tag"): graphic.findtext("Name")
+            for graphic in root.findall(".//GraphicObject")
+        }
+        saved_objects = {
+            record.findtext("Name"): record for record in root.findall(".//SimulationObject")
+        }
+        affine_saved = saved_objects[graphic_ids["SPEC-AFFINE"]]
+        clamped_saved = saved_objects[graphic_ids["SPEC-CLAMPED"]]
+        self.assertEqual(affine_saved.findtext("Expression"), "1.5 * X + 10.0")
+        self.assertIsNone(affine_saved.find("MinVal"))
+        self.assertIsNone(affine_saved.find("MaxVal"))
+        self.assertEqual(clamped_saved.findtext("Expression"), "-X")
+        self.assertEqual(clamped_saved.findtext("MinVal"), "-1000")
+        self.assertEqual(clamped_saved.findtext("MaxVal"), "1000")
+        self.assertEqual(clamped_saved.find("SourceObjectData").attrib["Name"], "SPEC-SOURCE")
+        self.assertEqual(clamped_saved.find("SourceObjectData").attrib["Property"], "PROP_ES_0")
+        self.assertEqual(
+            clamped_saved.find("TargetObjectData").attrib["Name"], "SPEC-CLAMPED-TARGET"
+        )
+        self.assertEqual(clamped_saved.find("TargetObjectData").attrib["Property"], "PROP_ES_0")
 
 
 if __name__ == "__main__":
