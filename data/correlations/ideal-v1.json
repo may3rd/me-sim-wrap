@@ -30,6 +30,26 @@
       "compound_id": "N-pentane",
       "heat_capacity": {"equation": 16, "A": 81062, "B": -706.86, "C": 12.962, "D": -0.000049298, "E": 2.8357e-9, "minimum_k": 200, "maximum_k": 1500, "unit": "J/kmol/K"},
       "vapor_pressure": {"equation": 101, "A": 72.14242, "B": -5265.589, "C": -7.720709, "D": 7.151866e-6, "E": 2, "minimum_k": 143.42, "maximum_k": 469.7, "unit": "Pa"}
+    },
+    {
+      "compound_id": "Water",
+      "heat_capacity": {"equation": 16, "A": 33200, "B": -878.9001, "C": 8.436956, "D": 0.00207627, "E": -6.467085e-7, "minimum_k": 50, "maximum_k": 1600, "unit": "J/kmol/K"},
+      "vapor_pressure": {"equation": 101, "A": 74.55502, "B": -7295.586, "C": -7.442448, "D": 4.2881e-6, "E": 2, "minimum_k": 263.15, "maximum_k": 647.29, "unit": "Pa"}
+    },
+    {
+      "compound_id": "Carbon monoxide",
+      "heat_capacity": {"equation": 16, "A": 29100, "B": -1979.753, "C": 10.58274, "D": -0.0000790406, "E": -1.99685e-7, "minimum_k": 10, "maximum_k": 1500, "unit": "J/kmol/K"},
+      "vapor_pressure": {"equation": 101, "A": 42.283, "B": -1035.1, "C": -4.2012, "D": 0.000062546, "E": 2, "minimum_k": 64.07, "maximum_k": 132.92, "unit": "Pa"}
+    },
+    {
+      "compound_id": "Carbon dioxide",
+      "heat_capacity": {"equation": 16, "A": 28933, "B": -494.28, "C": 10.658, "D": -0.000027375, "E": 3.3268e-9, "minimum_k": 50, "maximum_k": 2000, "unit": "J/kmol/K"},
+      "vapor_pressure": {"equation": 101, "A": 95.478, "B": -4070, "C": -12.07, "D": 0.000029505, "E": 2, "minimum_k": 216.4, "maximum_k": 304.21, "unit": "Pa"}
+    },
+    {
+      "compound_id": "Hydrogen",
+      "heat_capacity": {"equation": 16, "A": 3994.325, "B": -48.69006, "C": 10.36209, "D": -0.000340144, "E": 1.960333e-7, "minimum_k": 80, "maximum_k": 1500, "unit": "J/kmol/K"},
+      "vapor_pressure": {"equation": 101, "A": 13.05, "B": -97.534, "C": 1.0355, "D": 0.00031816, "E": 2, "minimum_k": 13.08, "maximum_k": 33.19, "unit": "Pa"}
     }
   ]
 }

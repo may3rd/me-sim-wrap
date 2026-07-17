@@ -30,11 +30,14 @@ class CompoundThermochemistry:
 class ReactionDefinition:
     id: str
     name: str
+    reaction_type: str
     base_reactant: str
     phase: str
     stoichiometry: tuple[tuple[str, float], ...]
     reaction_heat_j_per_kmol: float
-    conversion_fraction: float
+    conversion_fraction: float | None
+    equilibrium_constant_model: str | None
+    reaction_basis: str | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,10 +75,12 @@ def load_reaction_data(path: str | Path) -> ReactionData:
         )
         reactions = tuple(
             ReactionDefinition(
-                record["id"], record["name"], record["base_reactant"], record["phase"],
+                record["id"], record["name"], record["reaction_type"], record["base_reactant"], record["phase"],
                 tuple((compound, float(coefficient)) for compound, coefficient in record["stoichiometry"].items()),
                 _property(record, "reaction_heat", "J/kmol"),
-                float(record["conversion_percent"]) / 100.0,
+                float(record["conversion_percent"]) / 100.0 if "conversion_percent" in record else None,
+                record.get("equilibrium_constant_model"),
+                record.get("reaction_basis"),
             )
             for record in raw["reactions"]
         )
@@ -105,6 +110,17 @@ def load_reaction_data(path: str | Path) -> ReactionData:
             raise ValidationError("reaction thermochemistry requires a compound ID and explicit elements")
         if record.formation_temperature_k <= 0.0:
             raise ValidationError("formation temperature must be positive")
+        calculated_formation_entropy = (
+            record.ideal_gas_formation_enthalpy_j_per_kmol
+            - record.ideal_gas_formation_gibbs_energy_j_per_kmol
+        ) / record.formation_temperature_k
+        if not math.isclose(
+            record.ideal_gas_formation_entropy_j_per_kmol_k,
+            calculated_formation_entropy,
+            rel_tol=1.0e-12,
+            abs_tol=1.0e-6,
+        ):
+            raise ValidationError(f"{record.compound_id} formation H/G/S values are inconsistent")
         for element, count in record.elements:
             if not element or not math.isfinite(count) or count <= 0.0 or not count.is_integer():
                 raise ValidationError("element counts must be positive integers")
@@ -113,14 +129,28 @@ def load_reaction_data(path: str | Path) -> ReactionData:
         raise ValidationError("reaction IDs must be unique")
     for reaction in reactions:
         stoichiometry = dict(reaction.stoichiometry)
-        if not reaction.id or not reaction.name or reaction.phase not in {"mixture", "vapor", "liquid", "solid"}:
+        if (
+            not reaction.id or not reaction.name
+            or reaction.reaction_type not in {"conversion", "equilibrium"}
+            or reaction.phase not in {"mixture", "vapor", "liquid", "solid"}
+        ):
             raise ValidationError("reaction identity and phase are invalid")
         if len(stoichiometry) < 2 or any(not math.isfinite(value) or value == 0.0 for value in stoichiometry.values()):
             raise ValidationError("reaction stoichiometry requires finite non-zero coefficients")
         if reaction.base_reactant not in stoichiometry or stoichiometry[reaction.base_reactant] >= 0.0:
             raise ValidationError("reaction base reactant must have a negative coefficient")
-        if not 0.0 <= reaction.conversion_fraction <= 1.0:
-            raise ValidationError("reaction conversion must be between zero and one")
+        if reaction.reaction_type == "conversion":
+            if reaction.conversion_fraction is None or not 0.0 <= reaction.conversion_fraction <= 1.0:
+                raise ValidationError("conversion reaction conversion must be between zero and one")
+            if reaction.equilibrium_constant_model is not None or reaction.reaction_basis is not None:
+                raise ValidationError("conversion reaction cannot define equilibrium settings")
+        else:
+            if reaction.conversion_fraction is not None:
+                raise ValidationError("equilibrium reaction cannot define a fixed conversion")
+            if reaction.equilibrium_constant_model != "gibbs" or reaction.reaction_basis != "fugacity":
+                raise ValidationError("equilibrium reaction must use Gibbs fugacity equilibrium")
+            if reaction.phase != "vapor":
+                raise ValidationError("only vapor equilibrium reactions are supported")
         if any(compound not in thermo_by_id for compound in stoichiometry):
             raise ValidationError("reaction stoichiometry is missing explicit thermochemistry")
         elements = {element for compound in stoichiometry for element, _ in thermo_by_id[compound].elements}

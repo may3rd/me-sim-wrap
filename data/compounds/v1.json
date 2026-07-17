@@ -45,6 +45,42 @@
       "acentric_factor": {"value": 0.251, "unit": "dimensionless"},
       "normal_boiling_point": {"value": 309.22, "unit": "K"},
       "provenance": {"database": "ChemSep", "source": "DWSIM.AvailableCompounds", "source_revision": "9.0.4", "imported_utc": "2026-07-13T01:51:18.8788100Z"}
+    },
+    {
+      "id": "Water", "name": "Water", "cas": "7732-18-5", "formula": "HOH",
+      "molecular_weight": {"value": 18.01528, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 647.14, "unit": "K"},
+      "critical_pressure": {"value": 22064000, "unit": "Pa"},
+      "acentric_factor": {"value": 0.344, "unit": "dimensionless"},
+      "normal_boiling_point": {"value": 373.15, "unit": "K"},
+      "provenance": {"database": "ChemSep", "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml", "source_revision": "9.0.4", "imported_utc": "2026-07-17T07:10:00Z"}
+    },
+    {
+      "id": "Carbon monoxide", "name": "Carbon monoxide", "cas": "630-08-0", "formula": "CO",
+      "molecular_weight": {"value": 28.0101, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 132.85, "unit": "K"},
+      "critical_pressure": {"value": 3494000, "unit": "Pa"},
+      "acentric_factor": {"value": 0.045, "unit": "dimensionless"},
+      "normal_boiling_point": {"value": 81.66, "unit": "K"},
+      "provenance": {"database": "ChemSep", "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml", "source_revision": "9.0.4", "imported_utc": "2026-07-17T07:10:00Z"}
+    },
+    {
+      "id": "Carbon dioxide", "name": "Carbon dioxide", "cas": "124-38-9", "formula": "OCO",
+      "molecular_weight": {"value": 44.0095, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 304.21, "unit": "K"},
+      "critical_pressure": {"value": 7383000, "unit": "Pa"},
+      "acentric_factor": {"value": 0.223621, "unit": "dimensionless"},
+      "normal_boiling_point": {"value": 194.686, "unit": "K"},
+      "provenance": {"database": "ChemSep", "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml", "source_revision": "9.0.4", "imported_utc": "2026-07-17T07:10:00Z"}
+    },
+    {
+      "id": "Hydrogen", "name": "Hydrogen", "cas": "1333-74-0", "formula": "H2",
+      "molecular_weight": {"value": 2.01588, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 33.19, "unit": "K"},
+      "critical_pressure": {"value": 1313000, "unit": "Pa"},
+      "acentric_factor": {"value": -0.215993, "unit": "dimensionless"},
+      "normal_boiling_point": {"value": 20.39, "unit": "K"},
+      "provenance": {"database": "ChemSep", "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml", "source_revision": "9.0.4", "imported_utc": "2026-07-17T07:10:00Z"}
     }
   ]
 }

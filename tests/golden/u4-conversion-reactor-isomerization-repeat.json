@@ -5,12 +5,12 @@
     "source":  {
                    "dwsim_revision":  "9.0.5.0",
                    "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
-                   "captured_utc":  "2026-07-17T06:32:52.0087942Z",
+                   "captured_utc":  "2026-07-17T07:00:28.9223111Z",
                    "platform":  "Microsoft Windows NT 10.0.22631.0",
                    "architecture":  "AMD64",
                    "engine_bin":  "C:\\Users\\may3r\\AppData\\Local\\DWSIM",
                    "input_file":  "C:\\Users\\may3r\\Code\\me-sim-wrap-live\\tests\\u4-conversion-reactor-isomerization.dwxmz",
-                   "input_file_sha256":  "e187d4bdf1bf2bdcc64eee96770705097d1f0b21e8485c147c70a64beec4cb3b",
+                   "input_file_sha256":  "a009d09466a26ca85b60ab91b34d7dc8bc96d93e5354e1ef914cebfcb4a1975e",
                    "property_package":  "Chao-Seader",
                    "flash_algorithm":  "DWSIM default",
                    "bubble_dew_calculation":  false,
@@ -19,200 +19,6 @@
                },
     "inputs":  {
                    "compounds":  [
-                                     {
-                                         "id":  "N-butane",
-                                         "ideal_gas_formation":  {
-                                                                     "entropy":  {
-                                                                                     "value_text":  "-6.29517899975051",
-                                                                                     "unit":  "kJ/kg/K",
-                                                                                     "value_type":  "number",
-                                                                                     "value":  -6.29517899975051
-                                                                                 },
-                                                                     "enthalpy":  {
-                                                                                      "value_text":  "-2164.23328779709",
-                                                                                      "unit":  "kJ/kg",
-                                                                                      "value_type":  "number",
-                                                                                      "value":  -2164.23328779709
-                                                                                  },
-                                                                     "gibbs_energy":  {
-                                                                                          "value_text":  "-287.32566902147545",
-                                                                                          "unit":  "kJ/kg",
-                                                                                          "value_type":  "number",
-                                                                                          "value":  -287.32566902147545
-                                                                                      },
-                                                                     "temperature":  {
-                                                                                         "value_text":  "298.15",
-                                                                                         "unit":  "K",
-                                                                                         "value_type":  "number",
-                                                                                         "value":  298.15
-                                                                                     }
-                                                                 },
-                                         "elements":  {
-                                                          "C":  4,
-                                                          "H":  10
-                                                      },
-                                         "cas":  "106-97-8",
-                                         "ideal_reference":  {
-                                                                 "vapor_pressure":  {
-                                                                                        "value_text":  "101779.79340489578",
-                                                                                        "unit":  "Pa",
-                                                                                        "value_type":  "number",
-                                                                                        "value":  101779.79340489578
-                                                                                    },
-                                                                 "vapor_pressure_temperature":  {
-                                                                                                    "value_text":  "272.66",
-                                                                                                    "unit":  "K",
-                                                                                                    "value_type":  "number",
-                                                                                                    "value":  272.66
-                                                                                                },
-                                                                 "heat_capacity":  {
-                                                                                       "value_text":  "1.7502053394113617",
-                                                                                       "unit":  "kJ/kg/K",
-                                                                                       "value_type":  "number",
-                                                                                       "value":  1.7502053394113617
-                                                                                   },
-                                                                 "heat_capacity_temperature":  {
-                                                                                                   "value_text":  "300",
-                                                                                                   "unit":  "K",
-                                                                                                   "value_type":  "number",
-                                                                                                   "value":  300
-                                                                                               }
-                                                             },
-                                         "critical_pressure":  {
-                                                                   "value_text":  "3796000",
-                                                                   "unit":  "Pa",
-                                                                   "value_type":  "number",
-                                                                   "value":  3796000
-                                                               },
-                                         "name":  "N-butane",
-                                         "provenance":  {
-                                                            "database":  "ChemSep",
-                                                            "source":  "DWSIM.AvailableCompounds",
-                                                            "source_revision":  "9.0.5.0"
-                                                        },
-                                         "molecular_weight":  {
-                                                                  "value_text":  "58.1222",
-                                                                  "unit":  "kg/kmol",
-                                                                  "value_type":  "number",
-                                                                  "value":  58.1222
-                                                              },
-                                         "critical_temperature":  {
-                                                                      "value_text":  "425.12",
-                                                                      "unit":  "K",
-                                                                      "value_type":  "number",
-                                                                      "value":  425.12
-                                                                  },
-                                         "formula":  "CH3(CH2)2CH3",
-                                         "normal_boiling_point":  {
-                                                                      "value_text":  "272.66",
-                                                                      "unit":  "K",
-                                                                      "value_type":  "number",
-                                                                      "value":  272.66
-                                                                  },
-                                         "acentric_factor":  {
-                                                                 "value_text":  "0.199",
-                                                                 "unit":  "dimensionless",
-                                                                 "value_type":  "number",
-                                                                 "value":  0.199
-                                                             }
-                                     },
-                                     {
-                                         "id":  "Isopentane",
-                                         "ideal_gas_formation":  {
-                                                                     "entropy":  {
-                                                                                     "value_text":  "-6.4919794222873355",
-                                                                                     "unit":  "kJ/kg/K",
-                                                                                     "value_type":  "number",
-                                                                                     "value":  -6.4919794222873355
-                                                                                 },
-                                                                     "enthalpy":  {
-                                                                                      "value_text":  "-2130.3201523296721",
-                                                                                      "unit":  "kJ/kg",
-                                                                                      "value_type":  "number",
-                                                                                      "value":  -2130.3201523296721
-                                                                                  },
-                                                                     "gibbs_energy":  {
-                                                                                          "value_text":  "-194.73648757470326",
-                                                                                          "unit":  "kJ/kg",
-                                                                                          "value_type":  "number",
-                                                                                          "value":  -194.73648757470326
-                                                                                      },
-                                                                     "temperature":  {
-                                                                                         "value_text":  "298.15",
-                                                                                         "unit":  "K",
-                                                                                         "value_type":  "number",
-                                                                                         "value":  298.15
-                                                                                     }
-                                                                 },
-                                         "elements":  {
-                                                          "C":  5,
-                                                          "H":  12
-                                                      },
-                                         "cas":  "78-78-4",
-                                         "ideal_reference":  {
-                                                                 "vapor_pressure":  {
-                                                                                        "value_text":  "101332.63126390145",
-                                                                                        "unit":  "Pa",
-                                                                                        "value_type":  "number",
-                                                                                        "value":  101332.63126390145
-                                                                                    },
-                                                                 "vapor_pressure_temperature":  {
-                                                                                                    "value_text":  "300.99",
-                                                                                                    "unit":  "K",
-                                                                                                    "value_type":  "number",
-                                                                                                    "value":  300.99
-                                                                                                },
-                                                                 "heat_capacity":  {
-                                                                                       "value_text":  "1.6562354968003232",
-                                                                                       "unit":  "kJ/kg/K",
-                                                                                       "value_type":  "number",
-                                                                                       "value":  1.6562354968003232
-                                                                                   },
-                                                                 "heat_capacity_temperature":  {
-                                                                                                   "value_text":  "300",
-                                                                                                   "unit":  "K",
-                                                                                                   "value_type":  "number",
-                                                                                                   "value":  300
-                                                                                               }
-                                                             },
-                                         "critical_pressure":  {
-                                                                   "value_text":  "3381000",
-                                                                   "unit":  "Pa",
-                                                                   "value_type":  "number",
-                                                                   "value":  3381000
-                                                               },
-                                         "name":  "Isopentane",
-                                         "provenance":  {
-                                                            "database":  "ChemSep",
-                                                            "source":  "DWSIM.AvailableCompounds",
-                                                            "source_revision":  "9.0.5.0"
-                                                        },
-                                         "molecular_weight":  {
-                                                                  "value_text":  "72.14878",
-                                                                  "unit":  "kg/kmol",
-                                                                  "value_type":  "number",
-                                                                  "value":  72.14878
-                                                              },
-                                         "critical_temperature":  {
-                                                                      "value_text":  "460.39",
-                                                                      "unit":  "K",
-                                                                      "value_type":  "number",
-                                                                      "value":  460.39
-                                                                  },
-                                         "formula":  "CH3CH(CH3)CH2CH3",
-                                         "normal_boiling_point":  {
-                                                                      "value_text":  "300.99",
-                                                                      "unit":  "K",
-                                                                      "value_type":  "number",
-                                                                      "value":  300.99
-                                                                  },
-                                         "acentric_factor":  {
-                                                                 "value_text":  "0.229",
-                                                                 "unit":  "dimensionless",
-                                                                 "value_type":  "number",
-                                                                 "value":  0.229
-                                                             }
-                                     },
                                      {
                                          "id":  "Propane",
                                          "ideal_gas_formation":  {
@@ -405,6 +211,200 @@
                                                                  "unit":  "dimensionless",
                                                                  "value_type":  "number",
                                                                  "value":  0.186
+                                                             }
+                                     },
+                                     {
+                                         "id":  "N-butane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-6.29517899975051",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -6.29517899975051
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-2164.23328779709",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -2164.23328779709
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-287.32566902147545",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -287.32566902147545
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  4,
+                                                          "H":  10
+                                                      },
+                                         "cas":  "106-97-8",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101779.79340489578",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101779.79340489578
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "272.66",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  272.66
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.7502053394113617",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.7502053394113617
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "3796000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  3796000
+                                                               },
+                                         "name":  "N-butane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "58.1222",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  58.1222
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "425.12",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  425.12
+                                                                  },
+                                         "formula":  "CH3(CH2)2CH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "272.66",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  272.66
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.199",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.199
+                                                             }
+                                     },
+                                     {
+                                         "id":  "Isopentane",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-6.4919794222873355",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -6.4919794222873355
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-2130.3201523296721",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -2130.3201523296721
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-194.73648757470326",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -194.73648757470326
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  5,
+                                                          "H":  12
+                                                      },
+                                         "cas":  "78-78-4",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101332.63126390145",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101332.63126390145
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "300.99",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  300.99
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.6562354968003232",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.6562354968003232
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "3381000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  3381000
+                                                               },
+                                         "name":  "Isopentane",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "9.0.5.0"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "72.14878",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  72.14878
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "460.39",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  460.39
+                                                                  },
+                                         "formula":  "CH3CH(CH3)CH2CH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "300.99",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  300.99
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.229",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.229
                                                              }
                                      }
                                  ],

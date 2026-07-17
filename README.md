@@ -63,7 +63,8 @@ thermodynamics.
 | Acyclic flowsheet execution | Done |
 | HTTP API (`/v1/*`) | Done (internal alpha) |
 | Hydraulics | Partial (U3: pipes, defined heat-load and constant/gradient/tabulated defined-HTC plus estimated air/water/soil-HTC liquid thermal profiles with PR enthalpy coupling, optional insulation and local/global irradiation, fittings, orifice, two-phase correlations, relief sizing) |
-| Reactors, columns, dynamics | Not yet |
+| Reactors | Partial (U4: conversion and simultaneous vapor equilibrium reactions) |
+| Columns, dynamics | Not yet |
 
 See [`docs/compatibility.md`](docs/compatibility.md) for the full matrix and current
 parity/difference notes.

@@ -1,3 +1,4 @@
+import copy
 import json
 import math
 import sys
@@ -10,13 +11,18 @@ from zipfile import ZipFile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.errors import ValidationError
 from mesim.reactions import load_reaction_data
-from mesim.unitops.reactors import conversion_reactor
+from mesim.thermo.ideal import load_correlations
+from mesim.unitops.reactors import conversion_reactor, equilibrium_reactor
 
 
 ROOT = Path(__file__).parents[1]
 DWSIM_REACTOR_PHASE_AGGREGATE_REL_TOL = 2e-7
+DWSIM_EQUILIBRIUM_COMPONENT_REL_TOL = 2e-5
+DWSIM_EQUILIBRIUM_EXTENT_REL_TOL = 2e-6
+DWSIM_EQUILIBRIUM_DUTY_REL_TOL = 2e-6
 
 
 class ReactionDataTest(unittest.TestCase):
@@ -51,12 +57,14 @@ class ReactionDataTest(unittest.TestCase):
 
     def test_reaction_loader_rejects_unbalanced_stoichiometry_and_inconsistent_heat(self):
         source = json.loads((ROOT / "data/reactions/v1.json").read_text())
-        for mutation in ("stoichiometry", "heat"):
+        for mutation in ("stoichiometry", "heat", "formation entropy"):
             broken = json.loads(json.dumps(source))
             if mutation == "stoichiometry":
                 broken["reactions"][0]["stoichiometry"]["Isobutane"] = 2.0
-            else:
+            elif mutation == "heat":
                 broken["reactions"][0]["reaction_heat"]["value"] = 0.0
+            else:
+                broken["thermochemistry"][0]["ideal_gas_formation_entropy"]["value"] = 0.0
             with tempfile.TemporaryDirectory() as directory:
                 path = Path(directory) / "reactions.json"
                 path.write_text(json.dumps(broken))
@@ -117,6 +125,85 @@ class ConversionReactorTest(unittest.TestCase):
             conversion_reactor((("N-butane", 1.0),), reaction, 1.01)
         with self.assertRaises(ValidationError):
             conversion_reactor((("Isobutane", 1.0),), reaction)
+
+
+class EquilibriumReactorTest(unittest.TestCase):
+    def test_steam_reforming_matches_captured_dwsim_equilibrium_reactor(self):
+        data = load_reaction_data(ROOT / "data/reactions/v1.json")
+        reactions = tuple(reaction for reaction in data.reactions if reaction.reaction_type == "equilibrium")
+        catalog = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
+        correlation_catalog = {
+            record.compound_id: record for record in load_correlations(ROOT / "data/correlations/ideal-v1.json")
+        }
+        interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
+        golden = json.loads(
+            (ROOT / "tests/golden/u4-equilibrium-reactor-steam-reforming-pr-eos.json").read_text(encoding="utf-8-sig")
+        )
+        repeat = json.loads(
+            (ROOT / "tests/golden/u4-equilibrium-reactor-steam-reforming-pr-eos-repeat.json").read_text(encoding="utf-8-sig")
+        )
+        normalized_golden, normalized_repeat = copy.deepcopy(golden), copy.deepcopy(repeat)
+        normalized_golden["source"].pop("captured_utc")
+        normalized_repeat["source"].pop("captured_utc")
+        self.assertEqual(normalized_golden, normalized_repeat)
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {item["property"]: item["value"]["value"] for item in objects[tag]["properties"]}
+            for tag in ("4", "5", "e2", "RE-001")
+        }
+        compound_ids = ("Methane", "Water", "Carbon monoxide", "Carbon dioxide", "Hydrogen")
+        inlet = tuple(
+            (compound_id, properties["4"][f"PROP_MS_104/{compound_id}"] / 1_000.0)
+            for compound_id in compound_ids
+        )
+        result = equilibrium_reactor(
+            inlet,
+            reactions,
+            data.thermochemistry,
+            tuple(catalog[compound_id] for compound_id in compound_ids),
+            tuple(correlation_catalog[compound_id] for compound_id in compound_ids),
+            interactions,
+            properties["4"]["PROP_MS_0"],
+            properties["4"]["PROP_MS_1"],
+        )
+
+        expected_outlet = {
+            compound_id: properties["5"][f"PROP_MS_104/{compound_id}"] / 1_000.0
+            for compound_id in compound_ids
+        }
+        for compound_id, actual in result.outlet_component_flows_kmol_s:
+            self.assertTrue(math.isclose(
+                actual, expected_outlet[compound_id],
+                rel_tol=DWSIM_EQUILIBRIUM_COMPONENT_REL_TOL, abs_tol=1.0e-10,
+            ))
+        for reaction, (_, extent) in zip(reactions, result.extents_kmol_s):
+            self.assertTrue(math.isclose(
+                extent, properties["RE-001"][f"{reaction.name}: Extent"] / 1_000.0,
+                rel_tol=DWSIM_EQUILIBRIUM_EXTENT_REL_TOL,
+            ))
+        conversions = dict(result.component_conversions)
+        self.assertTrue(math.isclose(
+            conversions["Methane"] * 100.0, properties["RE-001"]["Methane: Conversion"],
+            rel_tol=DWSIM_EQUILIBRIUM_COMPONENT_REL_TOL,
+        ))
+        self.assertTrue(math.isclose(
+            conversions["Water"] * 100.0, properties["RE-001"]["Water: Conversion"],
+            rel_tol=DWSIM_EQUILIBRIUM_COMPONENT_REL_TOL,
+        ))
+        self.assertTrue(math.isclose(
+            result.isothermal_duty_w / 1_000.0, properties["e2"]["PROP_ES_0"],
+            rel_tol=DWSIM_EQUILIBRIUM_DUTY_REL_TOL,
+        ))
+        self.assertLess(max(abs(value) for _, value in result.equilibrium_log_residuals), 1.0e-9)
+
+    def test_equilibrium_reactor_rejects_a_conversion_reaction(self):
+        data = load_reaction_data(ROOT / "data/reactions/v1.json")
+        with self.assertRaises(ValidationError):
+            equilibrium_reactor(
+                (("N-butane", 1.0), ("Isobutane", 0.1)),
+                (data.reactions[0],), data.thermochemistry, (), (),
+                load_pr_interactions(ROOT / "data/interactions/pr-v1.json"), 400.0, 101325.0,
+            )
 
 
 if __name__ == "__main__":

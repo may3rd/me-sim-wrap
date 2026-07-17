@@ -106,6 +106,13 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertIn("ConvertFrom-Json", script)
         self.assertIn('PSObject.Properties["AttachedUtility"]', script)
 
+    def test_capture_script_reads_plain_dwxml_without_zip(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn('".dwxml"', script)
+        self.assertIn("[IO.File]::ReadAllText($CasePath)", script)
+        self.assertIn("[StringComparison]::OrdinalIgnoreCase", script)
+
     def test_capture_script_records_ideal_compound_reference_values(self):
         script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
 

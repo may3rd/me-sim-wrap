@@ -386,28 +386,36 @@ function Get-SavedUtilityStates {
         [string]$CasePath
     )
 
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
-    $archive = [System.IO.Compression.ZipFile]::OpenRead($CasePath)
+    if ([IO.Path]::GetExtension($CasePath).Equals(
+        ".dwxml",
+        [StringComparison]::OrdinalIgnoreCase
+    )) {
+        [xml]$document = [IO.File]::ReadAllText($CasePath)
+    }
+    else {
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        $archive = [System.IO.Compression.ZipFile]::OpenRead($CasePath)
 
-    try {
-        $entry = @($archive.Entries | Where-Object {
-            $_.FullName.EndsWith(".xml")
-        }) | Select-Object -First 1
-
-        if ($null -eq $entry) {
-            throw "DWSIM case archive contains no XML document"
-        }
-
-        $reader = New-Object IO.StreamReader($entry.Open())
         try {
-            [xml]$document = $reader.ReadToEnd()
+            $entry = @($archive.Entries | Where-Object {
+                $_.FullName.EndsWith(".xml")
+            }) | Select-Object -First 1
+
+            if ($null -eq $entry) {
+                throw "DWSIM case archive contains no XML document"
+            }
+
+            $reader = New-Object IO.StreamReader($entry.Open())
+            try {
+                [xml]$document = $reader.ReadToEnd()
+            }
+            finally {
+                $reader.Dispose()
+            }
         }
         finally {
-            $reader.Dispose()
+            $archive.Dispose()
         }
-    }
-    finally {
-        $archive.Dispose()
     }
 
     $states = @{}

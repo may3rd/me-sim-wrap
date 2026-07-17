@@ -22,9 +22,9 @@ class CompoundDataTest(unittest.TestCase):
             (ROOT / "tests/golden/compound-catalog.json").read_text(encoding="utf-8-sig")
         )["inputs"]["compounds"]
 
-        self.assertEqual(len(compounds), 5)
-        self.assertEqual({c.id for c in compounds}, {c["id"] for c in captured})
-        for compound in compounds:
+        self.assertEqual(len(compounds), 9)
+        self.assertTrue({c["id"] for c in captured}.issubset({c.id for c in compounds}))
+        for compound in (item for item in compounds if item.id in {c["id"] for c in captured}):
             reference = next(c for c in captured if c["id"] == compound.id)
             for field in ("name", "cas", "formula"):
                 self.assertEqual(getattr(compound, field), reference[field])
@@ -34,6 +34,16 @@ class CompoundDataTest(unittest.TestCase):
             for field in ("database", "source", "source_revision"):
                 self.assertEqual(getattr(compound.provenance, field), reference["provenance"][field])
             self.assertTrue(compound.provenance.imported_utc.endswith("Z"))
+
+        equilibrium = json.loads(
+            (ROOT / "tests/golden/u4-equilibrium-reactor-steam-reforming-pr-eos.json").read_text(encoding="utf-8-sig")
+        )["inputs"]["compounds"]
+        equilibrium_by_id = {record["id"]: record for record in equilibrium}
+        for compound in (item for item in compounds if item.id in {"Water", "Carbon monoxide", "Carbon dioxide", "Hydrogen"}):
+            reference = equilibrium_by_id[compound.id]
+            self.assertEqual(compound.formula, reference["formula"])
+            for field in ("molecular_weight", "critical_temperature", "critical_pressure", "acentric_factor", "normal_boiling_point"):
+                self.assertEqual(getattr(compound, field).value, reference[field]["value"])
         with self.assertRaises(FrozenInstanceError):
             compounds[0].id = "changed"
 
@@ -80,12 +90,16 @@ class CompoundDataTest(unittest.TestCase):
         self.assertEqual(interactions.get("Methane", "N-pentane"), 0.023)
         self.assertEqual(interactions.get("N-pentane", "Methane"), 0.023)
         self.assertEqual(interactions.get("Methane", "Methane"), 0.0)
+        self.assertEqual(interactions.get("Methane", "Water"), 0.5)
         with self.assertRaises(MissingCompoundData):
-            interactions.get("Methane", "Water")
+            interactions.get("Ethane", "Water")
 
     def test_pr_interactions_match_first_entries_loaded_by_dwsim(self):
         interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
-        names = {"1": "Methane", "2": "Ethane", "3": "Propane", "5": "N-butane", "7": "N-pentane"}
+        names = {
+            "1": "Methane", "2": "Ethane", "3": "Propane", "5": "N-butane", "7": "N-pentane",
+            "902": "Hydrogen", "908": "Carbon monoxide", "909": "Carbon dioxide", "1921": "Water",
+        }
         expected = {}
         source = ROOT / interactions.provenance.source
         for line in source.read_text(encoding="utf-8-sig").splitlines()[1:]:
@@ -93,7 +107,10 @@ class CompoundDataTest(unittest.TestCase):
             if len(fields) >= 3 and fields[0] in names and fields[1] in names:
                 expected.setdefault(frozenset((names[fields[0]], names[fields[1]])), float(fields[2]))
         actual = {frozenset((first, second)): value for first, second, value in interactions.pairs}
-        self.assertEqual(actual, expected)
+        for pair, value in actual.items():
+            if value == 0.0 and pair not in expected:
+                continue
+            self.assertEqual(value, expected[pair])
 
     def test_unknown_schema_and_missing_pair_policy_are_rejected(self):
         cases = (

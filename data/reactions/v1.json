@@ -1,9 +1,9 @@
 {
   "schema_version": "reaction-data-1",
   "provenance": {
-    "source": "DWSIM tests/Isomerisation.dwxmz",
+    "source": "DWSIM tests/Isomerisation.dwxmz and samples/Gibbs and Equilibrium Reactors.dwxml",
     "source_revision": "9.0.5.0",
-    "selection": "saved N-butane isomerisation conversion reaction and ChemSep compound records",
+    "selection": "saved isomerisation conversion plus steam-reforming equilibrium reactions and ChemSep compound records",
     "imported_utc": "2026-07-17T06:25:41Z"
   },
   "thermochemistry": [
@@ -22,17 +22,80 @@
       "ideal_gas_formation_enthalpy": {"value": -134990000.0, "unit": "J/kmol"},
       "ideal_gas_formation_gibbs_energy": {"value": -21440000.0, "unit": "J/kmol"},
       "ideal_gas_formation_entropy": {"value": -380848.5661579742, "unit": "J/kmol/K"}
+    },
+    {
+      "compound_id": "Methane",
+      "elements": {"C": 1, "H": 4},
+      "formation_temperature": {"value": 298.15, "unit": "K"},
+      "ideal_gas_formation_enthalpy": {"value": -74520000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_gibbs_energy": {"value": -50490000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_entropy": {"value": -80597.01492537315, "unit": "J/kmol/K"}
+    },
+    {
+      "compound_id": "Water",
+      "elements": {"H": 2, "O": 1},
+      "formation_temperature": {"value": 298.15, "unit": "K"},
+      "ideal_gas_formation_enthalpy": {"value": -241814000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_gibbs_energy": {"value": -228590000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_entropy": {"value": -44353.513332215276, "unit": "J/kmol/K"}
+    },
+    {
+      "compound_id": "Carbon monoxide",
+      "elements": {"C": 1, "O": 1},
+      "formation_temperature": {"value": 298.15, "unit": "K"},
+      "ideal_gas_formation_enthalpy": {"value": -110530000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_gibbs_energy": {"value": -137150000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_entropy": {"value": 89283.91749119574, "unit": "J/kmol/K"}
+    },
+    {
+      "compound_id": "Carbon dioxide",
+      "elements": {"C": 1, "O": 2},
+      "formation_temperature": {"value": 298.15, "unit": "K"},
+      "ideal_gas_formation_enthalpy": {"value": -393510000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_gibbs_energy": {"value": -394370000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_entropy": {"value": 2884.454133825317, "unit": "J/kmol/K"}
+    },
+    {
+      "compound_id": "Hydrogen",
+      "elements": {"H": 2},
+      "formation_temperature": {"value": 298.15, "unit": "K"},
+      "ideal_gas_formation_enthalpy": {"value": 0.0, "unit": "J/kmol"},
+      "ideal_gas_formation_gibbs_energy": {"value": 0.0, "unit": "J/kmol"},
+      "ideal_gas_formation_entropy": {"value": 0.0, "unit": "J/kmol/K"}
     }
   ],
   "reactions": [
     {
       "id": "isomerisation",
       "name": "isomerisation",
+      "reaction_type": "conversion",
       "base_reactant": "N-butane",
       "phase": "vapor",
       "stoichiometry": {"N-butane": -1.0, "Isobutane": 1.0},
       "reaction_heat": {"value": -9200000.0, "unit": "J/kmol"},
       "conversion_percent": 33.0
+    },
+    {
+      "id": "steam-reforming-carbon-dioxide",
+      "name": "1",
+      "reaction_type": "equilibrium",
+      "base_reactant": "Methane",
+      "phase": "vapor",
+      "stoichiometry": {"Methane": -1.0, "Water": -2.0, "Carbon dioxide": 1.0, "Hydrogen": 4.0},
+      "reaction_heat": {"value": 164638000.0, "unit": "J/kmol"},
+      "equilibrium_constant_model": "gibbs",
+      "reaction_basis": "fugacity"
+    },
+    {
+      "id": "steam-reforming-carbon-monoxide",
+      "name": "2",
+      "reaction_type": "equilibrium",
+      "base_reactant": "Water",
+      "phase": "vapor",
+      "stoichiometry": {"Methane": -1.0, "Water": -1.0, "Carbon monoxide": 1.0, "Hydrogen": 3.0},
+      "reaction_heat": {"value": 205804000.0, "unit": "J/kmol"},
+      "equilibrium_constant_model": "gibbs",
+      "reaction_basis": "fugacity"
     }
   ]
 }
