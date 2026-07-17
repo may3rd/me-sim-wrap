@@ -400,5 +400,93 @@ class AbsorberGoldenGateTest(unittest.TestCase):
         self.assertEqual(len(caught.exception.history), 1)
 
 
+class ReboiledAbsorberGoldenGateTest(unittest.TestCase):
+    NAMES = ("Methanol", "Acetone")
+
+    @classmethod
+    def setUpClass(cls):
+        cls.golden = json.loads(
+            (ROOT / "tests/golden/u6-reboiled-absorber-acetone-nrtl.json").read_text(
+                encoding="utf-8-sig"
+            )
+        )
+        cls.properties = {
+            record["tag"]: {
+                item["property"]: item["value"]["value"]
+                for item in record["properties"]
+            }
+            for record in cls.golden["outputs"]["objects_after"]
+        }
+
+    def test_reference_is_repeatable_solved_and_materially_closed(self):
+        repeat = json.loads(
+            (
+                ROOT
+                / "tests/golden/u6-reboiled-absorber-acetone-nrtl-repeat.json"
+            ).read_text(encoding="utf-8-sig")
+        )
+        normalized_golden = copy.deepcopy(self.golden)
+        normalized_repeat = copy.deepcopy(repeat)
+        normalized_golden["source"].pop("captured_utc")
+        normalized_repeat["source"].pop("captured_utc")
+        self.assertEqual(normalized_golden, normalized_repeat)
+        self.assertTrue(self.golden["outputs"]["solve"]["success"])
+        self.assertFalse(self.golden["outputs"]["solve"]["errors"])
+        self.assertFalse(any(
+            record["error"] or prop["read_error"]
+            for record in self.golden["outputs"]["objects_after"]
+            for prop in record["properties"]
+        ))
+
+        stream_vector = lambda tag: tuple(
+            self.properties[tag][f"PROP_MS_104/{name}"] / 1000.0
+            for name in self.NAMES
+        )
+        residuals = column_balance_residuals(
+            (stream_vector("HP Feed"),),
+            (stream_vector("HP Azeotrope"), stream_vector("Acetone Rich Product")),
+        )
+        self.assertTrue(residuals.is_closed(1.5e-9))
+        self.assertEqual(
+            self.properties["HP Feed"]["PROP_MS_3"],
+            self.properties["HP Azeotrope"]["PROP_MS_3"]
+            + self.properties["Acetone Rich Product"]["PROP_MS_3"],
+        )
+
+    def test_saved_mode_and_vapor_product_mapping_are_authoritative(self):
+        with ZipFile(
+            ROOT / "tests/u6-reboiled-absorber-acetone-nrtl.dwxmz"
+        ) as archive:
+            root = ElementTree.fromstring(
+                archive.read(
+                    next(name for name in archive.namelist() if name.endswith(".xml"))
+                )
+            )
+        graphic_ids = {
+            graphic.findtext("Tag"): graphic.findtext("Name")
+            for graphic in root.findall(".//GraphicObject")
+        }
+        saved = next(
+            record
+            for record in root.findall(".//SimulationObject")
+            if record.findtext("Name") == graphic_ids["Acetone Column (6 atm)"]
+        )
+        saved_tags = {value: key for key, value in graphic_ids.items()}
+        streams = {
+            stream.findtext("StreamBehavior"): saved_tags[stream.findtext("StreamID")]
+            for stream in saved.findall("./MaterialStreams/MaterialStream")
+        }
+        self.assertEqual(saved.findtext("ReboiledAbsorber"), "true")
+        self.assertEqual(saved.findtext("NumberOfStages"), "20")
+        self.assertEqual(saved.findtext("SolvingMethodName"), "Wang-Henke (Bubble Point)")
+        self.assertEqual(saved.findtext("InitialEstimatesProvider"), "Internal 2 (Experimental)")
+        self.assertEqual(saved.findtext("MaxIterations"), "1000")
+        self.assertEqual(saved.findtext("ExternalLoopTolerance"), "0.001")
+        self.assertEqual(saved.findtext("InternalLoopTolerance"), "0.001")
+        self.assertNotIn("Distillate", streams)
+        self.assertEqual(streams["OverheadVapor"], "HP Azeotrope")
+        self.assertEqual(streams["BottomsLiquid"], "Acetone Rich Product")
+
+
 if __name__ == "__main__":
     unittest.main()

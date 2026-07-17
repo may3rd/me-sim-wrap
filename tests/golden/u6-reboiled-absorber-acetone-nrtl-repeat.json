@@ -1,0 +1,661 @@
+﻿{
+    "schema_version":  "golden-case-1",
+    "case_id":  "u6-reboiled-absorber-acetone-nrtl",
+    "case_kind":  "flowsheet",
+    "source":  {
+                   "dwsim_revision":  "10.0.9671.22371",
+                   "automation_version":  "DWSIM version 10.0.9671.22371 (24-Jun-26 5:25:42 AM)",
+                   "captured_utc":  "2026-07-17T14:09:09.9585505Z",
+                   "platform":  "Microsoft Windows NT 10.0.22631.0",
+                   "architecture":  "AMD64",
+                   "engine_bin":  "C:\\Users\\may3r\\AppData\\Local\\DWSIM10",
+                   "input_file":  "C:\\Users\\may3r\\Code\\me-sim-wrap-live\\tests\\u6-reboiled-absorber-acetone-nrtl.dwxmz",
+                   "input_file_sha256":  "e6ac3611572c2a07b99bfa9ff1f57f1683dc00114862d28288bf30abb4b7166b",
+                   "property_package":  "NRTL",
+                   "flash_algorithm":  "Wang-Henke (Bubble Point)",
+                   "bubble_dew_calculation":  false,
+                   "property_packages_updated":  0,
+                   "notes":  "Values are captured before and after CalculateFlowsheet4; numeric_text preserves invariant-culture source formatting."
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     {
+                                         "id":  "Acetone",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-3.7190402336092814",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -3.7190402336092814
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-3713.8979674974526",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -3713.8979674974526
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-2605.0661218468454",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -2605.0661218468454
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  3,
+                                                          "H":  6,
+                                                          "O":  1
+                                                      },
+                                         "cas":  "67-64-1",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101083.91803348652",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101083.91803348652
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "329.22",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  329.22
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.2915951953088816",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.2915951953088816
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "4700000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  4700000
+                                                               },
+                                         "name":  "Acetone",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "10.0.9671.22371"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "58.07914",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  58.07914
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "508.1",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  508.1
+                                                                  },
+                                         "formula":  "CH3COCH3",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "329.22",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  329.22
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.307",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.307
+                                                             }
+                                     },
+                                     {
+                                         "id":  "Methanol",
+                                         "ideal_gas_formation":  {
+                                                                     "entropy":  {
+                                                                                     "value_text":  "-4.0425903710759021",
+                                                                                     "unit":  "kJ/kg/K",
+                                                                                     "value_type":  "number",
+                                                                                     "value":  -4.0425903710759021
+                                                                                 },
+                                                                     "enthalpy":  {
+                                                                                      "value_text":  "-6271.1715237504941",
+                                                                                      "unit":  "kJ/kg",
+                                                                                      "value_type":  "number",
+                                                                                      "value":  -6271.1715237504941
+                                                                                  },
+                                                                     "gibbs_energy":  {
+                                                                                          "value_text":  "-5065.873204614214",
+                                                                                          "unit":  "kJ/kg",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -5065.873204614214
+                                                                                      },
+                                                                     "temperature":  {
+                                                                                         "value_text":  "298.15",
+                                                                                         "unit":  "K",
+                                                                                         "value_type":  "number",
+                                                                                         "value":  298.15
+                                                                                     }
+                                                                 },
+                                         "elements":  {
+                                                          "C":  1,
+                                                          "H":  4,
+                                                          "O":  1
+                                                      },
+                                         "cas":  "67-56-1",
+                                         "ideal_reference":  {
+                                                                 "vapor_pressure":  {
+                                                                                        "value_text":  "101070.45238492134",
+                                                                                        "unit":  "Pa",
+                                                                                        "value_type":  "number",
+                                                                                        "value":  101070.45238492134
+                                                                                    },
+                                                                 "vapor_pressure_temperature":  {
+                                                                                                    "value_text":  "337.69",
+                                                                                                    "unit":  "K",
+                                                                                                    "value_type":  "number",
+                                                                                                    "value":  337.69
+                                                                                                },
+                                                                 "heat_capacity":  {
+                                                                                       "value_text":  "1.3951350694156555",
+                                                                                       "unit":  "kJ/kg/K",
+                                                                                       "value_type":  "number",
+                                                                                       "value":  1.3951350694156555
+                                                                                   },
+                                                                 "heat_capacity_temperature":  {
+                                                                                                   "value_text":  "300",
+                                                                                                   "unit":  "K",
+                                                                                                   "value_type":  "number",
+                                                                                                   "value":  300
+                                                                                               }
+                                                             },
+                                         "critical_pressure":  {
+                                                                   "value_text":  "8097000",
+                                                                   "unit":  "Pa",
+                                                                   "value_type":  "number",
+                                                                   "value":  8097000
+                                                               },
+                                         "name":  "Methanol",
+                                         "provenance":  {
+                                                            "database":  "ChemSep",
+                                                            "source":  "DWSIM.AvailableCompounds",
+                                                            "source_revision":  "10.0.9671.22371"
+                                                        },
+                                         "molecular_weight":  {
+                                                                  "value_text":  "32.04186",
+                                                                  "unit":  "kg/kmol",
+                                                                  "value_type":  "number",
+                                                                  "value":  32.04186
+                                                              },
+                                         "critical_temperature":  {
+                                                                      "value_text":  "512.64",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  512.64
+                                                                  },
+                                         "formula":  "CH3OH",
+                                         "normal_boiling_point":  {
+                                                                      "value_text":  "337.69",
+                                                                      "unit":  "K",
+                                                                      "value_type":  "number",
+                                                                      "value":  337.69
+                                                                  },
+                                         "acentric_factor":  {
+                                                                 "value_text":  "0.565",
+                                                                 "unit":  "dimensionless",
+                                                                 "value_type":  "number",
+                                                                 "value":  0.565
+                                                             }
+                                     }
+                                 ],
+                   "objects_before":  [
+                                          {
+                                              "tag":  "Acetone Column (6 atm)",
+                                              "name":  "DC-d8d17391-93e8-4990-b225-e42f4f7b0b33",
+                                              "error":  null,
+                                              "properties":  [
+
+                                                             ],
+                                              "type":  "DistillationColumn",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "HP Feed",
+                                              "name":  "MAT-df21fa52-ddbf-4e61-a6bb-9fb208f76a2d",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.566418943465365",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.566418943465365
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.7911355796134",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.7911355796134
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "2.35755452307876",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  2.35755452307876
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "328.645225056215",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  328.645225056215
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950.057",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950.057
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "Acetone Rich Product",
+                                              "name":  "MAT-4c626b03-8509-409c-a65d-9d3346c1fff6",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.00847918982548832",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.00847918982548832
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.491520810174512",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.491520810174512
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.5",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.5
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "394.296810365565",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  394.296810365565
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "HP Azeotrope",
+                                              "name":  "MAT-2bfc6fd0-cbc8-4b85-84f4-c990c3990d85",
+                                              "error":  null,
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.557938215465239",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.557938215465239
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.29961630761352",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.29961630761352
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.85755452307876",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.85755452307876
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "389.153805171998",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  389.153805171998
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          }
+                                      ]
+               },
+    "outputs":  {
+                    "solve":  {
+                                  "errors":  [
+
+                                             ],
+                                  "success":  true,
+                                  "executed":  true
+                              },
+                    "objects_after":  [
+                                          {
+                                              "tag":  "Acetone Column (6 atm)",
+                                              "name":  "DC-d8d17391-93e8-4990-b225-e42f4f7b0b33",
+                                              "error":  "",
+                                              "properties":  [
+
+                                                             ],
+                                              "type":  "DistillationColumn",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "HP Feed",
+                                              "name":  "MAT-df21fa52-ddbf-4e61-a6bb-9fb208f76a2d",
+                                              "error":  "",
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.56070099950717722",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.56070099950717722
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.7954554187803031",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.7954554187803031
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "2.3561564182874806",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  2.3561564182874806
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "328.64606196092581",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  328.64606196092581
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950.057",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950.057
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "Acetone Rich Product",
+                                              "name":  "MAT-4c626b03-8509-409c-a65d-9d3346c1fff6",
+                                              "error":  "",
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.0081401937369094558",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.0081401937369094558
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.4918598062630905",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.4918598062630905
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.5",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.5
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "394.32734465983322",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  394.32734465983322
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          },
+                                          {
+                                              "tag":  "HP Azeotrope",
+                                              "name":  "MAT-2bfc6fd0-cbc8-4b85-84f4-c990c3990d85",
+                                              "error":  "",
+                                              "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Methanol",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.55255938819991857",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.55255938819991857
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_104/Acetone",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.3035970300875619",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.3035970300875619
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_3",
+                                                                     "value":  {
+                                                                                   "value_text":  "1.8561564182874806",
+                                                                                   "unit":  "mol/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  1.8561564182874806
+                                                                               },
+                                                                     "unit":  "mol/s"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_0",
+                                                                     "value":  {
+                                                                                   "value_text":  "391.43290248841333",
+                                                                                   "unit":  "K",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  391.43290248841333
+                                                                               },
+                                                                     "unit":  "K"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_1",
+                                                                     "value":  {
+                                                                                   "value_text":  "607950",
+                                                                                   "unit":  "Pa",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  607950
+                                                                               },
+                                                                     "unit":  "Pa"
+                                                                 }
+                                                             ],
+                                              "type":  "MaterialStream",
+                                              "utilities":  [
+
+                                                            ],
+                                              "calculated":  true
+                                          }
+                                      ]
+                }
+}
