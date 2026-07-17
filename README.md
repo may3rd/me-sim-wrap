@@ -64,7 +64,8 @@ thermodynamics.
 | HTTP API (`/v1/*`) | Done (internal alpha) |
 | Hydraulics | Partial (U3: pipes, defined heat-load and constant/gradient/tabulated defined-HTC plus estimated air/water/soil-HTC liquid thermal profiles with PR enthalpy coupling, optional insulation and local/global irradiation, fittings, orifice, two-phase correlations, relief sizing) |
 | Reactors | Partial (U4: conversion, simultaneous vapor equilibrium reactions, and vapor Gibbs minimization) |
-| Columns, dynamics | Not yet |
+| Columns | Partial (U6/U7: shortcut, fixed-K absorber, and fixed-thermodynamic rigorous-column gates) |
+| Dynamics and controls | Partial (U9: holdup balances, fixed/adaptive ODE paths, tank/PID DWSIM parity, lumped HX, dynamic CSTR) |
 
 See [`docs/compatibility.md`](docs/compatibility.md) for the full matrix and current
 parity/difference notes.
