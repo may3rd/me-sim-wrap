@@ -15,7 +15,12 @@ from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.errors import ValidationError
 from mesim.reactions import load_reaction_data
 from mesim.thermo.ideal import load_correlations
-from mesim.unitops.reactors import conversion_reactor, equilibrium_reactor, gibbs_reactor
+from mesim.unitops.reactors import (
+    continuous_stirred_tank_reactor,
+    conversion_reactor,
+    equilibrium_reactor,
+    gibbs_reactor,
+)
 
 
 ROOT = Path(__file__).parents[1]
@@ -25,6 +30,8 @@ DWSIM_EQUILIBRIUM_EXTENT_REL_TOL = 2e-6
 DWSIM_EQUILIBRIUM_DUTY_REL_TOL = 2e-6
 DWSIM_GIBBS_COMPONENT_REL_TOL = 1.2e-3
 DWSIM_GIBBS_DUTY_REL_TOL = 2e-4
+DWSIM_CSTR_RATE_REL_TOL = 3e-5
+DWSIM_CSTR_STREAM_REL_TOL = 1.1e-3
 
 
 class ReactionDataTest(unittest.TestCase):
@@ -72,6 +79,52 @@ class ReactionDataTest(unittest.TestCase):
                 path.write_text(json.dumps(broken))
                 with self.assertRaises(ValidationError):
                     load_reaction_data(path)
+
+    def test_ethylene_glycol_kinetics_preserve_dwsim_expression_units(self):
+        data = load_reaction_data(ROOT / "data/reactions/v1.json")
+        reaction = next(record for record in data.reactions if record.reaction_type == "kinetic")
+        kinetics = reaction.kinetics
+
+        self.assertIsNotNone(kinetics)
+        assert kinetics is not None
+        self.assertEqual(reaction.phase, "mixture")
+        self.assertEqual(dict(reaction.stoichiometry), {
+            "Ethylene oxide": -1.0, "Water": -1.0, "Ethylene glycol": 1.0,
+        })
+        self.assertEqual(reaction.reaction_heat_j_per_kmol, -97_756_000.0)
+        self.assertEqual(kinetics.basis, "molar_concentration")
+        self.assertEqual(kinetics.concentration_unit, "kmol/m3")
+        self.assertEqual(kinetics.rate_unit, "kmol/[m3.h]")
+        self.assertEqual(kinetics.forward.pre_exponential_factor, 0.005)
+        self.assertEqual(kinetics.forward.activation_energy_j_per_mol, 0.0)
+        self.assertEqual(dict(kinetics.forward.orders)["Ethylene oxide"], 1.0)
+
+        golden = json.loads(
+            (ROOT / "tests/golden/u5-cstr-ethylene-glycol-raoult.json").read_text(encoding="utf-8-sig")
+        )
+        captured = {record["id"]: record for record in golden["inputs"]["compounds"]}
+        thermochemistry = {record.compound_id: record for record in data.thermochemistry}
+        for compound_id in ("Ethylene oxide", "Ethylene glycol"):
+            record = thermochemistry[compound_id]
+            reference = captured[compound_id]
+            molecular_weight = reference["molecular_weight"]["value"]
+            self.assertEqual(dict(record.elements), reference["elements"])
+            self.assertTrue(math.isclose(
+                record.ideal_gas_formation_enthalpy_j_per_kmol,
+                reference["ideal_gas_formation"]["enthalpy"]["value"] * molecular_weight * 1_000.0,
+                rel_tol=1e-12,
+            ))
+
+        with ZipFile(ROOT / "tests/u5-cstr-ethylene-glycol-raoult.dwxmz") as archive:
+            root = ElementTree.fromstring(archive.read(next(name for name in archive.namelist() if name.endswith(".xml"))))
+        saved = root.find(".//Reaction[ReactionType='Kinetic']")
+        self.assertIsNotNone(saved)
+        assert saved is not None
+        self.assertEqual(saved.findtext("ConcUnit"), kinetics.concentration_unit)
+        self.assertEqual(saved.findtext("VelUnit"), kinetics.rate_unit)
+        self.assertEqual(saved.findtext("E_Forward_Unit"), kinetics.forward.activation_energy_unit)
+        self.assertEqual(float(saved.findtext("A_Forward")), kinetics.forward.pre_exponential_factor)
+        self.assertEqual(float(saved.findtext("E_Forward")), kinetics.forward.activation_energy_j_per_mol)
 
 
 class ConversionReactorTest(unittest.TestCase):
@@ -205,6 +258,94 @@ class EquilibriumReactorTest(unittest.TestCase):
                 (("N-butane", 1.0), ("Isobutane", 0.1)),
                 (data.reactions[0],), data.thermochemistry, (), (),
                 load_pr_interactions(ROOT / "data/interactions/pr-v1.json"), 400.0, 101325.0,
+            )
+
+
+class CSTRReactorTest(unittest.TestCase):
+    def test_ethylene_glycol_cstr_matches_repeatable_dwsim_case(self):
+        data = load_reaction_data(ROOT / "data/reactions/v1.json")
+        reaction = next(record for record in data.reactions if record.reaction_type == "kinetic")
+        golden = json.loads(
+            (ROOT / "tests/golden/u5-cstr-ethylene-glycol-raoult.json").read_text(encoding="utf-8-sig")
+        )
+        repeat = json.loads(
+            (ROOT / "tests/golden/u5-cstr-ethylene-glycol-raoult-repeat.json").read_text(encoding="utf-8-sig")
+        )
+        normalized_golden, normalized_repeat = copy.deepcopy(golden), copy.deepcopy(repeat)
+        normalized_golden["source"].pop("captured_utc")
+        normalized_repeat["source"].pop("captured_utc")
+        self.assertEqual(normalized_golden, normalized_repeat)
+        self.assertFalse(any(
+            property_record["read_error"]
+            for object_record in golden["outputs"]["objects_after"]
+            for property_record in object_record["properties"]
+        ))
+
+        objects = {item["tag"]: item for item in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {item["property"]: item["value"]["value"] for item in objects[tag]["properties"]}
+            for tag in ("5", "6", "E2", "CSTR-1")
+        }
+        compound_ids = ("Ethylene oxide", "Water", "Ethylene glycol")
+        inlet = tuple(
+            (compound_id, properties["5"][f"PROP_MS_104/{compound_id}"] / 1_000.0)
+            for compound_id in compound_ids
+        )
+        result = continuous_stirred_tank_reactor(
+            inlet,
+            reaction,
+            properties["5"]["PROP_MS_0"],
+            properties["CSTR-1"]["PROP_CS_2"],
+            properties["6"]["PROP_MS_4"],
+        )
+
+        expected_outlet = {
+            compound_id: properties["6"][f"PROP_MS_104/{compound_id}"] / 1_000.0
+            for compound_id in compound_ids
+        }
+        for compound_id, actual in result.outlet_component_flows_kmol_s:
+            self.assertTrue(math.isclose(
+                actual, expected_outlet[compound_id],
+                rel_tol=DWSIM_CSTR_STREAM_REL_TOL, abs_tol=1.0e-12,
+            ))
+        self.assertTrue(math.isclose(
+            result.extent_kmol_s * 1_000.0,
+            properties["CSTR-1"]["Ethylene Glycol Production: Extent"],
+            rel_tol=DWSIM_CSTR_RATE_REL_TOL,
+        ))
+        self.assertTrue(math.isclose(
+            result.reaction_rate_kmol_m3_s * 1_000.0,
+            properties["CSTR-1"]["Ethylene Glycol Production: Rate"],
+            rel_tol=DWSIM_CSTR_RATE_REL_TOL,
+        ))
+        self.assertTrue(math.isclose(
+            result.reference_reaction_heat_w / 1_000.0,
+            properties["CSTR-1"]["Ethylene Glycol Production: Heat"],
+            rel_tol=DWSIM_CSTR_RATE_REL_TOL,
+        ))
+        self.assertTrue(math.isclose(
+            dict(result.component_conversions)["Ethylene oxide"] * 100.0,
+            properties["CSTR-1"]["Ethylene oxide: Conversion"],
+            rel_tol=DWSIM_CSTR_STREAM_REL_TOL,
+        ))
+        self.assertLess(abs(result.material_rate_residual_kmol_s), 1.0e-15)
+        self.assertTrue(math.isclose(
+            result.total_molar_flow_kmol_s,
+            math.fsum(flow for _, flow in inlet) - result.extent_kmol_s,
+            rel_tol=0.0, abs_tol=1.0e-15,
+        ))
+
+    def test_cstr_rejects_nonkinetic_reaction_and_invalid_supplied_volume(self):
+        data = load_reaction_data(ROOT / "data/reactions/v1.json")
+        kinetic = next(record for record in data.reactions if record.reaction_type == "kinetic")
+        with self.assertRaises(ValidationError):
+            continuous_stirred_tank_reactor(
+                (("N-butane", 1.0), ("Isobutane", 0.0)), data.reactions[0], 350.0, 1.0, 0.001,
+            )
+        with self.assertRaises(ValidationError):
+            continuous_stirred_tank_reactor(
+                (("Ethylene oxide", 1.0), ("Water", 1.0), ("Ethylene glycol", 0.0)),
+                kinetic, 350.0, 1.0, 0.0,
             )
 
 

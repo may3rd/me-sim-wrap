@@ -1,10 +1,10 @@
 {
   "schema_version": "reaction-data-1",
   "provenance": {
-    "source": "DWSIM tests/Isomerisation.dwxmz and samples/Gibbs and Equilibrium Reactors.dwxml",
+    "source": "DWSIM tests/Isomerisation.dwxmz plus Gibbs/Equilibrium and Dynamic Simulation - PFR samples",
     "source_revision": "9.0.5.0",
-    "selection": "saved isomerisation conversion plus steam-reforming equilibrium reactions and ChemSep compound records",
-    "imported_utc": "2026-07-17T06:25:41Z"
+    "selection": "saved conversion, equilibrium, and ethylene-glycol kinetic reactions plus ChemSep compound records",
+    "imported_utc": "2026-07-17T07:30:00Z"
   },
   "thermochemistry": [
     {
@@ -38,6 +38,22 @@
       "ideal_gas_formation_enthalpy": {"value": -241814000.0, "unit": "J/kmol"},
       "ideal_gas_formation_gibbs_energy": {"value": -228590000.0, "unit": "J/kmol"},
       "ideal_gas_formation_entropy": {"value": -44353.513332215276, "unit": "J/kmol/K"}
+    },
+    {
+      "compound_id": "Ethylene oxide",
+      "elements": {"C": 2, "H": 4, "O": 1},
+      "formation_temperature": {"value": 298.15, "unit": "K"},
+      "ideal_gas_formation_enthalpy": {"value": -52630000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_gibbs_energy": {"value": -13230000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_entropy": {"value": -132148.2475264129, "unit": "J/kmol/K"}
+    },
+    {
+      "compound_id": "Ethylene glycol",
+      "elements": {"C": 2, "H": 6, "O": 2},
+      "formation_temperature": {"value": 298.15, "unit": "K"},
+      "ideal_gas_formation_enthalpy": {"value": -392200000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_gibbs_energy": {"value": -301800000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_entropy": {"value": -303203.0856951199, "unit": "J/kmol/K"}
     },
     {
       "compound_id": "Carbon monoxide",
@@ -96,6 +112,32 @@
       "reaction_heat": {"value": 205804000.0, "unit": "J/kmol"},
       "equilibrium_constant_model": "gibbs",
       "reaction_basis": "fugacity"
+    },
+    {
+      "id": "ethylene-glycol-production",
+      "name": "Ethylene Glycol Production",
+      "reaction_type": "kinetic",
+      "base_reactant": "Ethylene oxide",
+      "phase": "mixture",
+      "stoichiometry": {"Ethylene oxide": -1.0, "Water": -1.0, "Ethylene glycol": 1.0},
+      "reaction_heat": {"value": -97756000.0, "unit": "J/kmol"},
+      "kinetics": {
+        "basis": "molar_concentration",
+        "concentration_unit": "kmol/m3",
+        "rate_unit": "kmol/[m3.h]",
+        "forward": {
+          "model": "arrhenius",
+          "pre_exponential_factor": 0.005,
+          "activation_energy": {"value": 0.0, "unit": "J/mol"},
+          "orders": {"Ethylene oxide": 1.0, "Water": 0.0, "Ethylene glycol": 0.0}
+        },
+        "reverse": {
+          "model": "arrhenius",
+          "pre_exponential_factor": 0.0,
+          "activation_energy": {"value": 0.0, "unit": "J/mol"},
+          "orders": {"Ethylene oxide": 0.0, "Water": 0.0, "Ethylene glycol": 0.0}
+        }
+      }
     }
   ]
 }

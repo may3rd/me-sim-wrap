@@ -1,6 +1,9 @@
 """Reaction unit operations."""
 import math
+import sys
 from dataclasses import dataclass
+
+from scipy.optimize import least_squares
 
 from ..compounds import Compound, PRInteractions
 from ..errors import ConvergenceError, ValidationError
@@ -11,6 +14,7 @@ from ..thermo.peng_robinson import PengRobinsonMixture
 
 DWSIM_EQUILIBRIUM_R = 8314.0  # J/kmol/K, as used by DWSIM AUX_DELGF_T
 DWSIM_REFERENCE_PRESSURE_PA = 101325.0
+DWSIM_KINETIC_R = 8.31446261815324  # J/mol/K
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,6 +54,21 @@ class GibbsReactorResult:
     final_gibbs_energy_w: float
     isothermal_duty_w: float
     iterations: int
+
+    @property
+    def total_molar_flow_kmol_s(self) -> float:
+        return math.fsum(flow for _, flow in self.outlet_component_flows_kmol_s)
+
+
+@dataclass(frozen=True, slots=True)
+class CSTRResult:
+    outlet_component_flows_kmol_s: tuple[tuple[str, float], ...]
+    extent_kmol_s: float
+    reaction_rate_kmol_m3_s: float
+    component_conversions: tuple[tuple[str, float], ...]
+    reference_reaction_heat_w: float
+    material_rate_residual_kmol_s: float
+    evaluations: int
 
     @property
     def total_molar_flow_kmol_s(self) -> float:
@@ -97,6 +116,156 @@ def conversion_reactor(
         outlet.append((compound, max(flow, 0.0)))
     return ConversionReactorResult(
         tuple(outlet), extent, float(conversion), extent * reaction.reaction_heat_j_per_kmol,
+    )
+
+
+def _arrhenius_rate(
+    pre_exponential_factor: float,
+    activation_energy_j_per_mol: float,
+    orders: tuple[tuple[str, float], ...],
+    concentrations_kmol_m3: dict[str, float],
+    temperature_k: float,
+) -> float:
+    if pre_exponential_factor == 0.0:
+        return 0.0
+    logarithm = math.log(pre_exponential_factor) - activation_energy_j_per_mol / (
+        DWSIM_KINETIC_R * temperature_k
+    )
+    for compound, order in orders:
+        if order == 0.0:
+            continue
+        concentration = concentrations_kmol_m3.get(compound, 0.0)
+        if concentration <= 0.0:
+            return 0.0
+        logarithm += order * math.log(concentration)
+    if logarithm > math.log(sys.float_info.max):
+        raise ValidationError("kinetic rate is outside the representable range")
+    if logarithm < math.log(sys.float_info.min):
+        return 0.0
+    return math.exp(logarithm)
+
+
+def _kinetic_rate_kmol_m3_s(
+    reaction: ReactionDefinition,
+    concentrations_kmol_m3: dict[str, float],
+    temperature_k: float,
+) -> float:
+    kinetics = reaction.kinetics
+    if kinetics is None:
+        raise ValidationError("kinetic reaction is missing its rate definition")
+    forward = _arrhenius_rate(
+        kinetics.forward.pre_exponential_factor,
+        kinetics.forward.activation_energy_j_per_mol,
+        kinetics.forward.orders,
+        concentrations_kmol_m3,
+        temperature_k,
+    )
+    reverse = _arrhenius_rate(
+        kinetics.reverse.pre_exponential_factor,
+        kinetics.reverse.activation_energy_j_per_mol,
+        kinetics.reverse.orders,
+        concentrations_kmol_m3,
+        temperature_k,
+    )
+    rate = forward - reverse
+    if kinetics.rate_unit == "kmol/[m3.h]":
+        rate /= 3600.0
+    return rate
+
+
+def continuous_stirred_tank_reactor(
+    inlet_component_flows_kmol_s: tuple[tuple[str, float], ...],
+    reaction: ReactionDefinition,
+    temperature_k: float,
+    reactor_volume_m3: float,
+    outlet_volumetric_flow_m3_s: float,
+    tolerance: float = 1.0e-10,
+    max_evaluations: int = 100,
+) -> CSTRResult:
+    """Solve one steady, ideally mixed kinetic reaction using its original DWSIM units."""
+    inlet_items = tuple(inlet_component_flows_kmol_s)
+    if not inlet_items or len({compound for compound, _ in inlet_items}) != len(inlet_items):
+        raise ValidationError("CSTR inlet compound IDs must be non-empty and unique")
+    inlet: dict[str, float] = {}
+    for compound, flow in inlet_items:
+        if not isinstance(compound, str) or not compound:
+            raise ValidationError("CSTR compound IDs must be non-empty strings")
+        if isinstance(flow, bool) or not isinstance(flow, (int, float)) or not math.isfinite(flow) or flow < 0.0:
+            raise ValidationError("CSTR component flows must be finite and non-negative")
+        inlet[compound] = float(flow)
+    if reaction.reaction_type != "kinetic" or reaction.kinetics is None:
+        raise ValidationError("CSTR requires a kinetic reaction")
+    if reaction.phase not in {"mixture", "liquid"}:
+        raise ValidationError("CSTR currently supports mixture or liquid kinetic reactions")
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value <= 0.0
+        for value in (temperature_k, reactor_volume_m3, outlet_volumetric_flow_m3_s, tolerance)
+    ) or isinstance(max_evaluations, bool) or not isinstance(max_evaluations, int) or max_evaluations <= 0:
+        raise ValidationError("CSTR state and solver controls must be finite and positive")
+
+    stoichiometry = dict(reaction.stoichiometry)
+    ordered_compounds = tuple(inlet) + tuple(compound for compound in stoichiometry if compound not in inlet)
+    limits = [
+        inlet.get(compound, 0.0) / -coefficient
+        for compound, coefficient in stoichiometry.items()
+        if coefficient < 0.0
+    ]
+    if not limits or min(limits) <= 0.0:
+        raise ValidationError("CSTR reaction requires every consumed compound to have positive inlet flow")
+    limiting_extent = min(limits)
+
+    def outlet_flows(extent: float) -> tuple[float, ...]:
+        return tuple(
+            inlet.get(compound, 0.0) + stoichiometry.get(compound, 0.0) * extent
+            for compound in ordered_compounds
+        )
+
+    def rate_at(extent: float) -> float:
+        flows = outlet_flows(extent)
+        if any(flow < 0.0 for flow in flows):
+            raise ValidationError("CSTR trial produced a negative component flow")
+        concentrations = {
+            compound: flow / outlet_volumetric_flow_m3_s
+            for compound, flow in zip(ordered_compounds, flows)
+        }
+        return _kinetic_rate_kmol_m3_s(reaction, concentrations, float(temperature_k))
+
+    initial_rate = rate_at(0.0)
+    if initial_rate < 0.0:
+        raise ValidationError("CSTR reverse-rate-dominated solutions are outside the current domain")
+    scale = max(limiting_extent, 1.0e-12)
+    initial_extent = min(max(initial_rate * reactor_volume_m3, limiting_extent * 1.0e-12), limiting_extent * 0.5)
+
+    def residual(values) -> tuple[float]:
+        extent = float(values[0])
+        return ((extent - rate_at(extent) * reactor_volume_m3) / scale,)
+
+    solved = least_squares(
+        residual, (initial_extent,), bounds=(0.0, limiting_extent),
+        ftol=1.0e-14, xtol=1.0e-14, gtol=1.0e-14, max_nfev=max_evaluations,
+    )
+    extent = float(solved.x[0])
+    reaction_rate = rate_at(extent)
+    material_residual = extent - reaction_rate * reactor_volume_m3
+    if not solved.success or abs(material_residual) > tolerance * scale:
+        raise ConvergenceError("CSTR material-rate balance did not converge")
+
+    outlet_values = outlet_flows(extent)
+    outlet = tuple(zip(ordered_compounds, outlet_values))
+    conversions = tuple(
+        (compound, (flow - outlet_values[index]) / flow)
+        for index, (compound, flow) in enumerate(inlet.items())
+        if flow > 0.0 and outlet_values[index] < flow
+    )
+    return CSTRResult(
+        outlet,
+        extent,
+        reaction_rate,
+        conversions,
+        extent * reaction.reaction_heat_j_per_kmol,
+        material_residual,
+        solved.nfev,
     )
 
 

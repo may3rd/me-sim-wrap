@@ -27,6 +27,24 @@ class CompoundThermochemistry:
 
 
 @dataclass(frozen=True, slots=True)
+class ArrheniusRateDefinition:
+    model: str
+    pre_exponential_factor: float
+    activation_energy_j_per_mol: float
+    activation_energy_unit: str
+    orders: tuple[tuple[str, float], ...]
+
+
+@dataclass(frozen=True, slots=True)
+class KineticRateDefinition:
+    basis: str
+    concentration_unit: str
+    rate_unit: str
+    forward: ArrheniusRateDefinition
+    reverse: ArrheniusRateDefinition
+
+
+@dataclass(frozen=True, slots=True)
 class ReactionDefinition:
     id: str
     name: str
@@ -38,6 +56,7 @@ class ReactionDefinition:
     conversion_fraction: float | None
     equilibrium_constant_model: str | None
     reaction_basis: str | None
+    kinetics: KineticRateDefinition | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,6 +73,29 @@ def _property(record: dict, name: str, unit: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
         raise ValidationError(f"{name} must be finite numeric data")
     return float(value)
+
+
+def _arrhenius_rate(record: dict) -> ArrheniusRateDefinition:
+    activation_energy = record["activation_energy"]
+    if activation_energy["unit"] != "J/mol":
+        raise ValidationError("kinetic activation energy must use J/mol")
+    return ArrheniusRateDefinition(
+        record["model"],
+        float(record["pre_exponential_factor"]),
+        float(activation_energy["value"]),
+        activation_energy["unit"],
+        tuple((compound, float(order)) for compound, order in record["orders"].items()),
+    )
+
+
+def _kinetics(record: dict) -> KineticRateDefinition | None:
+    kinetics = record.get("kinetics")
+    if kinetics is None:
+        return None
+    return KineticRateDefinition(
+        kinetics["basis"], kinetics["concentration_unit"], kinetics["rate_unit"],
+        _arrhenius_rate(kinetics["forward"]), _arrhenius_rate(kinetics["reverse"]),
+    )
 
 
 def load_reaction_data(path: str | Path) -> ReactionData:
@@ -81,6 +123,7 @@ def load_reaction_data(path: str | Path) -> ReactionData:
                 float(record["conversion_percent"]) / 100.0 if "conversion_percent" in record else None,
                 record.get("equilibrium_constant_model"),
                 record.get("reaction_basis"),
+                _kinetics(record),
             )
             for record in raw["reactions"]
         )
@@ -131,7 +174,7 @@ def load_reaction_data(path: str | Path) -> ReactionData:
         stoichiometry = dict(reaction.stoichiometry)
         if (
             not reaction.id or not reaction.name
-            or reaction.reaction_type not in {"conversion", "equilibrium"}
+            or reaction.reaction_type not in {"conversion", "equilibrium", "kinetic"}
             or reaction.phase not in {"mixture", "vapor", "liquid", "solid"}
         ):
             raise ValidationError("reaction identity and phase are invalid")
@@ -144,13 +187,49 @@ def load_reaction_data(path: str | Path) -> ReactionData:
                 raise ValidationError("conversion reaction conversion must be between zero and one")
             if reaction.equilibrium_constant_model is not None or reaction.reaction_basis is not None:
                 raise ValidationError("conversion reaction cannot define equilibrium settings")
-        else:
+            if reaction.kinetics is not None:
+                raise ValidationError("conversion reaction cannot define kinetics")
+        elif reaction.reaction_type == "equilibrium":
             if reaction.conversion_fraction is not None:
                 raise ValidationError("equilibrium reaction cannot define a fixed conversion")
             if reaction.equilibrium_constant_model != "gibbs" or reaction.reaction_basis != "fugacity":
                 raise ValidationError("equilibrium reaction must use Gibbs fugacity equilibrium")
             if reaction.phase != "vapor":
                 raise ValidationError("only vapor equilibrium reactions are supported")
+            if reaction.kinetics is not None:
+                raise ValidationError("equilibrium reaction cannot define kinetics")
+        else:
+            if reaction.conversion_fraction is not None:
+                raise ValidationError("kinetic reaction cannot define a fixed conversion")
+            if reaction.equilibrium_constant_model is not None or reaction.reaction_basis is not None:
+                raise ValidationError("kinetic reaction cannot define equilibrium settings")
+            kinetics = reaction.kinetics
+            if kinetics is None:
+                raise ValidationError("kinetic reaction requires explicit kinetics")
+            if (
+                kinetics.basis != "molar_concentration"
+                or kinetics.concentration_unit != "kmol/m3"
+                or kinetics.rate_unit not in {"kmol/[m3.s]", "kmol/[m3.h]"}
+            ):
+                raise ValidationError("unsupported kinetic basis or original expression units")
+            for direction in (kinetics.forward, kinetics.reverse):
+                if (
+                    direction.model != "arrhenius"
+                    or direction.activation_energy_unit != "J/mol"
+                    or not math.isfinite(direction.pre_exponential_factor)
+                    or direction.pre_exponential_factor < 0.0
+                    or not math.isfinite(direction.activation_energy_j_per_mol)
+                    or direction.activation_energy_j_per_mol < 0.0
+                    or any(
+                        compound not in stoichiometry
+                        or not math.isfinite(order)
+                        or order < 0.0
+                        for compound, order in direction.orders
+                    )
+                ):
+                    raise ValidationError("invalid Arrhenius kinetic definition")
+            if kinetics.forward.pre_exponential_factor <= 0.0:
+                raise ValidationError("kinetic reaction requires a positive forward factor")
         if any(compound not in thermo_by_id for compound in stoichiometry):
             raise ValidationError("reaction stoichiometry is missing explicit thermochemistry")
         elements = {element for compound in stoichiometry for element, _ in thermo_by_id[compound].elements}
