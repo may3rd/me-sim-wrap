@@ -1075,18 +1075,24 @@ def _pipe_estimated_htc_air_pr_calculated_profile(
     insulation_conductivity_w_m_k: float | None = None,
     *, allow_transport_extrapolation: bool = False,
     segment_start_distances_m: tuple[float, ...] = (),
+    segment_absorbed_radiation_w: tuple[float, ...] = (),
 ) -> PipeEstimatedHtcProfileResult:
     try:
         pressures = tuple(outlet_pressures_pa)
         lengths = tuple(segment_lengths_m)
         external_temperatures = tuple(external_temperatures_k)
         start_distances = tuple(segment_start_distances_m)
+        radiation = tuple(segment_absorbed_radiation_w)
     except TypeError as exc:
         raise ValidationError("calculated pipe profile values must be finite sequences") from exc
     if not pressures or len({len(pressures), len(lengths), len(external_temperatures)}) != 1:
         raise ValidationError("calculated pipe pressures, lengths, and external temperatures must have equal non-zero counts")
     if start_distances and len(start_distances) != len(lengths):
         raise ValidationError("calculated pipe start distances must match the segment count")
+    if radiation and len(radiation) != len(lengths):
+        raise ValidationError("calculated pipe radiation values must match the segment count")
+    if not radiation:
+        radiation = (0.0,) * len(lengths)
 
     def htc_builder(
         external_temperature: float, temperature: float,
@@ -1106,8 +1112,8 @@ def _pipe_estimated_htc_air_pr_calculated_profile(
     property_results = []
     htc_results = []
     thermal_results = []
-    for external_temperature, outlet_pressure, length in zip(
-        external_temperatures, pressures, lengths,
+    for external_temperature, outlet_pressure, length, absorbed_radiation in zip(
+        external_temperatures, pressures, lengths, radiation,
     ):
         properties = pipe_liquid_pr_properties(
             temperature, pressure, compounds, composition, interactions,
@@ -1122,6 +1128,7 @@ def _pipe_estimated_htc_air_pr_calculated_profile(
             (length,), (properties.velocity_m_s,), (properties.heat_capacity_j_kg_k,),
             (properties.thermal_conductivity_w_m_k,), (properties.viscosity_pa_s,),
             (properties.density_kg_m3,), htc_builder,
+            segment_absorbed_radiation_w=(absorbed_radiation,),
         )
         property_results.append(properties)
         htc_results.extend(segment.htc_results)
@@ -1133,7 +1140,7 @@ def _pipe_estimated_htc_air_pr_calculated_profile(
         tuple(htc_results), results,
         math.fsum(item.area_m2 for item in results), temperature,
         math.fsum(item.heat_transfer_w for item in results),
-        (0.0,) * len(results), 0.0,
+        radiation, math.fsum(radiation),
         external_temperatures, start_distances, tuple(property_results),
     )
 
@@ -1148,6 +1155,9 @@ def pipe_estimated_htc_air_pr_calculated_profile(
     segment_lengths_m: tuple[float, ...], external_air_velocity_m_s: float,
     insulation_thickness_m: float = 0.0,
     insulation_conductivity_w_m_k: float | None = None,
+    solar_irradiation_kwh_m2: float = 0.0,
+    solar_absorption_efficiency: float = 0.0,
+    inlet_volumetric_flow_m3_s: float | None = None,
     *, allow_transport_extrapolation: bool = False,
 ) -> PipeEstimatedHtcProfileResult:
     """Advance estimated-air HTC while recalculating liquid properties per segment."""
@@ -1155,6 +1165,30 @@ def pipe_estimated_htc_air_pr_calculated_profile(
         lengths = tuple(segment_lengths_m)
     except TypeError as exc:
         raise ValidationError("calculated pipe lengths must be a finite sequence") from exc
+    if (
+        isinstance(solar_irradiation_kwh_m2, bool)
+        or not isinstance(solar_irradiation_kwh_m2, (int, float))
+        or not math.isfinite(solar_irradiation_kwh_m2)
+        or solar_irradiation_kwh_m2 < 0.0
+    ):
+        raise ValidationError("calculated pipe solar irradiation must be finite and non-negative")
+    if (
+        isinstance(solar_absorption_efficiency, bool)
+        or not isinstance(solar_absorption_efficiency, (int, float))
+        or not math.isfinite(solar_absorption_efficiency)
+        or not 0.0 <= solar_absorption_efficiency <= 1.0
+    ):
+        raise ValidationError("calculated pipe radiation absorption efficiency must be between zero and one")
+    radiation_enabled = solar_irradiation_kwh_m2 > 0.0 and solar_absorption_efficiency > 0.0
+    if radiation_enabled and inlet_volumetric_flow_m3_s is None:
+        raise ValidationError("calculated pipe inlet volumetric flow is required when irradiation is enabled")
+    radiation = tuple(
+        pipe_absorbed_solar_radiation(
+            solar_irradiation_kwh_m2, solar_absorption_efficiency,
+            outer_diameter_m, length, inlet_volumetric_flow_m3_s,
+        )
+        for length in lengths
+    ) if radiation_enabled else (0.0,) * len(lengths)
     return _pipe_estimated_htc_air_pr_calculated_profile(
         inlet_temperature_k, inlet_pressure_pa,
         (external_temperature_k,) * len(lengths),
@@ -1163,6 +1197,7 @@ def pipe_estimated_htc_air_pr_calculated_profile(
         outer_diameter_m, roughness_m, lengths, external_air_velocity_m_s,
         insulation_thickness_m, insulation_conductivity_w_m_k,
         allow_transport_extrapolation=allow_transport_extrapolation,
+        segment_absorbed_radiation_w=radiation,
     )
 
 
@@ -1236,6 +1271,7 @@ def _pipe_estimated_htc_pr_profile(
     densities_kg_m3: tuple[float, ...],
     htc_builder: Callable[[float, float, float, float, float, float, float], PipeEstimatedHtc],
     segment_start_distances_m: tuple[float, ...] = (),
+    segment_absorbed_radiation_w: tuple[float, ...] = (),
 ) -> PipeEstimatedHtcProfileResult:
     """Advance a liquid PR enthalpy profile using a medium-specific HTC builder."""
     try:
@@ -1256,6 +1292,19 @@ def _pipe_estimated_htc_pr_profile(
         raise ValidationError("estimated pipe HTC profile start distances must be a finite sequence") from exc
     if start_distances and len(start_distances) != len(sequences[0]):
         raise ValidationError("estimated pipe HTC profile start distances must match the segment count")
+    try:
+        radiation = tuple(segment_absorbed_radiation_w)
+    except TypeError as exc:
+        raise ValidationError("estimated pipe HTC radiation values must be a finite sequence") from exc
+    if radiation and len(radiation) != len(sequences[0]):
+        raise ValidationError("estimated pipe HTC radiation values must match the segment count")
+    if not radiation:
+        radiation = (0.0,) * len(sequences[0])
+    if any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        or not math.isfinite(value) or value < 0.0 for value in radiation
+    ):
+        raise ValidationError("estimated pipe absorbed radiation must be finite and non-negative")
     if (
         isinstance(molar_flow_kmol_s, bool)
         or not isinstance(molar_flow_kmol_s, (int, float))
@@ -1272,9 +1321,9 @@ def _pipe_estimated_htc_pr_profile(
     if not inlet_flash.report.converged or inlet_flash.phase != "liquid":
         raise ValidationError("estimated pipe HTC PR profile requires a converged liquid inlet flash")
     enthalpy = flash_enthalpy(compounds, correlations, inlet_flash)
-    for external_temperature, outlet_pressure, length, velocity, heat_capacity, conductivity, viscosity, density in zip(
+    for external_temperature, outlet_pressure, length, velocity, heat_capacity, conductivity, viscosity, density, absorbed_radiation in zip(
         external_temperatures, pressures, lengths, velocities, heat_capacities,
-        conductivities, viscosities, densities,
+        conductivities, viscosities, densities, radiation,
     ):
         area = math.pi * outer_diameter_m * length
 
@@ -1298,7 +1347,7 @@ def _pipe_estimated_htc_pr_profile(
                     (external_temperature - temperature)
                     / (external_temperature - trial_temperature)
                 )
-            heat_transfer = trial_htc.overall_htc_w_m2_k * area * lmtd
+            heat_transfer = trial_htc.overall_htc_w_m2_k * area * lmtd + absorbed_radiation
             residual = molar_flow_kmol_s * (trial_enthalpy - enthalpy) - heat_transfer
             return trial_flash, trial_enthalpy, trial_htc, residual
 
@@ -1346,7 +1395,7 @@ def _pipe_estimated_htc_pr_profile(
         tuple(htc_results), segment_results,
         math.fsum(item.area_m2 for item in segment_results), temperature,
         math.fsum(item.heat_transfer_w for item in segment_results),
-        (0.0,) * len(segment_results), 0.0,
+        radiation, math.fsum(radiation),
         tuple(external_temperatures), start_distances,
     )
 
