@@ -1512,6 +1512,47 @@ def pipe_estimated_htc_water_pr_profile(
     )
 
 
+def pipe_estimated_htc_soil_pr_calculated_profile(
+    inlet_temperature_k: float, inlet_pressure_pa: float, external_temperature_k: float,
+    compounds: tuple[Compound, ...], composition: tuple[float, ...],
+    interactions: PRInteractions, correlations: tuple[IdealCorrelations, ...],
+    transport_records: tuple[TransportRecord, ...], molar_flow_kmol_s: float,
+    outlet_pressures_pa: tuple[float, ...], inner_diameter_m: float,
+    outer_diameter_m: float, roughness_m: float,
+    segment_lengths_m: tuple[float, ...], burial_depth_m: float,
+    soil_thermal_conductivity_w_m_k: float,
+    insulation_thickness_m: float = 0.0,
+    insulation_conductivity_w_m_k: float | None = None,
+    *, allow_transport_extrapolation: bool = False,
+) -> PipeEstimatedHtcProfileResult:
+    """Advance buried-pipe HTC while recalculating liquid properties per segment."""
+    try:
+        lengths = tuple(segment_lengths_m)
+    except TypeError as exc:
+        raise ValidationError("calculated soil-pipe lengths must be a finite sequence") from exc
+
+    def htc_builder(
+        _external_temperature: float, temperature: float,
+        velocity: float, heat_capacity: float,
+        conductivity: float, viscosity: float, density: float,
+    ) -> PipeEstimatedHtc:
+        return pipe_estimated_htc_soil(
+            temperature, inner_diameter_m, outer_diameter_m, roughness_m,
+            velocity, heat_capacity, conductivity, viscosity, density,
+            burial_depth_m, soil_thermal_conductivity_w_m_k,
+            insulation_thickness_m, insulation_conductivity_w_m_k,
+        )
+
+    return _pipe_estimated_htc_pr_calculated_profile(
+        inlet_temperature_k, inlet_pressure_pa,
+        (external_temperature_k,) * len(lengths),
+        compounds, composition, interactions, correlations, transport_records,
+        molar_flow_kmol_s, outlet_pressures_pa, inner_diameter_m,
+        outer_diameter_m, roughness_m, lengths, htc_builder,
+        allow_transport_extrapolation=allow_transport_extrapolation,
+    )
+
+
 def pipe_estimated_htc_soil_pr_profile(
     inlet_temperature_k: float, inlet_pressure_pa: float, external_temperature_k: float,
     compounds: tuple[Compound, ...], composition: tuple[float, ...],

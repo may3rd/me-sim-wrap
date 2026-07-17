@@ -14,7 +14,7 @@ from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.thermo.flash import flash_enthalpy, tp_flash
 from mesim.thermo.ideal import load_correlations
 from mesim.thermo.transport import load_transport_correlations
-from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, dwsim_terrain_thermal_conductivity, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_absorbed_solar_radiation, pipe_defined_heat_pr_profile, pipe_defined_htc_gradient_profile, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_estimated_htc_air, pipe_estimated_htc_air_pr_calculated_gradient_profile, pipe_estimated_htc_air_pr_calculated_profile, pipe_estimated_htc_air_pr_gradient_profile, pipe_estimated_htc_air_profile, pipe_estimated_htc_soil, pipe_estimated_htc_soil_pr_profile, pipe_estimated_htc_water, pipe_estimated_htc_water_pr_calculated_profile, pipe_estimated_htc_water_pr_profile, pipe_irradiated_heat_transfer, pipe_liquid_pr_properties, pipe_pressure_drop, pipe_pressure_drop_profile, pipe_solar_irradiation_source, pipe_tabulated_defined_htc_pr_profile
+from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, dwsim_terrain_thermal_conductivity, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_absorbed_solar_radiation, pipe_defined_heat_pr_profile, pipe_defined_htc_gradient_profile, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_estimated_htc_air, pipe_estimated_htc_air_pr_calculated_gradient_profile, pipe_estimated_htc_air_pr_calculated_profile, pipe_estimated_htc_air_pr_gradient_profile, pipe_estimated_htc_air_profile, pipe_estimated_htc_soil, pipe_estimated_htc_soil_pr_calculated_profile, pipe_estimated_htc_soil_pr_profile, pipe_estimated_htc_water, pipe_estimated_htc_water_pr_calculated_profile, pipe_estimated_htc_water_pr_profile, pipe_irradiated_heat_transfer, pipe_liquid_pr_properties, pipe_pressure_drop, pipe_pressure_drop_profile, pipe_solar_irradiation_source, pipe_tabulated_defined_htc_pr_profile
 
 
 class HydraulicsTest(unittest.TestCase):
@@ -820,6 +820,35 @@ class HydraulicsTest(unittest.TestCase):
         self.assertTrue(math.isclose(profile.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
         self.assertTrue(math.isclose(profile.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3, abs_tol=35.0))
 
+        root_path = Path(__file__).parents[1]
+        correlation_catalog = {record.compound_id: record for record in load_correlations(root_path / "data/correlations/ideal-v1.json")}
+        transport_catalog = {record.compound_id: record for record in load_transport_correlations(root_path / "data/correlations/transport-v1.json")}
+        calculated = pipe_estimated_htc_soil_pr_calculated_profile(
+            pipe["HydraulicSegment,1,Results,2,InitialTemperature"],
+            pipe["HydraulicSegment,1,Results,2,InitialPressure"], external_temperature,
+            compounds, (0.952380952380952, 0.0476190476190476),
+            load_pr_interactions(root_path / "data/interactions/pr-v1.json"),
+            (correlation_catalog["N-pentane"], correlation_catalog["Ethane"]),
+            (transport_catalog["N-pentane"], transport_catalog["Ethane"]),
+            feed["PROP_MS_3"] / 1000.0,
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},InitialPressure"] for index in range(3, 7)),
+            inner_diameter_m, outer_diameter_m, 4.5e-5,
+            (segment_length_m,) * 4, burial_depth_m, soil_conductivity,
+            allow_transport_extrapolation=True,
+        )
+        self.assertEqual(len(calculated.liquid_properties), 4)
+        for index, result in enumerate(calculated.segment_results, 2):
+            self.assertTrue(math.isclose(
+                result.heat_transfer_w,
+                pipe[f"HydraulicSegment,1,Results,{index},HeatTransfer"] * 1000.0,
+                rel_tol=3e-3,
+            ))
+        self.assertTrue(math.isclose(calculated.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(
+            calculated.heat_transfer_w, -energy["PROP_ES_0"] * 1000.0,
+            rel_tol=2e-3, abs_tol=35.0,
+        ))
+
     def test_estimated_htc_moist_soil_matches_captured_dwsim_case(self):
         self.assertEqual(
             {name: dwsim_terrain_thermal_conductivity(name) for name in ("gravel", "stones", "dry_soil", "moist_soil")},
@@ -887,6 +916,35 @@ class HydraulicsTest(unittest.TestCase):
             self.assertTrue(math.isclose(result.heat_transfer_w, pipe[f"HydraulicSegment,1,Results,{index},HeatTransfer"] * 1_000.0, rel_tol=3e-3))
         self.assertTrue(math.isclose(profile.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
         self.assertTrue(math.isclose(profile.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3, abs_tol=35.0))
+
+        root_path = Path(__file__).parents[1]
+        correlation_catalog = {record.compound_id: record for record in load_correlations(root_path / "data/correlations/ideal-v1.json")}
+        transport_catalog = {record.compound_id: record for record in load_transport_correlations(root_path / "data/correlations/transport-v1.json")}
+        calculated = pipe_estimated_htc_soil_pr_calculated_profile(
+            pipe["HydraulicSegment,1,Results,2,InitialTemperature"],
+            pipe["HydraulicSegment,1,Results,2,InitialPressure"], external_temperature,
+            compounds, (0.952380952380952, 0.0476190476190476),
+            load_pr_interactions(root_path / "data/interactions/pr-v1.json"),
+            (correlation_catalog["N-pentane"], correlation_catalog["Ethane"]),
+            (transport_catalog["N-pentane"], transport_catalog["Ethane"]),
+            feed["PROP_MS_3"] / 1000.0,
+            tuple(pipe[f"HydraulicSegment,1,Results,{index},InitialPressure"] for index in range(3, 7)),
+            inner_diameter_m, outer_diameter_m, 4.5e-5,
+            (segment_length_m,) * 4, burial_depth_m, soil_conductivity,
+            allow_transport_extrapolation=True,
+        )
+        self.assertEqual(len(calculated.liquid_properties), 4)
+        for index, result in enumerate(calculated.segment_results, 2):
+            self.assertTrue(math.isclose(
+                result.heat_transfer_w,
+                pipe[f"HydraulicSegment,1,Results,{index},HeatTransfer"] * 1000.0,
+                rel_tol=3e-3,
+            ))
+        self.assertTrue(math.isclose(calculated.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(
+            calculated.heat_transfer_w, -energy["PROP_ES_0"] * 1000.0,
+            rel_tol=2e-3, abs_tol=35.0,
+        ))
 
     def test_estimated_htc_insulation_matches_captured_dwsim_case(self):
         golden = json.loads((Path(__file__).parents[1] / "tests/golden/u3-pipe-thermal-estimated-htc-insulated-liquid-pr-eos.json").read_text(encoding="utf-8-sig"))
