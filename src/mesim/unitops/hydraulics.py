@@ -53,9 +53,19 @@ class PipeThermalProfileResult:
 
 
 @dataclass(frozen=True, slots=True)
+class PipeThermalGradientProfileResult:
+    segment_results: tuple[PipeThermalResult, ...]
+    segment_start_distances_m: tuple[float, ...]
+    external_temperatures_k: tuple[float, ...]
+    total_area_m2: float
+    outlet_temperature_k: float
+    heat_transfer_w: float
+
+
+@dataclass(frozen=True, slots=True)
 class LiquidPipeProfileResult:
     pressure: PipePressureProfileResult
-    thermal: PipeThermalProfileResult
+    thermal: PipeThermalGradientProfileResult
 
 
 @dataclass(frozen=True, slots=True)
@@ -500,6 +510,70 @@ def pipe_defined_htc_profile(
     )
 
 
+def pipe_defined_htc_gradient_profile(
+    inlet_temperature_k: float, base_external_temperature_k: float,
+    external_temperature_gradient_k_m: float, overall_htc_w_m2_k: float,
+    outer_diameter_m: float, segment_lengths_m: tuple[float, ...], mass_flow_kg_s: float,
+    heat_capacities_j_kg_k: tuple[float, ...], start_distance_m: float = 0.0,
+) -> PipeThermalGradientProfileResult:
+    """Advance a defined-HTC profile using DWSIM's segment-start ambient gradient."""
+    if (
+        isinstance(base_external_temperature_k, bool)
+        or not isinstance(base_external_temperature_k, (int, float))
+        or not math.isfinite(base_external_temperature_k)
+        or base_external_temperature_k <= 0.0
+    ):
+        raise ValidationError("pipe base external temperature must be finite and positive")
+    if (
+        isinstance(external_temperature_gradient_k_m, bool)
+        or not isinstance(external_temperature_gradient_k_m, (int, float))
+        or not math.isfinite(external_temperature_gradient_k_m)
+    ):
+        raise ValidationError("pipe external temperature gradient must be finite")
+    if (
+        isinstance(start_distance_m, bool)
+        or not isinstance(start_distance_m, (int, float))
+        or not math.isfinite(start_distance_m)
+        or start_distance_m < 0.0
+    ):
+        raise ValidationError("pipe thermal profile start distance must be finite and non-negative")
+    try:
+        lengths = tuple(segment_lengths_m)
+        heat_capacities = tuple(heat_capacities_j_kg_k)
+    except TypeError as exc:
+        raise ValidationError("pipe thermal segment lengths and heat capacities must be finite sequences") from exc
+    if not lengths:
+        raise ValidationError("pipe thermal profile must contain at least one segment")
+    if len(lengths) != len(heat_capacities):
+        raise ValidationError("pipe thermal segment lengths and heat capacities must have equal counts")
+
+    temperature = inlet_temperature_k
+    distance = float(start_distance_m)
+    results = []
+    distances = []
+    external_temperatures = []
+    for length_m, heat_capacity_j_kg_k in zip(lengths, heat_capacities):
+        external_temperature = base_external_temperature_k + external_temperature_gradient_k_m * distance
+        result = pipe_defined_htc_heat_transfer(
+            temperature, external_temperature, overall_htc_w_m2_k, outer_diameter_m,
+            length_m, mass_flow_kg_s, heat_capacity_j_kg_k,
+        )
+        distances.append(distance)
+        external_temperatures.append(external_temperature)
+        results.append(result)
+        temperature = result.outlet_temperature_k
+        distance += length_m
+    segment_results = tuple(results)
+    return PipeThermalGradientProfileResult(
+        segment_results,
+        tuple(distances),
+        tuple(external_temperatures),
+        math.fsum(item.area_m2 for item in segment_results),
+        temperature,
+        math.fsum(item.heat_transfer_w for item in segment_results),
+    )
+
+
 def pipe_pressure_drop(
     diameter_m: float, length_m: float, elevation_m: float, roughness_m: float,
     volumetric_flow_m3_s: float, density_kg_m3: float, viscosity_pa_s: float,
@@ -578,6 +652,8 @@ def liquid_pipe_supplied_state_profile(
     liquid_viscosities_pa_s: tuple[float, ...], external_temperature_k: float,
     overall_htc_w_m2_k: float, thermal_segment_lengths_m: tuple[float, ...],
     mass_flow_kg_s: float, heat_capacities_j_kg_k: tuple[float, ...],
+    external_temperature_gradient_k_m: float = 0.0,
+    thermal_start_distance_m: float = 0.0,
 ) -> LiquidPipeProfileResult:
     """Couple supplied-state liquid pressure and defined-HTC thermal profiles."""
     try:
@@ -590,10 +666,10 @@ def liquid_pipe_supplied_state_profile(
         hydraulic_segment_lengths_m, hydraulic_segment_elevations_m,
         flows, densities, liquid_viscosities_pa_s,
     )
-    thermal = pipe_defined_htc_profile(
-        inlet_temperature_k, external_temperature_k, overall_htc_w_m2_k,
-        outer_diameter_m, thermal_segment_lengths_m, mass_flow_kg_s,
-        heat_capacities_j_kg_k,
+    thermal = pipe_defined_htc_gradient_profile(
+        inlet_temperature_k, external_temperature_k, external_temperature_gradient_k_m,
+        overall_htc_w_m2_k, outer_diameter_m, thermal_segment_lengths_m,
+        mass_flow_kg_s, heat_capacities_j_kg_k, thermal_start_distance_m,
     )
     if outer_diameter_m <= inner_diameter_m:
         raise ValidationError("pipe outer diameter must exceed inner diameter")

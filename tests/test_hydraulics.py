@@ -10,7 +10,7 @@ from zipfile import ZipFile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mesim import ValidationError
-from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_pressure_drop, pipe_pressure_drop_profile
+from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_defined_htc_gradient_profile, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_pressure_drop, pipe_pressure_drop_profile
 
 
 class HydraulicsTest(unittest.TestCase):
@@ -244,6 +244,25 @@ class HydraulicsTest(unittest.TestCase):
         self.assertTrue(math.isclose(profile.thermal.outlet_temperature_k, product["PROP_MS_0"], rel_tol=1e-4))
         self.assertTrue(math.isclose(profile.thermal.heat_transfer_w, -energy["PROP_ES_0"] * 1_000.0, rel_tol=2e-3))
 
+    def test_defined_htc_gradient_uses_dwsim_segment_start_positions(self):
+        profile = pipe_defined_htc_gradient_profile(
+            300.0, 350.0, 0.1, 25.0, 0.1, (10.0, 20.0), 10.0, (2_000.0, 2_000.0),
+        )
+
+        self.assertEqual(profile.segment_start_distances_m, (0.0, 10.0))
+        self.assertEqual(profile.external_temperatures_k, (350.0, 351.0))
+        self.assertTrue(math.isclose(profile.segment_results[0].outlet_temperature_k, 300.19596451359183, rel_tol=1e-12))
+        self.assertTrue(math.isclose(profile.outlet_temperature_k, 300.5934156452265, rel_tol=1e-12))
+        self.assertTrue(math.isclose(profile.heat_transfer_w, 11868.31290453023, rel_tol=1e-12))
+
+        constant = pipe_defined_htc_profile(300.0, 350.0, 25.0, 0.1, (10.0, 20.0), 10.0, (2_000.0, 2_000.0))
+        zero_gradient = pipe_defined_htc_gradient_profile(
+            300.0, 350.0, 0.0, 25.0, 0.1, (10.0, 20.0), 10.0, (2_000.0, 2_000.0),
+        )
+        self.assertEqual(zero_gradient.segment_results, constant.segment_results)
+        self.assertEqual(zero_gradient.outlet_temperature_k, constant.outlet_temperature_k)
+        self.assertEqual(zero_gradient.heat_transfer_w, constant.heat_transfer_w)
+
     def test_defined_htc_pipe_rejects_invalid_inputs(self):
         with self.assertRaises(ValidationError):
             pipe_defined_htc_heat_transfer(300.0, 350.0, 25.0, 0.0, 20.0, 10.0, 2_000.0)
@@ -253,6 +272,10 @@ class HydraulicsTest(unittest.TestCase):
             pipe_defined_htc_profile(300.0, 350.0, 25.0, 0.1, (), 10.0, ())
         with self.assertRaises(ValidationError):
             pipe_defined_htc_profile(300.0, 350.0, 25.0, 0.1, (20.0,), 10.0, (2_000.0, 2_000.0))
+        with self.assertRaises(ValidationError):
+            pipe_defined_htc_gradient_profile(300.0, 350.0, math.nan, 25.0, 0.1, (20.0,), 10.0, (2_000.0,))
+        with self.assertRaises(ValidationError):
+            pipe_defined_htc_gradient_profile(300.0, 350.0, 0.1, 25.0, 0.1, (20.0,), 10.0, (2_000.0,), -1.0)
         with self.assertRaises(ValidationError):
             liquid_pipe_supplied_state_profile(
                 500_000.0, 300.0, 0.1, 0.11, 4.5e-5, (20.0,), (2.0,),
