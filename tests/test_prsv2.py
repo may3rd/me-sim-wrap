@@ -14,7 +14,9 @@ from mesim.errors import ValidationError
 from mesim.thermo.prsv2 import PRSV2Mixture, load_prsv2_data
 from mesim.thermo.systems import (
     PENG_ROBINSON_STRYJEK_VERA_2_MARGULES,
+    PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR,
     PRSV2MargulesSystem,
+    PRSV2VanLaarSystem,
     create_thermo_system,
 )
 
@@ -69,7 +71,9 @@ class PRSV2Test(unittest.TestCase):
             expected,
         )
 
-    def _assert_golden(self, stem: str) -> None:
+    def _assert_golden(
+        self, stem: str, model_id: str, package_class: str, system_type: type
+    ) -> None:
         golden = json.loads(
             (ROOT / f"tests/golden/{stem}.json").read_text(encoding="utf-8-sig")
         )
@@ -81,15 +85,15 @@ class PRSV2Test(unittest.TestCase):
         self.assertEqual(golden, repeat)
         self.assertEqual(
             golden["source"]["property_package_class"],
-            "DWSIM.Thermodynamics.PropertyPackages.PRSV2PropertyPackage",
+            package_class,
         )
         inputs = golden["inputs"]
         system = create_thermo_system(
-            PENG_ROBINSON_STRYJEK_VERA_2_MARGULES,
+            model_id,
             compounds=tuple(self.catalog[name] for name in inputs["compounds"]),
             data=self.data,
         )
-        self.assertIsInstance(system, PRSV2MargulesSystem)
+        self.assertIsInstance(system, system_type)
         for phase in ("liquid", "vapor"):
             state = system.state(
                 tuple(inputs["composition"]),
@@ -104,10 +108,28 @@ class PRSV2Test(unittest.TestCase):
                 self.assertTrue(math.isclose(actual, expected, rel_tol=5.0e-11))
 
     def test_prsv2_alpha_phase_states_match_repeatable_dwsim_golden(self):
-        self._assert_golden("prsv2-m-methane-ethane-state")
+        self._assert_golden(
+            "prsv2-m-methane-ethane-state",
+            PENG_ROBINSON_STRYJEK_VERA_2_MARGULES,
+            "DWSIM.Thermodynamics.PropertyPackages.PRSV2PropertyPackage",
+            PRSV2MargulesSystem,
+        )
 
     def test_margules_phase_states_match_repeatable_dwsim_golden(self):
-        self._assert_golden("prsv2-m-acetone-cyclohexane-state")
+        self._assert_golden(
+            "prsv2-m-acetone-cyclohexane-state",
+            PENG_ROBINSON_STRYJEK_VERA_2_MARGULES,
+            "DWSIM.Thermodynamics.PropertyPackages.PRSV2PropertyPackage",
+            PRSV2MargulesSystem,
+        )
+
+    def test_van_laar_phase_states_match_repeatable_finite_dwsim_golden(self):
+        self._assert_golden(
+            "prsv2-vl-acetone-cyclohexane-state",
+            PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR,
+            "DWSIM.Thermodynamics.PropertyPackages.PRSV2VLPropertyPackage",
+            PRSV2VanLaarSystem,
+        )
 
     def test_loader_rejects_duplicate_exact_alpha_key(self):
         document = json.loads(self.data_path.read_text(encoding="utf-8-sig"))

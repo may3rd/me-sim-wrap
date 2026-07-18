@@ -63,6 +63,9 @@ PENG_ROBINSON_LEE_KESLER = "peng-robinson-lee-kesler"
 PENG_ROBINSON_STRYJEK_VERA_2_MARGULES = (
     "peng-robinson-stryjek-vera-2-margules"
 )
+PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR = (
+    "peng-robinson-stryjek-vera-2-van-laar"
+)
 
 
 @runtime_checkable
@@ -682,6 +685,36 @@ class PRSV2MargulesSystem:
         ).stable_state(temperature_k, pressure_pa)
 
 
+@dataclass(frozen=True, slots=True)
+class PRSV2VanLaarSystem(PRSV2MargulesSystem):
+    """DWSIM PRSV2-VL phase-fugacity boundary over frozen source tables."""
+
+    model_id: str = field(
+        default=PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR, init=False
+    )
+
+    def state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+        phase: str,
+    ) -> PRSV2MixtureState:
+        return PRSV2Mixture(
+            self.compounds, composition, self.data, "van-laar"
+        ).state(temperature_k, pressure_pa, phase)
+
+    def stable_state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+    ) -> PRSV2MixtureState:
+        return PRSV2Mixture(
+            self.compounds, composition, self.data, "van-laar"
+        ).stable_state(temperature_k, pressure_pa)
+
+
 ThermoSystemConstructor = Callable[..., ThermodynamicSystem]
 _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_CLASSIC: PengRobinsonSystem,
@@ -691,6 +724,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_1978: PengRobinson1978System,
     PENG_ROBINSON_LEE_KESLER: PengRobinsonLeeKeslerSystem,
     PENG_ROBINSON_STRYJEK_VERA_2_MARGULES: PRSV2MargulesSystem,
+    PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR: PRSV2VanLaarSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS

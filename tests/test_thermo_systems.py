@@ -23,6 +23,7 @@ from mesim.thermo.systems import (
     PENG_ROBINSON_1978,
     PENG_ROBINSON_LEE_KESLER,
     PENG_ROBINSON_STRYJEK_VERA_2_MARGULES,
+    PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR,
     SOAVE_REDLICH_KWONG,
     THERMO_SYSTEM_CONSTRUCTORS,
     IdealRaoultSystem,
@@ -58,6 +59,7 @@ class ThermodynamicSystemTest(unittest.TestCase):
                 PENG_ROBINSON_1978,
                 PENG_ROBINSON_LEE_KESLER,
                 PENG_ROBINSON_STRYJEK_VERA_2_MARGULES,
+                PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR,
             },
         )
         with self.assertRaises(TypeError):

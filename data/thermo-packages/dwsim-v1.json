@@ -77,8 +77,8 @@
       "dwsim_class": "PRSV2VLPropertyPackage",
       "family": "cubic-eos",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/PengRobinsonStryjekVera2VL.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["peng-robinson-stryjek-vera-2-van-laar"]
     },
     {
       "id": "soave-redlich-kwong",
