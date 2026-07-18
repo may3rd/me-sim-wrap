@@ -19,6 +19,7 @@ from mesim.thermo.ideal import load_correlations
 from mesim.thermo.systems import (
     CHAO_SEADER_METHANE_N_PENTANE,
     GRAYSON_STREED_METHANE_N_PENTANE,
+    LEE_KESLER_PLOCKER_METHANE_N_PENTANE,
     IDEAL_RAOULT,
     NRTL_ACETONE_METHANOL,
     PENG_ROBINSON_CLASSIC,
@@ -64,6 +65,7 @@ class ThermodynamicSystemTest(unittest.TestCase):
             {
                 CHAO_SEADER_METHANE_N_PENTANE,
                 GRAYSON_STREED_METHANE_N_PENTANE,
+                LEE_KESLER_PLOCKER_METHANE_N_PENTANE,
                 PENG_ROBINSON_CLASSIC,
                 NRTL_ACETONE_METHANOL,
                 IDEAL_RAOULT,

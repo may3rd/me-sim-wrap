@@ -206,8 +206,8 @@
       "dwsim_class": "LKPPropertyPackage",
       "family": "corresponding-states",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/LeeKeslerPlocker.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["lee-kesler-plocker-methane-n-pentane"]
     },
     {
       "id": "reaktoro",

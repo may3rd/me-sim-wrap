@@ -1,0 +1,735 @@
+﻿{
+    "schema_version":  "dwsim-lkp-data-1",
+    "model":  "Lee-Kesler-Plöcker",
+    "source":  {
+                   "product":  "DWSIM",
+                   "revision":  "9.0.5.0",
+                   "case_sha256":  "f71e040e1bdc1a7ef6bc663b93038a43c10f975f8f7de379a722efe37182b9f4",
+                   "runtime_assembly_sha256":  "c5a038c86cdfd3304be5e283527ab377df7579ca306eac69950ab4b8c495c544",
+                   "interaction_resource":  "DWSIM.Thermodynamics.lkp_ip.dat",
+                   "interaction_resource_sha256":  "20e48a501f4d568a1a41b6d265c3d5d7bdaddc729e9aeedce1ce4e3961a379ed",
+                   "property_package_class":  "DWSIM.Thermodynamics.PropertyPackages.LKPPropertyPackage",
+                   "property_package_source_sha256":  "8a014546070466424fbff868679fbf12a16a991f54965c29af524929ffaad6b5",
+                   "model_source_sha256":  "3ef348565f78eb586f2358f9e0b8e82f03e37134670176428b54d40fe65c6c6a"
+               },
+    "compounds":  [
+                      {
+                          "compound_id":  "Methane",
+                          "molecular_weight":  16.04246,
+                          "critical_temperature_k":  190.56,
+                          "critical_pressure_pa":  4599000,
+                          "acentric_factor":  0.011,
+                          "critical_volume":  0.0986
+                      },
+                      {
+                          "compound_id":  "N-pentane",
+                          "molecular_weight":  72.14878,
+                          "critical_temperature_k":  469.7,
+                          "critical_pressure_pa":  3370000,
+                          "acentric_factor":  0.251,
+                          "critical_volume":  0.311
+                      }
+                  ],
+    "interaction_pairs":  [
+                              {
+                                  "first_compound_id":  "Acetylene",
+                                  "second_compound_id":  "Ethylene",
+                                  "kij":  0.948
+                              },
+                              {
+                                  "first_compound_id":  "Argon",
+                                  "second_compound_id":  "Ammonia",
+                                  "kij":  1.01
+                              },
+                              {
+                                  "first_compound_id":  "Argon",
+                                  "second_compound_id":  "Methane",
+                                  "kij":  0.984
+                              },
+                              {
+                                  "first_compound_id":  "Argon",
+                                  "second_compound_id":  "Oxygen",
+                                  "kij":  0.985
+                              },
+                              {
+                                  "first_compound_id":  "Benzene",
+                                  "second_compound_id":  "Cyclohexane",
+                                  "kij":  0.979
+                              },
+                              {
+                                  "first_compound_id":  "Benzene",
+                                  "second_compound_id":  "Isooctane",
+                                  "kij":  0.982
+                              },
+                              {
+                                  "first_compound_id":  "Benzene",
+                                  "second_compound_id":  "N-decane",
+                                  "kij":  1.047
+                              },
+                              {
+                                  "first_compound_id":  "Benzene",
+                                  "second_compound_id":  "N-heptane",
+                                  "kij":  0.985
+                              },
+                              {
+                                  "first_compound_id":  "Benzene",
+                                  "second_compound_id":  "N-nonane",
+                                  "kij":  1.034
+                              },
+                              {
+                                  "first_compound_id":  "Benzene",
+                                  "second_compound_id":  "N-octane",
+                                  "kij":  0.987
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "Benzene",
+                                  "kij":  1018
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "Cyclohexane",
+                                  "kij":  1.054
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "Ethane",
+                                  "kij":  0.938
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "Hydrogen sulfide",
+                                  "kij":  0.922
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "Isobutane",
+                                  "kij":  0.946
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "Methane",
+                                  "kij":  0.975
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "Methanol",
+                                  "kij":  1.069
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "N-butane",
+                                  "kij":  0.955
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "N-decane",
+                                  "kij":  1.16
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "N-heptane",
+                                  "kij":  1.058
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "N-hexane",
+                                  "kij":  1.018
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "N-nonane",
+                                  "kij":  1.126
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "N-octane",
+                                  "kij":  1.09
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "N-pentane",
+                                  "kij":  1.002
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "Propane",
+                                  "kij":  0.925
+                              },
+                              {
+                                  "first_compound_id":  "Carbon dioxide",
+                                  "second_compound_id":  "R12",
+                                  "kij":  0.969
+                              },
+                              {
+                                  "first_compound_id":  "Carbon monoxide",
+                                  "second_compound_id":  "Carbon Methane",
+                                  "kij":  0.974
+                              },
+                              {
+                                  "first_compound_id":  "Cyclohexane",
+                                  "second_compound_id":  "N-decane",
+                                  "kij":  1.032
+                              },
+                              {
+                                  "first_compound_id":  "Cyclohexane",
+                                  "second_compound_id":  "N-heptane",
+                                  "kij":  0.999
+                              },
+                              {
+                                  "first_compound_id":  "Cyclohexane",
+                                  "second_compound_id":  "N-nonane",
+                                  "kij":  1.021
+                              },
+                              {
+                                  "first_compound_id":  "Cyclohexane",
+                                  "second_compound_id":  "N-octane",
+                                  "kij":  1.01
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "Benzene",
+                                  "kij":  1.066
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "Cyclohexane",
+                                  "kij":  1.081
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "Ethylene",
+                                  "kij":  0.991
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "Isobutane",
+                                  "kij":  1.036
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "Isopentane",
+                                  "kij":  1.07
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "N-butane",
+                                  "kij":  1.029
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "N-decane",
+                                  "kij":  1.237
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "N-heptane",
+                                  "kij":  1.143
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "N-hexane",
+                                  "kij":  1.106
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "N-nonane",
+                                  "kij":  1.214
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "N-octane",
+                                  "kij":  1.165
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "N-pentane",
+                                  "kij":  1.064
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "Propane",
+                                  "kij":  1.01
+                              },
+                              {
+                                  "first_compound_id":  "Ethane",
+                                  "second_compound_id":  "Propylene",
+                                  "kij":  1.002
+                              },
+                              {
+                                  "first_compound_id":  "Ethylene",
+                                  "second_compound_id":  "Benzene",
+                                  "kij":  1.094
+                              },
+                              {
+                                  "first_compound_id":  "Ethylene",
+                                  "second_compound_id":  "N-butane",
+                                  "kij":  0.998
+                              },
+                              {
+                                  "first_compound_id":  "Ethylene",
+                                  "second_compound_id":  "N-heptane",
+                                  "kij":  1.163
+                              },
+                              {
+                                  "first_compound_id":  "Hydrogen",
+                                  "second_compound_id":  "Carbon dioxide",
+                                  "kij":  1.624
+                              },
+                              {
+                                  "first_compound_id":  "Hydrogen",
+                                  "second_compound_id":  "Carbon monoxide",
+                                  "kij":  1.085
+                              },
+                              {
+                                  "first_compound_id":  "Hydrogen",
+                                  "second_compound_id":  "Ethylene",
+                                  "kij":  1408
+                              },
+                              {
+                                  "first_compound_id":  "Hydrogen",
+                                  "second_compound_id":  "Methane",
+                                  "kij":  1.216
+                              },
+                              {
+                                  "first_compound_id":  "Hydrogen",
+                                  "second_compound_id":  "N-heptane",
+                                  "kij":  2.834
+                              },
+                              {
+                                  "first_compound_id":  "Hydrogen",
+                                  "second_compound_id":  "N-hexane",
+                                  "kij":  2.466
+                              },
+                              {
+                                  "first_compound_id":  "Hydrogen",
+                                  "second_compound_id":  "N-pentane",
+                                  "kij":  2.335
+                              },
+                              {
+                                  "first_compound_id":  "Hydrogen",
+                                  "second_compound_id":  "Nitrogen",
+                                  "kij":  1.08
+                              },
+                              {
+                                  "first_compound_id":  "Hydrogen",
+                                  "second_compound_id":  "Propane",
+                                  "kij":  1828
+                              },
+                              {
+                                  "first_compound_id":  "Hydrogen",
+                                  "second_compound_id":  "itbutane",
+                                  "kij":  2093
+                              },
+                              {
+                                  "first_compound_id":  "Hydrogen sulfide",
+                                  "second_compound_id":  "Isobutane",
+                                  "kij":  0.947
+                              },
+                              {
+                                  "first_compound_id":  "Krypton",
+                                  "second_compound_id":  "Oxygen",
+                                  "kij":  0.989
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "Benzene",
+                                  "kij":  1.234
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "Cyclohexane",
+                                  "kij":  1.269
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "Ethane",
+                                  "kij":  1.052
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "Ethylene",
+                                  "kij":  1.014
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "Isobutane",
+                                  "kij":  1.155
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "Isopentane",
+                                  "kij":  1.228
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "N-butane",
+                                  "kij":  1.171
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "N-decane",
+                                  "kij":  1.533
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "N-heptane",
+                                  "kij":  1.367
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "N-hexane",
+                                  "kij":  1.304
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "N-nonane",
+                                  "kij":  1.484
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "N-octane",
+                                  "kij":  1.423
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "N-pentane",
+                                  "kij":  1.2401
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "Propane",
+                                  "kij":  1.113
+                              },
+                              {
+                                  "first_compound_id":  "Methane",
+                                  "second_compound_id":  "Propylene",
+                                  "kij":  1.089
+                              },
+                              {
+                                  "first_compound_id":  "N-butane",
+                                  "second_compound_id":  "Benzene",
+                                  "kij":  0.999
+                              },
+                              {
+                                  "first_compound_id":  "N-butane",
+                                  "second_compound_id":  "Cyclohexane",
+                                  "kij":  1.008
+                              },
+                              {
+                                  "first_compound_id":  "N-butane",
+                                  "second_compound_id":  "Isobutane",
+                                  "kij":  1.001
+                              },
+                              {
+                                  "first_compound_id":  "N-butane",
+                                  "second_compound_id":  "Isopentane",
+                                  "kij":  0.998
+                              },
+                              {
+                                  "first_compound_id":  "N-butane",
+                                  "second_compound_id":  "N-decane",
+                                  "kij":  1.078
+                              },
+                              {
+                                  "first_compound_id":  "N-butane",
+                                  "second_compound_id":  "N-heptane",
+                                  "kij":  1.027
+                              },
+                              {
+                                  "first_compound_id":  "N-butane",
+                                  "second_compound_id":  "N-hexane",
+                                  "kij":  1.018
+                              },
+                              {
+                                  "first_compound_id":  "N-butane",
+                                  "second_compound_id":  "N-nonane",
+                                  "kij":  1.064
+                              },
+                              {
+                                  "first_compound_id":  "N-butane",
+                                  "second_compound_id":  "N-octane",
+                                  "kij":  1.046
+                              },
+                              {
+                                  "first_compound_id":  "N-butane",
+                                  "second_compound_id":  "N-pentane",
+                                  "kij":  0.994
+                              },
+                              {
+                                  "first_compound_id":  "N-heptane",
+                                  "second_compound_id":  "Isooctane",
+                                  "kij":  1.002
+                              },
+                              {
+                                  "first_compound_id":  "N-heptane",
+                                  "second_compound_id":  "N-decane",
+                                  "kij":  1.01
+                              },
+                              {
+                                  "first_compound_id":  "N-heptane",
+                                  "second_compound_id":  "N-nonane",
+                                  "kij":  1.002
+                              },
+                              {
+                                  "first_compound_id":  "N-heptane",
+                                  "second_compound_id":  "N-octane",
+                                  "kij":  0.993
+                              },
+                              {
+                                  "first_compound_id":  "N-hexane",
+                                  "second_compound_id":  "Benzene",
+                                  "kij":  0.978
+                              },
+                              {
+                                  "first_compound_id":  "N-hexane",
+                                  "second_compound_id":  "Cyclohexane",
+                                  "kij":  0.998
+                              },
+                              {
+                                  "first_compound_id":  "N-hexane",
+                                  "second_compound_id":  "N-decane",
+                                  "kij":  1.025
+                              },
+                              {
+                                  "first_compound_id":  "N-hexane",
+                                  "second_compound_id":  "N-heptane",
+                                  "kij":  1.008
+                              },
+                              {
+                                  "first_compound_id":  "N-hexane",
+                                  "second_compound_id":  "N-nonane",
+                                  "kij":  1.015
+                              },
+                              {
+                                  "first_compound_id":  "N-hexane",
+                                  "second_compound_id":  "N-octane",
+                                  "kij":  1.005
+                              },
+                              {
+                                  "first_compound_id":  "N-octane",
+                                  "second_compound_id":  "N-decane",
+                                  "kij":  0.999
+                              },
+                              {
+                                  "first_compound_id":  "N-octane",
+                                  "second_compound_id":  "N-nonane",
+                                  "kij":  0.993
+                              },
+                              {
+                                  "first_compound_id":  "N-pentane",
+                                  "second_compound_id":  "Benzene",
+                                  "kij":  0.977
+                              },
+                              {
+                                  "first_compound_id":  "N-pentane",
+                                  "second_compound_id":  "Cyclohexane",
+                                  "kij":  0.996
+                              },
+                              {
+                                  "first_compound_id":  "N-pentane",
+                                  "second_compound_id":  "Isopentane",
+                                  "kij":  0.987
+                              },
+                              {
+                                  "first_compound_id":  "N-pentane",
+                                  "second_compound_id":  "N-decane",
+                                  "kij":  1.045
+                              },
+                              {
+                                  "first_compound_id":  "N-pentane",
+                                  "second_compound_id":  "N-heptane",
+                                  "kij":  1.004
+                              },
+                              {
+                                  "first_compound_id":  "N-pentane",
+                                  "second_compound_id":  "N-hexane",
+                                  "kij":  0.998
+                              },
+                              {
+                                  "first_compound_id":  "N-pentane",
+                                  "second_compound_id":  "N-nonane",
+                                  "kij":  1.033
+                              },
+                              {
+                                  "first_compound_id":  "N-pentane",
+                                  "second_compound_id":  "N-octane",
+                                  "kij":  1.02
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Ammonia",
+                                  "kij":  1.033
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Argon",
+                                  "kij":  0.988
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Carbon dioxide",
+                                  "kij":  1.11
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Carbon monoxide",
+                                  "kij":  0.987
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Ethane",
+                                  "kij":  1.082
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Ethylene",
+                                  "kij":  1.032
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Hydrogen sulfide",
+                                  "kij":  0.983
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "N-butane",
+                                  "kij":  1.276
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "N-hexane",
+                                  "kij":  1.442
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "N-pentane",
+                                  "kij":  1.372
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Nitrogen",
+                                  "kij":  0.977
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Nitrous oxide",
+                                  "kij":  1.073
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Oxygen",
+                                  "kij":  0.997
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Propane",
+                                  "kij":  1.177
+                              },
+                              {
+                                  "first_compound_id":  "Nitrogen",
+                                  "second_compound_id":  "Propylene",
+                                  "kij":  1.151
+                              },
+                              {
+                                  "first_compound_id":  "Nitrous oxide",
+                                  "second_compound_id":  "Methane",
+                                  "kij":  1.017
+                              },
+                              {
+                                  "first_compound_id":  "Oxygen",
+                                  "second_compound_id":  "Nitrous oxide",
+                                  "kij":  1.057
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "Benzene",
+                                  "kij":  1.011
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "Cyclohexane",
+                                  "kij":  1.037
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "Isobutane",
+                                  "kij":  1.003
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "Isopentane",
+                                  "kij":  1.009
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "N-butane",
+                                  "kij":  1.003
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "N-decane",
+                                  "kij":  1.139
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "N-heptane",
+                                  "kij":  1.067
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "N-hexane",
+                                  "kij":  1.047
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "N-nonane",
+                                  "kij":  1.115
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "N-octane",
+                                  "kij":  1.09
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "N-pentane",
+                                  "kij":  1.008
+                              },
+                              {
+                                  "first_compound_id":  "Propane",
+                                  "second_compound_id":  "Propylene",
+                                  "kij":  0.992
+                              },
+                              {
+                                  "first_compound_id":  "Propylene",
+                                  "second_compound_id":  "Isobutane",
+                                  "kij":  1.009
+                              },
+                              {
+                                  "first_compound_id":  "Propylene",
+                                  "second_compound_id":  "Isobutene",
+                                  "kij":  1.006
+                              },
+                              {
+                                  "first_compound_id":  "Propylene",
+                                  "second_compound_id":  "N-butane",
+                                  "kij":  1.01
+                              },
+                              {
+                                  "first_compound_id":  "Water",
+                                  "second_compound_id":  "Ammonia",
+                                  "kij":  1.152
+                              },
+                              {
+                                  "first_compound_id":  "Water",
+                                  "second_compound_id":  "Carbon dioxide",
+                                  "kij":  0.92
+                              },
+                              {
+                                  "first_compound_id":  "Water",
+                                  "second_compound_id":  "Methanol",
+                                  "kij":  0.979
+                              }
+                          ]
+}

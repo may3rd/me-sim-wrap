@@ -1,0 +1,50 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "lkp-methane-n-pentane-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "f71e040e1bdc1a7ef6bc663b93038a43c10f975f8f7de379a722efe37182b9f4",
+                   "property_package":  "Lee-Kesler-Plöcker",
+                   "property_package_class":  "DWSIM.Thermodynamics.PropertyPackages.LKPPropertyPackage",
+                   "property_package_construction":  "deserialized-from-case",
+                   "flash_algorithm":  "Universal Flash"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "Methane",
+                                     "N-pentane"
+                                 ],
+                   "temperature_k":  350,
+                   "pressure_pa":  1000000,
+                   "composition":  [
+                                       0.5,
+                                       0.5
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         1.0474616793180842,
+                                                         0.801539429868552
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        1.0474616786506488,
+                                                        0.80153943037928754
+                                                    ],
+                    "liquid_fraction":  0.219358696740531,
+                    "vapor_fraction":  0.780641303259469,
+                    "liquid_composition":  [
+                                               0.029738164288962417,
+                                               0.97026183571103752
+                                           ],
+                    "vapor_composition":  [
+                                              0.63213959103493,
+                                              0.36786040896507016
+                                          ],
+                    "iterations":  5,
+                    "equilibrium_ratios":  [
+                                               21.257341160529311,
+                                               0.379144017829666
+                                           ]
+                }
+}
