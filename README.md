@@ -50,6 +50,8 @@ golden-backed slices add the compounds required by reactions and columns.
   source-backed with provenance.
 - Calculations are pure and deterministic. Solver failures are structured results
   (`converged`, `iterations`, `residual`, `algorithm`, `warnings`), not crashes.
+- Thermodynamic models are bound through explicit systems with stable IDs and declared
+  capabilities; see [`docs/thermodynamic-systems.md`](docs/thermodynamic-systems.md).
 - The kernel never imports or loads a DWSIM assembly.
 
 ### What is implemented

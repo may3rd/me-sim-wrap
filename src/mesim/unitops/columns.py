@@ -4,14 +4,8 @@ import math
 from scipy.optimize import least_squares
 
 from ..errors import ValidationError
-from ..thermo.activity import (
-    NRTLVLEData,
-    NRTLVLEResult,
-    nrtl_bubble_pressure,
-    nrtl_bubble_temperature,
-    nrtl_equilibrium_ratios,
-    nrtl_phase_enthalpies,
-)
+from ..thermo.activity import NRTLVLEResult
+from ..thermo.systems import NRTLSystem
 
 
 def _finite_number(value: object) -> bool:
@@ -30,7 +24,7 @@ class NRTLColumnEquilibriumProfile:
 
 
 def nrtl_column_equilibrium_profile(
-    data: NRTLVLEData,
+    data: NRTLSystem,
     compound_ids: tuple[str, ...],
     temperatures_k: tuple[float, ...],
     pressures_pa: tuple[float, ...],
@@ -42,14 +36,20 @@ def nrtl_column_equilibrium_profile(
         liquid = tuple(tuple(row) for row in liquid_mole_fractions)
     except TypeError as error:
         raise ValidationError("NRTL column profile inputs must be finite sequences") from error
-    if not temperatures or len(temperatures) != len(pressures) or len(temperatures) != len(liquid):
+    if (
+        not isinstance(data, NRTLSystem)
+        or tuple(compound_ids) != data.compound_ids
+        or not temperatures
+        or len(temperatures) != len(pressures)
+        or len(temperatures) != len(liquid)
+    ):
         raise ValidationError("NRTL column profile stage arrays must be non-empty and aligned")
     ratios = []
     bubble_pressures = []
     residuals = []
     for temperature_k, pressure_pa, composition in zip(temperatures, pressures, liquid):
-        stage_ratios = nrtl_equilibrium_ratios(data, compound_ids, composition, temperature_k, pressure_pa)
-        bubble = nrtl_bubble_pressure(data, compound_ids, composition, temperature_k)
+        stage_ratios = data.equilibrium_ratios(composition, temperature_k, pressure_pa)
+        bubble = data.bubble_pressure(composition, temperature_k)
         ratios.append(stage_ratios)
         bubble_pressures.append(bubble.pressure_pa)
         residuals.append((bubble.pressure_pa - pressure_pa) / pressure_pa)
@@ -57,7 +57,7 @@ def nrtl_column_equilibrium_profile(
 
 
 def nrtl_column_bubble_temperature_profile(
-    data: NRTLVLEData,
+    data: NRTLSystem,
     compound_ids: tuple[str, ...],
     pressures_pa: tuple[float, ...],
     liquid_mole_fractions: tuple[tuple[float, ...], ...],
@@ -70,12 +70,15 @@ def nrtl_column_bubble_temperature_profile(
         liquid = tuple(tuple(row) for row in liquid_mole_fractions)
     except TypeError as error:
         raise ValidationError("NRTL column bubble-point inputs must be finite sequences") from error
-    if not pressures or len(pressures) != len(liquid):
+    if (
+        not isinstance(data, NRTLSystem)
+        or tuple(compound_ids) != data.compound_ids
+        or not pressures
+        or len(pressures) != len(liquid)
+    ):
         raise ValidationError("NRTL column pressure and composition arrays must be non-empty and aligned")
     return tuple(
-        nrtl_bubble_temperature(
-            data,
-            compound_ids,
+        data.bubble_temperature(
             composition,
             pressure_pa,
             bracket_k,
@@ -148,7 +151,7 @@ class NRTLRigorousColumnConvergenceError(RuntimeError):
 
 
 def nrtl_column_enthalpy_profile(
-    data: NRTLVLEData,
+    data: NRTLSystem,
     compound_ids: tuple[str, ...],
     temperatures_k: tuple[float, ...],
     pressures_pa: tuple[float, ...],
@@ -164,16 +167,16 @@ def nrtl_column_enthalpy_profile(
         raise ValidationError("NRTL column enthalpy inputs must be finite sequences") from error
     stage_count = len(temperatures)
     if (
-        not temperatures
+        not isinstance(data, NRTLSystem)
+        or tuple(compound_ids) != data.compound_ids
+        or not temperatures
         or len(pressures) != stage_count
         or len(liquid) != stage_count
         or len(vapor) != stage_count
     ):
         raise ValidationError("NRTL column enthalpy stage arrays must be non-empty and aligned")
     results = tuple(
-        nrtl_phase_enthalpies(
-            data,
-            compound_ids,
+        data.phase_enthalpies(
             liquid_row,
             vapor_row,
             temperature_k,
@@ -192,7 +195,7 @@ def nrtl_column_enthalpy_profile(
 
 
 def nrtl_rigorous_total_condenser_column(
-    data: NRTLVLEData,
+    data: NRTLSystem,
     compound_ids: tuple[str, ...],
     feed_component_flows_by_stage_kmol_s: tuple[tuple[float, ...], ...],
     feed_energy_flows_by_stage_w: tuple[float, ...],
@@ -233,7 +236,8 @@ def nrtl_rigorous_total_condenser_column(
     component_count = len(ids)
     scalar_values = (reflux_ratio, bottoms_flow_kmol_s, residual_tolerance)
     if (
-        not isinstance(data, NRTLVLEData)
+        not isinstance(data, NRTLSystem)
+        or ids != data.compound_ids
         or stage_count < 2
         or component_count < 2
         or len(set(ids)) != component_count
@@ -330,17 +334,15 @@ def nrtl_rigorous_total_condenser_column(
         for temperature_k, pressure_pa, liquid_row in zip(
             temperatures, pressures, fractions
         ):
-            ratio_row = nrtl_equilibrium_ratios(
-                data, ids, liquid_row, temperature_k, pressure_pa
+            ratio_row = data.equilibrium_ratios(
+                liquid_row, temperature_k, pressure_pa
             )
             vapor_row = tuple(
                 ratio * fraction for ratio, fraction in zip(ratio_row, liquid_row)
             )
             vapor_total = math.fsum(vapor_row)
             normalized_vapor = tuple(value / vapor_total for value in vapor_row)
-            enthalpies = nrtl_phase_enthalpies(
-                data,
-                ids,
+            enthalpies = data.phase_enthalpies(
                 liquid_row,
                 normalized_vapor,
                 temperature_k,
@@ -490,7 +492,7 @@ def nrtl_rigorous_total_condenser_column(
 
 
 def nrtl_rigorous_reboiled_absorber(
-    data: NRTLVLEData,
+    data: NRTLSystem,
     compound_ids: tuple[str, ...],
     feed_component_flows_by_stage_kmol_s: tuple[tuple[float, ...], ...],
     feed_energy_flows_by_stage_w: tuple[float, ...],
@@ -534,7 +536,8 @@ def nrtl_rigorous_reboiled_absorber(
     component_count = len(ids)
     scalar_values = (bottoms_flow_kmol_s, residual_tolerance)
     if (
-        not isinstance(data, NRTLVLEData)
+        not isinstance(data, NRTLSystem)
+        or ids != data.compound_ids
         or stage_count < 2
         or component_count < 2
         or len(set(ids)) != component_count
@@ -617,17 +620,15 @@ def nrtl_rigorous_reboiled_absorber(
         for temperature_k, pressure_pa, liquid_row in zip(
             temperatures, pressures, fractions
         ):
-            ratio_row = nrtl_equilibrium_ratios(
-                data, ids, liquid_row, temperature_k, pressure_pa
+            ratio_row = data.equilibrium_ratios(
+                liquid_row, temperature_k, pressure_pa
             )
             vapor_row = tuple(
                 ratio * fraction for ratio, fraction in zip(ratio_row, liquid_row)
             )
             vapor_total = math.fsum(vapor_row)
             normalized_vapor = tuple(value / vapor_total for value in vapor_row)
-            enthalpies = nrtl_phase_enthalpies(
-                data,
-                ids,
+            enthalpies = data.phase_enthalpies(
                 liquid_row,
                 normalized_vapor,
                 temperature_k,

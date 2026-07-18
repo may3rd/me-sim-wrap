@@ -128,6 +128,14 @@ Run each capture twice with the same binary and inputs. Compare the normalized J
 
 ## Implemented thermodynamics
 
+`mesim.thermo.systems` extracts model selection and ordered data binding from API and
+unit-operation calculations. The fixed registry contains `peng-robinson-classic` for the
+verified PR TP/PH/PS and caloric path and `nrtl-acetone-methanol` for the accepted binary
+stage-equilibrium/caloric path. Registry construction reproduces the underlying equation
+results exactly and rejects incomplete data, missing interactions, unknown model IDs, and
+compound-order mismatches. The capability split is intentional: NRTL is not advertised as
+a general flash system. Runtime model plugins remain unsupported.
+
 - T0: five-compound ideal-gas heat capacity, enthalpy, entropy, density, and pure vapor pressure.
 - T1 implementation candidate: five-compound Peng-Robinson pure and mixture parameters, physical cubic roots, fugacity coefficients, density, departure enthalpy/entropy, and minimum-residual-Gibbs stable-root selection.
 

@@ -13,8 +13,8 @@ from . import __version__
 from .compounds import load_compounds, load_pr_interactions
 from .errors import ValidationError
 from .streams import PhaseState, StreamState, flash_stream
-from .thermo.flash import tp_flash
 from .thermo.ideal import load_correlations
+from .thermo.systems import PengRobinsonSystem
 from .units import Quantity
 from .unitops.basic import equilibrium_separator, heater, mix_streams, valve
 
@@ -199,13 +199,17 @@ def _compounds(compound_ids: tuple[str, ...]):
         raise HTTPException(status_code=404, detail=f"unknown compound: {error.args[0]}") from error
 
 
+def _pr_system(compound_ids: tuple[str, ...]) -> PengRobinsonSystem:
+    return PengRobinsonSystem(_compounds(compound_ids), INTERACTIONS, CORRELATIONS)
+
+
 def _phase(stream: StreamInput) -> PhaseState:
     temperature = stream.temperature.quantity("temperature")
     pressure = stream.pressure.quantity("pressure")
     flow = stream.molar_flow.quantity("molar_flow")
     return flash_stream(
         StreamState(temperature.si_value, pressure.si_value, flow.si_value, stream.compound_ids, stream.composition),
-        _compounds(stream.compound_ids), INTERACTIONS, CORRELATIONS,
+        _pr_system(stream.compound_ids),
     )
 
 
@@ -262,10 +266,12 @@ def flash(request: TPFlashRequest) -> dict[str, object]:
 
 
 def _flash(request: TPFlashRequest) -> dict[str, object]:
-    compounds = _compounds(request.compound_ids)
+    system = _pr_system(request.compound_ids)
     temperature = request.temperature.quantity("temperature")
     pressure = request.pressure.quantity("pressure")
-    result = tp_flash(compounds, request.composition, INTERACTIONS, temperature.si_value, pressure.si_value)
+    result = system.tp_flash(
+        request.composition, temperature.si_value, pressure.si_value
+    )
     return {
         "schema_version": "mesim-api-1",
         "inputs": {
@@ -287,8 +293,15 @@ def heat(request: HeaterRequest) -> dict[str, object]:
 
 def _heat(request: HeaterRequest) -> dict[str, object]:
     inlet = _phase(request.stream)
+    system = _pr_system(request.stream.compound_ids)
     outlet_temperature = request.outlet_temperature.quantity("temperature")
-    result = heater(inlet, _compounds(request.stream.compound_ids), INTERACTIONS, CORRELATIONS, outlet_temperature.si_value)
+    result = heater(
+        inlet,
+        system.compounds,
+        system.interactions,
+        system.correlations,
+        outlet_temperature.si_value,
+    )
     return {
         "schema_version": "mesim-api-1",
         "inputs": {"stream": _stream_input(request.stream), "outlet_temperature": _quantity(outlet_temperature)},
@@ -304,10 +317,11 @@ def throttle(request: ValveRequest) -> dict[str, object]:
 
 def _throttle(request: ValveRequest) -> dict[str, object]:
     inlet = _phase(request.stream)
+    system = _pr_system(request.stream.compound_ids)
     outlet_pressure = request.outlet_pressure.quantity("pressure")
     bracket = _bracket(request.temperature_bracket)
     result = valve(
-        inlet, _compounds(request.stream.compound_ids), INTERACTIONS, CORRELATIONS, outlet_pressure.si_value,
+        inlet, system.compounds, system.interactions, system.correlations, outlet_pressure.si_value,
         tuple(item.si_value for item in bracket),
     )
     return {
@@ -327,16 +341,17 @@ def solve_u0(request: U0FlowsheetRequest) -> dict[str, object]:
 
 def _solve_u0(request: U0FlowsheetRequest) -> dict[str, object]:
     first, second = (_phase(feed) for feed in request.feeds)
-    compounds = _compounds(first.stream.compound_ids)
+    system = _pr_system(first.stream.compound_ids)
+    compounds = system.compounds
     mixer_pressure = request.mixer_outlet_pressure.quantity("pressure")
     mixer_bracket = _bracket(request.mixer_temperature_bracket)
-    mixed = mix_streams((first, second), compounds, INTERACTIONS, CORRELATIONS, mixer_pressure.si_value, tuple(item.si_value for item in mixer_bracket))
+    mixed = mix_streams((first, second), compounds, system.interactions, system.correlations, mixer_pressure.si_value, tuple(item.si_value for item in mixer_bracket))
     heater_temperature = request.heater_outlet_temperature.quantity("temperature")
-    heated = heater(mixed, compounds, INTERACTIONS, CORRELATIONS, heater_temperature.si_value).outlet
+    heated = heater(mixed, compounds, system.interactions, system.correlations, heater_temperature.si_value).outlet
     valve_pressure = request.valve_outlet_pressure.quantity("pressure")
     valve_bracket = _bracket(request.valve_temperature_bracket)
-    throttled = valve(heated, compounds, INTERACTIONS, CORRELATIONS, valve_pressure.si_value, tuple(item.si_value for item in valve_bracket))
-    separated = equilibrium_separator(throttled, compounds, CORRELATIONS)
+    throttled = valve(heated, compounds, system.interactions, system.correlations, valve_pressure.si_value, tuple(item.si_value for item in valve_bracket))
+    separated = equilibrium_separator(throttled, compounds, system.correlations)
     return {
         "schema_version": "mesim-api-1",
         "inputs": {

@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.errors import ValidationError
 from mesim.thermo.activity import load_nrtl_vle_data
+from mesim.thermo.systems import NRTLSystem
 from mesim.unitops.columns import (
     EquilibriumStageState,
     StageStream,
@@ -429,8 +430,11 @@ class ReboiledAbsorberGoldenGateTest(unittest.TestCase):
             }
             for record in cls.golden["outputs"]["objects_after"]
         }
-        cls.nrtl_data = load_nrtl_vle_data(
-            ROOT / "data/correlations/nrtl-acetone-methanol-v1.json"
+        cls.nrtl_system = NRTLSystem(
+            load_nrtl_vle_data(
+                ROOT / "data/correlations/nrtl-acetone-methanol-v1.json"
+            ),
+            cls.NAMES,
         )
 
     def _live_solver_inputs(self):
@@ -583,7 +587,7 @@ class ReboiledAbsorberGoldenGateTest(unittest.TestCase):
         self.assertLess(captured["ReboilerDuty"]["value"], 0.0)
 
         caloric = nrtl_column_enthalpy_profile(
-            self.nrtl_data,
+            self.nrtl_system,
             self.NAMES,
             tuple(captured["Tf"]),
             (pressure_pa,) * 20,
@@ -591,7 +595,7 @@ class ReboiledAbsorberGoldenGateTest(unittest.TestCase):
             tuple(tuple(row) for row in captured["yf"]),
         )
         molecular_weights = tuple(
-            self.nrtl_data.caloric(name).molecular_weight_kg_per_kmol
+            self.nrtl_system.caloric(name).molecular_weight_kg_per_kmol
             for name in self.NAMES
         )
         liquid_mass_enthalpies = tuple(
@@ -632,7 +636,7 @@ class ReboiledAbsorberGoldenGateTest(unittest.TestCase):
         )
 
         result = nrtl_rigorous_reboiled_absorber(
-            self.nrtl_data,
+            self.nrtl_system,
             self.NAMES,
             feeds,
             feed_energy,
@@ -725,7 +729,7 @@ class ReboiledAbsorberGoldenGateTest(unittest.TestCase):
     def test_live_nrtl_reboiled_absorber_preserves_failure_history(self):
         captured, feeds, feed_energy, pressure_pa = self._live_solver_inputs()
         arguments = (
-            self.nrtl_data,
+            self.nrtl_system,
             self.NAMES,
             feeds,
             feed_energy,
@@ -790,8 +794,11 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
             }
             for tag, record in cls.objects.items()
         }
-        cls.nrtl_data = load_nrtl_vle_data(
-            ROOT / "data/correlations/nrtl-acetone-methanol-v1.json"
+        cls.nrtl_system = NRTLSystem(
+            load_nrtl_vle_data(
+                ROOT / "data/correlations/nrtl-acetone-methanol-v1.json"
+            ),
+            cls.NAMES,
         )
 
     def test_reference_is_repeatable_solved_and_error_free(self):
@@ -935,7 +942,7 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
         pressures = (pressure_pa,) * len(captured["Tf"])
         liquid = tuple(tuple(row) for row in captured["xf"])
         profile = nrtl_column_equilibrium_profile(
-            self.nrtl_data,
+            self.nrtl_system,
             self.NAMES,
             tuple(captured["Tf"]),
             pressures,
@@ -951,7 +958,7 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
         self.assertLess(max(abs(value) for value in profile.relative_pressure_residuals), 2.0e-3)
 
         solved = nrtl_column_bubble_temperature_profile(
-            self.nrtl_data,
+            self.nrtl_system,
             self.NAMES,
             pressures,
             liquid,
@@ -974,7 +981,7 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
 
         with self.assertRaises(ValidationError):
             nrtl_column_equilibrium_profile(
-                self.nrtl_data,
+                self.nrtl_system,
                 self.NAMES,
                 (captured["Tf"][0],),
                 (),
@@ -1003,7 +1010,7 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
         captured = self.objects["Acetone Column (6 atm)"]["column_profile"]
         pressure_pa = self.properties["HP Azeotrope"]["PROP_MS_1"]
         profile = nrtl_column_enthalpy_profile(
-            self.nrtl_data,
+            self.nrtl_system,
             self.NAMES,
             tuple(captured["Tf"]),
             (pressure_pa,) * len(captured["Tf"]),
@@ -1011,7 +1018,7 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
             tuple(tuple(row) for row in captured["yf"]),
         )
         molecular_weights = tuple(
-            self.nrtl_data.caloric(name).molecular_weight_kg_per_kmol
+            self.nrtl_system.caloric(name).molecular_weight_kg_per_kmol
             for name in self.NAMES
         )
         calculated_liquid_kj_per_kg = tuple(
@@ -1086,7 +1093,7 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
         )
         pressure_pa = self.properties["HP Azeotrope"]["PROP_MS_1"]
         result = nrtl_rigorous_total_condenser_column(
-            self.nrtl_data,
+            self.nrtl_system,
             self.NAMES,
             tuple(tuple(row) for row in feeds),
             tuple(feed_energy),
@@ -1196,7 +1203,7 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
         )
         pressure_pa = self.properties["HP Azeotrope"]["PROP_MS_1"]
         arguments = (
-            self.nrtl_data,
+            self.nrtl_system,
             self.NAMES,
             tuple(tuple(row) for row in feeds),
             tuple(feed_energy),
@@ -1280,7 +1287,16 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
             column_profile_energy_residuals((1.0,), (1.0,), (1.0,), (1.0,), (1.0,))
         with self.assertRaises(ValidationError):
             nrtl_column_enthalpy_profile(
-                self.nrtl_data, self.NAMES, (388.0,), (), ((0.5, 0.5),), ((0.5, 0.5),)
+                self.nrtl_system, self.NAMES, (388.0,), (), ((0.5, 0.5),), ((0.5, 0.5),)
+            )
+        with self.assertRaises(ValidationError):
+            nrtl_column_enthalpy_profile(
+                self.nrtl_system.data,
+                self.NAMES,
+                (388.0,),
+                (607_950.0,),
+                ((0.5, 0.5),),
+                ((0.5, 0.5),),
             )
 
 

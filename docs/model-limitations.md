@@ -11,6 +11,7 @@ This document is a release boundary for `me-sim-wrap` 0.1.0. A result is support
 ## Thermodynamics and compounds
 
 - Classic Peng-Robinson is the principal equation of state. PR78, SRK, electrolytes, solids, petroleum characterization, hydrates, and CAPE-OPEN packages are not Python property packages. Activity-coefficient coverage is limited to the documented acetone/methanol NRTL pressure and caloric slice and is not a general property package.
+- The thermodynamic-system registry is fixed to `peng-robinson-classic` and `nrtl-acetone-methanol`; it is a capability boundary, not a runtime plugin or automatic model-selection system.
 - The initial five-compound PR domain is methane, ethane, propane, n-butane, and n-pentane. Additional catalog records exist to support specific golden-backed reaction and column cases; their presence does not imply universal model coverage.
 - Correlation temperature bounds are authoritative. Extrapolation is rejected unless an API explicitly exposes and documents an opt-in flag.
 - Unmodified cubic density and Peneloux-translated density are separate model choices. DWSIM stream density fields may use Rackett, experimental data, or volume translation and are not interchangeable.

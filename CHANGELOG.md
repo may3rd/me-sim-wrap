@@ -12,6 +12,7 @@ All notable changes are documented here. This project follows semantic versionin
 - Live NRTL liquid/vapor stage-caloric parity across that profile on a coherent J/kmol basis.
 - A simultaneous live NRTL MESH solve for the accepted binary total-condenser column, including calculated condenser and reboiler duties.
 - Repeatable DWSIM stage-enthalpy and runtime-duty captures plus a live energy-coupled NRTL solve for the accepted reboiled absorber.
+- Explicit classic-PR and acetone/methanol-NRTL thermodynamic systems with stable model IDs and a fixed constructor registry.
 
 ## [0.1.0] - 2026-07-18
 

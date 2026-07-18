@@ -3,8 +3,9 @@ from dataclasses import dataclass
 
 from .compounds import Compound, PRInteractions
 from .errors import ConvergenceError, ValidationError
-from .thermo.flash import TPFlashResult, flash_enthalpy, tp_flash
+from .thermo.flash import TPFlashResult
 from .thermo.ideal import IdealCorrelations
+from .thermo.systems import PengRobinsonSystem
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,13 +60,28 @@ class PhaseState:
 
 def flash_stream(
     stream: StreamState,
-    compounds: tuple[Compound, ...],
-    interactions: PRInteractions,
-    correlations: tuple[IdealCorrelations, ...],
+    system: PengRobinsonSystem | tuple[Compound, ...],
+    interactions: PRInteractions | None = None,
+    correlations: tuple[IdealCorrelations, ...] | None = None,
 ) -> PhaseState:
-    if tuple(compound.id for compound in compounds) != stream.compound_ids:
+    """Flash a stream through an extracted PR system.
+
+    The three-data-argument form remains temporarily accepted for internal
+    callers while they migrate to :class:`PengRobinsonSystem`.
+    """
+    if isinstance(system, PengRobinsonSystem):
+        if interactions is not None or correlations is not None:
+            raise ValidationError("a PR system cannot be combined with separate thermodynamic data")
+        thermo = system
+    else:
+        if interactions is None or correlations is None:
+            raise ValidationError("legacy stream flashing requires PR interactions and ideal correlations")
+        thermo = PengRobinsonSystem(tuple(system), interactions, tuple(correlations))
+    if thermo.compound_ids != stream.compound_ids:
         raise ValidationError("stream compound IDs must exactly match the supplied compound order")
-    flash = tp_flash(compounds, stream.composition, interactions, stream.temperature_k, stream.pressure_pa)
+    flash = thermo.tp_flash(
+        stream.composition, stream.temperature_k, stream.pressure_pa
+    )
     if not flash.report.converged:
         raise ConvergenceError(flash.report.failure_reason or "TP flash did not converge")
-    return PhaseState(stream, flash, flash_enthalpy(compounds, correlations, flash))
+    return PhaseState(stream, flash, thermo.enthalpy(flash))
