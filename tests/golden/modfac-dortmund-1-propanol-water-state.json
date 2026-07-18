@@ -1,0 +1,54 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "modfac-dortmund-1-propanol-water-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "a3f52d401e795bcdf90feb846570df5fb2f9bf3291752b807d9f4035d8ca1b42",
+                   "property_package":  "Modified UNIFAC (Dortmund)",
+                   "property_package_class":  "DWSIM.Thermodynamics.PropertyPackages.MODFACPropertyPackage",
+                   "property_package_construction":  "deserialized-from-case",
+                   "flash_algorithm":  "Universal Flash"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "1-propanol",
+                                     "Water"
+                                 ],
+                   "temperature_k":  350,
+                   "pressure_pa":  100000,
+                   "composition":  [
+                                       0.5,
+                                       0.5
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         0.57295779927903145,
+                                                         0.73372937086457468
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        1,
+                                                        1
+                                                    ],
+                    "liquid_fraction":  1,
+                    "vapor_fraction":  0,
+                    "liquid_composition":  [
+                                               0.5,
+                                               0.5
+                                           ],
+                    "vapor_composition":  [
+                                              0.4328747267927251,
+                                              0.56712527320727479
+                                          ],
+                    "iterations":  2,
+                    "equilibrium_ratios":  [
+                                               0.56651594399312977,
+                                               0.74221360044247431
+                                           ],
+                    "activity_coefficients":  [
+                                                  1.2863275215191357,
+                                                  1.7586065761032688
+                                              ]
+                }
+}

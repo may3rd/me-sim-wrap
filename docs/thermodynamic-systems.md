@@ -20,6 +20,7 @@ loading correlation files or selecting model equations themselves.
 | `uniquac-1-propanol-water` | `UniquacSystem` | Liquid activity coefficients | Complete 376-pair DWSIM source table with resolved `R`, `Q`, and directional parameters only for 1-propanol/water; no general flash, LLE, or caloric model |
 | `unifac-1-propanol-water` | `UnifacSystem` | Original-UNIFAC liquid activity coefficients | Complete installed 119-subgroup and 1,403-directed-interaction domains with a resolved 1-propanol/water group basis; no general flash, LLE, or caloric model |
 | `unifac-ll-1-propanol-water` | `UnifacLLSystem` | UNIFAC-LL liquid activity coefficients | Shared 119-subgroup domain plus all 1,467 LLE-directed interactions and DWSIM's executable mixed-group normalization for 1-propanol/water; no general flash or LLE split solver |
+| `modfac-dortmund-1-propanol-water` | `ModfacDortmundSystem` | Modified UNIFAC (Dortmund) liquid activity coefficients | Complete 108-subgroup and 1,167 paired temperature-dependent interaction domain with scoped 1-propanol/water group vectors; no general flash or caloric model |
 
 The registry is a fixed dictionary from stable model ID to constructor. Runtime plugin
 registration and silent fallback are unsupported. An unknown ID, incomplete correlation
@@ -64,6 +65,11 @@ UNIFAC-LL uses the same group-contribution equation with the separately hashed
 `MODFACGroups` while `RET_VN` reads `UNIFACGroups`; the resulting non-unit surface
 fraction sums are captured and preserved as executable behavior. The scoped activity
 coefficients match the repeatable DWSIM vector exactly.
+
+The Dortmund extractor freezes both embedded resource hashes, all `R`/`Q` groups,
+and all paired six-coefficient interaction records. Its `r^(3/4)` combinatorial rule
+and quadratic temperature interaction rule reproduce the saved activity vector within
+`3e-15` relative.
 
 The frozen compound catalog and all three pure-property datasets cover the same 408
 case-distinct DWSIM/ChemSep names. These are the records among the 431-source catalog

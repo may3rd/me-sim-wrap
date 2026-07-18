@@ -126,8 +126,10 @@
       "dwsim_class": "MODFACPropertyPackage",
       "family": "activity-coefficient",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/MODFAC.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": [
+        "modfac-dortmund-1-propanol-water"
+      ]
     },
     {
       "id": "modified-unifac-nist",

@@ -56,6 +56,7 @@ from .transport import TransportRecord
 from .wilson import WilsonData, wilson_activity_coefficients
 from .uniquac import UniquacData, uniquac_activity_coefficients
 from .unifac import UnifacData, unifac_activity_coefficients
+from .modfac import ModfacData, modfac_activity_coefficients
 
 
 PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
@@ -76,6 +77,7 @@ WILSON_ACETONE_METHANOL = "wilson-acetone-methanol"
 UNIQUAC_1_PROPANOL_WATER = "uniquac-1-propanol-water"
 UNIFAC_1_PROPANOL_WATER = "unifac-1-propanol-water"
 UNIFAC_LL_1_PROPANOL_WATER = "unifac-ll-1-propanol-water"
+MODFAC_DORTMUND_1_PROPANOL_WATER = "modfac-dortmund-1-propanol-water"
 
 
 @runtime_checkable
@@ -483,6 +485,20 @@ class UnifacLLSystem:
         return unifac_activity_coefficients(
             self.data, self.compound_ids, liquid_composition, temperature_k
         )
+
+@dataclass(frozen=True, slots=True)
+class ModfacDortmundSystem:
+    data: ModfacData
+    compound_ids: tuple[str, ...]
+    model_id: str = field(default=MODFAC_DORTMUND_1_PROPANOL_WATER, init=False)
+    def __post_init__(self) -> None:
+        try: ids=tuple(self.compound_ids)
+        except TypeError as error: raise ValidationError("Dortmund compound IDs must be a sequence") from error
+        if not isinstance(self.data,ModfacData) or len(ids)!=2 or len(set(ids))!=2: raise ValidationError("Dortmund thermodynamic-system inputs are invalid")
+        for value in ids: self.data.compound(value)
+        object.__setattr__(self,"compound_ids",ids)
+    def activity_coefficients(self,liquid_composition:tuple[float,...],temperature_k:float)->tuple[float,...]:
+        return modfac_activity_coefficients(self.data,self.compound_ids,liquid_composition,temperature_k)
 
 
 @dataclass(frozen=True, slots=True)
@@ -1028,6 +1044,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     UNIQUAC_1_PROPANOL_WATER: UniquacSystem,
     UNIFAC_1_PROPANOL_WATER: UnifacSystem,
     UNIFAC_LL_1_PROPANOL_WATER: UnifacLLSystem,
+    MODFAC_DORTMUND_1_PROPANOL_WATER: ModfacDortmundSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS
