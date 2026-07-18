@@ -20,6 +20,7 @@ from mesim.thermo.systems import (
     IDEAL_RAOULT,
     NRTL_ACETONE_METHANOL,
     PENG_ROBINSON_CLASSIC,
+    SOAVE_REDLICH_KWONG,
     THERMO_SYSTEM_CONSTRUCTORS,
     IdealRaoultSystem,
     NRTLSystem,
@@ -46,7 +47,12 @@ class ThermodynamicSystemTest(unittest.TestCase):
     def test_registry_has_stable_non_plugin_model_ids(self):
         self.assertEqual(
             set(THERMO_SYSTEM_CONSTRUCTORS),
-            {PENG_ROBINSON_CLASSIC, NRTL_ACETONE_METHANOL, IDEAL_RAOULT},
+            {
+                PENG_ROBINSON_CLASSIC,
+                NRTL_ACETONE_METHANOL,
+                IDEAL_RAOULT,
+                SOAVE_REDLICH_KWONG,
+            },
         )
         with self.assertRaises(TypeError):
             THERMO_SYSTEM_CONSTRUCTORS["runtime-plugin"] = object

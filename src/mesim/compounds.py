@@ -48,6 +48,7 @@ class PRInteractions:
     pairs: tuple[tuple[str, str, float], ...]
     default_zero: bool
     provenance: InteractionProvenance
+    model: str = "Peng-Robinson"
 
     def get(self, first: str, second: str) -> float:
         if first == second:
@@ -119,12 +120,24 @@ def load_compounds(path: str | Path) -> tuple[Compound, ...]:
 
 
 def load_pr_interactions(path: str | Path) -> PRInteractions:
+    return _load_cubic_interactions(path, "pr-interactions-1", "Peng-Robinson")
+
+
+def load_srk_interactions(path: str | Path) -> PRInteractions:
+    return _load_cubic_interactions(
+        path, "srk-interactions-1", "Soave-Redlich-Kwong"
+    )
+
+
+def _load_cubic_interactions(
+    path: str | Path, schema_version: str, model: str
+) -> PRInteractions:
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8-sig"))
-        if data["schema_version"] != "pr-interactions-1":
-            raise ValidationError("unsupported PR interaction schema")
-        if data["model"] != "Peng-Robinson":
-            raise ValidationError("interaction model must be Peng-Robinson")
+        if data["schema_version"] != schema_version:
+            raise ValidationError("unsupported cubic-EOS interaction schema")
+        if data["model"] != model:
+            raise ValidationError(f"interaction model must be {model}")
         if data["missing_pair_policy"] not in {"error", "zero"}:
             raise ValidationError("missing_pair_policy must be error or zero")
         if any(pair["unit"] != "dimensionless" for pair in data["pairs"]):
@@ -144,4 +157,4 @@ def load_pr_interactions(path: str | Path) -> PRInteractions:
             raise ValidationError("PR interaction compound IDs must be non-empty and distinct")
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
             raise ValidationError("PR interaction kij must be finite numeric data")
-    return PRInteractions(pairs, default_zero, provenance)
+    return PRInteractions(pairs, default_zero, provenance, model)

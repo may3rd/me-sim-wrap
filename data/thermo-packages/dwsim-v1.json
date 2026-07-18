@@ -86,8 +86,8 @@
       "dwsim_class": "SRKPropertyPackage",
       "family": "cubic-eos",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/SoaveRedlichKwong.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["soave-redlich-kwong"]
     },
     {
       "id": "peng-robinson-lee-kesler",

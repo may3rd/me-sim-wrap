@@ -12,6 +12,8 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$OutputPath,
 
+    [string]$CaseId,
+
     [Parameter(Mandatory = $true)]
     [double]$TemperatureK,
 
@@ -145,6 +147,12 @@ public static class DwsimThermoProbe
 
 $engineDirectory = (Resolve-Path -LiteralPath $EngineBin).Path
 $resolvedCase = (Resolve-Path -LiteralPath $CasePath).Path
+$resolvedCaseId = if ([string]::IsNullOrWhiteSpace($CaseId)) {
+    [IO.Path]::GetFileNameWithoutExtension($resolvedCase)
+}
+else {
+    $CaseId
+}
 $automationPath = Join-Path $engineDirectory "DWSIM.Automation.dll"
 $interfacesPath = Join-Path $engineDirectory "DWSIM.Interfaces.dll"
 
@@ -198,7 +206,7 @@ $flash = [DwsimThermoProbe]::FlashPT(
 
 $document = [ordered]@{
     schema_version = "dwsim-thermo-package-golden-1"
-    case_id = "ideal-raoult-ethylene-oxide-water-tp"
+    case_id = $resolvedCaseId
     source = [ordered]@{
         dwsim_revision = $DwsimRevision
         automation_version = [string]$automation.GetVersion()

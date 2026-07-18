@@ -1,0 +1,49 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "srk-methane-ethane-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "63b5dbca9c21e2324a1efb313bd014fef38e6ab7ac60807fa9c26f1bd1850e9b",
+                   "property_package":  "Soave-Redlich-Kwong (SRK)",
+                   "property_package_class":  "DWSIM.Thermodynamics.PropertyPackages.SRKPropertyPackage",
+                   "flash_algorithm":  "Universal Flash"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "Methane",
+                                     "Ethane"
+                                 ],
+                   "temperature_k":  180,
+                   "pressure_pa":  500000,
+                   "composition":  [
+                                       0.7,
+                                       0.3
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         4.6349120990358905,
+                                                         0.18574077336015202
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        0.9598225274346458,
+                                                        0.86640958358218745
+                                                    ],
+                    "liquid_fraction":  0.21113769650526693,
+                    "vapor_fraction":  0.78886230349473307,
+                    "liquid_composition":  [
+                                               0.14302456631790916,
+                                               0.85697543368209084
+                                           ],
+                    "vapor_composition":  [
+                                              0.849073910128468,
+                                              0.15092608987153197
+                                          ],
+                    "iterations":  3,
+                    "equilibrium_ratios":  [
+                                               5.9365458982943249,
+                                               0.17611442181585868
+                                           ]
+                }
+}

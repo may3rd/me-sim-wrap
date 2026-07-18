@@ -38,12 +38,19 @@ from .raoult import (
     raoult_fugacity_coefficients,
     raoult_tp_flash,
 )
+from .soave_redlich_kwong import (
+    SRKMixtureState,
+    SRKTPFlashResult,
+    SoaveRedlichKwongMixture,
+    srk_tp_flash,
+)
 from .transport import TransportRecord
 
 
 PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
 NRTL_ACETONE_METHANOL = "nrtl-acetone-methanol"
 IDEAL_RAOULT = "ideal-raoult"
+SOAVE_REDLICH_KWONG = "soave-redlich-kwong"
 
 
 @runtime_checkable
@@ -77,6 +84,7 @@ class PengRobinsonSystem:
         if (
             not compounds
             or not isinstance(self.interactions, PRInteractions)
+            or self.interactions.model != "Peng-Robinson"
             or any(not isinstance(record, Compound) for record in compounds)
             or any(not isinstance(record, IdealCorrelations) for record in correlations)
             or any(not isinstance(record, TransportRecord) for record in transport)
@@ -420,11 +428,83 @@ class IdealRaoultSystem:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class SoaveRedlichKwongSystem:
+    """Classic SRK phase-state boundary for one ordered compound domain."""
+
+    compounds: tuple[Compound, ...]
+    interactions: PRInteractions
+    model_id: str = field(default=SOAVE_REDLICH_KWONG, init=False)
+    compound_ids: tuple[str, ...] = field(init=False)
+
+    def __post_init__(self) -> None:
+        try:
+            compounds = tuple(self.compounds)
+        except TypeError as error:
+            raise ValidationError("SRK compounds must be a sequence") from error
+        if (
+            len(compounds) < 2
+            or any(not isinstance(compound, Compound) for compound in compounds)
+            or not isinstance(self.interactions, PRInteractions)
+            or self.interactions.model != "Soave-Redlich-Kwong"
+        ):
+            raise ValidationError("SRK thermodynamic-system inputs are invalid")
+        compound_ids = tuple(compound.id for compound in compounds)
+        if len(set(compound_ids)) != len(compound_ids):
+            raise ValidationError("SRK thermodynamic-system compound IDs must be unique")
+        for first_index, first in enumerate(compound_ids):
+            for second in compound_ids[first_index + 1:]:
+                self.interactions.get(first, second)
+        object.__setattr__(self, "compounds", compounds)
+        object.__setattr__(self, "compound_ids", compound_ids)
+
+    def state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+        phase: str,
+    ) -> SRKMixtureState:
+        return SoaveRedlichKwongMixture(
+            self.compounds, composition, self.interactions
+        ).state(temperature_k, pressure_pa, phase)
+
+    def stable_state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+    ) -> SRKMixtureState:
+        return SoaveRedlichKwongMixture(
+            self.compounds, composition, self.interactions
+        ).stable_state(temperature_k, pressure_pa)
+
+    def tp_flash(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+        *,
+        max_iterations: int = 100,
+        tolerance: float = 1.0e-10,
+    ) -> SRKTPFlashResult:
+        return srk_tp_flash(
+            self.compounds,
+            composition,
+            self.interactions,
+            temperature_k,
+            pressure_pa,
+            max_iterations=max_iterations,
+            tolerance=tolerance,
+        )
+
+
 ThermoSystemConstructor = Callable[..., ThermodynamicSystem]
 _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_CLASSIC: PengRobinsonSystem,
     NRTL_ACETONE_METHANOL: NRTLSystem,
     IDEAL_RAOULT: IdealRaoultSystem,
+    SOAVE_REDLICH_KWONG: SoaveRedlichKwongSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS

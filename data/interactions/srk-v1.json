@@ -1,0 +1,325 @@
+{
+  "schema_version": "srk-interactions-1",
+  "model": "Soave-Redlich-Kwong",
+  "missing_pair_policy": "error",
+  "provenance": {
+    "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/srk_ip.dat",
+    "source_revision": "9.0.5.0",
+    "selection": "first entry loaded by DWSIM for each supported pair",
+    "imported_utc": "2026-07-18T00:00:00Z"
+  },
+  "pairs": [
+    {
+      "compound_1": "Methanol",
+      "compound_2": "Water",
+      "kij": -0.0789,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Ethane",
+      "kij": -0.0089,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Propane",
+      "kij": 0.018,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-butane",
+      "kij": 0.0215,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-pentane",
+      "kij": 0.018,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-hexane",
+      "kij": 0.0378,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-heptane",
+      "kij": 0.0274,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "M-xylene",
+      "kij": 0.09,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-octane",
+      "kij": 0.0448,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-nonane",
+      "kij": 0.0448,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Propane",
+      "kij": -0.0022,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "N-butane",
+      "kij": 0.0052,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "N-pentane",
+      "kij": 0.0056,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Benzene",
+      "kij": 0.0278,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Cyclohexane",
+      "kij": 0.0122,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "N-hexane",
+      "kij": -0.0433,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "N-heptane",
+      "kij": 0.0041,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "N-octane",
+      "kij": 0.017,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "Ethanol",
+      "kij": 0.0256,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "N-butane",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "N-pentane",
+      "kij": 0.0233,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "Benzene",
+      "kij": 0.02,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "N-hexane",
+      "kij": -0.0022,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "N-heptane",
+      "kij": 0.0044,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "N-octane",
+      "kij": 0.0074,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-butane",
+      "compound_2": "N-pentane",
+      "kij": 0.0204,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-butane",
+      "compound_2": "N-hexane",
+      "kij": -0.0111,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-butane",
+      "compound_2": "N-heptane",
+      "kij": -0.0004,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-butane",
+      "compound_2": "N-octane",
+      "kij": 0.0044,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-pentane",
+      "compound_2": "Benzene",
+      "kij": 0.0244,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-pentane",
+      "compound_2": "Cyclohexane",
+      "kij": 0.0041,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-pentane",
+      "compound_2": "N-heptane",
+      "kij": 0.0019,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-pentane",
+      "compound_2": "N-octane",
+      "kij": -0.0022,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Benzene",
+      "compound_2": "N-heptane",
+      "kij": 0.0048,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Benzene",
+      "compound_2": "N-octane",
+      "kij": 0.007,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Cyclohexane",
+      "compound_2": "Benzene",
+      "kij": 0.0322,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-hexane",
+      "compound_2": "Benzene",
+      "kij": 0.0156,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-hexane",
+      "compound_2": "Cyclohexane",
+      "kij": -0.0011,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-hexane",
+      "compound_2": "N-heptane",
+      "kij": -0.0011,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Methane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Ethane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Propane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Isobutane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "2,2,3,3-tetramethylpentane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-pentane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Isopentane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Neopentane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-hexane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-heptane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-octane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-nonane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-decane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    }
+  ]
+}

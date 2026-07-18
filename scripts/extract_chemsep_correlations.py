@@ -14,6 +14,8 @@ CORRELATIONS = ROOT / "data/correlations"
 COMPOUNDS = ROOT / "data/compounds/v1.json"
 PR_SOURCE = ROOT / "dwsim-windows/DWSIM.Thermodynamics/Assets/pr_ip.dat"
 PR_INTERACTIONS = ROOT / "data/interactions/pr-v1.json"
+SRK_SOURCE = ROOT / "dwsim-windows/DWSIM.Thermodynamics/Assets/srk_ip.dat"
+SRK_INTERACTIONS = ROOT / "data/interactions/srk-v1.json"
 SOURCE_PATH = SOURCE.relative_to(ROOT).as_posix()
 REVISION = "9.0.4"
 PRIMARY_COMPOUNDS = (
@@ -232,6 +234,7 @@ def _datasets() -> dict[Path, dict]:
             }
         )
     interactions = _pr_interactions(compound_ids, compounds)
+    srk_interactions = _srk_interactions(compound_ids, compounds)
     exclusions = _exclusions()
     return {
         COMPOUNDS: catalog,
@@ -240,6 +243,7 @@ def _datasets() -> dict[Path, dict]:
         CORRELATIONS / "saturated-liquid-v1.json": saturated,
         CORRELATIONS / "chemsep-exclusions-v1.json": exclusions,
         PR_INTERACTIONS: interactions,
+        SRK_INTERACTIONS: srk_interactions,
     }
 
 
@@ -335,6 +339,45 @@ def _pr_interactions(compound_ids: list[str], compounds: dict[str, object]) -> d
                 "first entry loaded by DWSIM for each supported pair; explicit zero "
                 "for absent accepted steam-reforming and methanol-column pairs"
             ),
+            "imported_utc": "2026-07-18T00:00:00Z",
+        },
+        "pairs": pairs,
+    }
+
+
+def _srk_interactions(compound_ids: list[str], compounds: dict[str, object]) -> dict:
+    supported = set(compound_ids)
+    by_index = {
+        compound.find("LibraryIndex").attrib["value"]: compound_id
+        for compound_id, compound in compounds.items()
+    }
+    pairs = []
+    seen = set()
+    for line in SRK_SOURCE.read_text(encoding="utf-8-sig").splitlines():
+        fields = line.split(";")
+        if len(fields) < 3 or fields[0] not in by_index or fields[1] not in by_index:
+            continue
+        first, second = by_index[fields[0]], by_index[fields[1]]
+        key = frozenset((first, second))
+        if first not in supported or second not in supported or first == second or key in seen:
+            continue
+        seen.add(key)
+        pairs.append(
+            {
+                "compound_1": first,
+                "compound_2": second,
+                "kij": _number(fields[2]),
+                "unit": "dimensionless",
+            }
+        )
+    return {
+        "schema_version": "srk-interactions-1",
+        "model": "Soave-Redlich-Kwong",
+        "missing_pair_policy": "error",
+        "provenance": {
+            "source": SRK_SOURCE.relative_to(ROOT).as_posix(),
+            "source_revision": "9.0.5.0",
+            "selection": "first entry loaded by DWSIM for each supported pair",
             "imported_utc": "2026-07-18T00:00:00Z",
         },
         "pairs": pairs,
