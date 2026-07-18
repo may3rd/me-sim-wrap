@@ -30,6 +30,7 @@ from mesim.unitops.columns import (
     nrtl_column_bubble_temperature_profile,
     nrtl_column_enthalpy_profile,
     nrtl_column_equilibrium_profile,
+    nrtl_rigorous_reboiled_absorber,
     nrtl_rigorous_total_condenser_column,
     shortcut_column,
 )
@@ -428,6 +429,30 @@ class ReboiledAbsorberGoldenGateTest(unittest.TestCase):
             }
             for record in cls.golden["outputs"]["objects_after"]
         }
+        cls.nrtl_data = load_nrtl_vle_data(
+            ROOT / "data/correlations/nrtl-acetone-methanol-v1.json"
+        )
+
+    def _live_solver_inputs(self):
+        column = next(
+            record
+            for record in self.golden["outputs"]["objects_after"]
+            if record["tag"] == "Acetone Column (6 atm)"
+        )
+        captured = column["column_profile"]
+        feeds = [[0.0] * len(self.NAMES) for _ in range(20)]
+        feeds[10] = [
+            self.properties["HP Feed"][f"PROP_MS_104/{name}"] / 1000.0
+            for name in self.NAMES
+        ]
+        feed_energy = [0.0] * 20
+        feed_energy[10] = (
+            self.properties["HP Feed"]["PROP_MS_2"]
+            * self.properties["HP Feed"]["PROP_MS_7"]
+            * 1000.0
+        )
+        pressure_pa = self.properties["HP Azeotrope"]["PROP_MS_1"]
+        return captured, tuple(tuple(row) for row in feeds), tuple(feed_energy), pressure_pa
 
     def test_reference_is_repeatable_solved_and_materially_closed(self):
         repeat = json.loads(
@@ -513,7 +538,10 @@ class ReboiledAbsorberGoldenGateTest(unittest.TestCase):
             if record["tag"] == "Acetone Column (6 atm)"
         )
         captured = column["column_profile"]
-        self.assertEqual(set(captured), {"Tf", "Lf", "Vf", "xf", "yf", "Kf"})
+        self.assertEqual(
+            set(captured),
+            {"Tf", "Lf", "Vf", "xf", "yf", "Kf", "Hlf", "Hvf", "CondenserDuty", "ReboilerDuty"},
+        )
         self.assertEqual(len(captured["Lf"]), 20)
 
         feeds = [[0.0] * len(self.NAMES) for _ in range(20)]
@@ -547,6 +575,181 @@ class ReboiledAbsorberGoldenGateTest(unittest.TestCase):
             for actual, expected in zip(actual_row, expected_row):
                 self.assertTrue(math.isclose(actual, expected, abs_tol=4.0e-14))
 
+    def test_live_nrtl_reboiled_absorber_matches_profile_and_duty(self):
+        captured, feeds, feed_energy, pressure_pa = self._live_solver_inputs()
+        self.assertEqual(captured["CondenserDuty"]["unit"], "kW")
+        self.assertEqual(captured["CondenserDuty"]["value"], 0.0)
+        self.assertEqual(captured["ReboilerDuty"]["unit"], "kW")
+        self.assertLess(captured["ReboilerDuty"]["value"], 0.0)
+
+        caloric = nrtl_column_enthalpy_profile(
+            self.nrtl_data,
+            self.NAMES,
+            tuple(captured["Tf"]),
+            (pressure_pa,) * 20,
+            tuple(tuple(row) for row in captured["xf"]),
+            tuple(tuple(row) for row in captured["yf"]),
+        )
+        molecular_weights = tuple(
+            self.nrtl_data.caloric(name).molecular_weight_kg_per_kmol
+            for name in self.NAMES
+        )
+        liquid_mass_enthalpies = tuple(
+            enthalpy
+            / math.fsum(
+                fraction * molecular_weight
+                for fraction, molecular_weight in zip(composition, molecular_weights)
+            )
+            / 1000.0
+            for enthalpy, composition in zip(
+                caloric.liquid_enthalpies_j_per_kmol, captured["xf"]
+            )
+        )
+        vapor_mass_enthalpies = tuple(
+            enthalpy
+            / math.fsum(
+                fraction * molecular_weight
+                for fraction, molecular_weight in zip(composition, molecular_weights)
+            )
+            / 1000.0
+            for enthalpy, composition in zip(
+                caloric.vapor_enthalpies_j_per_kmol, captured["yf"]
+            )
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected) / abs(expected)
+                for actual, expected in zip(liquid_mass_enthalpies, captured["Hlf"])
+            ),
+            1.0e-6,
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected) / abs(expected)
+                for actual, expected in zip(vapor_mass_enthalpies, captured["Hvf"])
+            ),
+            3.0e-6,
+        )
+
+        result = nrtl_rigorous_reboiled_absorber(
+            self.nrtl_data,
+            self.NAMES,
+            feeds,
+            feed_energy,
+            (pressure_pa,) * 20,
+            tuple(captured["Tf"]),
+            tuple(value / 1000.0 for value in captured["Lf"]),
+            tuple(value / 1000.0 for value in captured["Vf"]),
+            tuple(tuple(row) for row in captured["xf"]),
+            bottoms_flow_kmol_s=0.0005,
+            temperature_bounds_k=(350.0, 450.0),
+        )
+        self.assertLess(result.scaled_residual_norm, 1.0e-8)
+        self.assertLessEqual(result.solver_evaluations, 100)
+        self.assertLessEqual(result.residual_evaluations, 2500)
+        self.assertTrue(result.history)
+        self.assertLess(
+            max(
+                abs(actual - expected)
+                for actual, expected in zip(result.temperatures_k, captured["Tf"])
+            ),
+            0.08,
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected)
+                for actual_row, expected_row in zip(
+                    result.liquid_mole_fractions, captured["xf"]
+                )
+                for actual, expected in zip(actual_row, expected_row)
+            ),
+            1.6e-3,
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected)
+                for actual_row, expected_row in zip(
+                    result.vapor_mole_fractions, captured["yf"]
+                )
+                for actual, expected in zip(actual_row, expected_row)
+            ),
+            1.6e-3,
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected / 1000.0)
+                for actual, expected in zip(result.liquid_flows_kmol_s, captured["Lf"])
+            ),
+            2.0e-6,
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected / 1000.0)
+                for actual, expected in zip(result.vapor_flows_kmol_s, captured["Vf"])
+            ),
+            2.0e-6,
+        )
+        self.assertTrue(math.isclose(
+            result.overhead_vapor_flow_kmol_s * 1000.0,
+            self.properties["HP Azeotrope"]["PROP_MS_3"],
+            abs_tol=1.0e-9,
+        ))
+        self.assertTrue(math.isclose(result.bottoms_flow_kmol_s, 0.0005, abs_tol=1.0e-12))
+        self.assertTrue(math.isclose(
+            result.reboiler_duty_w / 1000.0,
+            abs(captured["ReboilerDuty"]["value"]),
+            rel_tol=1.0e-4,
+        ))
+
+        material = fixed_k_column_profile_residuals(
+            feeds,
+            result.liquid_flows_kmol_s,
+            result.vapor_flows_kmol_s,
+            result.liquid_mole_fractions,
+            result.vapor_mole_fractions,
+            result.equilibrium_ratios,
+        )
+        self.assertTrue(material.is_closed(1.0e-8, 1.0e-8, 1.0e-8))
+        duties = [0.0] * 20
+        duties[-1] = result.reboiler_duty_w
+        energy = column_profile_energy_residuals(
+            feed_energy,
+            result.liquid_flows_kmol_s,
+            result.vapor_flows_kmol_s,
+            result.liquid_enthalpies_j_per_kmol,
+            result.vapor_enthalpies_j_per_kmol,
+            heat_duties_by_stage_w=tuple(duties),
+        )
+        self.assertLess(max(abs(value) for value in energy), 1.0e-3)
+
+    def test_live_nrtl_reboiled_absorber_preserves_failure_history(self):
+        captured, feeds, feed_energy, pressure_pa = self._live_solver_inputs()
+        arguments = (
+            self.nrtl_data,
+            self.NAMES,
+            feeds,
+            feed_energy,
+            (pressure_pa,) * 20,
+            tuple(captured["Tf"]),
+            tuple(value / 1000.0 for value in captured["Lf"]),
+            tuple(value / 1000.0 for value in captured["Vf"]),
+            tuple(tuple(row) for row in captured["xf"]),
+        )
+        with self.assertRaises(NRTLRigorousColumnConvergenceError) as caught:
+            nrtl_rigorous_reboiled_absorber(
+                *arguments,
+                bottoms_flow_kmol_s=0.0005,
+                temperature_bounds_k=(350.0, 450.0),
+                residual_tolerance=1.0e-12,
+                maximum_solver_evaluations=1,
+            )
+        self.assertTrue(caught.exception.history)
+        with self.assertRaises(ValidationError):
+            nrtl_rigorous_reboiled_absorber(
+                *arguments,
+                bottoms_flow_kmol_s=0.0,
+                temperature_bounds_k=(350.0, 450.0),
+            )
     def test_fixed_k_material_solver_validates_and_preserves_failure_history(self):
         with self.assertRaises(ValidationError):
             fixed_k_material_column(

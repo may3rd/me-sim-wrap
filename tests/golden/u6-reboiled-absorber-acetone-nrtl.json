@@ -5,7 +5,7 @@
     "source":  {
                    "dwsim_revision":  "10.0.9671.22371",
                    "automation_version":  "DWSIM version 10.0.9671.22371 (24-Jun-26 5:25:42 AM)",
-                   "captured_utc":  "2026-07-17T14:22:03.6001643Z",
+                   "captured_utc":  "2026-07-18T11:06:41.5301788Z",
                    "platform":  "Microsoft Windows NT 10.0.22631.0",
                    "architecture":  "AMD64",
                    "engine_bin":  "C:\\Users\\may3r\\AppData\\Local\\DWSIM10",
@@ -534,7 +534,63 @@
                                                                                     1.74089,
                                                                                     0.987219
                                                                                 ]
-                                                                            ]
+                                                                            ],
+                                                                     "Hlf":  [
+                                                                                 -377.73483144013034,
+                                                                                 -377.73203585211763,
+                                                                                 -377.73203585211763,
+                                                                                 -377.72887922513632,
+                                                                                 -377.72887922513632,
+                                                                                 -377.72887922513632,
+                                                                                 -377.72887922513632,
+                                                                                 -377.72572258336891,
+                                                                                 -377.72572258336891,
+                                                                                 -377.72607202819552,
+                                                                                 -377.72607202819552,
+                                                                                 -368.0365835556222,
+                                                                                 -356.87800087515109,
+                                                                                 -344.88893797250989,
+                                                                                 -332.96764501071152,
+                                                                                 -322.03635479681964,
+                                                                                 -312.76243215151277,
+                                                                                 -305.43494630205134,
+                                                                                 -299.96840179137826,
+                                                                                 -296.07084822198
+                                                                             ],
+                                                                     "Hvf":  [
+                                                                                 130.80850616519214,
+                                                                                 130.80845597372621,
+                                                                                 130.80846155053266,
+                                                                                 130.81002914781556,
+                                                                                 130.81002914781556,
+                                                                                 130.81002914781556,
+                                                                                 130.81002914781556,
+                                                                                 130.81159674795583,
+                                                                                 130.81159674795583,
+                                                                                 130.81159674795583,
+                                                                                 130.81159674795583,
+                                                                                 131.26204077663209,
+                                                                                 131.87341254567491,
+                                                                                 132.65139596029678,
+                                                                                 133.56985578777284,
+                                                                                 134.55466357886542,
+                                                                                 135.51506001229183,
+                                                                                 136.36162647073411,
+                                                                                 137.049943007627,
+                                                                                 137.57254580574016
+                                                                             ],
+                                                                     "CondenserDuty":  {
+                                                                                           "value_text":  "0",
+                                                                                           "unit":  "kW",
+                                                                                           "value_type":  "number",
+                                                                                           "value":  0
+                                                                                       },
+                                                                     "ReboilerDuty":  {
+                                                                                          "value_text":  "-71.1420311799661",
+                                                                                          "unit":  "kW",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -71.1420311799661
+                                                                                      }
                                                                  },
                                               "properties":  [
 
@@ -553,6 +609,17 @@
 
                                                                  },
                                               "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "-552.112344161049",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -552.112344161049
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
                                                                  {
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_104/Methanol",
@@ -607,6 +674,17 @@
                                                                                    "value":  607950.057
                                                                                },
                                                                      "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.122178350250463",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.122178350250463
+                                                                               },
+                                                                     "unit":  "kg/s"
                                                                  }
                                                              ],
                                               "calculated":  true,
@@ -623,6 +701,17 @@
 
                                                                  },
                                               "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "-296.040995623937",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -296.040995623937
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
                                                                  {
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_104/Methanol",
@@ -677,6 +766,17 @@
                                                                                    "value":  607950
                                                                                },
                                                                      "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.0288192188553239",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.0288192188553239
+                                                                               },
+                                                                     "unit":  "kg/s"
                                                                  }
                                                              ],
                                               "calculated":  true,
@@ -693,6 +793,17 @@
 
                                                                  },
                                               "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "130.841119162257",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  130.841119162257
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
                                                                  {
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_104/Methanol",
@@ -747,6 +858,17 @@
                                                                                    "value":  607950
                                                                                },
                                                                      "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.0933591714461307",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.0933591714461307
+                                                                               },
+                                                                     "unit":  "kg/s"
                                                                  }
                                                              ],
                                               "calculated":  true,
@@ -1082,7 +1204,63 @@
                                                                                     1.7430539737638644,
                                                                                     0.98770258674037192
                                                                                 ]
-                                                                            ]
+                                                                            ],
+                                                                     "Hlf":  [
+                                                                                 -376.62945232679044,
+                                                                                 -376.62523290993903,
+                                                                                 -376.6243537146961,
+                                                                                 -376.62342259062092,
+                                                                                 -376.62257993586866,
+                                                                                 -376.62191864051107,
+                                                                                 -376.62145654529934,
+                                                                                 -376.62115897685368,
+                                                                                 -376.62097737470873,
+                                                                                 -376.62087024049083,
+                                                                                 -376.62080827732484,
+                                                                                 -366.78929211966425,
+                                                                                 -355.55133759429623,
+                                                                                 -343.57045481313492,
+                                                                                 -331.75791509226883,
+                                                                                 -321.01335494007117,
+                                                                                 -311.96585417841067,
+                                                                                 -304.85503122114216,
+                                                                                 -299.57548413491281,
+                                                                                 -295.82480466526465
+                                                                             ],
+                                                                     "Hvf":  [
+                                                                                 130.85617008851639,
+                                                                                 130.85671761806503,
+                                                                                 130.85718214263929,
+                                                                                 130.85767434679536,
+                                                                                 130.8581197875701,
+                                                                                 130.85846936018578,
+                                                                                 130.85871363080818,
+                                                                                 130.85887093202987,
+                                                                                 130.85896692880891,
+                                                                                 130.85902356216013,
+                                                                                 130.85905631833481,
+                                                                                 131.32565728817539,
+                                                                                 131.95251040262053,
+                                                                                 132.74558034113161,
+                                                                                 133.67201054958704,
+                                                                                 134.65493297808095,
+                                                                                 135.60249301817555,
+                                                                                 136.43261734421708,
+                                                                                 137.10163012944847,
+                                                                                 137.60582900934926
+                                                                             ],
+                                                                     "CondenserDuty":  {
+                                                                                           "value_text":  "0",
+                                                                                           "unit":  "kW",
+                                                                                           "value_type":  "number",
+                                                                                           "value":  0
+                                                                                       },
+                                                                     "ReboilerDuty":  {
+                                                                                          "value_text":  "-71.083935935217681",
+                                                                                          "unit":  "kW",
+                                                                                          "value_type":  "number",
+                                                                                          "value":  -71.083935935217681
+                                                                                      }
                                                                  },
                                               "properties":  [
 
@@ -1101,6 +1279,17 @@
 
                                                                  },
                                               "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "-551.19490318815281",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -551.19490318815281
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
                                                                  {
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_104/Methanol",
@@ -1155,6 +1344,17 @@
                                                                                    "value":  607950.057
                                                                                },
                                                                      "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.12224603214896897",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.12224603214896897
+                                                                               },
+                                                                     "unit":  "kg/s"
                                                                  }
                                                              ],
                                               "calculated":  true,
@@ -1171,6 +1371,17 @@
 
                                                                  },
                                               "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "-295.8157481368205",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  -295.8157481368205
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
                                                                  {
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_104/Methanol",
@@ -1225,6 +1436,17 @@
                                                                                    "value":  607950
                                                                                },
                                                                      "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.028828045635478351",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.028828045635478351
+                                                                               },
+                                                                     "unit":  "kg/s"
                                                                  }
                                                              ],
                                               "calculated":  true,
@@ -1241,6 +1463,17 @@
 
                                                                  },
                                               "properties":  [
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_7",
+                                                                     "value":  {
+                                                                                   "value_text":  "134.40622778795978",
+                                                                                   "unit":  "kJ/kg",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  134.40622778795978
+                                                                               },
+                                                                     "unit":  "kJ/kg"
+                                                                 },
                                                                  {
                                                                      "read_error":  null,
                                                                      "property":  "PROP_MS_104/Methanol",
@@ -1295,6 +1528,17 @@
                                                                                    "value":  607950
                                                                                },
                                                                      "unit":  "Pa"
+                                                                 },
+                                                                 {
+                                                                     "read_error":  null,
+                                                                     "property":  "PROP_MS_2",
+                                                                     "value":  {
+                                                                                   "value_text":  "0.093418023424187382",
+                                                                                   "unit":  "kg/s",
+                                                                                   "value_type":  "number",
+                                                                                   "value":  0.093418023424187382
+                                                                               },
+                                                                     "unit":  "kg/s"
                                                                  }
                                                              ],
                                               "calculated":  true,

@@ -66,7 +66,7 @@ golden-backed slices add the compounds required by reactions and columns.
 | HTTP API (`/v1/*`) | Done (internal alpha) |
 | Hydraulics | Partial (U3: pipes, defined heat-load and constant/gradient/tabulated defined-HTC plus estimated air/water/soil-HTC liquid thermal profiles with PR enthalpy coupling, optional insulation and local/global irradiation, fittings, orifice, two-phase correlations, relief sizing) |
 | Reactors | Partial (U4: conversion, simultaneous vapor equilibrium reactions, and vapor Gibbs minimization) |
-| Columns | Partial (U6/U7: shortcut, fixed-K absorber, and one live energy-coupled NRTL total-condenser solve) |
+| Columns | Partial (U6/U7: shortcut, fixed-K absorber, and live energy-coupled NRTL total-condenser and reboiled-absorber solves) |
 | Dynamics and controls | Partial (U9: holdup balances, fixed/adaptive ODE paths, tank/PID DWSIM parity, lumped HX, dynamic CSTR) |
 | Specialty energy | Partial (U10: solar panel, wind turbine, and hydroelectric turbine source-equation parity) |
 

@@ -701,6 +701,14 @@ function Get-ObjectStates {
                     $columnProfile[$profile[0]] = $enthalpyProfile
                 }
             }
+
+            foreach ($dutyName in @("CondenserDuty", "ReboilerDuty")) {
+                $dutyValue = [DwsimCaptureReflection]::Get($object, $dutyName)
+
+                if ($null -ne $dutyValue) {
+                    $columnProfile[$dutyName] = New-ValueRecord $dutyValue "kW"
+                }
+            }
         }
 
         $states += @{

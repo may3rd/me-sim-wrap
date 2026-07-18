@@ -52,6 +52,8 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertIn('foreach ($profileName in @("Tf", "Lf", "Vf", "xf", "yf", "Kf"))', script)
         self.assertIn('@("Hlf", "xf", "Liquid")', script)
         self.assertIn('@("Hvf", "yf", "Vapor")', script)
+        self.assertIn('foreach ($dutyName in @("CondenserDuty", "ReboilerDuty"))', script)
+        self.assertIn('New-ValueRecord $dutyValue "kW"', script)
         self.assertIn("column_profiles_captured", script)
 
     def test_compatibility_record_requires_source_revision(self):

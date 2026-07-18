@@ -11,6 +11,7 @@ All notable changes are documented here. This project follows semantic versionin
 - Live NRTL K-value and bubble-point-temperature parity across all 20 stages of the accepted acetone column profile.
 - Live NRTL liquid/vapor stage-caloric parity across that profile on a coherent J/kmol basis.
 - A simultaneous live NRTL MESH solve for the accepted binary total-condenser column, including calculated condenser and reboiler duties.
+- Repeatable DWSIM stage-enthalpy and runtime-duty captures plus a live energy-coupled NRTL solve for the accepted reboiled absorber.
 
 ## [0.1.0] - 2026-07-18
 
