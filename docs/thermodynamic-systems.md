@@ -23,6 +23,7 @@ loading correlation files or selecting model equations themselves.
 | `modfac-dortmund-1-propanol-water` | `ModfacDortmundSystem` | Modified UNIFAC (Dortmund) liquid activity coefficients | Complete 108-subgroup and 1,167 paired temperature-dependent interaction domain with scoped 1-propanol/water group vectors; no general flash or caloric model |
 | `modfac-nist-1-propanol-water` | `ModfacNistSystem` | Modified UNIFAC (NIST) liquid activity coefficients | Complete 201-subgroup and 1,969-directed temperature-dependent interaction domain with scoped 1-propanol/water group vectors; no general flash or caloric model |
 | `chao-seader-methane-n-pentane` | `ChaoSeaderSystem` | Chao-Seader liquid/vapor fugacity coefficients and TP flash | Exact methane/N-pentane pure constants and source-equation parity at 350 K and 1 MPa; no Lee-Kesler calorics or broader compound domain |
+| `grayson-streed-methane-n-pentane` | `GraysonStreedSystem` | Grayson-Streed liquid/vapor fugacity coefficients and TP flash | Exact methane/N-pentane pure constants and source-equation parity at 350 K and 1 MPa; no Lee-Kesler calorics or broader compound domain |
 
 The registry is a fixed dictionary from stable model ID to constructor. Runtime plugin
 registration and silent fallback are unsupported. An unknown ID, incomplete correlation
@@ -85,6 +86,10 @@ liquid regular-solution/pure-reference equation and vapor Redlich-Kwong equation
 repeat phase-fugacity captures within floating-point precision. The Python TP flash
 converges the same equations more tightly than DWSIM's four-iteration reference; phase
 fractions and compositions use a documented `1e-4` absolute reference tolerance.
+The parameterized extractor also freezes Grayson-Streed's separate package/model source
+hashes. Grayson-Streed shares the vapor Redlich-Kwong equation and compound constants,
+but its distinct pure-liquid reference coefficients are evaluated and parity-tested
+independently; its saved four-iteration flash uses the same reference tolerance.
 
 The frozen compound catalog and all three pure-property datasets cover the same 408
 case-distinct DWSIM/ChemSep names. These are the records among the 431-source catalog

@@ -9,6 +9,7 @@ class ChaoSeaderTest(unittest.TestCase):
  @classmethod
  def setUpClass(cls): cls.path=ROOT/"data/interactions/chao-seader-v1.json";cls.data=load_chao_seader_data(cls.path);cls.ids=("Methane","N-pentane")
  def test_scoped_source_data_are_frozen(self):
+  self.assertEqual(self.data.model,"Chao-Seader")
   self.assertEqual(tuple(x.compound_id for x in self.data.compounds),self.ids)
   self.assertEqual(self.data.runtime_assembly_sha256,"c5a038c86cdfd3304be5e283527ab377df7579ca306eac69950ab4b8c495c544")
   self.assertEqual(self.data.property_package_source_sha256,"284ae761082d3fab4104d0c636a1023349cee15719757c3d932a7118478f023f")

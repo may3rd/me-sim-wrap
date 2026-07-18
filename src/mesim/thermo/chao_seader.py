@@ -23,6 +23,7 @@ class ChaoSeaderCompound:
 
 @dataclass(frozen=True, slots=True)
 class ChaoSeaderData:
+    model: str
     source_revision: str
     case_sha256: str
     runtime_assembly_sha256: str
@@ -47,11 +48,11 @@ class ChaoSeaderTPFlashResult:
 def load_chao_seader_data(path: str | Path) -> ChaoSeaderData:
     try:
         document=json.loads(Path(path).read_text(encoding="utf-8-sig"))
-        if document["schema_version"]!="dwsim-chao-seader-data-1" or document["model"]!="Chao-Seader":
-            raise ValidationError("unsupported Chao-Seader data schema or model")
+        if document["schema_version"]!="dwsim-semi-empirical-data-1" or document["model"] not in {"Chao-Seader","Grayson-Streed"}:
+            raise ValidationError("unsupported semi-empirical data schema or model")
         source=document["source"]
         compounds=tuple(ChaoSeaderCompound(**record) for record in document["compounds"])
-        data=ChaoSeaderData(source["revision"],source["case_sha256"],source["runtime_assembly_sha256"],source["property_package_source_sha256"],source["model_source_sha256"],compounds)
+        data=ChaoSeaderData(document["model"],source["revision"],source["case_sha256"],source["runtime_assembly_sha256"],source["property_package_source_sha256"],source["model_source_sha256"],compounds)
     except ValidationError:
         raise
     except (KeyError,TypeError,ValueError) as error:
@@ -87,7 +88,7 @@ def _positive_exp(log_value: float, label: str) -> float:
         raise ValidationError(f"{label} is outside the representable range")
     return value
 
-def chao_seader_liquid_fugacity_coefficients(data: ChaoSeaderData,compound_ids,composition,temperature_k: float,pressure_pa: float)->tuple[float,...]:
+def _semi_empirical_liquid_fugacity_coefficients(data: ChaoSeaderData,compound_ids,composition,temperature_k: float,pressure_pa: float)->tuple[float,...]:
     compounds,fractions=_state(data,compound_ids,composition,temperature_k,pressure_pa)
     try:
         volume_sum=math.fsum(x*c.liquid_molar_volume for x,c in zip(fractions,compounds))
@@ -97,12 +98,18 @@ def chao_seader_liquid_fugacity_coefficients(data: ChaoSeaderData,compound_ids,c
             reduced_temperature=temperature_k/compound.critical_temperature_k
             reduced_pressure=pressure_pa/compound.critical_pressure_pa
             molecular_weight_class=int(round(compound.molecular_weight))
-            if molecular_weight_class==2:
+            if data.model=="Chao-Seader" and molecular_weight_class==2:
                 a=(1.96718,1.02972,-0.054009,0.0005288,0.0,0.008585,0.0,0.0,0.0,0.0)
-            elif molecular_weight_class==16:
+            elif data.model=="Chao-Seader" and molecular_weight_class==16:
                 a=(2.4384,-2.2455,-0.34084,0.00212,-0.00223,0.10486,-0.03691,0.0,0.0,0.0)
-            else:
+            elif data.model=="Chao-Seader":
                 a=(5.75748,-3.01761,-4.985,2.02299,0.0,0.08427,0.26667,-0.31138,-0.02655,0.02883)
+            elif molecular_weight_class==2:
+                a=(1.50709,2.74283,-0.0211,0.00011,0.0,0.008585,0.0,0.0,0.0,0.0)
+            elif molecular_weight_class==16:
+                a=(1.36822,-1.54831,0.0,0.02889,-0.01076,0.10486,-0.02529,0.0,0.0,0.0)
+            else:
+                a=(2.05135,-2.10889,0.0,-0.19396,0.02282,0.08852,0.0,-0.00872,-0.00353,0.00203)
             log_nu=a[0]+a[1]/reduced_temperature+a[2]*reduced_temperature+a[3]*reduced_temperature**2+a[4]*reduced_temperature**3+(a[5]+a[6]*reduced_temperature+a[7]*reduced_temperature**2)*reduced_pressure+(a[8]+a[9]*reduced_temperature)*reduced_pressure**2-math.log10(reduced_pressure)
             correction=-4.23893+8.65808*reduced_temperature-1.2206/reduced_temperature-3.15224*reduced_temperature**3-0.025*(reduced_pressure-0.6)
             log_activity=compound.liquid_molar_volume*(compound.solubility_parameter-mixture_solubility)**2/(8314470.0*temperature_k)
@@ -111,7 +118,7 @@ def chao_seader_liquid_fugacity_coefficients(data: ChaoSeaderData,compound_ids,c
     except (ValueError,ZeroDivisionError,OverflowError) as error:
         raise ValidationError("Chao-Seader liquid state is outside the representable range") from error
 
-def chao_seader_vapor_fugacity_coefficients(data: ChaoSeaderData,compound_ids,composition,temperature_k: float,pressure_pa: float)->tuple[float,...]:
+def _semi_empirical_vapor_fugacity_coefficients(data: ChaoSeaderData,compound_ids,composition,temperature_k: float,pressure_pa: float)->tuple[float,...]:
     compounds,fractions=_state(data,compound_ids,composition,temperature_k,pressure_pa)
     try:
         pure_a=tuple(0.42748*R**2*c.critical_temperature_k**2.5/(c.critical_pressure_pa*math.sqrt(temperature_k)) for c in compounds)
@@ -140,7 +147,7 @@ def _rachford_rice_vapor_fraction(composition: tuple[float,...],ratios: tuple[fl
         else: upper=midpoint
     return (lower+upper)/2.0
 
-def chao_seader_tp_flash(data: ChaoSeaderData,compound_ids,composition,temperature_k:float,pressure_pa:float,*,max_iterations:int=100,tolerance:float=1e-11)->ChaoSeaderTPFlashResult:
+def _semi_empirical_tp_flash(data: ChaoSeaderData,compound_ids,composition,temperature_k:float,pressure_pa:float,*,max_iterations:int=100,tolerance:float=1e-11)->ChaoSeaderTPFlashResult:
     compounds,feed=_state(data,compound_ids,composition,temperature_k,pressure_pa)
     if isinstance(max_iterations,bool) or not isinstance(max_iterations,int) or max_iterations<=0 or isinstance(tolerance,bool) or not isinstance(tolerance,(int,float)) or not math.isfinite(tolerance) or tolerance<=0:
         raise ValidationError("invalid Chao-Seader flash controls")
@@ -152,8 +159,8 @@ def chao_seader_tp_flash(data: ChaoSeaderData,compound_ids,composition,temperatu
             vapor=tuple(ratios[i]*liquid[i] for i in range(2))
             liquid_total=math.fsum(liquid);vapor_total=math.fsum(vapor)
             liquid=tuple(value/liquid_total for value in liquid);vapor=tuple(value/vapor_total for value in vapor)
-            liquid_phi=chao_seader_liquid_fugacity_coefficients(data,compound_ids,liquid,temperature_k,pressure_pa)
-            vapor_phi=chao_seader_vapor_fugacity_coefficients(data,compound_ids,vapor,temperature_k,pressure_pa)
+            liquid_phi=_semi_empirical_liquid_fugacity_coefficients(data,compound_ids,liquid,temperature_k,pressure_pa)
+            vapor_phi=_semi_empirical_vapor_fugacity_coefficients(data,compound_ids,vapor,temperature_k,pressure_pa)
             updated=tuple(liquid_phi[i]/vapor_phi[i] for i in range(2))
             error=max(abs(math.log(updated[i]/ratios[i])) for i in range(2))
             ratios=updated
@@ -166,4 +173,21 @@ def chao_seader_tp_flash(data: ChaoSeaderData,compound_ids,composition,temperatu
         raise ValidationError("Chao-Seader flash is outside the representable range") from error
     raise ValidationError("Chao-Seader flash did not converge")
 
-__all__=("ChaoSeaderData","ChaoSeaderTPFlashResult","load_chao_seader_data","chao_seader_liquid_fugacity_coefficients","chao_seader_vapor_fugacity_coefficients","chao_seader_tp_flash")
+def _require_model(data: ChaoSeaderData, expected: str) -> None:
+    if not isinstance(data,ChaoSeaderData) or data.model!=expected:
+        raise ValidationError(f"{expected} data is required")
+
+def chao_seader_liquid_fugacity_coefficients(data,compound_ids,composition,temperature_k,pressure_pa):
+    _require_model(data,"Chao-Seader");return _semi_empirical_liquid_fugacity_coefficients(data,compound_ids,composition,temperature_k,pressure_pa)
+def chao_seader_vapor_fugacity_coefficients(data,compound_ids,composition,temperature_k,pressure_pa):
+    _require_model(data,"Chao-Seader");return _semi_empirical_vapor_fugacity_coefficients(data,compound_ids,composition,temperature_k,pressure_pa)
+def chao_seader_tp_flash(data,compound_ids,composition,temperature_k,pressure_pa,**controls):
+    _require_model(data,"Chao-Seader");return _semi_empirical_tp_flash(data,compound_ids,composition,temperature_k,pressure_pa,**controls)
+def grayson_streed_liquid_fugacity_coefficients(data,compound_ids,composition,temperature_k,pressure_pa):
+    _require_model(data,"Grayson-Streed");return _semi_empirical_liquid_fugacity_coefficients(data,compound_ids,composition,temperature_k,pressure_pa)
+def grayson_streed_vapor_fugacity_coefficients(data,compound_ids,composition,temperature_k,pressure_pa):
+    _require_model(data,"Grayson-Streed");return _semi_empirical_vapor_fugacity_coefficients(data,compound_ids,composition,temperature_k,pressure_pa)
+def grayson_streed_tp_flash(data,compound_ids,composition,temperature_k,pressure_pa,**controls):
+    _require_model(data,"Grayson-Streed");return _semi_empirical_tp_flash(data,compound_ids,composition,temperature_k,pressure_pa,**controls)
+
+__all__=("ChaoSeaderData","ChaoSeaderTPFlashResult","load_chao_seader_data","chao_seader_liquid_fugacity_coefficients","chao_seader_vapor_fugacity_coefficients","chao_seader_tp_flash","grayson_streed_liquid_fugacity_coefficients","grayson_streed_vapor_fugacity_coefficients","grayson_streed_tp_flash")

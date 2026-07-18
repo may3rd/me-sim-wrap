@@ -188,8 +188,8 @@
       "dwsim_class": "GraysonStreedPropertyPackage",
       "family": "semi-empirical",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/GraysonStreed.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["grayson-streed-methane-n-pentane"]
     },
     {
       "id": "ideal-raoult",
