@@ -200,6 +200,8 @@ def nrtl_activity_coefficients(
     composition,
     temperature_k: float,
 ) -> tuple[float, ...]:
+    if not isinstance(data, NRTLVLEData):
+        raise ValidationError("NRTL VLE data is required")
     ids, fractions = _validate_state(compound_ids, composition, temperature_k)
     count = len(ids)
     tau = [[0.0] * count for _ in range(count)]
@@ -270,6 +272,120 @@ def nrtl_bubble_pressure(
     vapor = tuple(value / pressure for value in terms)
     residual = abs(math.fsum(vapor) - 1.0)
     return NRTLVLEResult(True, 1, residual, "NRTL modified-Raoult bubble pressure", (), None, "bubble", temperature_k, pressure, liquid, vapor, gamma)
+
+
+def nrtl_equilibrium_ratios(
+    data: NRTLVLEData,
+    compound_ids,
+    liquid_composition,
+    temperature_k: float,
+    pressure_pa: float,
+) -> tuple[float, ...]:
+    ids, liquid = _validate_state(compound_ids, liquid_composition, temperature_k)
+    if not math.isfinite(pressure_pa) or pressure_pa <= 0:
+        raise ValidationError("absolute pressure must be finite and positive")
+    gamma = nrtl_activity_coefficients(data, ids, liquid, temperature_k)
+    ratios = tuple(
+        gamma[index] * data.vapor_pressure(compound).evaluate(temperature_k) / pressure_pa
+        for index, compound in enumerate(ids)
+    )
+    if any(not math.isfinite(value) or value <= 0 for value in ratios):
+        raise ValidationError("NRTL equilibrium ratios must be finite and positive")
+    return ratios
+
+
+def nrtl_bubble_temperature(
+    data: NRTLVLEData,
+    compound_ids,
+    liquid_composition,
+    pressure_pa: float,
+    bracket_k: tuple[float, float],
+    max_iterations: int = 100,
+    tolerance: float = 1e-10,
+) -> NRTLVLEResult:
+    try:
+        lower_k, upper_k = bracket_k
+    except (TypeError, ValueError) as error:
+        raise ValidationError("temperature bracket must contain two values") from error
+    if not all(math.isfinite(value) and value > 0 for value in (lower_k, upper_k, pressure_pa)):
+        raise ValidationError("temperature bracket and pressure must be finite and positive")
+    if lower_k >= upper_k:
+        raise ValidationError("temperature bracket must be increasing")
+    if isinstance(max_iterations, bool) or not isinstance(max_iterations, int) or max_iterations <= 0:
+        raise ValidationError("max_iterations must be a positive integer")
+    if not math.isfinite(tolerance) or tolerance <= 0:
+        raise ValidationError("tolerance must be finite and positive")
+    ids, liquid = _validate_state(compound_ids, liquid_composition, lower_k)
+    lower = nrtl_bubble_pressure(data, ids, liquid, lower_k)
+    upper = nrtl_bubble_pressure(data, ids, liquid, upper_k)
+    lower_residual = lower.pressure_pa - pressure_pa
+    upper_residual = upper.pressure_pa - pressure_pa
+    if lower_residual == 0:
+        return _replace_nrtl_result(lower, kind="bubble-temperature", algorithm="NRTL bubble-temperature bisection")
+    if upper_residual == 0:
+        return _replace_nrtl_result(upper, kind="bubble-temperature", algorithm="NRTL bubble-temperature bisection")
+    if lower_residual * upper_residual > 0:
+        raise ValidationError("temperature bracket does not enclose an NRTL bubble point")
+
+    current = lower
+    scaled_residual = abs(lower_residual) / pressure_pa
+    for iteration in range(1, max_iterations + 1):
+        middle_k = (lower_k + upper_k) / 2.0
+        current = nrtl_bubble_pressure(data, ids, liquid, middle_k)
+        signed_residual = current.pressure_pa - pressure_pa
+        scaled_residual = abs(signed_residual) / pressure_pa
+        if scaled_residual <= tolerance:
+            return NRTLVLEResult(
+                True,
+                iteration,
+                scaled_residual,
+                "NRTL bubble-temperature bisection",
+                (),
+                None,
+                "bubble-temperature",
+                current.temperature_k,
+                current.pressure_pa,
+                current.liquid_composition,
+                current.vapor_composition,
+                current.activity_coefficients,
+            )
+        if lower_residual * signed_residual <= 0:
+            upper_k = middle_k
+            upper_residual = signed_residual
+        else:
+            lower_k = middle_k
+            lower_residual = signed_residual
+    return NRTLVLEResult(
+        False,
+        max_iterations,
+        scaled_residual,
+        "NRTL bubble-temperature bisection",
+        (),
+        "maximum iterations exceeded",
+        "bubble-temperature",
+        current.temperature_k,
+        current.pressure_pa,
+        current.liquid_composition,
+        current.vapor_composition,
+        current.activity_coefficients,
+    )
+
+
+def _replace_nrtl_result(result: NRTLVLEResult, *, kind: str, algorithm: str) -> NRTLVLEResult:
+    return NRTLVLEResult(
+        result.converged,
+        result.iterations,
+        result.residual,
+        algorithm,
+        result.warnings,
+        result.failure_reason,
+        kind,
+        result.temperature_k,
+        result.pressure_pa,
+        result.liquid_composition,
+        result.vapor_composition,
+        result.activity_coefficients,
+    )
 
 
 def nrtl_dew_pressure(

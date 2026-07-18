@@ -15,7 +15,9 @@ from mesim.thermo.activity import (
     load_nrtl_vle_data,
     nrtl_activity_coefficients,
     nrtl_bubble_pressure,
+    nrtl_bubble_temperature,
     nrtl_dew_pressure,
+    nrtl_equilibrium_ratios,
 )
 
 
@@ -109,6 +111,8 @@ class NRTLActivityTest(unittest.TestCase):
         with self.assertRaises(ValidationError):
             nrtl_activity_coefficients(self.data, ("Acetone", "Methanol"), (0.8, 0.3), 388.0)
         with self.assertRaises(ValidationError):
+            nrtl_activity_coefficients(None, ("Acetone", "Methanol"), (0.7, 0.3), 388.0)
+        with self.assertRaises(ValidationError):
             nrtl_activity_coefficients(self.data, ("Acetone", "Methanol"), (0.7, 0.3), 0.0)
         with self.assertRaises(ValidationError):
             nrtl_activity_coefficients(self.data, ("Acetone", "Methanol"), (0.7, 0.3), 1e308)
@@ -118,6 +122,38 @@ class NRTLActivityTest(unittest.TestCase):
         missing = replace(self.data, interactions=())
         with self.assertRaises(MissingCompoundData):
             nrtl_activity_coefficients(missing, ("Acetone", "Methanol"), (0.7, 0.3), 388.0)
+
+        ratios = nrtl_equilibrium_ratios(
+            self.data, ("Acetone", "Methanol"), (0.7, 0.3), 388.0, 600_000.0
+        )
+        self.assertTrue(all(math.isfinite(value) and value > 0 for value in ratios))
+        temperature = nrtl_bubble_temperature(
+            self.data,
+            ("Acetone", "Methanol"),
+            (0.7, 0.3),
+            600_000.0,
+            (350.0, 450.0),
+        )
+        self.assertTrue(temperature.converged)
+        self.assertLess(temperature.residual, 1e-9)
+        with self.assertRaises(ValidationError):
+            nrtl_bubble_temperature(
+                self.data,
+                ("Acetone", "Methanol"),
+                (0.7, 0.3),
+                600_000.0,
+                (200.0, 250.0),
+            )
+        exhausted_temperature = nrtl_bubble_temperature(
+            self.data,
+            ("Acetone", "Methanol"),
+            (0.7, 0.3),
+            600_000.0,
+            (350.0, 450.0),
+            max_iterations=1,
+            tolerance=1e-30,
+        )
+        self.assertFalse(exhausted_temperature.converged)
 
     def test_loader_rejects_invalid_units_duplicates_ranges_and_provenance(self):
         source = json.loads(

@@ -2,6 +2,13 @@ from dataclasses import dataclass
 import math
 
 from ..errors import ValidationError
+from ..thermo.activity import (
+    NRTLVLEData,
+    NRTLVLEResult,
+    nrtl_bubble_pressure,
+    nrtl_bubble_temperature,
+    nrtl_equilibrium_ratios,
+)
 
 
 def _finite_number(value: object) -> bool:
@@ -9,6 +16,70 @@ def _finite_number(value: object) -> bool:
         not isinstance(value, bool)
         and isinstance(value, (int, float))
         and math.isfinite(value)
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class NRTLColumnEquilibriumProfile:
+    equilibrium_ratios: tuple[tuple[float, ...], ...]
+    bubble_pressures_pa: tuple[float, ...]
+    relative_pressure_residuals: tuple[float, ...]
+
+
+def nrtl_column_equilibrium_profile(
+    data: NRTLVLEData,
+    compound_ids: tuple[str, ...],
+    temperatures_k: tuple[float, ...],
+    pressures_pa: tuple[float, ...],
+    liquid_mole_fractions: tuple[tuple[float, ...], ...],
+) -> NRTLColumnEquilibriumProfile:
+    try:
+        temperatures = tuple(temperatures_k)
+        pressures = tuple(pressures_pa)
+        liquid = tuple(tuple(row) for row in liquid_mole_fractions)
+    except TypeError as error:
+        raise ValidationError("NRTL column profile inputs must be finite sequences") from error
+    if not temperatures or len(temperatures) != len(pressures) or len(temperatures) != len(liquid):
+        raise ValidationError("NRTL column profile stage arrays must be non-empty and aligned")
+    ratios = []
+    bubble_pressures = []
+    residuals = []
+    for temperature_k, pressure_pa, composition in zip(temperatures, pressures, liquid):
+        stage_ratios = nrtl_equilibrium_ratios(data, compound_ids, composition, temperature_k, pressure_pa)
+        bubble = nrtl_bubble_pressure(data, compound_ids, composition, temperature_k)
+        ratios.append(stage_ratios)
+        bubble_pressures.append(bubble.pressure_pa)
+        residuals.append((bubble.pressure_pa - pressure_pa) / pressure_pa)
+    return NRTLColumnEquilibriumProfile(tuple(ratios), tuple(bubble_pressures), tuple(residuals))
+
+
+def nrtl_column_bubble_temperature_profile(
+    data: NRTLVLEData,
+    compound_ids: tuple[str, ...],
+    pressures_pa: tuple[float, ...],
+    liquid_mole_fractions: tuple[tuple[float, ...], ...],
+    bracket_k: tuple[float, float],
+    max_iterations: int = 100,
+    tolerance: float = 1e-10,
+) -> tuple[NRTLVLEResult, ...]:
+    try:
+        pressures = tuple(pressures_pa)
+        liquid = tuple(tuple(row) for row in liquid_mole_fractions)
+    except TypeError as error:
+        raise ValidationError("NRTL column bubble-point inputs must be finite sequences") from error
+    if not pressures or len(pressures) != len(liquid):
+        raise ValidationError("NRTL column pressure and composition arrays must be non-empty and aligned")
+    return tuple(
+        nrtl_bubble_temperature(
+            data,
+            compound_ids,
+            composition,
+            pressure_pa,
+            bracket_k,
+            max_iterations=max_iterations,
+            tolerance=tolerance,
+        )
+        for pressure_pa, composition in zip(pressures, liquid)
     )
 
 

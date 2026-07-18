@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from mesim.compounds import load_compounds, load_pr_interactions
 from mesim.errors import ValidationError
+from mesim.thermo.activity import load_nrtl_vle_data
 from mesim.unitops.columns import (
     EquilibriumStageState,
     StageStream,
@@ -25,6 +26,8 @@ from mesim.unitops.columns import (
     fixed_k_column_profile_residuals,
     fixed_k_material_column,
     fixed_k_sum_rates_absorber,
+    nrtl_column_bubble_temperature_profile,
+    nrtl_column_equilibrium_profile,
     shortcut_column,
 )
 
@@ -581,6 +584,9 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
             }
             for tag, record in cls.objects.items()
         }
+        cls.nrtl_data = load_nrtl_vle_data(
+            ROOT / "data/correlations/nrtl-acetone-methanol-v1.json"
+        )
 
     def test_reference_is_repeatable_solved_and_error_free(self):
         repeat = json.loads(
@@ -715,6 +721,59 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
             ),
             2.0e-16,
         )
+
+    def test_live_nrtl_k_values_and_bubble_points_match_all_captured_stages(self):
+        captured = self.objects["Acetone Column (6 atm)"]["column_profile"]
+        pressure_pa = self.properties["HP Azeotrope"]["PROP_MS_1"]
+        self.assertEqual(pressure_pa, self.properties["Acetone Rich Product"]["PROP_MS_1"])
+        pressures = (pressure_pa,) * len(captured["Tf"])
+        liquid = tuple(tuple(row) for row in captured["xf"])
+        profile = nrtl_column_equilibrium_profile(
+            self.nrtl_data,
+            self.NAMES,
+            tuple(captured["Tf"]),
+            pressures,
+            liquid,
+        )
+
+        maximum_k_relative = max(
+            abs(calculated - expected) / abs(expected)
+            for calculated_row, expected_row in zip(profile.equilibrium_ratios, captured["Kf"])
+            for calculated, expected in zip(calculated_row, expected_row)
+        )
+        self.assertLess(maximum_k_relative, 2.5e-3)
+        self.assertLess(max(abs(value) for value in profile.relative_pressure_residuals), 2.0e-3)
+
+        solved = nrtl_column_bubble_temperature_profile(
+            self.nrtl_data,
+            self.NAMES,
+            pressures,
+            liquid,
+            (350.0, 450.0),
+        )
+        self.assertTrue(all(result.converged for result in solved))
+        self.assertLess(
+            max(abs(result.temperature_k - expected) for result, expected in zip(solved, captured["Tf"])),
+            0.08,
+        )
+        self.assertLess(max(result.residual for result in solved), 1.0e-9)
+        self.assertLess(
+            max(
+                abs(calculated - expected)
+                for result, expected_row in zip(solved, captured["yf"])
+                for calculated, expected in zip(result.vapor_composition, expected_row)
+            ),
+            5.0e-4,
+        )
+
+        with self.assertRaises(ValidationError):
+            nrtl_column_equilibrium_profile(
+                self.nrtl_data,
+                self.NAMES,
+                (captured["Tf"][0],),
+                (),
+                (tuple(captured["xf"][0]),),
+            )
 
     def test_total_column_energy_balance_closes_in_watts(self):
         residual_w = column_energy_residual_w(

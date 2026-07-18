@@ -8,6 +8,7 @@ All notable changes are documented here. This project follows semantic versionin
 
 - Deterministic, nonzero DWSIM bubble/dew-pressure captures and executable methane/ethane PR parity gates.
 - A saved-source acetone/methanol NRTL activity and modified-Raoult bubble/dew slice for the accepted pressure-swing column domain.
+- Live NRTL K-value and bubble-point-temperature parity across all 20 stages of the accepted acetone column profile.
 
 ## [0.1.0] - 2026-07-18
 
