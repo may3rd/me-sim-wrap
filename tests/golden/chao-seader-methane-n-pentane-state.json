@@ -1,0 +1,50 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "chao-seader-methane-n-pentane-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "ae9b92e2c6033eae1cbce4ce0e1615b26c4670748d709bb7809b6cdc8ccc9bdf",
+                   "property_package":  "Chao-Seader",
+                   "property_package_class":  "DWSIM.Thermodynamics.PropertyPackages.ChaoSeaderPropertyPackage",
+                   "property_package_construction":  "deserialized-from-case",
+                   "flash_algorithm":  "Universal Flash"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "Methane",
+                                     "N-pentane"
+                                 ],
+                   "temperature_k":  350,
+                   "pressure_pa":  1000000,
+                   "composition":  [
+                                       0.5,
+                                       0.5
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         17.941612723024992,
+                                                         0.31917380309202964
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        1.030784259963097,
+                                                        0.81365605592866308
+                                                    ],
+                    "liquid_fraction":  0.22019622832339369,
+                    "vapor_fraction":  0.77980377167660631,
+                    "liquid_composition":  [
+                                               0.03556437778465777,
+                                               0.96443562221534229
+                                           ],
+                    "vapor_composition":  [
+                                              0.63113353712539433,
+                                              0.36886646287460573
+                                          ],
+                    "iterations":  4,
+                    "equilibrium_ratios":  [
+                                               17.747710450980087,
+                                               0.38250068700819817
+                                           ]
+                }
+}

@@ -17,6 +17,7 @@ from mesim.thermo.activity import (
 from mesim.thermo.flash import flash_enthalpy, tp_flash
 from mesim.thermo.ideal import load_correlations
 from mesim.thermo.systems import (
+    CHAO_SEADER_METHANE_N_PENTANE,
     IDEAL_RAOULT,
     NRTL_ACETONE_METHANOL,
     PENG_ROBINSON_CLASSIC,
@@ -60,6 +61,7 @@ class ThermodynamicSystemTest(unittest.TestCase):
         self.assertEqual(
             set(THERMO_SYSTEM_CONSTRUCTORS),
             {
+                CHAO_SEADER_METHANE_N_PENTANE,
                 PENG_ROBINSON_CLASSIC,
                 NRTL_ACETONE_METHANOL,
                 IDEAL_RAOULT,

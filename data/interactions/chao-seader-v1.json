@@ -1,0 +1,37 @@
+﻿{
+    "schema_version":  "dwsim-chao-seader-data-1",
+    "model":  "Chao-Seader",
+    "source":  {
+                   "product":  "DWSIM",
+                   "revision":  "9.0.5.0",
+                   "case_sha256":  "ae9b92e2c6033eae1cbce4ce0e1615b26c4670748d709bb7809b6cdc8ccc9bdf",
+                   "runtime_assembly_sha256":  "c5a038c86cdfd3304be5e283527ab377df7579ca306eac69950ab4b8c495c544",
+                   "property_package_class":  "DWSIM.Thermodynamics.PropertyPackages.ChaoSeaderPropertyPackage",
+                   "property_package_source":  "DWSIM.Thermodynamics/PropertyPackages/ChaoSeader.vb",
+                   "property_package_source_sha256":  "284ae761082d3fab4104d0c636a1023349cee15719757c3d932a7118478f023f",
+                   "model_source":  "DWSIM.Thermodynamics/PropertyPackages/Models/ChaoSeader.vb",
+                   "model_source_sha256":  "5fe15931118e56a149d7b321fa6120e94b37aea1c763f541b54f760c2640d405"
+               },
+    "compounds":  [
+                      {
+                          "compound_id":  "Methane",
+                          "molecular_weight":  16.04246,
+                          "critical_temperature_k":  190.56,
+                          "critical_pressure_pa":  4599000,
+                          "acentric_factor":  0.011,
+                          "liquid_molar_volume":  37.8392,
+                          "chao_seader_acentricity":  0,
+                          "solubility_parameter":  0.00277501792024
+                      },
+                      {
+                          "compound_id":  "N-pentane",
+                          "molecular_weight":  72.14878,
+                          "critical_temperature_k":  469.7,
+                          "critical_pressure_pa":  3370000,
+                          "acentric_factor":  0.251,
+                          "liquid_molar_volume":  116.1,
+                          "chao_seader_acentricity":  0.2387,
+                          "solubility_parameter":  0.00342968764086
+                      }
+                  ]
+}

@@ -57,6 +57,7 @@ from .wilson import WilsonData, wilson_activity_coefficients
 from .uniquac import UniquacData, uniquac_activity_coefficients
 from .unifac import UnifacData, unifac_activity_coefficients
 from .modfac import ModfacData, modfac_activity_coefficients
+from .chao_seader import ChaoSeaderData, ChaoSeaderTPFlashResult, chao_seader_liquid_fugacity_coefficients, chao_seader_vapor_fugacity_coefficients, chao_seader_tp_flash
 
 
 PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
@@ -79,6 +80,7 @@ UNIFAC_1_PROPANOL_WATER = "unifac-1-propanol-water"
 UNIFAC_LL_1_PROPANOL_WATER = "unifac-ll-1-propanol-water"
 MODFAC_DORTMUND_1_PROPANOL_WATER = "modfac-dortmund-1-propanol-water"
 MODFAC_NIST_1_PROPANOL_WATER = "modfac-nist-1-propanol-water"
+CHAO_SEADER_METHANE_N_PENTANE = "chao-seader-methane-n-pentane"
 
 
 @runtime_checkable
@@ -514,6 +516,24 @@ class ModfacNistSystem:
         object.__setattr__(self,"compound_ids",ids)
     def activity_coefficients(self,liquid_composition:tuple[float,...],temperature_k:float)->tuple[float,...]:
         return modfac_activity_coefficients(self.data,self.compound_ids,liquid_composition,temperature_k)
+
+@dataclass(frozen=True, slots=True)
+class ChaoSeaderSystem:
+    data: ChaoSeaderData
+    compound_ids: tuple[str, ...]
+    model_id: str = field(default=CHAO_SEADER_METHANE_N_PENTANE, init=False)
+    def __post_init__(self) -> None:
+        try: ids=tuple(self.compound_ids)
+        except TypeError as error: raise ValidationError("Chao-Seader compound IDs must be a sequence") from error
+        if not isinstance(self.data,ChaoSeaderData) or len(ids)!=2 or len(set(ids))!=2: raise ValidationError("Chao-Seader thermodynamic-system inputs are invalid")
+        for value in ids: self.data.compound(value)
+        object.__setattr__(self,"compound_ids",ids)
+    def liquid_fugacity_coefficients(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float)->tuple[float,...]:
+        return chao_seader_liquid_fugacity_coefficients(self.data,self.compound_ids,composition,temperature_k,pressure_pa)
+    def vapor_fugacity_coefficients(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float)->tuple[float,...]:
+        return chao_seader_vapor_fugacity_coefficients(self.data,self.compound_ids,composition,temperature_k,pressure_pa)
+    def tp_flash(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float)->ChaoSeaderTPFlashResult:
+        return chao_seader_tp_flash(self.data,self.compound_ids,composition,temperature_k,pressure_pa)
 
 
 @dataclass(frozen=True, slots=True)
@@ -1061,6 +1081,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     UNIFAC_LL_1_PROPANOL_WATER: UnifacLLSystem,
     MODFAC_DORTMUND_1_PROPANOL_WATER: ModfacDortmundSystem,
     MODFAC_NIST_1_PROPANOL_WATER: ModfacNistSystem,
+    CHAO_SEADER_METHANE_N_PENTANE: ChaoSeaderSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS

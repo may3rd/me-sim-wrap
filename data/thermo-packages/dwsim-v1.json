@@ -179,8 +179,8 @@
       "dwsim_class": "ChaoSeaderPropertyPackage",
       "family": "semi-empirical",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/ChaoSeader.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["chao-seader-methane-n-pentane"]
     },
     {
       "id": "grayson-streed",
