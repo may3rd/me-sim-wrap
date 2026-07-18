@@ -27,6 +27,7 @@ from mesim.unitops.columns import (
     fixed_k_material_column,
     fixed_k_sum_rates_absorber,
     nrtl_column_bubble_temperature_profile,
+    nrtl_column_enthalpy_profile,
     nrtl_column_equilibrium_profile,
     shortcut_column,
 )
@@ -793,6 +794,78 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
         )
         self.assertLess(abs(residual_w), 2.0e-5)
 
+    def test_live_nrtl_stage_enthalpies_match_captured_caloric_profiles(self):
+        captured = self.objects["Acetone Column (6 atm)"]["column_profile"]
+        pressure_pa = self.properties["HP Azeotrope"]["PROP_MS_1"]
+        profile = nrtl_column_enthalpy_profile(
+            self.nrtl_data,
+            self.NAMES,
+            tuple(captured["Tf"]),
+            (pressure_pa,) * len(captured["Tf"]),
+            tuple(tuple(row) for row in captured["xf"]),
+            tuple(tuple(row) for row in captured["yf"]),
+        )
+        molecular_weights = tuple(
+            self.nrtl_data.caloric(name).molecular_weight_kg_per_kmol
+            for name in self.NAMES
+        )
+        calculated_liquid_kj_per_kg = tuple(
+            enthalpy / math.fsum(
+                fraction * molecular_weight
+                for fraction, molecular_weight in zip(composition, molecular_weights)
+            ) / 1000.0
+            for enthalpy, composition in zip(
+                profile.liquid_enthalpies_j_per_kmol, captured["xf"]
+            )
+        )
+        calculated_vapor_kj_per_kg = tuple(
+            enthalpy / math.fsum(
+                fraction * molecular_weight
+                for fraction, molecular_weight in zip(composition, molecular_weights)
+            ) / 1000.0
+            for enthalpy, composition in zip(
+                profile.vapor_enthalpies_j_per_kmol, captured["yf"]
+            )
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected) / abs(expected)
+                for actual, expected in zip(calculated_liquid_kj_per_kg, captured["Hlf"])
+            ),
+            1.0e-6,
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected) / abs(expected)
+                for actual, expected in zip(calculated_vapor_kj_per_kg, captured["Hvf"])
+            ),
+            3.0e-6,
+        )
+        self.assertTrue(all(value > 0.0 for value in profile.liquid_densities_kg_per_m3))
+        self.assertTrue(all(math.isfinite(value) for value in profile.excess_enthalpies_j_per_kmol))
+
+        feed_energy = [0.0] * 20
+        feed_energy[10] = (
+            self.properties["HP Feed"]["PROP_MS_2"]
+            * self.properties["HP Feed"]["PROP_MS_7"]
+            * 1000.0
+        )
+        duties = [0.0] * 20
+        duties[0] = -self.properties["Condenser Duty (2)"]["PROP_ES_0"] * 1000.0
+        duties[-1] = self.properties["Reboiler Duty (2)"]["PROP_ES_0"] * 1000.0
+        liquid_products = [0.0] * 20
+        liquid_products[0] = self.properties["HP Azeotrope"]["PROP_MS_3"] / 1000.0
+        residuals = column_profile_energy_residuals(
+            tuple(feed_energy),
+            tuple(value / 1000.0 for value in captured["Lf"]),
+            tuple(value / 1000.0 for value in captured["Vf"]),
+            profile.liquid_enthalpies_j_per_kmol,
+            profile.vapor_enthalpies_j_per_kmol,
+            heat_duties_by_stage_w=tuple(duties),
+            liquid_product_flows_by_stage_kmol_s=tuple(liquid_products),
+        )
+        self.assertLess(max(abs(value) for value in residuals), 31.0)
+
     def test_every_stage_energy_balance_closes_with_saved_solver_tolerance(self):
         captured = self.objects["Acetone Column (6 atm)"]["column_profile"]
         molecular_weights = {
@@ -847,6 +920,10 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
             column_energy_residual_w((), ((1.0, 1.0),))
         with self.assertRaises(ValidationError):
             column_profile_energy_residuals((1.0,), (1.0,), (1.0,), (1.0,), (1.0,))
+        with self.assertRaises(ValidationError):
+            nrtl_column_enthalpy_profile(
+                self.nrtl_data, self.NAMES, (388.0,), (), ((0.5, 0.5),), ((0.5, 0.5),)
+            )
 
 
 if __name__ == "__main__":

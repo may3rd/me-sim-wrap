@@ -10,7 +10,7 @@ The wheel installs these records under `share/mesim/data`; a source checkout use
 | `data/interactions/pr-v1.json` | `pr-interactions-1` | `dwsim-windows/DWSIM.Thermodynamics/Assets/pr_ip.dat` | DWSIM 9.0.5.0 | Symmetry, compound-key, and PR mixture gates |
 | `data/correlations/ideal-v1.json` | `ideal-correlations-1` | Vendored ChemSep `chemsep1.xml` | DWSIM 9.0.4 | Range, equation-vector, and DWSIM property gates |
 | `data/correlations/transport-v1.json` | `transport-correlations-1` | Vendored ChemSep `chemsep1.xml` | DWSIM 9.0.4 | Equation and captured vapor/liquid transport gates |
-| `data/correlations/nrtl-acetone-methanol-v1.json` | `nrtl-vle-data-1` | Saved COCO compound records and ChemSep NRTL parameters inside the accepted pressure-swing column | DWSIM 10.0.9671.22371 case SHA-256 recorded in the file | Unit/schema rejection, equation vectors, and deterministic NRTL envelope goldens |
+| `data/correlations/nrtl-acetone-methanol-v1.json` | `nrtl-vle-data-2` | Saved COCO compound records, phase-caloric correlations, and ChemSep NRTL parameters inside the accepted pressure-swing column | DWSIM 10.0.9671.22371 case SHA-256 recorded in the file | Unit/schema rejection, equation vectors, deterministic NRTL envelope goldens, and all-stage caloric parity |
 | `data/reactions/v1.json` | `reaction-data-1` | DWSIM isomerization, Gibbs/equilibrium, ethylene-glycol, and methanol-carbonylation reactor samples | DWSIM 9.0.5.0 | Element balance, formation-property consistency, original kinetic units, and reactor goldens |
 
 ## Golden references

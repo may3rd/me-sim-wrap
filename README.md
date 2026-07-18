@@ -60,13 +60,13 @@ golden-backed slices add the compounds required by reactions and columns.
 | Five-compound ideal properties (cp, h, s, density, vapor pressure) | Done |
 | Peng-Robinson pure + mixture (cubic roots, fugacity, departure h/s, stable-root selection) | Done (T1) |
 | TP / PH / bubble / dew flash | Done (T2; documented DWSIM solver/model differences) |
-| Activity-coefficient liquid VLE | Partial (T4: saved-source acetone/methanol NRTL bubble/dew slice) |
+| Activity-coefficient liquid VLE | Partial (T4: saved-source acetone/methanol NRTL bubble/dew and phase-caloric slice) |
 | Streams, mixer, splitter, heater, cooler, valve, equilibrium separator | Done (U0) |
 | Acyclic flowsheet execution | Done |
 | HTTP API (`/v1/*`) | Done (internal alpha) |
 | Hydraulics | Partial (U3: pipes, defined heat-load and constant/gradient/tabulated defined-HTC plus estimated air/water/soil-HTC liquid thermal profiles with PR enthalpy coupling, optional insulation and local/global irradiation, fittings, orifice, two-phase correlations, relief sizing) |
 | Reactors | Partial (U4: conversion, simultaneous vapor equilibrium reactions, and vapor Gibbs minimization) |
-| Columns | Partial (U6/U7: shortcut, fixed-K absorber, fixed-profile material/energy gates, and live NRTL stage K/bubble-point parity) |
+| Columns | Partial (U6/U7: shortcut, fixed-K absorber, fixed-profile balances, and live NRTL stage equilibrium/caloric parity) |
 | Dynamics and controls | Partial (U9: holdup balances, fixed/adaptive ODE paths, tank/PID DWSIM parity, lumped HX, dynamic CSTR) |
 | Specialty energy | Partial (U10: solar panel, wind turbine, and hydroelectric turbine source-equation parity) |
 

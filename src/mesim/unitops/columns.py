@@ -8,6 +8,7 @@ from ..thermo.activity import (
     nrtl_bubble_pressure,
     nrtl_bubble_temperature,
     nrtl_equilibrium_ratios,
+    nrtl_phase_enthalpies,
 )
 
 
@@ -80,6 +81,58 @@ def nrtl_column_bubble_temperature_profile(
             tolerance=tolerance,
         )
         for pressure_pa, composition in zip(pressures, liquid)
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class NRTLColumnEnthalpyProfile:
+    liquid_enthalpies_j_per_kmol: tuple[float, ...]
+    vapor_enthalpies_j_per_kmol: tuple[float, ...]
+    liquid_densities_kg_per_m3: tuple[float, ...]
+    excess_enthalpies_j_per_kmol: tuple[float, ...]
+
+
+def nrtl_column_enthalpy_profile(
+    data: NRTLVLEData,
+    compound_ids: tuple[str, ...],
+    temperatures_k: tuple[float, ...],
+    pressures_pa: tuple[float, ...],
+    liquid_mole_fractions: tuple[tuple[float, ...], ...],
+    vapor_mole_fractions: tuple[tuple[float, ...], ...],
+) -> NRTLColumnEnthalpyProfile:
+    try:
+        temperatures = tuple(temperatures_k)
+        pressures = tuple(pressures_pa)
+        liquid = tuple(tuple(row) for row in liquid_mole_fractions)
+        vapor = tuple(tuple(row) for row in vapor_mole_fractions)
+    except TypeError as error:
+        raise ValidationError("NRTL column enthalpy inputs must be finite sequences") from error
+    stage_count = len(temperatures)
+    if (
+        not temperatures
+        or len(pressures) != stage_count
+        or len(liquid) != stage_count
+        or len(vapor) != stage_count
+    ):
+        raise ValidationError("NRTL column enthalpy stage arrays must be non-empty and aligned")
+    results = tuple(
+        nrtl_phase_enthalpies(
+            data,
+            compound_ids,
+            liquid_row,
+            vapor_row,
+            temperature_k,
+            pressure_pa,
+        )
+        for temperature_k, pressure_pa, liquid_row, vapor_row in zip(
+            temperatures, pressures, liquid, vapor
+        )
+    )
+    return NRTLColumnEnthalpyProfile(
+        tuple(result.liquid_j_per_kmol for result in results),
+        tuple(result.vapor_j_per_kmol for result in results),
+        tuple(result.liquid_density_kg_per_m3 for result in results),
+        tuple(result.excess_enthalpy_j_per_kmol for result in results),
     )
 
 

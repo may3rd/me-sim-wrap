@@ -1,5 +1,5 @@
 {
-  "schema_version": "nrtl-vle-data-1",
+  "schema_version": "nrtl-vle-data-2",
   "model": "NRTL",
   "provenance": {
     "source": "tests/u7-distillation-acetone-nrtl.dwxmz saved compound records and InteractionParameters_NRTL",
@@ -31,6 +31,82 @@
       "minimum_k": 175.47,
       "maximum_k": 512.64,
       "unit": "Pa"
+    }
+  ],
+  "caloric_correlations": [
+    {
+      "compound_id": "Methanol",
+      "molecular_weight": {"value": 32.042, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 512.64, "unit": "K"},
+      "critical_pressure": {"value": 8097000, "unit": "Pa"},
+      "acentric_factor": {"value": 0.565, "unit": "dimensionless"},
+      "minimum_k": 298.15,
+      "maximum_k": 450.0,
+      "ideal_gas_heat_capacity": {
+        "equation": 16,
+        "A": 36313.16,
+        "B": -680.4577,
+        "C": 11.10203,
+        "D": 0.000757,
+        "E": 0.0,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 58058000,
+        "B": 0.87168,
+        "C": -0.81501,
+        "D": 0.1695,
+        "E": 0.17846,
+        "unit": "J/kmol"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.7918,
+        "B": 0.23929,
+        "C": 512.64,
+        "D": 0.21078,
+        "E": 0.0,
+        "unit": "kmol/m3",
+        "pressure_correction": "Thomson-1982"
+      }
+    },
+    {
+      "compound_id": "Acetone",
+      "molecular_weight": {"value": 58.08, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 508.1, "unit": "K"},
+      "critical_pressure": {"value": 4700000, "unit": "Pa"},
+      "acentric_factor": {"value": 0.307, "unit": "dimensionless"},
+      "minimum_k": 298.15,
+      "maximum_k": 450.0,
+      "ideal_gas_heat_capacity": {
+        "equation": 16,
+        "A": 52915,
+        "B": -669.27,
+        "C": 12.201,
+        "D": 0.000128,
+        "E": 0.0,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 66943000,
+        "B": 3.4736,
+        "C": -8.9271,
+        "D": 10.062,
+        "E": -4.1656,
+        "unit": "J/kmol"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.1051,
+        "B": 0.24556,
+        "C": 508.21,
+        "D": 0.27409,
+        "E": 0.0,
+        "unit": "kmol/m3",
+        "pressure_correction": "Thomson-1982"
+      }
     }
   ],
   "interactions": [

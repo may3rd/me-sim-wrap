@@ -18,6 +18,8 @@ from mesim.thermo.activity import (
     nrtl_bubble_temperature,
     nrtl_dew_pressure,
     nrtl_equilibrium_ratios,
+    nrtl_excess_enthalpy,
+    nrtl_phase_enthalpies,
 )
 
 
@@ -155,6 +157,41 @@ class NRTLActivityTest(unittest.TestCase):
         )
         self.assertFalse(exhausted_temperature.converged)
 
+        enthalpies = nrtl_phase_enthalpies(
+            self.data,
+            ("Acetone", "Methanol"),
+            (0.7, 0.3),
+            (0.8, 0.2),
+            388.0,
+            600_000.0,
+        )
+        self.assertLess(enthalpies.liquid_j_per_kmol, enthalpies.vapor_j_per_kmol)
+        self.assertGreater(enthalpies.liquid_density_kg_per_m3, 0.0)
+        self.assertEqual(
+            enthalpies.excess_enthalpy_j_per_kmol,
+            nrtl_excess_enthalpy(
+                self.data, ("Acetone", "Methanol"), (0.7, 0.3), 388.0
+            ),
+        )
+        with self.assertRaises(ValidationError):
+            nrtl_phase_enthalpies(
+                self.data,
+                ("Acetone", "Methanol"),
+                (0.7, 0.3),
+                (0.8, 0.2),
+                500.0,
+                600_000.0,
+            )
+        with self.assertRaises(ValidationError):
+            nrtl_phase_enthalpies(
+                self.data,
+                ("Acetone", "Methanol"),
+                (0.7, 0.3),
+                (0.8, 0.2),
+                388.0,
+                0.0,
+            )
+
     def test_loader_rejects_invalid_units_duplicates_ranges_and_provenance(self):
         source = json.loads(
             (ROOT / "data/correlations/nrtl-acetone-methanol-v1.json").read_text(encoding="utf-8")
@@ -172,6 +209,20 @@ class NRTLActivityTest(unittest.TestCase):
         bad_range = copy.deepcopy(source)
         bad_range["vapor_pressure_correlations"][0]["minimum_k"] = -1.0
         mutations.append(bad_range)
+
+        bad_caloric_unit = copy.deepcopy(source)
+        bad_caloric_unit["caloric_correlations"][0]["heat_of_vaporization"]["unit"] = "kJ/kmol"
+        mutations.append(bad_caloric_unit)
+
+        duplicate_caloric = copy.deepcopy(source)
+        duplicate_caloric["caloric_correlations"].append(
+            copy.deepcopy(duplicate_caloric["caloric_correlations"][0])
+        )
+        mutations.append(duplicate_caloric)
+
+        mismatched_domain = copy.deepcopy(source)
+        mismatched_domain["caloric_correlations"][0]["compound_id"] = "Not Methanol"
+        mutations.append(mismatched_domain)
 
         local_time = copy.deepcopy(source)
         local_time["provenance"]["imported_utc"] = "2026-07-18T10:17:02"

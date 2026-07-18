@@ -44,6 +44,20 @@ class NRTLVaporPressure:
 
 
 @dataclass(frozen=True)
+class NRTLCaloricRecord:
+    compound_id: str
+    molecular_weight_kg_per_kmol: float
+    critical_temperature_k: float
+    critical_pressure_pa: float
+    acentric_factor: float
+    ideal_gas_heat_capacity_coefficients: tuple[float, float, float, float, float]
+    heat_of_vaporization_coefficients: tuple[float, float, float, float, float]
+    liquid_density_coefficients: tuple[float, float, float, float, float]
+    minimum_k: float
+    maximum_k: float
+
+
+@dataclass(frozen=True)
 class NRTLInteraction:
     compound_1: str
     compound_2: str
@@ -59,6 +73,7 @@ class NRTLInteraction:
 @dataclass(frozen=True)
 class NRTLVLEData:
     vapor_pressures: tuple[NRTLVaporPressure, ...]
+    calorics: tuple[NRTLCaloricRecord, ...]
     interactions: tuple[NRTLInteraction, ...]
     provenance: NRTLProvenance
 
@@ -67,6 +82,12 @@ class NRTLVLEData:
             if correlation.compound_id == compound_id:
                 return correlation
         raise MissingCompoundData(f"missing NRTL VLE vapor-pressure data: {compound_id}")
+
+    def caloric(self, compound_id: str) -> NRTLCaloricRecord:
+        for record in self.calorics:
+            if record.compound_id == compound_id:
+                return record
+        raise MissingCompoundData(f"missing NRTL caloric data: {compound_id}")
 
     def interaction(self, first: str, second: str) -> NRTLInteraction:
         for interaction in self.interactions:
@@ -104,6 +125,16 @@ class NRTLVLEResult:
     activity_coefficients: tuple[float, ...]
 
 
+@dataclass(frozen=True)
+class NRTLPhaseEnthalpies:
+    liquid_j_per_kmol: float
+    vapor_j_per_kmol: float
+    liquid_molecular_weight_kg_per_kmol: float
+    vapor_molecular_weight_kg_per_kmol: float
+    liquid_density_kg_per_m3: float
+    excess_enthalpy_j_per_kmol: float
+
+
 def _number(value, name: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
         raise ValidationError(f"{name} must be finite numeric data")
@@ -119,7 +150,7 @@ def _quantity(record: dict, name: str, unit: str) -> float:
 def load_nrtl_vle_data(path: str | Path) -> NRTLVLEData:
     try:
         document = json.loads(Path(path).read_text(encoding="utf-8-sig"))
-        if document["schema_version"] != "nrtl-vle-data-1" or document["model"] != "NRTL":
+        if document["schema_version"] != "nrtl-vle-data-2" or document["model"] != "NRTL":
             raise ValidationError("unsupported NRTL VLE data schema or model")
         provenance = NRTLProvenance(**document["provenance"])
         vapor_pressures = tuple(
@@ -134,6 +165,41 @@ def load_nrtl_vle_data(path: str | Path) -> NRTLVLEData:
         )
         if len(vapor_pressures) != len(document["vapor_pressure_correlations"]):
             raise ValidationError("NRTL VLE vapor pressures must use equation 101 in Pa")
+        calorics = tuple(
+            NRTLCaloricRecord(
+                record["compound_id"],
+                _quantity(record["molecular_weight"], "molecular_weight", "kg/kmol"),
+                _quantity(record["critical_temperature"], "critical_temperature", "K"),
+                _quantity(record["critical_pressure"], "critical_pressure", "Pa"),
+                _quantity(record["acentric_factor"], "acentric_factor", "dimensionless"),
+                tuple(
+                    _number(record["ideal_gas_heat_capacity"][key], f"ideal_gas_heat_capacity.{key}")
+                    for key in "ABCDE"
+                ),
+                tuple(
+                    _number(record["heat_of_vaporization"][key], f"heat_of_vaporization.{key}")
+                    for key in "ABCDE"
+                ),
+                tuple(
+                    _number(record["liquid_density"][key], f"liquid_density.{key}")
+                    for key in "ABCDE"
+                ),
+                _number(record["minimum_k"], f"{record['compound_id']}.caloric.minimum_k"),
+                _number(record["maximum_k"], f"{record['compound_id']}.caloric.maximum_k"),
+            )
+            for record in document["caloric_correlations"]
+            if (
+                record["ideal_gas_heat_capacity"]["equation"] == 16
+                and record["ideal_gas_heat_capacity"]["unit"] == "J/kmol/K"
+                and record["heat_of_vaporization"]["equation"] == 106
+                and record["heat_of_vaporization"]["unit"] == "J/kmol"
+                and record["liquid_density"]["equation"] == 105
+                and record["liquid_density"]["unit"] == "kmol/m3"
+                and record["liquid_density"]["pressure_correction"] == "Thomson-1982"
+            )
+        )
+        if len(calorics) != len(document["caloric_correlations"]):
+            raise ValidationError("NRTL caloric correlations use unsupported equations, units, or density mode")
         interactions = tuple(
             NRTLInteraction(
                 record["compound_1"],
@@ -163,10 +229,12 @@ def load_nrtl_vle_data(path: str | Path) -> NRTLVLEData:
         raise ValidationError("NRTL VLE imported_utc must be UTC")
     if len({record.compound_id for record in vapor_pressures}) != len(vapor_pressures):
         raise ValidationError("NRTL VLE vapor-pressure compound IDs must be unique")
+    if len({record.compound_id for record in calorics}) != len(calorics):
+        raise ValidationError("NRTL caloric compound IDs must be unique")
     if len({(record.compound_1, record.compound_2) for record in interactions}) != len(interactions):
         raise ValidationError("directed NRTL interaction pairs must be unique")
-    if not vapor_pressures or not interactions:
-        raise ValidationError("NRTL VLE data must include correlations and interactions")
+    if not vapor_pressures or not calorics or not interactions:
+        raise ValidationError("NRTL data must include VLE, caloric, and interaction records")
     for record in vapor_pressures:
         if not record.compound_id or record.minimum_k <= 0 or record.maximum_k <= record.minimum_k:
             raise ValidationError("invalid NRTL VLE vapor-pressure range")
@@ -175,7 +243,21 @@ def load_nrtl_vle_data(path: str | Path) -> NRTLVLEData:
             raise ValidationError("NRTL interaction compound IDs must be non-empty and distinct")
         if record.alpha12 < 0:
             raise ValidationError("NRTL alpha12 must be nonnegative")
-    return NRTLVLEData(vapor_pressures, interactions, provenance)
+    for record in calorics:
+        if (
+            not record.compound_id
+            or record.molecular_weight_kg_per_kmol <= 0
+            or record.critical_temperature_k <= 0
+            or record.critical_pressure_pa <= 0
+            or record.minimum_k <= 0
+            or record.maximum_k <= record.minimum_k
+        ):
+            raise ValidationError("invalid NRTL caloric record")
+    if {record.compound_id for record in calorics} != {
+        record.compound_id for record in vapor_pressures
+    }:
+        raise ValidationError("NRTL VLE and caloric compound domains must match")
+    return NRTLVLEData(vapor_pressures, calorics, interactions, provenance)
 
 
 def _validate_state(compound_ids, composition, temperature_k: float) -> tuple[tuple[str, ...], tuple[float, ...]]:
@@ -254,6 +336,210 @@ def nrtl_activity_coefficients(
             raise ValidationError("NRTL activity coefficient must be finite and positive")
         coefficients.append(gamma)
     return tuple(coefficients)
+
+
+def _adaptive_simpson(function, start: float, end: float) -> float:
+    if start == end:
+        return 0.0
+    middle = (start + end) / 2.0
+    first, center, last = function(start), function(middle), function(end)
+    whole = (end - start) * (first + 4.0 * center + last) / 6.0
+
+    def refine(left, right, f_left, f_middle, f_right, estimate, tolerance, depth):
+        center = (left + right) / 2.0
+        left_center = (left + center) / 2.0
+        right_center = (center + right) / 2.0
+        f_left_center = function(left_center)
+        f_right_center = function(right_center)
+        left_estimate = (center - left) * (f_left + 4.0 * f_left_center + f_middle) / 6.0
+        right_estimate = (right - center) * (f_middle + 4.0 * f_right_center + f_right) / 6.0
+        error = left_estimate + right_estimate - estimate
+        if depth == 0:
+            raise ValidationError("NRTL caloric integration did not converge")
+        if abs(error) <= 15.0 * tolerance:
+            return left_estimate + right_estimate + error / 15.0
+        return refine(
+            left, center, f_left, f_left_center, f_middle,
+            left_estimate, tolerance / 2.0, depth - 1,
+        ) + refine(
+            center, right, f_middle, f_right_center, f_right,
+            right_estimate, tolerance / 2.0, depth - 1,
+        )
+
+    return refine(
+        start,
+        end,
+        first,
+        center,
+        last,
+        whole,
+        max(1.0e-8, abs(whole) * 1.0e-12),
+        20,
+    )
+
+
+def _caloric_temperature(record: NRTLCaloricRecord, temperature_k: float) -> None:
+    if not record.minimum_k <= temperature_k <= record.maximum_k:
+        raise ValidationError(
+            f"{record.compound_id} caloric state is outside "
+            f"{record.minimum_k:g}..{record.maximum_k:g} K"
+        )
+
+
+def _ideal_enthalpy_change(record: NRTLCaloricRecord, temperature_k: float) -> float:
+    reference_k = 298.15
+    _caloric_temperature(record, reference_k)
+    _caloric_temperature(record, temperature_k)
+
+    def heat_capacity(value: float) -> float:
+        a, b, c, d, e = record.ideal_gas_heat_capacity_coefficients
+        try:
+            result = a + math.exp(b / value + c + d * value + e * value**2)
+        except OverflowError as error:
+            raise ValidationError("ideal-gas heat capacity is outside the representable range") from error
+        if not math.isfinite(result) or result <= 0:
+            raise ValidationError("ideal-gas heat capacity must be positive and finite")
+        return result
+
+    return _adaptive_simpson(heat_capacity, reference_k, temperature_k)
+
+
+def _heat_of_vaporization(record: NRTLCaloricRecord, temperature_k: float) -> float:
+    reduced = temperature_k / record.critical_temperature_k
+    if reduced >= 1.0:
+        return 0.0
+    a, b, c, d, e = record.heat_of_vaporization_coefficients
+    try:
+        result = a * (1.0 - reduced) ** (
+            b + c * reduced + d * reduced**2 + e * reduced**3
+        )
+    except (OverflowError, ValueError) as error:
+        raise ValidationError("heat of vaporization is outside the representable range") from error
+    if not math.isfinite(result) or result < 0:
+        raise ValidationError("heat of vaporization must be nonnegative and finite")
+    return result
+
+
+def nrtl_excess_enthalpy(
+    data: NRTLVLEData,
+    compound_ids,
+    liquid_composition,
+    temperature_k: float,
+) -> float:
+    """Reproduce DWSIM's NRTL excess-enthalpy source equation in J/kmol."""
+    ids, fractions = _validate_state(compound_ids, liquid_composition, temperature_k)
+    epsilon_k = 0.001
+    first = nrtl_activity_coefficients(data, ids, fractions, temperature_k)
+    second = nrtl_activity_coefficients(data, ids, fractions, temperature_k + epsilon_k)
+    # DWSIM's implementation differentiates gamma itself despite the routine's
+    # DLNGAMMA_DT name. Preserve that executable equation for golden parity.
+    value = -8.314 * temperature_k**2 * math.fsum(
+        fraction * (next_gamma - gamma) / epsilon_k
+        for fraction, gamma, next_gamma in zip(fractions, first, second)
+    ) * 1000.0
+    if not math.isfinite(value):
+        raise ValidationError("NRTL excess enthalpy must be finite")
+    return value
+
+
+def _compressed_liquid_density(
+    data: NRTLVLEData,
+    record: NRTLCaloricRecord,
+    temperature_k: float,
+    pressure_pa: float,
+) -> float:
+    _caloric_temperature(record, temperature_k)
+    a, b, c, d, _ = record.liquid_density_coefficients
+    if b <= 0 or c <= 0 or temperature_k >= c:
+        raise ValidationError("NRTL liquid-density correlation state is invalid")
+    try:
+        molar_density_kmol_per_m3 = a / b ** (1.0 + (1.0 - temperature_k / c) ** d)
+        saturated_density = record.molecular_weight_kg_per_kmol * molar_density_kmol_per_m3
+        reduced = temperature_k / record.critical_temperature_k
+        one_minus = 1.0 - reduced
+        exponential = math.exp(
+            4.79594
+            + 0.250047 * record.acentric_factor
+            + 1.14188 * record.acentric_factor**2
+        )
+        beta = record.critical_pressure_pa * (
+            1.0
+            - 9.070217 * one_minus ** (1.0 / 3.0)
+            + 62.45326 * one_minus ** (2.0 / 3.0)
+            - 135.1102 * one_minus
+            + exponential * one_minus ** (4.0 / 3.0)
+        )
+        vapor_pressure = data.vapor_pressure(record.compound_id).evaluate(temperature_k)
+        correction = 1.0 / (
+            1.0
+            - (0.0861488 + 0.0344483 * record.acentric_factor)
+            * math.log((beta + pressure_pa) / (beta + vapor_pressure))
+        )
+        density = saturated_density * correction
+    except (OverflowError, ValueError, ZeroDivisionError) as error:
+        raise ValidationError("compressed-liquid density is outside the representable range") from error
+    if not math.isfinite(density) or density <= 0:
+        raise ValidationError("compressed-liquid density must be positive and finite")
+    return density
+
+
+def nrtl_phase_enthalpies(
+    data: NRTLVLEData,
+    compound_ids,
+    liquid_composition,
+    vapor_composition,
+    temperature_k: float,
+    pressure_pa: float,
+) -> NRTLPhaseEnthalpies:
+    """Return DWSIM-Excess-mode phase enthalpies on one J/kmol basis."""
+    if not isinstance(data, NRTLVLEData):
+        raise ValidationError("NRTL VLE data is required")
+    ids, liquid = _validate_state(compound_ids, liquid_composition, temperature_k)
+    vapor_ids, vapor = _validate_state(compound_ids, vapor_composition, temperature_k)
+    if ids != vapor_ids or not math.isfinite(pressure_pa) or pressure_pa <= 0:
+        raise ValidationError("NRTL phase-enthalpy state is invalid")
+    records = tuple(data.caloric(compound_id) for compound_id in ids)
+    for record in records:
+        _caloric_temperature(record, temperature_k)
+    ideal = tuple(_ideal_enthalpy_change(record, temperature_k) for record in records)
+    liquid_molecular_weight = math.fsum(
+        fraction * record.molecular_weight_kg_per_kmol
+        for fraction, record in zip(liquid, records)
+    )
+    vapor_molecular_weight = math.fsum(
+        fraction * record.molecular_weight_kg_per_kmol
+        for fraction, record in zip(vapor, records)
+    )
+    pure_densities = tuple(
+        _compressed_liquid_density(data, record, temperature_k, pressure_pa)
+        for record in records
+    )
+    liquid_density = 1.0 / math.fsum(
+        fraction / density for fraction, density in zip(liquid, pure_densities)
+    )
+    excess = nrtl_excess_enthalpy(data, ids, liquid, temperature_k)
+    liquid_enthalpy = (
+        math.fsum(
+            fraction * (ideal_value - _heat_of_vaporization(record, temperature_k))
+            for fraction, ideal_value, record in zip(liquid, ideal, records)
+        )
+        + pressure_pa * liquid_molecular_weight / liquid_density
+        + excess
+    )
+    vapor_enthalpy = math.fsum(
+        fraction * ideal_value for fraction, ideal_value in zip(vapor, ideal)
+    )
+    values = (
+        liquid_enthalpy,
+        vapor_enthalpy,
+        liquid_molecular_weight,
+        vapor_molecular_weight,
+        liquid_density,
+        excess,
+    )
+    if any(not math.isfinite(value) for value in values):
+        raise ValidationError("NRTL phase enthalpies must be finite")
+    return NRTLPhaseEnthalpies(*values)
 
 
 def nrtl_bubble_pressure(
