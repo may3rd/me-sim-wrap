@@ -1,0 +1,56 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "ideal-raoult-ethylene-oxide-water-tp",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "381eff11e97f3daf7ab029551c7d98df8560921d68c058c12d8a15e698ce58f1",
+                   "property_package":  "Raoult\u0027s Law",
+                   "property_package_class":  "DWSIM.Thermodynamics.PropertyPackages.RaoultPropertyPackage",
+                   "flash_algorithm":  "Universal Flash"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "Ethylene oxide",
+                                     "Water",
+                                     "Ethylene glycol"
+                                 ],
+                   "temperature_k":  328.15,
+                   "pressure_pa":  96368.0610854724,
+                   "composition":  [
+                                       0.35,
+                                       0.65,
+                                       0
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         4.7034647444649975,
+                                                         0.16377931593297279,
+                                                         0.0013965152268445014
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        1,
+                                                        1,
+                                                        1
+                                                    ],
+                    "liquid_fraction":  0.75696173729066407,
+                    "vapor_fraction":  0.2430382627093359,
+                    "liquid_composition":  [
+                                               0.18420243731587743,
+                                               0.81579756268412251,
+                                               0
+                                           ],
+                    "vapor_composition":  [
+                                              0.86638929156701272,
+                                              0.13361070843298739,
+                                              0
+                                          ],
+                    "iterations":  1,
+                    "equilibrium_ratios":  [
+                                               4.7034647444649975,
+                                               0.16377931593297279,
+                                               0.0013965152268445014
+                                           ]
+                }
+}

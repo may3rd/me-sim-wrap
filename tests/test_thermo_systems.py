@@ -17,9 +17,11 @@ from mesim.thermo.activity import (
 from mesim.thermo.flash import flash_enthalpy, tp_flash
 from mesim.thermo.ideal import load_correlations
 from mesim.thermo.systems import (
+    IDEAL_RAOULT,
     NRTL_ACETONE_METHANOL,
     PENG_ROBINSON_CLASSIC,
     THERMO_SYSTEM_CONSTRUCTORS,
+    IdealRaoultSystem,
     NRTLSystem,
     PengRobinsonSystem,
     ThermodynamicSystem,
@@ -44,7 +46,7 @@ class ThermodynamicSystemTest(unittest.TestCase):
     def test_registry_has_stable_non_plugin_model_ids(self):
         self.assertEqual(
             set(THERMO_SYSTEM_CONSTRUCTORS),
-            {PENG_ROBINSON_CLASSIC, NRTL_ACETONE_METHANOL},
+            {PENG_ROBINSON_CLASSIC, NRTL_ACETONE_METHANOL, IDEAL_RAOULT},
         )
         with self.assertRaises(TypeError):
             THERMO_SYSTEM_CONSTRUCTORS["runtime-plugin"] = object
@@ -124,6 +126,27 @@ class ThermodynamicSystemTest(unittest.TestCase):
                 pressure_pa,
             ),
             expected_enthalpies,
+        )
+
+    def test_ideal_raoult_system_preserves_direct_equilibrium(self):
+        catalog = {record.compound_id: record for record in self.correlations}
+        correlations = (catalog["Methane"], catalog["Ethane"])
+        system = create_thermo_system(IDEAL_RAOULT, correlations=correlations)
+        self.assertIsInstance(system, IdealRaoultSystem)
+        self.assertIsInstance(system, ThermodynamicSystem)
+        self.assertEqual(system.compound_ids, ("Methane", "Ethane"))
+
+        temperature_k = 180.0
+        pressure_pa = 500_000.0
+        self.assertEqual(
+            system.fugacity_coefficients(temperature_k, pressure_pa, "vapor"),
+            (1.0, 1.0),
+        )
+        bubble = system.bubble_pressure((0.7, 0.3), temperature_k)
+        self.assertTrue(bubble.report.converged)
+        self.assertEqual(
+            bubble.equilibrium_ratios,
+            system.equilibrium_ratios(temperature_k, bubble.pressure_pa),
         )
 
     def test_systems_reject_incomplete_or_mismatched_domains(self):

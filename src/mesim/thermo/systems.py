@@ -29,11 +29,21 @@ from .flash import (
 )
 from .ideal import IdealCorrelations
 from .pure import SaturatedLiquidCorrelations
+from .raoult import (
+    RaoultTPFlashResult,
+    RaoultVLEResult,
+    raoult_bubble_pressure,
+    raoult_dew_pressure,
+    raoult_equilibrium_ratios,
+    raoult_fugacity_coefficients,
+    raoult_tp_flash,
+)
 from .transport import TransportRecord
 
 
 PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
 NRTL_ACETONE_METHANOL = "nrtl-acetone-methanol"
+IDEAL_RAOULT = "ideal-raoult"
 
 
 @runtime_checkable
@@ -300,10 +310,121 @@ class NRTLSystem:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class IdealRaoultSystem:
+    """Ideal Raoult-law equilibrium over an ordered pure-correlation domain."""
+
+    correlations: tuple[IdealCorrelations, ...]
+    model_id: str = field(default=IDEAL_RAOULT, init=False)
+    compound_ids: tuple[str, ...] = field(init=False)
+
+    def __post_init__(self) -> None:
+        try:
+            correlations = tuple(self.correlations)
+        except TypeError as error:
+            raise ValidationError(
+                "Raoult thermodynamic-system correlations must be a sequence"
+            ) from error
+        if (
+            not correlations
+            or any(not isinstance(record, IdealCorrelations) for record in correlations)
+        ):
+            raise ValidationError("Raoult thermodynamic-system correlations are invalid")
+        compound_ids = tuple(record.compound_id for record in correlations)
+        if (
+            len(set(compound_ids)) != len(compound_ids)
+            or any(not isinstance(value, str) or not value for value in compound_ids)
+        ):
+            raise ValidationError(
+                "Raoult thermodynamic-system compound IDs must be non-empty and unique"
+            )
+        object.__setattr__(self, "correlations", correlations)
+        object.__setattr__(self, "compound_ids", compound_ids)
+
+    def equilibrium_ratios(
+        self,
+        temperature_k: float,
+        pressure_pa: float,
+        *,
+        allow_extrapolation: bool = False,
+    ) -> tuple[float, ...]:
+        return raoult_equilibrium_ratios(
+            self.correlations,
+            temperature_k,
+            pressure_pa,
+            allow_extrapolation=allow_extrapolation,
+        )
+
+    def fugacity_coefficients(
+        self,
+        temperature_k: float,
+        pressure_pa: float,
+        phase: str,
+        *,
+        allow_extrapolation: bool = False,
+    ) -> tuple[float, ...]:
+        return raoult_fugacity_coefficients(
+            self.correlations,
+            temperature_k,
+            pressure_pa,
+            phase,
+            allow_extrapolation=allow_extrapolation,
+        )
+
+    def bubble_pressure(
+        self,
+        liquid_composition: tuple[float, ...],
+        temperature_k: float,
+        *,
+        allow_extrapolation: bool = False,
+    ) -> RaoultVLEResult:
+        return raoult_bubble_pressure(
+            self.correlations,
+            liquid_composition,
+            temperature_k,
+            allow_extrapolation=allow_extrapolation,
+        )
+
+    def dew_pressure(
+        self,
+        vapor_composition: tuple[float, ...],
+        temperature_k: float,
+        *,
+        allow_extrapolation: bool = False,
+    ) -> RaoultVLEResult:
+        return raoult_dew_pressure(
+            self.correlations,
+            vapor_composition,
+            temperature_k,
+            allow_extrapolation=allow_extrapolation,
+        )
+
+    def tp_flash(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+        *,
+        max_iterations: int = 100,
+        tolerance: float = 1.0e-12,
+        allow_extrapolation: bool = False,
+    ) -> RaoultTPFlashResult:
+        return raoult_tp_flash(
+            self.correlations,
+            composition,
+            temperature_k,
+            pressure_pa,
+            max_iterations=max_iterations,
+            tolerance=tolerance,
+            allow_extrapolation=allow_extrapolation,
+        )
+
+
 ThermoSystemConstructor = Callable[..., ThermodynamicSystem]
 _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_CLASSIC: PengRobinsonSystem,
     NRTL_ACETONE_METHANOL: NRTLSystem,
+    IDEAL_RAOULT: IdealRaoultSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS

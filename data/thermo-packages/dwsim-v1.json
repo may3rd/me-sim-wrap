@@ -185,8 +185,8 @@
       "dwsim_class": "RaoultPropertyPackage",
       "family": "ideal-mixture",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/Ideal.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["ideal-raoult"]
     },
     {
       "id": "lee-kesler-plocker",
