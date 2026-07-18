@@ -45,6 +45,7 @@ class PureComponentCorrelationTest(unittest.TestCase):
 
     def test_all_catalog_compounds_have_all_extracted_property_families(self):
         expected = set(self.compounds)
+        self.assertEqual(len(expected), 391)
         self.assertEqual(set(self.ideal), expected)
         self.assertEqual(set(self.transport), expected)
         self.assertEqual(set(self.saturated), expected)
@@ -56,6 +57,32 @@ class PureComponentCorrelationTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_every_extracted_correlation_has_a_positive_midpoint_value(self):
+        for record in self.ideal.values():
+            for correlation, evaluate in (
+                (record.heat_capacity_correlation, record.heat_capacity),
+                (record.vapor_pressure_correlation, record.vapor_pressure),
+            ):
+                evaluate((correlation.minimum_k + correlation.maximum_k) / 2.0)
+        for record in self.saturated.values():
+            for correlation, evaluate in (
+                (record.liquid_density_correlation, record.liquid_molar_density),
+                (record.liquid_heat_capacity_correlation, record.liquid_heat_capacity),
+                (record.heat_of_vaporization_correlation, record.heat_of_vaporization),
+                (record.surface_tension_correlation, record.surface_tension),
+            ):
+                evaluate((correlation.minimum_k + correlation.maximum_k) / 2.0)
+        for record in self.transport.values():
+            for correlation in (
+                record.liquid_viscosity,
+                record.vapor_viscosity,
+                record.liquid_thermal_conductivity,
+                record.vapor_thermal_conductivity,
+            ):
+                correlation.value(
+                    (correlation.minimum_k + correlation.maximum_k) / 2.0
+                )
 
     def test_extracted_properties_match_dwsim_catalog_evaluation(self):
         captured = json.loads(

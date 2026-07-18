@@ -6,11 +6,11 @@ The wheel installs these records under `share/mesim/data`; a source checkout use
 
 | Artifact | Schema | Primary source | Frozen revision | Verification |
 |---|---|---|---|---|
-| `data/compounds/v1.json` | `compound-data-1` | DWSIM `AvailableCompounds`, primarily ChemSep records | DWSIM 9.0.4, 9.0.5, and the explicit DWSIM 10 Acetone record | Loader schema, uniqueness, physical-field, and captured-value tests |
-| `data/interactions/pr-v1.json` | `pr-interactions-1` | `dwsim-windows/DWSIM.Thermodynamics/Assets/pr_ip.dat` | DWSIM 9.0.5.0 | Symmetry, compound-key, and PR mixture gates |
-| `data/correlations/ideal-v1.json` | `ideal-correlations-1` | Vendored ChemSep `chemsep1.xml` | DWSIM 9.0.4 | All 14 catalog compounds; range, equation-vector, and DWSIM property gates |
-| `data/correlations/transport-v1.json` | `transport-correlations-2` | Vendored ChemSep `chemsep1.xml` | DWSIM 9.0.4 | All 14 catalog compounds; both phase viscosities and thermal conductivities evaluated against DWSIM |
-| `data/correlations/saturated-liquid-v1.json` | `saturated-liquid-correlations-1` | Vendored ChemSep `chemsep1.xml` | DWSIM 9.0.4 | All 14 catalog compounds; density, heat capacity, heat of vaporization, and surface tension evaluated against DWSIM |
+| `data/compounds/v1.json` | `compound-data-1` | Vendored ChemSep `chemsep1.xml` | DWSIM 9.0.4 | 391 case-distinct fully supported records; loader schema, uniqueness, physical-field, and DWSIM captured-value tests |
+| `data/interactions/pr-v1.json` | `pr-interactions-1` | `dwsim-windows/DWSIM.Thermodynamics/Assets/pr_ip.dat` | DWSIM 9.0.5.0 | 180 first-source pairs plus 16 accepted explicit-zero closures; symmetry, compound-key, and PR mixture gates |
+| `data/correlations/ideal-v1.json` | `ideal-correlations-1` | Vendored ChemSep `chemsep1.xml` | DWSIM 9.0.4 | All 391 supported catalog compounds; range, midpoint, equation-vector, and representative DWSIM property gates |
+| `data/correlations/transport-v1.json` | `transport-correlations-2` | Vendored ChemSep `chemsep1.xml` | DWSIM 9.0.4 | All 391 supported catalog compounds; positive midpoint checks and representative DWSIM phase transport parity |
+| `data/correlations/saturated-liquid-v1.json` | `saturated-liquid-correlations-1` | Vendored ChemSep `chemsep1.xml` | DWSIM 9.0.4 | All 391 supported catalog compounds; positive midpoint checks and representative DWSIM density, heat-capacity, vaporization, and surface-tension parity |
 | `data/correlations/nrtl-acetone-methanol-v1.json` | `nrtl-vle-data-2` | Saved COCO compound records, phase-caloric correlations, and ChemSep NRTL parameters inside the accepted pressure-swing column | DWSIM 10.0.9671.22371 case SHA-256 recorded in the file | Unit/schema rejection, equation vectors, deterministic NRTL envelope goldens, and all-stage caloric parity |
 | `data/reactions/v1.json` | `reaction-data-1` | DWSIM isomerization, Gibbs/equilibrium, ethylene-glycol, and methanol-carbonylation reactor samples | DWSIM 9.0.5.0 | Element balance, formation-property consistency, original kinetic units, and reactor goldens |
 

@@ -5,51 +5,1185 @@
   "provenance": {
     "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/pr_ip.dat",
     "source_revision": "9.0.5.0",
-    "selection": "first entry loaded by DWSIM for each selected pair; explicit zero for absent steam-reforming and methanol-column pairs",
-    "imported_utc": "2026-07-17T09:00:00Z"
+    "selection": "first entry loaded by DWSIM for each supported pair; explicit zero for absent accepted steam-reforming and methanol-column pairs",
+    "imported_utc": "2026-07-18T00:00:00Z"
   },
   "pairs": [
-    {"compound_1": "Methane", "compound_2": "Ethane", "kij": -0.0033, "unit": "dimensionless"},
-    {"compound_1": "Methane", "compound_2": "Propane", "kij": 0.0119, "unit": "dimensionless"},
-    {"compound_1": "Methane", "compound_2": "N-butane", "kij": 0.0244, "unit": "dimensionless"},
-    {"compound_1": "Methane", "compound_2": "N-pentane", "kij": 0.023, "unit": "dimensionless"},
-    {"compound_1": "Ethane", "compound_2": "Propane", "kij": 0.0011, "unit": "dimensionless"},
-    {"compound_1": "Ethane", "compound_2": "N-butane", "kij": 0.0089, "unit": "dimensionless"},
-    {"compound_1": "Ethane", "compound_2": "N-pentane", "kij": 0.0078, "unit": "dimensionless"},
-    {"compound_1": "Propane", "compound_2": "N-butane", "kij": 0.0033, "unit": "dimensionless"},
-    {"compound_1": "Propane", "compound_2": "N-pentane", "kij": 0.0267, "unit": "dimensionless"},
-    {"compound_1": "N-butane", "compound_2": "N-pentane", "kij": 0.0174, "unit": "dimensionless"},
-    {"compound_1": "Hydrogen", "compound_2": "Carbon monoxide", "kij": 0.0919, "unit": "dimensionless"},
-    {"compound_1": "Hydrogen", "compound_2": "Methane", "kij": 0.0263, "unit": "dimensionless"},
-    {"compound_1": "Hydrogen", "compound_2": "Carbon dioxide", "kij": -0.1622, "unit": "dimensionless"},
-    {"compound_1": "Carbon monoxide", "compound_2": "Methane", "kij": 0.03, "unit": "dimensionless"},
-    {"compound_1": "Methane", "compound_2": "Carbon dioxide", "kij": 0.0793, "unit": "dimensionless"},
-    {"compound_1": "Water", "compound_2": "Carbon dioxide", "kij": -0.12155, "unit": "dimensionless"},
-    {"compound_1": "Water", "compound_2": "Methane", "kij": 0.5, "unit": "dimensionless"},
-    {"compound_1": "Hydrogen", "compound_2": "Water", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Carbon monoxide", "compound_2": "Carbon dioxide", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Carbon monoxide", "compound_2": "Water", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Hydrogen", "compound_2": "Nitrogen", "kij": 0.0711, "unit": "dimensionless"},
-    {"compound_1": "Hydrogen", "compound_2": "Argon", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Hydrogen", "compound_2": "Oxygen", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Hydrogen", "compound_2": "Methanol", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Nitrogen", "compound_2": "Carbon monoxide", "kij": 0.033, "unit": "dimensionless"},
-    {"compound_1": "Nitrogen", "compound_2": "Argon", "kij": -0.0026, "unit": "dimensionless"},
-    {"compound_1": "Nitrogen", "compound_2": "Oxygen", "kij": -0.0159, "unit": "dimensionless"},
-    {"compound_1": "Nitrogen", "compound_2": "Water", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Nitrogen", "compound_2": "Methanol", "kij": -0.2141, "unit": "dimensionless"},
-    {"compound_1": "Nitrogen", "compound_2": "Carbon dioxide", "kij": -0.0222, "unit": "dimensionless"},
-    {"compound_1": "Carbon monoxide", "compound_2": "Argon", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Carbon monoxide", "compound_2": "Oxygen", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Carbon monoxide", "compound_2": "Methanol", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Argon", "compound_2": "Oxygen", "kij": 0.0107, "unit": "dimensionless"},
-    {"compound_1": "Argon", "compound_2": "Water", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Argon", "compound_2": "Methanol", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Argon", "compound_2": "Carbon dioxide", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Oxygen", "compound_2": "Water", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Oxygen", "compound_2": "Methanol", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Oxygen", "compound_2": "Carbon dioxide", "kij": 0.0, "unit": "dimensionless"},
-    {"compound_1": "Water", "compound_2": "Methanol", "kij": -0.0778, "unit": "dimensionless"},
-    {"compound_1": "Methanol", "compound_2": "Carbon dioxide", "kij": 0.022, "unit": "dimensionless"}
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Nitrogen",
+      "kij": 0.0711,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Carbon monoxide",
+      "kij": 0.0919,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Methane",
+      "kij": 0.0263,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Ethylene",
+      "kij": 0.0633,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Ethane",
+      "kij": -0.0756,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Carbon dioxide",
+      "kij": -0.1622,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Propylene",
+      "kij": -0.1037,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Propane",
+      "kij": -0.1311,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "N-butane",
+      "kij": -0.397,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "N-hexane",
+      "kij": -0.03,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "N-heptane",
+      "kij": -0.1167,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Toluene",
+      "kij": -0.51,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "1-methylnaphthalene",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Carbon monoxide",
+      "kij": 0.033,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Argon",
+      "kij": -0.0026,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Oxygen",
+      "kij": -0.0159,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Methane",
+      "kij": 0.0289,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Ethylene",
+      "kij": 0.0856,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Ethane",
+      "kij": 0.0344,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Nitrous oxide",
+      "kij": 0.0044,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Carbon dioxide",
+      "kij": -0.0222,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Hydrogen sulfide",
+      "kij": 0.1789,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Propylene",
+      "kij": 0.09,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Propane",
+      "kij": 0.0878,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Ammonia",
+      "kij": 0.2193,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Isobutane",
+      "kij": 0.1033,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Sulfur dioxide",
+      "kij": 0.08,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "N-butane",
+      "kij": 0.0711,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Isopentane",
+      "kij": 0.0922,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "N-pentane",
+      "kij": 0.1,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Methanol",
+      "kij": -0.2141,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "N-hexane",
+      "kij": 0.1496,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Benzene",
+      "kij": 0.1641,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "N-heptane",
+      "kij": 0.1441,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "N-octane",
+      "kij": -0.4,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "N-decane",
+      "kij": 0.1122,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon monoxide",
+      "compound_2": "Methane",
+      "kij": 0.03,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon monoxide",
+      "compound_2": "Ethane",
+      "kij": -0.0226,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon monoxide",
+      "compound_2": "Hydrogen sulfide",
+      "kij": 0.0544,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon monoxide",
+      "compound_2": "Propane",
+      "kij": 0.0259,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Argon",
+      "compound_2": "Oxygen",
+      "kij": 0.0107,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Argon",
+      "compound_2": "Methane",
+      "kij": 0.023,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Argon",
+      "compound_2": "Ammonia",
+      "kij": -0.18,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Oxygen",
+      "compound_2": "Krypton",
+      "kij": 0.0256,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Oxygen",
+      "compound_2": "Nitrous oxide",
+      "kij": 0.0478,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Ethylene",
+      "kij": 0.0378,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Ethane",
+      "kij": -0.0033,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Nitrous oxide",
+      "kij": 0.0256,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Carbon dioxide",
+      "kij": 0.0793,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Carbonyl sulfide",
+      "kij": 0.0289,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Propylene",
+      "kij": 0.033,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Propane",
+      "kij": 0.0119,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Isobutane",
+      "kij": 0.0256,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Sulfur dioxide",
+      "kij": 0.1356,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-butane",
+      "kij": 0.0244,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Isopentane",
+      "kij": -0.0056,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-pentane",
+      "kij": 0.023,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-hexane",
+      "kij": 0.04,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Benzene",
+      "kij": 0.0807,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Cyclohexane",
+      "kij": 0.0389,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-heptane",
+      "kij": 0.0401,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "Toluene",
+      "kij": 0.097,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-octane",
+      "kij": 0.0496,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "M-xylene",
+      "kij": 0.0844,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-nonane",
+      "kij": 0.0474,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "N-decane",
+      "kij": 0.0489,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "M-cresol",
+      "kij": 0.1285,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methane",
+      "compound_2": "1-methylnaphthalene",
+      "kij": 0.1244,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethylene",
+      "compound_2": "Ethane",
+      "kij": 0.0119,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethylene",
+      "compound_2": "Acetylene",
+      "kij": 0.0652,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethylene",
+      "compound_2": "Carbon dioxide",
+      "kij": 0.0578,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethylene",
+      "compound_2": "N-butane",
+      "kij": 0.0922,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethylene",
+      "compound_2": "Benzene",
+      "kij": 0.0311,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethylene",
+      "compound_2": "N-heptane",
+      "kij": 0.0144,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethylene",
+      "compound_2": "N-decane",
+      "kij": 0.0253,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Ethane",
+      "kij": 0.1326,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Hydrogen sulfide",
+      "kij": 0.0822,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Propylene",
+      "kij": 0.0089,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Propane",
+      "kij": 0.0011,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Isobutane",
+      "kij": -0.0067,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "N-butane",
+      "kij": 0.0089,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Diethyl ether",
+      "kij": 0.0181,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "N-pentane",
+      "kij": 0.0078,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Acetone",
+      "kij": 0.1307,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Methyl acetate",
+      "kij": 0.1211,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Methanol",
+      "kij": 0.027,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "N-hexane",
+      "kij": -0.04,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Benzene",
+      "kij": 0.0322,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "Cyclohexane",
+      "kij": 0.0178,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "N-heptane",
+      "kij": 0.0074,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "N-octane",
+      "kij": 0.0185,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Ethane",
+      "compound_2": "N-decane",
+      "kij": 0.0144,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Nitrous oxide",
+      "kij": 0.0048,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Acetylene",
+      "compound_2": "Propylene",
+      "kij": -0.43,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Hydrogen sulfide",
+      "kij": 0.0978,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Propylene",
+      "kij": 0.0933,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Propane",
+      "kij": 0.1315,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Isobutane",
+      "kij": 0.13,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "1-butene",
+      "kij": 0.0593,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "N-butane",
+      "kij": 0.1352,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Isopentane",
+      "kij": 0.1219,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Diethyl ether",
+      "kij": 0.047,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "N-pentane",
+      "kij": -0.01,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Methyl acetate",
+      "kij": -0.0493,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Methanol",
+      "kij": 0.022,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "N-hexane",
+      "kij": 0.11,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Benzene",
+      "kij": 0.0774,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Cyclohexane",
+      "kij": 0.1052,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "N-heptane",
+      "kij": 0.1,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "Toluene",
+      "kij": 0.1056,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "N-decane",
+      "kij": 0.1141,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon dioxide",
+      "compound_2": "N-butylbenzene",
+      "kij": 0.1144,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen sulfide",
+      "compound_2": "Propane",
+      "kij": 0.06,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen sulfide",
+      "compound_2": "Isobutane",
+      "kij": 0.0474,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen sulfide",
+      "compound_2": "N-pentane",
+      "kij": 0.063,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen sulfide",
+      "compound_2": "Water",
+      "kij": 0.0394,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen sulfide",
+      "compound_2": "N-decane",
+      "kij": 0.0333,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propylene",
+      "compound_2": "Propane",
+      "kij": 0.0096,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propylene",
+      "compound_2": "Isobutane",
+      "kij": -0.0144,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propylene",
+      "compound_2": "1-butene",
+      "kij": 0.0004,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "Isobutane",
+      "kij": -0.0078,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "N-butane",
+      "kij": 0.0033,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "Isopentane",
+      "kij": 0.0111,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "N-pentane",
+      "kij": 0.0267,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "N-hexane",
+      "kij": 0.0007,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "Ethanol",
+      "kij": 0.0315,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "Benzene",
+      "kij": 0.0233,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "N-heptane",
+      "kij": 0.0056,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "N-octane",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Propane",
+      "compound_2": "N-decane",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Isobutane",
+      "compound_2": "N-butane",
+      "kij": -0.0004,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Sulfur dioxide",
+      "compound_2": "Benzene",
+      "kij": 0.0015,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "1-butene",
+      "compound_2": "1,3-butadiene",
+      "kij": 0.0022,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "1-butene",
+      "compound_2": "N-butane",
+      "kij": 0.0007,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "1,3-butadiene",
+      "compound_2": "N-butane",
+      "kij": 0.0141,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-butane",
+      "compound_2": "N-pentane",
+      "kij": 0.0174,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-butane",
+      "compound_2": "N-hexane",
+      "kij": -0.0056,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-butane",
+      "compound_2": "N-heptane",
+      "kij": 0.0033,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-butane",
+      "compound_2": "N-octane",
+      "kij": 0.0074,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-butane",
+      "compound_2": "N-decane",
+      "kij": 0.0078,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Isopentane",
+      "compound_2": "N-pentane",
+      "kij": 0.06,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-pentane",
+      "compound_2": "Benzene",
+      "kij": 0.0189,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-pentane",
+      "compound_2": "Cyclohexane",
+      "kij": 0.0037,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-pentane",
+      "compound_2": "N-heptane",
+      "kij": 0.0074,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-pentane",
+      "compound_2": "N-octane",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "2,2-dimethylbutane",
+      "compound_2": "1-pentanol",
+      "kij": 0.0452,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "2,3-dimethylbutane",
+      "compound_2": "1-pentanol",
+      "kij": 0.0467,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "2-methylpentane",
+      "compound_2": "1-pentanol",
+      "kij": 0.0467,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "1-pentanol",
+      "compound_2": "3-methylpentane",
+      "kij": 0.0478,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Methanol",
+      "compound_2": "Water",
+      "kij": -0.0778,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-hexane",
+      "compound_2": "Benzene",
+      "kij": 0.0089,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-hexane",
+      "compound_2": "Cyclohexane",
+      "kij": -0.003,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-hexane",
+      "compound_2": "Isopropanol",
+      "kij": 0.0844,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-hexane",
+      "compound_2": "N-heptane",
+      "kij": -0.0078,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-hexane",
+      "compound_2": "1-pentanol",
+      "kij": 0.0456,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Cyclohexane",
+      "compound_2": "Benzene",
+      "kij": 0.0126,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Benzene",
+      "compound_2": "N-heptane",
+      "kij": 0.0011,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Benzene",
+      "compound_2": "2,2,4-trimethylpentane",
+      "kij": 0.0004,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Benzene",
+      "compound_2": "N-octane",
+      "kij": 0.003,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Cyclohexene",
+      "compound_2": "Cyclohexane",
+      "kij": 0.0011,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Cyclohexane",
+      "compound_2": "1,2-dichloroethane",
+      "kij": 0.073,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Cyclohexane",
+      "compound_2": "Cyclohexanone",
+      "kij": 0.0659,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "1,2-dichloroethane",
+      "compound_2": "Cyclohexene",
+      "kij": 0.043,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-heptane",
+      "compound_2": "2,2,4-trimethylpentane",
+      "kij": 0.0004,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "N-heptane",
+      "compound_2": "2-pentanone",
+      "kij": 0.0693,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Carbon dioxide",
+      "kij": -0.12155,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Ammonia",
+      "kij": -0.2533,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Methane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Ethane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Propane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Isobutane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-butane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-pentane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Isopentane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "Neopentane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-hexane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-heptane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-octane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-nonane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Water",
+      "compound_2": "N-decane",
+      "kij": 0.5,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Water",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon monoxide",
+      "compound_2": "Carbon dioxide",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon monoxide",
+      "compound_2": "Water",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Argon",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Oxygen",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Hydrogen",
+      "compound_2": "Methanol",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Nitrogen",
+      "compound_2": "Water",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon monoxide",
+      "compound_2": "Argon",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon monoxide",
+      "compound_2": "Oxygen",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Carbon monoxide",
+      "compound_2": "Methanol",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Argon",
+      "compound_2": "Water",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Argon",
+      "compound_2": "Methanol",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Argon",
+      "compound_2": "Carbon dioxide",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Oxygen",
+      "compound_2": "Water",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Oxygen",
+      "compound_2": "Methanol",
+      "kij": 0,
+      "unit": "dimensionless"
+    },
+    {
+      "compound_1": "Oxygen",
+      "compound_2": "Carbon dioxide",
+      "kij": 0,
+      "unit": "dimensionless"
+    }
   ]
 }

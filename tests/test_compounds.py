@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from dataclasses import FrozenInstanceError
 from pathlib import Path
+from xml.etree import ElementTree
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -22,7 +23,7 @@ class CompoundDataTest(unittest.TestCase):
             (ROOT / "tests/golden/compound-catalog.json").read_text(encoding="utf-8-sig")
         )["inputs"]["compounds"]
 
-        self.assertEqual(len(compounds), 14)
+        self.assertEqual(len(compounds), 391)
         self.assertTrue({c["id"] for c in captured}.issubset({c.id for c in compounds}))
         for compound in (item for item in compounds if item.id in {c["id"] for c in captured}):
             reference = next(c for c in captured if c["id"] == compound.id)
@@ -31,8 +32,12 @@ class CompoundDataTest(unittest.TestCase):
             for field in ("molecular_weight", "critical_temperature", "critical_pressure", "acentric_factor", "normal_boiling_point"):
                 self.assertEqual(getattr(compound, field).value, reference[field]["value"])
                 self.assertEqual(getattr(compound, field).unit, reference[field]["unit"])
-            for field in ("database", "source", "source_revision"):
-                self.assertEqual(getattr(compound.provenance, field), reference["provenance"][field])
+            self.assertEqual(compound.provenance.database, "ChemSep")
+            self.assertEqual(
+                compound.provenance.source,
+                "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+            )
+            self.assertEqual(compound.provenance.source_revision, "9.0.4")
             self.assertTrue(compound.provenance.imported_utc.endswith("Z"))
 
         equilibrium = json.loads(
@@ -100,16 +105,21 @@ class CompoundDataTest(unittest.TestCase):
         self.assertEqual(interactions.get("N-pentane", "Methane"), 0.023)
         self.assertEqual(interactions.get("Methane", "Methane"), 0.0)
         self.assertEqual(interactions.get("Methane", "Water"), 0.5)
+        self.assertEqual(len(interactions.pairs), 196)
         with self.assertRaises(MissingCompoundData):
-            interactions.get("Ethane", "Water")
+            interactions.get("Methane", "Bromine")
 
     def test_pr_interactions_match_first_entries_loaded_by_dwsim(self):
         interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
+        root = ElementTree.parse(
+            ROOT
+            / "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml"
+        ).getroot()
         names = {
-            "1": "Methane", "2": "Ethane", "3": "Propane", "5": "N-butane", "7": "N-pentane",
-            "901": "Oxygen", "902": "Hydrogen", "905": "Nitrogen",
-            "908": "Carbon monoxide", "909": "Carbon dioxide", "914": "Argon",
-            "1101": "Methanol", "1921": "Water",
+            compound.find("LibraryIndex").attrib["value"]: compound.find(
+                "CompoundID"
+            ).attrib["value"]
+            for compound in root.iter("compound")
         }
         expected = {}
         source = ROOT / interactions.provenance.source

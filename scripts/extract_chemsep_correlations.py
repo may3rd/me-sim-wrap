@@ -10,10 +10,58 @@ from xml.etree import ElementTree
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml"
-CATALOG = ROOT / "data/compounds/v1.json"
 CORRELATIONS = ROOT / "data/correlations"
+COMPOUNDS = ROOT / "data/compounds/v1.json"
+PR_SOURCE = ROOT / "dwsim-windows/DWSIM.Thermodynamics/Assets/pr_ip.dat"
+PR_INTERACTIONS = ROOT / "data/interactions/pr-v1.json"
 SOURCE_PATH = SOURCE.relative_to(ROOT).as_posix()
 REVISION = "9.0.4"
+PRIMARY_COMPOUNDS = (
+    "Methane",
+    "Ethane",
+    "Propane",
+    "N-butane",
+    "N-pentane",
+    "Nitrogen",
+    "Argon",
+    "Oxygen",
+    "Methanol",
+    "Water",
+    "Carbon monoxide",
+    "Carbon dioxide",
+    "Hydrogen",
+    "Acetone",
+)
+SUPPORTED_EQUATIONS = {
+    "IdealGasHeatCapacityCp": {16},
+    "VaporPressure": {101},
+    "LiquidDensity": {105, 106},
+    "LiquidHeatCapacityCp": {16},
+    "HeatOfVaporization": {106},
+    "LiquidViscosity": {101},
+    "VaporViscosity": {102},
+    "LiquidThermalConductivity": {16},
+    "VaporThermalConductivity": {102},
+    "SurfaceTension": {16},
+}
+APPROVED_ZERO_PAIRS = (
+    ("Hydrogen", "Water"),
+    ("Carbon monoxide", "Carbon dioxide"),
+    ("Carbon monoxide", "Water"),
+    ("Hydrogen", "Argon"),
+    ("Hydrogen", "Oxygen"),
+    ("Hydrogen", "Methanol"),
+    ("Nitrogen", "Water"),
+    ("Carbon monoxide", "Argon"),
+    ("Carbon monoxide", "Oxygen"),
+    ("Carbon monoxide", "Methanol"),
+    ("Argon", "Water"),
+    ("Argon", "Methanol"),
+    ("Argon", "Carbon dioxide"),
+    ("Oxygen", "Water"),
+    ("Oxygen", "Methanol"),
+    ("Oxygen", "Carbon dioxide"),
+)
 
 
 def _number(text: str) -> int | float:
@@ -33,18 +81,33 @@ def _correlation(node, unit: str, *, include_e: bool = True) -> dict:
     }
 
 
+def _equation(compound, tag: str) -> int | None:
+    node = compound.find(tag)
+    equation = None if node is None else node.find("eqno")
+    if equation is None or equation.attrib.get("value") in (None, ""):
+        return None
+    return int(equation.attrib["value"])
+
+
+def _supported(compound) -> bool:
+    return all(
+        _equation(compound, tag) in equations
+        for tag, equations in SUPPORTED_EQUATIONS.items()
+    )
+
+
 def _source_records() -> tuple[list[str], dict[str, object]]:
-    catalog = json.loads(CATALOG.read_text(encoding="utf-8-sig"))
-    compound_ids = [record["id"] for record in catalog["compounds"]]
     root = ElementTree.parse(SOURCE).getroot()
     by_id = {}
     for compound in root.iter("compound"):
         identifier = compound.find("CompoundID")
-        if identifier is not None and identifier.attrib.get("value") in compound_ids:
+        if identifier is not None and _supported(compound):
             by_id[identifier.attrib["value"]] = compound
-    missing = [compound_id for compound_id in compound_ids if compound_id not in by_id]
+    missing = [compound_id for compound_id in PRIMARY_COMPOUNDS if compound_id not in by_id]
     if missing:
         raise RuntimeError(f"ChemSep is missing catalog compounds: {', '.join(missing)}")
+    compound_ids = list(PRIMARY_COMPOUNDS)
+    compound_ids.extend(name for name in by_id if name not in PRIMARY_COMPOUNDS)
     return compound_ids, by_id
 
 
@@ -53,6 +116,10 @@ def _datasets() -> dict[Path, dict]:
     source = {
         "source": SOURCE_PATH,
         "source_revision": REVISION,
+    }
+    catalog = {
+        "schema_version": "compound-data-1",
+        "compounds": [],
     }
     ideal = {
         "schema_version": "ideal-correlations-1",
@@ -71,6 +138,41 @@ def _datasets() -> dict[Path, dict]:
     }
     for compound_id in compound_ids:
         compound = compounds[compound_id]
+        catalog["compounds"].append(
+            {
+                "id": compound_id,
+                "name": compound_id,
+                "cas": compound.find("CAS").attrib["value"],
+                "formula": compound.find("StructureFormula").attrib["value"],
+                "molecular_weight": {
+                    "value": _number(compound.find("MolecularWeight").attrib["value"]),
+                    "unit": "kg/kmol",
+                },
+                "critical_temperature": {
+                    "value": _number(compound.find("CriticalTemperature").attrib["value"]),
+                    "unit": "K",
+                },
+                "critical_pressure": {
+                    "value": _number(compound.find("CriticalPressure").attrib["value"]),
+                    "unit": "Pa",
+                },
+                "acentric_factor": {
+                    "value": _number(compound.find("AcentricityFactor").attrib["value"]),
+                    "unit": "dimensionless",
+                },
+                "normal_boiling_point": {
+                    "value": _number(
+                        compound.find("NormalBoilingPointTemperature").attrib["value"]
+                    ),
+                    "unit": "K",
+                },
+                "provenance": {
+                    "database": "ChemSep",
+                    **source,
+                    "imported_utc": "2026-07-18T00:00:00Z",
+                },
+            }
+        )
         ideal["correlations"].append(
             {
                 "compound_id": compound_id,
@@ -126,10 +228,67 @@ def _datasets() -> dict[Path, dict]:
                 ),
             }
         )
+    interactions = _pr_interactions(compound_ids, compounds)
     return {
+        COMPOUNDS: catalog,
         CORRELATIONS / "ideal-v1.json": ideal,
         CORRELATIONS / "transport-v1.json": transport,
         CORRELATIONS / "saturated-liquid-v1.json": saturated,
+        PR_INTERACTIONS: interactions,
+    }
+
+
+def _pr_interactions(compound_ids: list[str], compounds: dict[str, object]) -> dict:
+    supported = set(compound_ids)
+    by_index = {
+        compound.find("LibraryIndex").attrib["value"]: compound_id
+        for compound_id, compound in compounds.items()
+    }
+    pairs = []
+    seen = set()
+    for line in PR_SOURCE.read_text(encoding="utf-8-sig").splitlines():
+        fields = line.split(";")
+        if len(fields) < 3 or fields[0] not in by_index or fields[1] not in by_index:
+            continue
+        first, second = by_index[fields[0]], by_index[fields[1]]
+        key = frozenset((first, second))
+        if first not in supported or second not in supported or key in seen:
+            continue
+        seen.add(key)
+        pairs.append(
+            {
+                "compound_1": first,
+                "compound_2": second,
+                "kij": _number(fields[2]),
+                "unit": "dimensionless",
+            }
+        )
+    for first, second in APPROVED_ZERO_PAIRS:
+        key = frozenset((first, second))
+        if key not in seen:
+            seen.add(key)
+            pairs.append(
+                {
+                    "compound_1": first,
+                    "compound_2": second,
+                    "kij": 0,
+                    "unit": "dimensionless",
+                }
+            )
+    return {
+        "schema_version": "pr-interactions-1",
+        "model": "Peng-Robinson",
+        "missing_pair_policy": "error",
+        "provenance": {
+            "source": PR_SOURCE.relative_to(ROOT).as_posix(),
+            "source_revision": "9.0.5.0",
+            "selection": (
+                "first entry loaded by DWSIM for each supported pair; explicit zero "
+                "for absent accepted steam-reforming and methanol-column pairs"
+            ),
+            "imported_utc": "2026-07-18T00:00:00Z",
+        },
+        "pairs": pairs,
     }
 
 
