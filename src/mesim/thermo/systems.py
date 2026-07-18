@@ -44,6 +44,7 @@ from .raoult import (
     raoult_fugacity_coefficients,
     raoult_tp_flash,
 )
+from .prsv2 import PRSV2Data, PRSV2Mixture, PRSV2MixtureState
 from .soave_redlich_kwong import (
     SRKMixtureState,
     SRKTPFlashResult,
@@ -59,6 +60,9 @@ IDEAL_RAOULT = "ideal-raoult"
 SOAVE_REDLICH_KWONG = "soave-redlich-kwong"
 PENG_ROBINSON_1978 = "peng-robinson-1978"
 PENG_ROBINSON_LEE_KESLER = "peng-robinson-lee-kesler"
+PENG_ROBINSON_STRYJEK_VERA_2_MARGULES = (
+    "peng-robinson-stryjek-vera-2-margules"
+)
 
 
 @runtime_checkable
@@ -628,6 +632,56 @@ class PengRobinsonLeeKeslerSystem:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class PRSV2MargulesSystem:
+    """DWSIM PRSV2-M phase-fugacity boundary over frozen source tables."""
+
+    compounds: tuple[Compound, ...]
+    data: PRSV2Data
+    model_id: str = field(
+        default=PENG_ROBINSON_STRYJEK_VERA_2_MARGULES, init=False
+    )
+    compound_ids: tuple[str, ...] = field(init=False)
+
+    def __post_init__(self) -> None:
+        try:
+            compounds = tuple(self.compounds)
+        except TypeError as error:
+            raise ValidationError("PRSV2-M compounds must be a sequence") from error
+        if (
+            len(compounds) < 2
+            or any(not isinstance(compound, Compound) for compound in compounds)
+            or not isinstance(self.data, PRSV2Data)
+        ):
+            raise ValidationError("PRSV2-M thermodynamic-system inputs are invalid")
+        compound_ids = tuple(compound.id for compound in compounds)
+        if len(set(compound_ids)) != len(compound_ids):
+            raise ValidationError("PRSV2-M compound IDs must be unique")
+        object.__setattr__(self, "compounds", compounds)
+        object.__setattr__(self, "compound_ids", compound_ids)
+
+    def state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+        phase: str,
+    ) -> PRSV2MixtureState:
+        return PRSV2Mixture(
+            self.compounds, composition, self.data, "margules"
+        ).state(temperature_k, pressure_pa, phase)
+
+    def stable_state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+    ) -> PRSV2MixtureState:
+        return PRSV2Mixture(
+            self.compounds, composition, self.data, "margules"
+        ).stable_state(temperature_k, pressure_pa)
+
+
 ThermoSystemConstructor = Callable[..., ThermodynamicSystem]
 _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_CLASSIC: PengRobinsonSystem,
@@ -636,6 +690,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     SOAVE_REDLICH_KWONG: SoaveRedlichKwongSystem,
     PENG_ROBINSON_1978: PengRobinson1978System,
     PENG_ROBINSON_LEE_KESLER: PengRobinsonLeeKeslerSystem,
+    PENG_ROBINSON_STRYJEK_VERA_2_MARGULES: PRSV2MargulesSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS

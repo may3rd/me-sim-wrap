@@ -68,8 +68,8 @@
       "dwsim_class": "PRSV2PropertyPackage",
       "family": "cubic-eos",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/PengRobinsonStryjekVera2.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["peng-robinson-stryjek-vera-2-margules"]
     },
     {
       "id": "prsv2-vl",
