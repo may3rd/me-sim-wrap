@@ -1,0 +1,57 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "ideal-aqueous-electrolyte-water-sodium-chloride-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "9f24bc90a19bcc6f3da43ae460aaba45592b8582a70a7347a3c3257895045e4c",
+                   "property_package":  "Ideal Solution (Aqueous Electrolytes)",
+                   "property_package_class":  "DWSIM.Thermodynamics.PropertyPackages.IdealElectrolytePropertyPackage",
+                   "property_package_construction":  "deserialized-from-case",
+                   "flash_algorithm":  "Electrolyte SVLE"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "Water",
+                                     "Sodium (ion)",
+                                     "Chloride (ion)"
+                                 ],
+                   "temperature_k":  298.15,
+                   "pressure_pa":  100000,
+                   "composition":  [
+                                       0.98,
+                                       0.01,
+                                       0.01
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         0.0317359806601829,
+                                                         0.56641260267134685,
+                                                         0.56641260267134685
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        1,
+                                                        10000000000,
+                                                        10000000000
+                                                    ],
+                    "liquid_fraction":  1,
+                    "vapor_fraction":  0,
+                    "liquid_composition":  [
+                                               0.98,
+                                               0.01,
+                                               0.01
+                                           ],
+                    "vapor_composition":  [
+                                              0,
+                                              0,
+                                              0
+                                          ],
+                    "iterations":  1,
+                    "equilibrium_ratios":  [
+                                               0,
+                                               0,
+                                               0
+                                           ]
+                }
+}

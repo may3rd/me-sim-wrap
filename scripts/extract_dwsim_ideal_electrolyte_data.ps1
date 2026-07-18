@@ -1,0 +1,29 @@
+[CmdletBinding()]
+param([Parameter(Mandatory=$true)][string]$EngineBin,[Parameter(Mandatory=$true)][string]$CasePath,[Parameter(Mandatory=$true)][string]$SourceRoot,[Parameter(Mandatory=$true)][string]$OutputPath,[string]$DwsimRevision="9.0.5.0",[double]$TemperatureK=298.15,[double]$PressurePa=100000,[string]$CompositionCsv="0.98,0.01,0.01")
+$ErrorActionPreference="Stop";Set-StrictMode -Version Latest
+$composition=@($CompositionCsv.Split(",")|ForEach-Object{[double]::Parse($_,[Globalization.CultureInfo]::InvariantCulture)})
+Add-Type -TypeDefinition @"
+using System;using System.Collections;using System.Globalization;using System.Linq;using System.Reflection;
+public static class DwsimIdealElectrolyteExtractor{
+ static BindingFlags F=BindingFlags.Public|BindingFlags.Instance;
+ static object G(object o,string n){var p=o.GetType().GetProperties(F).FirstOrDefault(x=>x.Name==n&&x.GetIndexParameters().Length==0);if(p!=null)return p.GetValue(o,null);var f=o.GetType().GetField(n,F);return f==null?null:f.GetValue(o);}
+ static object I(object o,string n,object[] a,int c){return o.GetType().GetMethods(F).First(x=>x.Name==n&&x.GetParameters().Length==c).Invoke(o,a);}
+ static object[] V(object d){return ((IEnumerable)d).Cast<object>().Select(e=>G(e,"Value")).Where(v=>v!=null).ToArray();}
+ public static object Package(object fs){return V(G(fs,"PropertyPackages")).First(p=>String.Equals(Convert.ToString(G(p,"ComponentName")),"Ideal Solution (Aqueous Electrolytes)",StringComparison.Ordinal));}
+ public static object Stream(object fs){return V(G(fs,"SimulationObjects")).First(o=>o.GetType().FullName=="DWSIM.Thermodynamics.Streams.MaterialStream");}
+ public static void Current(object pp,object ms){pp.GetType().GetProperties(F).First(x=>x.Name=="CurrentMaterialStream"&&x.CanWrite).SetValue(pp,ms,null);}
+ public static object[] Constants(object pp){return ((IEnumerable)I(pp,"DW_GetConstantProperties",new object[0],0)).Cast<object>().ToArray();}
+ public static string Text(object c,string n){return Convert.ToString(G(c,n),CultureInfo.InvariantCulture);}
+ public static double Number(object c,string n){return Convert.ToDouble(G(c,n),CultureInfo.InvariantCulture);}
+ public static bool Flag(object c,string n){return Convert.ToBoolean(G(c,n),CultureInfo.InvariantCulture);}
+}
+"@
+$engine=(Resolve-Path -LiteralPath $EngineBin).Path;$case=(Resolve-Path -LiteralPath $CasePath).Path;$source=(Resolve-Path -LiteralPath $SourceRoot).Path;$assembly=Join-Path $engine "DWSIM.Thermodynamics.dll";$packageSource=Join-Path $source "DWSIM.Thermodynamics\PropertyPackages\ElectrolyteIdeal.vb";$baseSource=Join-Path $source "DWSIM.Thermodynamics\PropertyPackages\ElectrolyteBase.vb";$flashSource=Join-Path $source "DWSIM.Thermodynamics\FlashAlgorithms\ElectrolyteSVLE.vb";$databaseSource=Join-Path $source "DWSIM.Thermodynamics\Assets\Databases\electrolyte.xml"
+foreach($f in @((Join-Path $engine "DWSIM.Interfaces.dll"),(Join-Path $engine "DWSIM.Automation.dll"),$assembly,$case,$packageSource,$baseSource,$flashSource,$databaseSource)){if(-not(Test-Path -LiteralPath $f)){throw "Missing required file: $f"}}
+[Reflection.Assembly]::LoadFrom((Join-Path $engine "DWSIM.Interfaces.dll"))|Out-Null;$tc=Get-ChildItem $engine -Filter ThermoCS.dll -File -Recurse -ErrorAction SilentlyContinue|Select-Object -First 1;if($null-ne$tc){[Reflection.Assembly]::LoadFrom($tc.FullName)|Out-Null};[Reflection.Assembly]::LoadFrom($assembly)|Out-Null;[Reflection.Assembly]::LoadFrom((Join-Path $engine "DWSIM.Automation.dll"))|Out-Null
+$auto=New-Object DWSIM.Automation.Automation3;$fs=$auto.LoadFlowsheet2($case);$pp=[DwsimIdealElectrolyteExtractor]::Package($fs);[DwsimIdealElectrolyteExtractor]::Current($pp,[DwsimIdealElectrolyteExtractor]::Stream($fs));$constants=[DwsimIdealElectrolyteExtractor]::Constants($pp);if($constants.Count-ne$composition.Count){throw "Composition length does not match electrolyte compounds"}
+$records=@();foreach($constant in $constants){$records+=,[ordered]@{compound_id=[DwsimIdealElectrolyteExtractor]::Text($constant,"Name");formula=[DwsimIdealElectrolyteExtractor]::Text($constant,"Formula");molecular_weight=[DwsimIdealElectrolyteExtractor]::Number($constant,"Molar_Weight");is_ion=[DwsimIdealElectrolyteExtractor]::Flag($constant,"IsIon");is_salt=[DwsimIdealElectrolyteExtractor]::Flag($constant,"IsSalt");charge=[DwsimIdealElectrolyteExtractor]::Number($constant,"Charge")}}
+$waterMassKgPerMol=$composition[0]*$records[0].molecular_weight/1000.0;$molalities=@($composition|ForEach-Object{$_/$waterMassKgPerMol})
+$doc=[ordered]@{schema_version="dwsim-ideal-electrolyte-data-1";model="Ideal Solution (Aqueous Electrolytes)";source=[ordered]@{product="DWSIM";revision=$DwsimRevision;case_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $case).Hash.ToLowerInvariant();runtime_assembly_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $assembly).Hash.ToLowerInvariant();property_package_source_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $packageSource).Hash.ToLowerInvariant();base_source_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $baseSource).Hash.ToLowerInvariant();flash_source_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $flashSource).Hash.ToLowerInvariant();database_source_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $databaseSource).Hash.ToLowerInvariant()};compounds=$records;scoped_probe=[ordered]@{temperature_k=$TemperatureK;pressure_pa=$PressurePa;composition=$composition;solvent_mass_kg_per_mol_mixture=$waterMassKgPerMol;molalities=$molalities}}
+$out=[IO.Path]::GetFullPath((Join-Path (Get-Location) $OutputPath));$dir=Split-Path -Parent $out;if($dir){New-Item -ItemType Directory -Force -Path $dir|Out-Null};$doc|ConvertTo-Json -Depth 8|Set-Content -LiteralPath $out -Encoding utf8
+[ordered]@{output=$out;compounds=$records;molalities=$molalities;sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $out).Hash.ToLowerInvariant()}|ConvertTo-Json -Depth 6

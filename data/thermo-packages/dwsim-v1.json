@@ -224,8 +224,8 @@
       "dwsim_class": "IdealElectrolytePropertyPackage",
       "family": "electrolyte",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/ElectrolyteIdeal.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["ideal-aqueous-electrolyte-water-sodium-chloride"]
     },
     {
       "id": "black-oil",

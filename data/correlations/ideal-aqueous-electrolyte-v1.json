@@ -1,0 +1,55 @@
+﻿{
+    "schema_version":  "dwsim-ideal-electrolyte-data-1",
+    "model":  "Ideal Solution (Aqueous Electrolytes)",
+    "source":  {
+                   "product":  "DWSIM",
+                   "revision":  "9.0.5.0",
+                   "case_sha256":  "9f24bc90a19bcc6f3da43ae460aaba45592b8582a70a7347a3c3257895045e4c",
+                   "runtime_assembly_sha256":  "c5a038c86cdfd3304be5e283527ab377df7579ca306eac69950ab4b8c495c544",
+                   "property_package_source_sha256":  "bc02882eaa79eb3ed5c3c7a5c4bd7a1665bacbba3077c274fd2e1c48285b9975",
+                   "base_source_sha256":  "95c07ac930105eb58ff0a1288f81d9a4d14fc6dba81396d13ed728204c23698f",
+                   "flash_source_sha256":  "b704fced3d2809bbb4596bb47897dc881392305746d4464d0d8baa234e884379",
+                   "database_source_sha256":  "bc72f2a5e4ac273a2ea4d881b4fad2bc5d0e7e9f470f019751205a00004c7fb1"
+               },
+    "compounds":  [
+                      {
+                          "compound_id":  "Water",
+                          "formula":  "HOH",
+                          "molecular_weight":  18.01528,
+                          "is_ion":  false,
+                          "is_salt":  false,
+                          "charge":  0
+                      },
+                      {
+                          "compound_id":  "Sodium (ion)",
+                          "formula":  "Na+",
+                          "molecular_weight":  22.99,
+                          "is_ion":  true,
+                          "is_salt":  false,
+                          "charge":  1
+                      },
+                      {
+                          "compound_id":  "Chloride (ion)",
+                          "formula":  "Cl-",
+                          "molecular_weight":  35.45,
+                          "is_ion":  true,
+                          "is_salt":  false,
+                          "charge":  -1
+                      }
+                  ],
+    "scoped_probe":  {
+                         "temperature_k":  298.15,
+                         "pressure_pa":  100000,
+                         "composition":  [
+                                             0.98,
+                                             0.01,
+                                             0.01
+                                         ],
+                         "solvent_mass_kg_per_mol_mixture":  0.0176549744,
+                         "molalities":  [
+                                            55.508435061791992,
+                                            0.56641260267134685,
+                                            0.56641260267134685
+                                        ]
+                     }
+}

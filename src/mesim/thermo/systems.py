@@ -62,6 +62,7 @@ from .lee_kesler_plocker import LKPData, LKPTPFlashResult, lkp_fugacity_coeffici
 from .steam_tables import SteamTablesData,SteamTablesTPFlashResult,steam_tables_fugacity_coefficients,steam_tables_tp_flash
 from .seawater import SeawaterData,SeawaterTPFlashResult,seawater_fugacity_coefficients,seawater_tp_flash
 from .black_oil import BlackOilData,BlackOilTPFlashResult,black_oil_fugacity_coefficients,black_oil_tp_flash
+from .ideal_electrolyte import IdealElectrolyteData,IdealElectrolyteTPFlashResult,ideal_electrolyte_fugacity_coefficients,ideal_electrolyte_tp_flash
 
 
 PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
@@ -90,6 +91,7 @@ LEE_KESLER_PLOCKER_METHANE_N_PENTANE = "lee-kesler-plocker-methane-n-pentane"
 STEAM_TABLES_WATER = "steam-tables-water"
 SEAWATER_WATER_SALT = "seawater-water-salt"
 BLACK_OIL_N_PENTANE_N_HEXANE = "black-oil-n-pentane-n-hexane"
+IDEAL_AQUEOUS_ELECTROLYTE_WATER_SODIUM_CHLORIDE = "ideal-aqueous-electrolyte-water-sodium-chloride"
 
 
 @runtime_checkable
@@ -615,6 +617,19 @@ class BlackOilSystem:
         return black_oil_fugacity_coefficients(self.data,self.steam_data,self.compound_ids,composition,temperature_k,pressure_pa,phase)
     def tp_flash(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float)->BlackOilTPFlashResult:
         return black_oil_tp_flash(self.data,self.compound_ids,composition,temperature_k,pressure_pa)
+
+@dataclass(frozen=True,slots=True)
+class IdealAqueousElectrolyteSystem:
+    data:IdealElectrolyteData
+    water:IdealCorrelations
+    model_id:str=field(default=IDEAL_AQUEOUS_ELECTROLYTE_WATER_SODIUM_CHLORIDE,init=False)
+    compound_ids:tuple[str,...]=field(default=("Water","Sodium (ion)","Chloride (ion)"),init=False)
+    def __post_init__(self)->None:
+        if not isinstance(self.data,IdealElectrolyteData) or not isinstance(self.water,IdealCorrelations) or self.water.compound_id!="Water" or self.data.compound_ids!=self.compound_ids:raise ValidationError("Ideal Aqueous Electrolyte system requires scoped Water/Na+/Cl- data")
+    def fugacity_coefficients(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float,phase:str)->tuple[float,...]:
+        return ideal_electrolyte_fugacity_coefficients(self.data,self.water,self.compound_ids,composition,temperature_k,pressure_pa,phase)
+    def tp_flash(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float)->IdealElectrolyteTPFlashResult:
+        return ideal_electrolyte_tp_flash(self.data,self.water,self.compound_ids,composition,temperature_k,pressure_pa)
 
 
 @dataclass(frozen=True, slots=True)
@@ -1168,6 +1183,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     STEAM_TABLES_WATER: SteamTablesSystem,
     SEAWATER_WATER_SALT: SeawaterSystem,
     BLACK_OIL_N_PENTANE_N_HEXANE: BlackOilSystem,
+    IDEAL_AQUEOUS_ELECTROLYTE_WATER_SODIUM_CHLORIDE: IdealAqueousElectrolyteSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS
