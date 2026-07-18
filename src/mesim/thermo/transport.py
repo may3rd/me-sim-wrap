@@ -95,7 +95,7 @@ class LiquidTransport:
 def load_transport_correlations(path: str | Path) -> tuple[TransportRecord, ...]:
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8-sig"))
-        if data["schema_version"] != "transport-correlations-1":
+        if data["schema_version"] != "transport-correlations-2":
             raise ValidationError("unsupported transport correlation schema")
         provenance = data["provenance"]
         imported = datetime.fromisoformat(provenance["imported_utc"])
@@ -107,7 +107,7 @@ def load_transport_correlations(path: str | Path) -> tuple[TransportRecord, ...]
                 _positive(record["critical_volume"], "m3/kmol", "critical volume"),
                 _correlation(record["vapor_viscosity"], "Pa.s"),
                 _correlation(record["vapor_thermal_conductivity"], "W/m/K"),
-                _liquid_correlation(record["liquid_viscosity"], 101, "Pa.s", False),
+                _liquid_correlation(record["liquid_viscosity"], 101, "Pa.s", True),
                 _liquid_correlation(record["liquid_thermal_conductivity"], 16, "W/m/K", True),
             )
             for record in data["correlations"]
@@ -198,7 +198,10 @@ def liquid_transport(
         or not math.isclose(sum(mole_fractions), 1.0, rel_tol=0.0, abs_tol=1e-12)
     ):
         raise ValidationError("liquid transport fractions must be finite, non-negative, and sum to one")
-    viscosities = tuple(record.liquid_viscosity.value(temperature_k) for record in records)
+    viscosities = tuple(
+        record.liquid_viscosity.value(temperature_k, allow_extrapolation)
+        for record in records
+    )
     conductivities = tuple(
         record.liquid_thermal_conductivity.value(temperature_k, allow_extrapolation)
         for record in records

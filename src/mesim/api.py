@@ -14,7 +14,9 @@ from .compounds import load_compounds, load_pr_interactions
 from .errors import ValidationError
 from .streams import PhaseState, StreamState, flash_stream
 from .thermo.ideal import load_correlations
+from .thermo.pure import load_saturated_liquid_correlations
 from .thermo.systems import PengRobinsonSystem
+from .thermo.transport import load_transport_correlations
 from .units import Quantity
 from .unitops.basic import equilibrium_separator, heater, mix_streams, valve
 
@@ -25,6 +27,12 @@ DATA = _SOURCE_DATA if _SOURCE_DATA.is_dir() else _INSTALLED_DATA
 COMPOUNDS = {compound.id: compound for compound in load_compounds(DATA / "compounds/v1.json")}
 INTERACTIONS = load_pr_interactions(DATA / "interactions/pr-v1.json")
 CORRELATIONS = load_correlations(DATA / "correlations/ideal-v1.json")
+TRANSPORT_CORRELATIONS = load_transport_correlations(
+    DATA / "correlations/transport-v1.json"
+)
+SATURATED_LIQUID_CORRELATIONS = load_saturated_liquid_correlations(
+    DATA / "correlations/saturated-liquid-v1.json"
+)
 CALCULATION_TIMEOUT_S = 5.0
 MAX_REQUEST_BYTES = 1_048_576
 CALCULATION_WORKERS = 2
@@ -200,7 +208,13 @@ def _compounds(compound_ids: tuple[str, ...]):
 
 
 def _pr_system(compound_ids: tuple[str, ...]) -> PengRobinsonSystem:
-    return PengRobinsonSystem(_compounds(compound_ids), INTERACTIONS, CORRELATIONS)
+    return PengRobinsonSystem(
+        _compounds(compound_ids),
+        INTERACTIONS,
+        CORRELATIONS,
+        TRANSPORT_CORRELATIONS,
+        SATURATED_LIQUID_CORRELATIONS,
+    )
 
 
 def _phase(stream: StreamInput) -> PhaseState:

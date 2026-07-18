@@ -799,6 +799,42 @@ function New-CompoundRecord {
         (Get-MemberValue -Object $Constant -Name "Elements")
     )
 
+    function New-CorrelationReference {
+        param(
+            [Parameter(Mandatory = $true)]
+            [string]$Method,
+
+            [Parameter(Mandatory = $true)]
+            [string]$MinimumProperty,
+
+            [Parameter(Mandatory = $true)]
+            [string]$MaximumProperty,
+
+            [Parameter(Mandatory = $true)]
+            [string]$Unit
+        )
+
+        $minimum = [double](
+            Get-MemberValue -Object $Constant -Name $MinimumProperty
+        )
+        $maximum = [double](
+            Get-MemberValue -Object $Constant -Name $MaximumProperty
+        )
+        if ($minimum -le 0 -or $maximum -le $minimum) {
+            throw "$canonicalName has an invalid $Method temperature range"
+        }
+        $temperature = ($minimum + $maximum) / 2.0
+        $value = [DwsimCaptureReflection]::Invoke(
+            $Constant,
+            $Method,
+            [object[]]@($temperature, $null)
+        )
+        return @{
+            temperature = New-ValueRecord $temperature "K"
+            value = New-ValueRecord $value $Unit
+        }
+    }
+
     return @{
         id = $canonicalName
 
@@ -900,6 +936,61 @@ function New-CompoundRecord {
             vapor_pressure = New-ValueRecord `
                 -Value $vaporPressure `
                 -Unit "Pa"
+        }
+
+        pure_reference = @{
+            liquid_density = New-CorrelationReference `
+                -Method "GetLiquidDensity" `
+                -MinimumProperty "Liquid_Density_Tmin" `
+                -MaximumProperty "Liquid_Density_Tmax" `
+                -Unit "kg/m3"
+
+            liquid_heat_capacity = New-CorrelationReference `
+                -Method "GetLiquidHeatCapacity" `
+                -MinimumProperty "Liquid_Heat_Capacity_Tmin" `
+                -MaximumProperty "Liquid_Heat_Capacity_Tmax" `
+                -Unit "kJ/kg/K"
+
+            heat_of_vaporization = New-CorrelationReference `
+                -Method "GetEnthalpyOfVaporization" `
+                -MinimumProperty "HVap_TMIN" `
+                -MaximumProperty "HVap_TMAX" `
+                -Unit "kJ/kg"
+
+            surface_tension = New-CorrelationReference `
+                -Method "GetLiquidSurfaceTension" `
+                -MinimumProperty "Surface_Tension_Tmin" `
+                -MaximumProperty "Surface_Tension_Tmax" `
+                -Unit "N/m"
+
+            liquid_viscosity = @{
+                temperature = New-ValueRecord $normalBoilingPoint "K"
+                value = New-ValueRecord (
+                    [DwsimCaptureReflection]::Invoke(
+                        $Constant,
+                        "GetLiquidViscosity",
+                        [object[]]@($normalBoilingPoint, $null)
+                    )
+                ) "Pa.s"
+            }
+
+            vapor_viscosity = New-CorrelationReference `
+                -Method "GetVaporViscosity" `
+                -MinimumProperty "Vapor_Viscosity_Tmin" `
+                -MaximumProperty "Vapor_Viscosity_Tmax" `
+                -Unit "Pa.s"
+
+            liquid_thermal_conductivity = New-CorrelationReference `
+                -Method "GetLiquidThermalConductivity" `
+                -MinimumProperty "Liquid_Thermal_Conductivity_Tmin" `
+                -MaximumProperty "Liquid_Thermal_Conductivity_Tmax" `
+                -Unit "W/m/K"
+
+            vapor_thermal_conductivity = New-CorrelationReference `
+                -Method "GetVaporThermalConductivity" `
+                -MinimumProperty "Vapor_Thermal_Conductivity_Tmin" `
+                -MaximumProperty "Vapor_Thermal_Conductivity_Tmax" `
+                -Unit "W/m/K"
         }
 
         provenance = @{

@@ -1,0 +1,724 @@
+{
+  "schema_version": "saturated-liquid-correlations-1",
+  "provenance": {
+    "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+    "source_revision": "9.0.4",
+    "imported_utc": "2026-07-18T00:00:00Z"
+  },
+  "correlations": [
+    {
+      "compound_id": "Methane",
+      "critical_temperature": {
+        "value": 190.56,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.894,
+        "B": 0.23603,
+        "C": 191.05,
+        "D": 0.21974,
+        "E": 0,
+        "minimum_k": 90.68,
+        "maximum_k": 191.04,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 61157,
+        "B": 5034.1,
+        "C": -48.913,
+        "D": -0.22998,
+        "E": 0.0022243,
+        "minimum_k": 88.71,
+        "maximum_k": 190,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 14418000,
+        "B": 2.3055,
+        "C": -5.4199,
+        "D": 5.658,
+        "E": -2.1286,
+        "minimum_k": 90.67,
+        "maximum_k": 190.55,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.040703,
+        "B": -6.9523,
+        "C": -2.3114,
+        "D": -0.0055565,
+        "E": 5.7595e-06,
+        "minimum_k": 90,
+        "maximum_k": 193.15,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Ethane",
+      "critical_temperature": {
+        "value": 305.32,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.3749,
+        "B": 0.23949,
+        "C": 305.43,
+        "D": 0.22875,
+        "E": 0,
+        "minimum_k": 88.71,
+        "maximum_k": 305.42,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 68726,
+        "B": -1953.6,
+        "C": 31.772,
+        "D": -0.10571,
+        "E": 0.00019673,
+        "minimum_k": 88.71,
+        "maximum_k": 290,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 23996000,
+        "B": 1.4625,
+        "C": -2.8991,
+        "D": 2.8421,
+        "E": -0.99532,
+        "minimum_k": 89.88,
+        "maximum_k": 305.33,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.0092564,
+        "B": 30.13,
+        "C": -3.5743,
+        "D": 0.0026003,
+        "E": -2.1736e-05,
+        "minimum_k": 89.88,
+        "maximum_k": 305.32,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Propane",
+      "critical_temperature": {
+        "value": 369.83,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.3186,
+        "B": 0.27005,
+        "C": 369.86,
+        "D": 0.27852,
+        "E": 0,
+        "minimum_k": 85.47,
+        "maximum_k": 369.85,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 87486,
+        "B": -13371,
+        "C": 156.92,
+        "D": -0.5459,
+        "E": 0.00068504,
+        "minimum_k": 85.47,
+        "maximum_k": 360,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 30459000,
+        "B": 1.2001,
+        "C": -2.1107,
+        "D": 1.9732,
+        "E": -0.65316,
+        "minimum_k": 85.44,
+        "maximum_k": 369.85,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.0093557,
+        "B": 17.245,
+        "C": -3.1909,
+        "D": 0.00024043,
+        "E": -1.1944e-05,
+        "minimum_k": 85.44,
+        "maximum_k": 369.98,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "N-butane",
+      "critical_temperature": {
+        "value": 425.12,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.0023,
+        "B": 0.26457,
+        "C": 425.17,
+        "D": 0.27138,
+        "E": 0,
+        "minimum_k": 134.86,
+        "maximum_k": 425.16,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 115150,
+        "B": -3564.7,
+        "C": 41.067,
+        "D": -0.098803,
+        "E": 0.0001183,
+        "minimum_k": 133.15,
+        "maximum_k": 400,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 36258000,
+        "B": 0.83741,
+        "C": -0.83676,
+        "D": 0.41526,
+        "E": -0.007606,
+        "minimum_k": 134.86,
+        "maximum_k": 425.16,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.035324,
+        "B": 4.5815,
+        "C": -2.4942,
+        "D": -0.0015096,
+        "E": -1.3297e-06,
+        "minimum_k": 134.86,
+        "maximum_k": 409.84,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "N-pentane",
+      "critical_temperature": {
+        "value": 469.7,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.77386,
+        "B": 0.25574,
+        "C": 469.7,
+        "D": 0.26319,
+        "E": 0,
+        "minimum_k": 143.42,
+        "maximum_k": 469.65,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 122980,
+        "B": 401.5,
+        "C": 3.9651,
+        "D": 0.024056,
+        "E": -2.0161e-05,
+        "minimum_k": 143.42,
+        "maximum_k": 390,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 40854000,
+        "B": 0.25483,
+        "C": 0.96045,
+        "D": -1.5349,
+        "E": 0.72504,
+        "minimum_k": 143.42,
+        "maximum_k": 469.5,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.013012,
+        "B": 17.72,
+        "C": -3.0334,
+        "D": -0.00028732,
+        "E": -5.6151e-06,
+        "minimum_k": 143.42,
+        "maximum_k": 452.53,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Nitrogen",
+      "critical_temperature": {
+        "value": 126.2,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 2.435,
+        "B": 0.25137,
+        "C": 126.27,
+        "D": 0.249,
+        "E": 0,
+        "minimum_k": 63.15,
+        "maximum_k": 126.26,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 55135,
+        "B": 217.45,
+        "C": -0.9071,
+        "D": 0.05327,
+        "E": 0.00024166,
+        "minimum_k": 63.15,
+        "maximum_k": 115,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 27284000,
+        "B": 7.8021,
+        "C": -19.125,
+        "D": 19.518,
+        "E": -7.5428,
+        "minimum_k": 63.15,
+        "maximum_k": 126.26,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.0025409,
+        "B": 96.836,
+        "C": -7.6473,
+        "D": 0.05313,
+        "E": -0.00036553,
+        "minimum_k": 63.15,
+        "maximum_k": 126.2,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Argon",
+      "critical_temperature": {
+        "value": 150.86,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 3.803,
+        "B": 0.286,
+        "C": 150.86,
+        "D": 0.2984,
+        "E": 0,
+        "minimum_k": 83.78,
+        "maximum_k": 150.86,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 46085,
+        "B": -1304.5,
+        "C": 21.195,
+        "D": -0.015382,
+        "E": 3.3063e-05,
+        "minimum_k": 83.8,
+        "maximum_k": 135,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 7981000,
+        "B": 0.099752,
+        "C": 0.32009,
+        "D": -0.11898,
+        "E": 0.031141,
+        "minimum_k": 83.78,
+        "maximum_k": 147.33,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.0029464,
+        "B": 165.33,
+        "C": -8.8347,
+        "D": 0.058394,
+        "E": -0.00030536,
+        "minimum_k": 83.78,
+        "maximum_k": 147.33,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Oxygen",
+      "critical_temperature": {
+        "value": 154.58,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 2.6097,
+        "B": 0.23614,
+        "C": 154.78,
+        "D": 0.23695,
+        "E": 0,
+        "minimum_k": 54.35,
+        "maximum_k": 154.77,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 53393,
+        "B": -1966.4,
+        "C": 48.21,
+        "D": -0.31631,
+        "E": 0.0010466,
+        "minimum_k": 54.36,
+        "maximum_k": 145,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 10672000,
+        "B": 1.5661,
+        "C": -3.4356,
+        "D": 3.5416,
+        "E": -1.2718,
+        "minimum_k": 54.36,
+        "maximum_k": 154.58,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.0062662,
+        "B": 17.53,
+        "C": -3.9173,
+        "D": 0.0058473,
+        "E": -9.1613e-05,
+        "minimum_k": 54.35,
+        "maximum_k": 154.58,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Methanol",
+      "critical_temperature": {
+        "value": 512.64,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.7918,
+        "B": 0.23929,
+        "C": 512.64,
+        "D": 0.21078,
+        "E": 0,
+        "minimum_k": 175.47,
+        "maximum_k": 503.1,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 62799,
+        "B": 1254.2,
+        "C": -5.9906,
+        "D": 0.052937,
+        "E": -4.711e-05,
+        "minimum_k": 175.47,
+        "maximum_k": 400,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 58058000,
+        "B": 0.87168,
+        "C": -0.81501,
+        "D": 0.1695,
+        "E": 0.17846,
+        "minimum_k": 175.47,
+        "maximum_k": 513.15,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.094523,
+        "B": 33.559,
+        "C": -2.3648,
+        "D": 0.001011,
+        "E": -2.2169e-06,
+        "minimum_k": 273.1,
+        "maximum_k": 503.15,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Water",
+      "critical_temperature": {
+        "value": 647.14,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 106,
+        "A": 32.51621,
+        "B": -3.213004,
+        "C": 7.92411,
+        "D": -7.359898,
+        "E": 2.703522,
+        "minimum_k": 253.1,
+        "maximum_k": 647.29,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 75539,
+        "B": -22297,
+        "C": 136.02,
+        "D": -0.25622,
+        "E": 0.00018273,
+        "minimum_k": 273.1,
+        "maximum_k": 533.15,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 59640000,
+        "B": 0.86515,
+        "C": -1.1134,
+        "D": 0.67764,
+        "E": -0.026925,
+        "minimum_k": 273.15,
+        "maximum_k": 647.28,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.031819,
+        "B": 167.09,
+        "C": -3.6781,
+        "D": 0.0053717,
+        "E": -8.4188e-06,
+        "minimum_k": 265.1,
+        "maximum_k": 647.1,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Carbon monoxide",
+      "critical_temperature": {
+        "value": 132.85,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 2.2423,
+        "B": 0.2437,
+        "C": 132.93,
+        "D": 0.24196,
+        "E": 0,
+        "minimum_k": 68.13,
+        "maximum_k": 132.92,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 63364,
+        "B": -10524,
+        "C": 359.6,
+        "D": -3.9494,
+        "E": 0.014624,
+        "minimum_k": 68.09,
+        "maximum_k": 132,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 8585000,
+        "B": 0.4921,
+        "C": -0.326,
+        "D": 0.2231,
+        "E": 0,
+        "minimum_k": 68.13,
+        "maximum_k": 132.5,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.0087233,
+        "B": 5.9843,
+        "C": -3.6585,
+        "D": 0.00036163,
+        "E": -6.7401e-05,
+        "minimum_k": 68.15,
+        "maximum_k": 129.51,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Carbon dioxide",
+      "critical_temperature": {
+        "value": 304.21,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 2.768,
+        "B": 0.26212,
+        "C": 304.21,
+        "D": 0.2908,
+        "E": 0,
+        "minimum_k": 216.58,
+        "maximum_k": 304.21,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 80592,
+        "B": 108.83,
+        "C": -6.9126,
+        "D": 0.059647,
+        "E": 6.9922e-06,
+        "minimum_k": 216.58,
+        "maximum_k": 290,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 21092000,
+        "B": 0.35366,
+        "C": -0.46134,
+        "D": 0.43554,
+        "E": 0.037671,
+        "minimum_k": 216.58,
+        "maximum_k": 304.21,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.011629,
+        "B": -183.67,
+        "C": 0.069773,
+        "D": -0.012408,
+        "E": -1.8232e-06,
+        "minimum_k": 216.58,
+        "maximum_k": 304.21,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Hydrogen",
+      "critical_temperature": {
+        "value": 33.19,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 2.9613,
+        "B": 0.25981,
+        "C": 33.19,
+        "D": 0.19104,
+        "E": 0,
+        "minimum_k": 13.84,
+        "maximum_k": 33.18,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 14510,
+        "B": -1191.1,
+        "C": 156.51,
+        "D": -6.1773,
+        "E": 0.087907,
+        "minimum_k": 13.84,
+        "maximum_k": 32,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 1534700,
+        "B": 3.214,
+        "C": -8.4567,
+        "D": 8.4646,
+        "E": -2.8057,
+        "minimum_k": 13.95,
+        "maximum_k": 32.62,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.003232,
+        "B": 1.9865,
+        "C": -5.0915,
+        "D": -0.00046122,
+        "E": -0.00062971,
+        "minimum_k": 13.95,
+        "maximum_k": 32.18,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Acetone",
+      "critical_temperature": {
+        "value": 508.1,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.1051,
+        "B": 0.24556,
+        "C": 508.21,
+        "D": 0.27409,
+        "E": 0,
+        "minimum_k": 178,
+        "maximum_k": 508.2,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 107130,
+        "B": 725.57,
+        "C": 0.95296,
+        "D": 0.025981,
+        "E": -1.439e-05,
+        "minimum_k": 178.45,
+        "maximum_k": 329.44,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 66943000,
+        "B": 3.4736,
+        "C": -8.9271,
+        "D": 10.062,
+        "E": -4.1656,
+        "minimum_k": 178.45,
+        "maximum_k": 508.15,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.036769,
+        "B": -1.4835,
+        "C": -2.315,
+        "D": -0.0012473,
+        "E": -1.404e-06,
+        "minimum_k": 178.45,
+        "maximum_k": 490.84,
+        "unit": "N/m"
+      }
+    }
+  ]
+}

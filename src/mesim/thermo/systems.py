@@ -28,6 +28,8 @@ from .flash import (
     tp_flash,
 )
 from .ideal import IdealCorrelations
+from .pure import SaturatedLiquidCorrelations
+from .transport import TransportRecord
 
 
 PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
@@ -49,6 +51,8 @@ class PengRobinsonSystem:
     compounds: tuple[Compound, ...]
     interactions: PRInteractions
     correlations: tuple[IdealCorrelations, ...]
+    transport_correlations: tuple[TransportRecord, ...] = ()
+    saturated_liquid_correlations: tuple[SaturatedLiquidCorrelations, ...] = ()
     model_id: str = field(default=PENG_ROBINSON_CLASSIC, init=False)
     compound_ids: tuple[str, ...] = field(init=False)
 
@@ -56,6 +60,8 @@ class PengRobinsonSystem:
         try:
             compounds = tuple(self.compounds)
             correlations = tuple(self.correlations)
+            transport = tuple(self.transport_correlations)
+            saturated = tuple(self.saturated_liquid_correlations)
         except TypeError as error:
             raise ValidationError("PR thermodynamic-system inputs must be sequences") from error
         if (
@@ -63,6 +69,8 @@ class PengRobinsonSystem:
             or not isinstance(self.interactions, PRInteractions)
             or any(not isinstance(record, Compound) for record in compounds)
             or any(not isinstance(record, IdealCorrelations) for record in correlations)
+            or any(not isinstance(record, TransportRecord) for record in transport)
+            or any(not isinstance(record, SaturatedLiquidCorrelations) for record in saturated)
         ):
             raise ValidationError("PR thermodynamic-system inputs are invalid")
         compound_ids = tuple(record.id for record in compounds)
@@ -76,12 +84,52 @@ class PengRobinsonSystem:
             raise ValidationError(
                 f"PR thermodynamic system is missing ideal correlations: {', '.join(missing)}"
             )
+        for label, records in (
+            ("transport", transport),
+            ("saturated-liquid", saturated),
+        ):
+            record_ids = tuple(record.compound_id for record in records)
+            if len(set(record_ids)) != len(record_ids):
+                raise ValidationError(
+                    f"PR thermodynamic-system {label} correlation IDs must be unique"
+                )
+            missing = tuple(name for name in compound_ids if name not in record_ids)
+            if records and missing:
+                raise ValidationError(
+                    f"PR thermodynamic system is missing {label} correlations: "
+                    f"{', '.join(missing)}"
+                )
         for first_index, first in enumerate(compound_ids):
             for second in compound_ids[first_index + 1:]:
                 self.interactions.get(first, second)
         object.__setattr__(self, "compounds", compounds)
         object.__setattr__(self, "correlations", correlations)
+        object.__setattr__(self, "transport_correlations", transport)
+        object.__setattr__(self, "saturated_liquid_correlations", saturated)
         object.__setattr__(self, "compound_ids", compound_ids)
+
+    def ideal(self, compound_id: str) -> IdealCorrelations:
+        return self._record(self.correlations, compound_id, "ideal")
+
+    def transport(self, compound_id: str) -> TransportRecord:
+        return self._record(self.transport_correlations, compound_id, "transport")
+
+    def saturated_liquid(self, compound_id: str) -> SaturatedLiquidCorrelations:
+        return self._record(
+            self.saturated_liquid_correlations, compound_id, "saturated-liquid"
+        )
+
+    def _record(self, records, compound_id: str, label: str):
+        if not isinstance(compound_id, str) or compound_id not in self.compound_ids:
+            raise ValidationError(
+                f"compound is outside PR thermodynamic-system domain: {compound_id}"
+            )
+        try:
+            return next(record for record in records if record.compound_id == compound_id)
+        except StopIteration as error:
+            raise ValidationError(
+                f"PR thermodynamic system has no {label} correlation for {compound_id}"
+            ) from error
 
     def tp_flash(
         self,

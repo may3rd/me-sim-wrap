@@ -1,15 +1,696 @@
 {
-  "schema_version": "transport-correlations-1",
+  "schema_version": "transport-correlations-2",
   "provenance": {
     "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
     "source_revision": "9.0.4",
-    "imported_utc": "2026-07-15T00:00:00Z"
+    "imported_utc": "2026-07-18T00:00:00Z"
   },
   "correlations": [
-    {"compound_id": "Methane", "critical_volume": {"value": 0.0986, "unit": "m3/kmol"}, "vapor_viscosity": {"equation": 102, "A": 5.3432e-7, "B": 0.58831, "C": 114.58, "D": -1338.5, "minimum_k": 90.0, "maximum_k": 1000.0, "unit": "Pa.s"}, "vapor_thermal_conductivity": {"equation": 102, "A": 7.4705e-6, "B": 1.4432, "C": -57.569, "D": 587.82, "minimum_k": 90.694, "maximum_k": 600.0, "unit": "W/m/K"}, "liquid_viscosity": {"equation": 101, "A": -45.328, "B": 724.39, "C": 6.5917, "D": -0.00010373, "E": 2.0, "unit": "Pa.s"}, "liquid_thermal_conductivity": {"equation": 16, "A": 0.011567, "B": -46.041, "C": 0.10435, "D": -0.012133, "E": -5.1716e-6, "minimum_k": 90.69, "maximum_k": 180.0, "unit": "W/m/K"}},
-    {"compound_id": "Ethane", "critical_volume": {"value": 0.1455, "unit": "m3/kmol"}, "vapor_viscosity": {"equation": 102, "A": 5.2452e-7, "B": 0.58906, "C": 188.8, "D": -2953.8, "minimum_k": 90.35, "maximum_k": 1000.0, "unit": "Pa.s"}, "vapor_thermal_conductivity": {"equation": 102, "A": 7.4549e-5, "B": 1.168, "C": 506.4, "D": -881.74, "minimum_k": 90.352, "maximum_k": 1000.0, "unit": "W/m/K"}, "liquid_viscosity": {"equation": 101, "A": -33.92204, "B": 743.404, "C": 4.302492, "D": -3.64469e-5, "E": 2.0, "unit": "Pa.s"}, "liquid_thermal_conductivity": {"equation": 16, "A": -0.073876, "B": -9.6787, "C": -0.67405, "D": -0.003407, "E": -2.2023e-6, "minimum_k": 90.35, "maximum_k": 300.0, "unit": "W/m/K"}},
-    {"compound_id": "Propane", "critical_volume": {"value": 0.2, "unit": "m3/kmol"}, "vapor_viscosity": {"equation": 102, "A": 4.7422e-8, "B": 0.90416, "C": -4.7484, "D": 478.57, "minimum_k": 85.47, "maximum_k": 1000.0, "unit": "Pa.s"}, "vapor_thermal_conductivity": {"equation": 102, "A": -1.139, "B": 0.10904, "C": -9898.6, "D": -7669600.0, "minimum_k": 85.47, "maximum_k": 1000.0, "unit": "W/m/K"}, "liquid_viscosity": {"equation": 101, "A": -35.23159, "B": 966.1472, "C": 4.395026, "D": -2.55079e-5, "E": 2.0, "unit": "Pa.s"}, "liquid_thermal_conductivity": {"equation": 16, "A": 0.02937, "B": -16.323, "C": -1.3313, "D": -0.0012596, "E": -1.1206e-5, "minimum_k": 85.47, "maximum_k": 350.0, "unit": "W/m/K"}},
-    {"compound_id": "N-butane", "critical_volume": {"value": 0.255, "unit": "m3/kmol"}, "vapor_viscosity": {"equation": 102, "A": 2.7078e-8, "B": 0.97147, "C": -51.16, "D": 6431.0, "minimum_k": 134.86, "maximum_k": 1000.0, "unit": "Pa.s"}, "vapor_thermal_conductivity": {"equation": 102, "A": 0.042635, "B": 0.45147, "C": 4234.0, "D": 1756600.0, "minimum_k": 134.86, "maximum_k": 1000.0, "unit": "W/m/K"}, "liquid_viscosity": {"equation": 101, "A": -46.56549, "B": 1439.945, "C": 6.168131, "D": -2.3917e-5, "E": 2.0, "unit": "Pa.s"}, "liquid_thermal_conductivity": {"equation": 16, "A": 0.00024966, "B": -43.155, "C": -0.78129, "D": -0.0043776, "E": -4.136e-8, "minimum_k": 134.86, "maximum_k": 400.0, "unit": "W/m/K"}},
-    {"compound_id": "N-pentane", "critical_volume": {"value": 0.311, "unit": "m3/kmol"}, "vapor_viscosity": {"equation": 102, "A": 5.9173e-8, "B": 0.85109, "C": 8.4138, "D": 3723.2, "minimum_k": 143.42, "maximum_k": 1000.0, "unit": "Pa.s"}, "vapor_thermal_conductivity": {"equation": 102, "A": -603.2, "B": 0.74698, "C": -818230000.0, "D": -8786500000.0, "minimum_k": 143.42, "maximum_k": 1000.0, "unit": "W/m/K"}, "liquid_viscosity": {"equation": 101, "A": -28.93847, "B": 1176.355, "C": 3.050544, "D": -9.721368e-6, "E": 2.0, "unit": "Pa.s"}, "liquid_thermal_conductivity": {"equation": 16, "A": 0.023649, "B": -75.089, "C": -0.64229, "D": -0.005078, "E": -2.7196e-7, "minimum_k": 143.42, "maximum_k": 445.0, "unit": "W/m/K"}}
+    {
+      "compound_id": "Methane",
+      "critical_volume": {
+        "value": 0.0986,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 5.3432e-07,
+        "B": 0.58831,
+        "C": 114.58,
+        "D": -1338.5,
+        "minimum_k": 90,
+        "maximum_k": 1000,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": 7.4705e-06,
+        "B": 1.4432,
+        "C": -57.569,
+        "D": 587.82,
+        "minimum_k": 90.694,
+        "maximum_k": 600,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -45.328,
+        "B": 724.39,
+        "C": 6.5917,
+        "D": -0.00010373,
+        "E": 2,
+        "minimum_k": 88.15,
+        "maximum_k": 190,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": 0.011567,
+        "B": -46.041,
+        "C": 0.10435,
+        "D": -0.012133,
+        "E": -5.1716e-06,
+        "minimum_k": 90.69,
+        "maximum_k": 180,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "Ethane",
+      "critical_volume": {
+        "value": 0.1455,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 5.2452e-07,
+        "B": 0.58906,
+        "C": 188.8,
+        "D": -2953.8,
+        "minimum_k": 90.35,
+        "maximum_k": 1000,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": 7.4549e-05,
+        "B": 1.168,
+        "C": 506.4,
+        "D": -881.74,
+        "minimum_k": 90.352,
+        "maximum_k": 1000,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -33.92204,
+        "B": 743.404,
+        "C": 4.302492,
+        "D": -3.64469e-05,
+        "E": 2,
+        "minimum_k": 90.35,
+        "maximum_k": 300,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": -0.073876,
+        "B": -9.6787,
+        "C": -0.67405,
+        "D": -0.003407,
+        "E": -2.2023e-06,
+        "minimum_k": 90.35,
+        "maximum_k": 300,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "Propane",
+      "critical_volume": {
+        "value": 0.2,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 4.7422e-08,
+        "B": 0.90416,
+        "C": -4.7484,
+        "D": 478.57,
+        "minimum_k": 85.47,
+        "maximum_k": 1000,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": -1.139,
+        "B": 0.10904,
+        "C": -9898.6,
+        "D": -7669600,
+        "minimum_k": 85.47,
+        "maximum_k": 1000,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -35.23159,
+        "B": 966.1472,
+        "C": 4.395026,
+        "D": -2.55079e-05,
+        "E": 2,
+        "minimum_k": 85.47,
+        "maximum_k": 363.15,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": 0.02937,
+        "B": -16.323,
+        "C": -1.3313,
+        "D": -0.0012596,
+        "E": -1.1206e-05,
+        "minimum_k": 85.47,
+        "maximum_k": 350,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "N-butane",
+      "critical_volume": {
+        "value": 0.255,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 2.7078e-08,
+        "B": 0.97147,
+        "C": -51.16,
+        "D": 6431,
+        "minimum_k": 134.86,
+        "maximum_k": 1000,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": 0.042635,
+        "B": 0.45147,
+        "C": 4234,
+        "D": 1756600,
+        "minimum_k": 134.86,
+        "maximum_k": 1000,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -46.56549,
+        "B": 1439.945,
+        "C": 6.168131,
+        "D": -2.3917e-05,
+        "E": 2,
+        "minimum_k": 134.86,
+        "maximum_k": 420,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": 0.00024966,
+        "B": -43.155,
+        "C": -0.78129,
+        "D": -0.0043776,
+        "E": -4.136e-08,
+        "minimum_k": 134.86,
+        "maximum_k": 400,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "N-pentane",
+      "critical_volume": {
+        "value": 0.311,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 5.9173e-08,
+        "B": 0.85109,
+        "C": 8.4138,
+        "D": 3723.2,
+        "minimum_k": 143.42,
+        "maximum_k": 1000,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": -603.2,
+        "B": 0.74698,
+        "C": -818230000,
+        "D": -8786500000,
+        "minimum_k": 143.42,
+        "maximum_k": 1000,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -28.93847,
+        "B": 1176.355,
+        "C": 3.050544,
+        "D": -9.721368e-06,
+        "E": 2,
+        "minimum_k": 137.15,
+        "maximum_k": 465.15,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": 0.023649,
+        "B": -75.089,
+        "C": -0.64229,
+        "D": -0.005078,
+        "E": -2.7196e-07,
+        "minimum_k": 143.42,
+        "maximum_k": 445,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "Nitrogen",
+      "critical_volume": {
+        "value": 0.0901,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 4.6051e-07,
+        "B": 0.65049,
+        "C": 5.8019,
+        "D": 2822.7,
+        "minimum_k": 63.15,
+        "maximum_k": 1970,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": 0.0003395,
+        "B": 0.76921,
+        "C": 19.592,
+        "D": 293.93,
+        "minimum_k": 50,
+        "maximum_k": 2000,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": 3.4358,
+        "B": -24.706,
+        "C": -2.6748,
+        "D": -4.1603e-05,
+        "E": 2,
+        "minimum_k": 63.15,
+        "maximum_k": 125,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": -0.21743,
+        "B": 10.383,
+        "C": -1.0631,
+        "D": 0.00036245,
+        "E": -2.3265e-05,
+        "minimum_k": 60,
+        "maximum_k": 124,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "Argon",
+      "critical_volume": {
+        "value": 0.07457,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 1.0023e-06,
+        "B": 0.5922,
+        "C": 85.563,
+        "D": 238.26,
+        "minimum_k": 50,
+        "maximum_k": 2000,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": 0.00013095,
+        "B": 0.81923,
+        "C": -122.33,
+        "D": 13993,
+        "minimum_k": 90,
+        "maximum_k": 2000,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -99.903,
+        "B": 1347.5,
+        "C": 17.615,
+        "D": -0.00032893,
+        "E": 2,
+        "minimum_k": 84.1,
+        "maximum_k": 150,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": -0.30397,
+        "B": -0.82999,
+        "C": -0.71462,
+        "D": -0.00039294,
+        "E": -1.2209e-05,
+        "minimum_k": 80,
+        "maximum_k": 150,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "Oxygen",
+      "critical_volume": {
+        "value": 0.07337,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 8.0134e-07,
+        "B": 0.60321,
+        "C": 56.09,
+        "D": 1584.9,
+        "minimum_k": 54.35,
+        "maximum_k": 1950,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": 0.0004508,
+        "B": 0.74544,
+        "C": 58.278,
+        "D": -562.62,
+        "minimum_k": 60,
+        "maximum_k": 2000,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -5.2319,
+        "B": 116.13,
+        "C": -1.0315,
+        "D": 3.4376e-06,
+        "E": 2,
+        "minimum_k": 54.36,
+        "maximum_k": 150,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": -0.19654,
+        "B": -10.535,
+        "C": -0.46717,
+        "D": -0.0052064,
+        "E": -3.3418e-07,
+        "minimum_k": 50,
+        "maximum_k": 150,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "Methanol",
+      "critical_volume": {
+        "value": 0.118,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 3.0654e-07,
+        "B": 0.69658,
+        "C": 204.87,
+        "D": 24.304,
+        "minimum_k": 240,
+        "maximum_k": 1000,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": 7.8368e-07,
+        "B": 1.7569,
+        "C": 108.12,
+        "D": -21101,
+        "minimum_k": 175.47,
+        "maximum_k": 684.37,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -32.996,
+        "B": 1981.4,
+        "C": 3.3666,
+        "D": -3.9246e-06,
+        "E": 2,
+        "minimum_k": 175.47,
+        "maximum_k": 412,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": -0.056817,
+        "B": 13.156,
+        "C": -1.2214,
+        "D": -0.00028282,
+        "E": -1.0129e-06,
+        "minimum_k": 150,
+        "maximum_k": 512,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "Water",
+      "critical_volume": {
+        "value": 0.05595,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 7.002327e-08,
+        "B": 0.934576,
+        "C": 195.6338,
+        "D": -13045.99,
+        "minimum_k": 273.16,
+        "maximum_k": 1073.15,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": 6.5986e-06,
+        "B": 1.3947,
+        "C": 59.478,
+        "D": -15484,
+        "minimum_k": 273.16,
+        "maximum_k": 1073.15,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -133.7,
+        "B": 6785.7,
+        "C": 18.47,
+        "D": -1.4736e-05,
+        "E": 2,
+        "minimum_k": 273.1,
+        "maximum_k": 647.13,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": -1.5697,
+        "B": -55.141,
+        "C": 0.7832,
+        "D": 0.0011484,
+        "E": -1.8151e-06,
+        "minimum_k": 273.1,
+        "maximum_k": 633.15,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "Carbon monoxide",
+      "critical_volume": {
+        "value": 0.0931,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 1.2713e-06,
+        "B": 0.51494,
+        "C": 105.97,
+        "D": -231.11,
+        "minimum_k": 68.15,
+        "maximum_k": 1273.15,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": 0.00061581,
+        "B": 0.6828,
+        "C": 61.287,
+        "D": 221.32,
+        "minimum_k": 70,
+        "maximum_k": 1500,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -82.158,
+        "B": 1037.8,
+        "C": 14.229,
+        "D": -0.00028204,
+        "E": 2,
+        "minimum_k": 68.15,
+        "maximum_k": 131.37,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": -0.23621,
+        "B": -3.5251,
+        "C": -0.55788,
+        "D": -0.0039362,
+        "E": -8.2725e-06,
+        "minimum_k": 65,
+        "maximum_k": 125,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "Carbon dioxide",
+      "critical_volume": {
+        "value": 0.094,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 2.2464e-06,
+        "B": 0.45495,
+        "C": 292.64,
+        "D": 1669.1,
+        "minimum_k": 170,
+        "maximum_k": 1900,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": 5.804,
+        "B": -0.44522,
+        "C": 794.13,
+        "D": 2139600,
+        "minimum_k": 180,
+        "maximum_k": 1500,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -7.7022,
+        "B": -166.34,
+        "C": 0.38094,
+        "D": -4.018e-05,
+        "E": 2,
+        "minimum_k": 216.58,
+        "maximum_k": 303.15,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": -0.24975,
+        "B": -55.106,
+        "C": 0.41735,
+        "D": -0.0051067,
+        "E": 2.0157e-06,
+        "minimum_k": 216.58,
+        "maximum_k": 300,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "Hydrogen",
+      "critical_volume": {
+        "value": 0.064147,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 1.7916e-07,
+        "B": 0.68557,
+        "C": -0.51413,
+        "D": 132.61,
+        "minimum_k": 13.95,
+        "maximum_k": 2000,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": 0.0026851,
+        "B": 0.74366,
+        "C": 13.289,
+        "D": -31.305,
+        "minimum_k": 10,
+        "maximum_k": 1600,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -32.531,
+        "B": 97.304,
+        "C": 5.9178,
+        "D": -0.0031563,
+        "E": 2,
+        "minimum_k": 13.84,
+        "maximum_k": 33,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": -0.34238,
+        "B": -4.3002,
+        "C": -0.53814,
+        "D": 0.0011639,
+        "E": -0.00021792,
+        "minimum_k": 13.84,
+        "maximum_k": 31,
+        "unit": "W/m/K"
+      }
+    },
+    {
+      "compound_id": "Acetone",
+      "critical_volume": {
+        "value": 0.209,
+        "unit": "m3/kmol"
+      },
+      "vapor_viscosity": {
+        "equation": 102,
+        "A": 3.1012e-08,
+        "B": 0.97616,
+        "C": 23.042,
+        "D": 14.834,
+        "minimum_k": 178.45,
+        "maximum_k": 1000,
+        "unit": "Pa.s"
+      },
+      "vapor_thermal_conductivity": {
+        "equation": 102,
+        "A": -26.882,
+        "B": 0.9036,
+        "C": -120950000,
+        "D": -608790000,
+        "minimum_k": 178.45,
+        "maximum_k": 1000,
+        "unit": "W/m/K"
+      },
+      "liquid_viscosity": {
+        "equation": 101,
+        "A": -14.064,
+        "B": 1000.7,
+        "C": 0.45349,
+        "D": 3.9456e-07,
+        "E": 2,
+        "minimum_k": 190,
+        "maximum_k": 408,
+        "unit": "Pa.s"
+      },
+      "liquid_thermal_conductivity": {
+        "equation": 16,
+        "A": 0.01013,
+        "B": -95.32,
+        "C": -0.21151,
+        "D": -0.0052616,
+        "E": 2.3043e-06,
+        "minimum_k": 178.45,
+        "maximum_k": 343.15,
+        "unit": "W/m/K"
+      }
+    }
   ]
 }

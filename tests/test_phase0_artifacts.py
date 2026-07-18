@@ -133,6 +133,22 @@ class Phase0ArtifactsTest(unittest.TestCase):
         self.assertIn('"GetIdealGasHeatCapacity"', script)
         self.assertIn('"GetVaporPressure"', script)
 
+    def test_capture_script_records_full_pure_component_reference_values(self):
+        script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
+
+        self.assertIn("pure_reference", script)
+        for method in (
+            "GetLiquidDensity",
+            "GetLiquidHeatCapacity",
+            "GetEnthalpyOfVaporization",
+            "GetLiquidSurfaceTension",
+            "GetLiquidViscosity",
+            "GetVaporViscosity",
+            "GetLiquidThermalConductivity",
+            "GetVaporThermalConductivity",
+        ):
+            self.assertIn(f'"{method}"', script)
+
     def test_capture_script_records_explicit_elements_and_formation_values(self):
         script = (ROOT / "scripts/capture_dwsim_reference.ps1").read_text()
 
