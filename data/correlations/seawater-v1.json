@@ -1,0 +1,43 @@
+﻿{
+    "schema_version":  "dwsim-seawater-data-1",
+    "model":  "Seawater",
+    "source":  {
+                   "product":  "DWSIM",
+                   "revision":  "9.0.5.0",
+                   "case_sha256":  "07e80f38f9315a70c8fccdc34cfa7f4e9b98e2bc89aff2fbcb65d80538e6cbff",
+                   "runtime_assembly_sha256":  "c5a038c86cdfd3304be5e283527ab377df7579ca306eac69950ab4b8c495c544",
+                   "property_package_source_sha256":  "435448de7115d5c00974f80e284ed7cef5976491a0f4974c7502a7c548739f79",
+                   "model_source_sha256":  "e402a3ee36418af3365bc9a3397a1cc3732a8748ca46ee181e4502c53cfcc740"
+               },
+    "compound_ids":  [
+                         "Water",
+                         "Salt"
+                     ],
+    "molecular_weights":  [
+                              18.01528,
+                              58.44
+                          ],
+    "salinity_limit":  0.12,
+    "vapor_pressure_coefficients":  [
+                                        -5800.2206,
+                                        1.3914993,
+                                        -0.048640239,
+                                        4.1764768E-05,
+                                        -1.4452093E-08,
+                                        6.5459673
+                                    ],
+    "scoped_probe":  {
+                         "temperature_k":  350,
+                         "composition":  [
+                                             0.98,
+                                             0.02
+                                         ],
+                         "converted_mass_fractions":  [
+                                                          0.93790830812336978,
+                                                          0.062091691876630224
+                                                      ],
+                         "calculated_salinity":  0.066202305000227016,
+                         "current_stream_salinity":  0.12,
+                         "vapor_pressure_pa":  40050.1457330831
+                     }
+}

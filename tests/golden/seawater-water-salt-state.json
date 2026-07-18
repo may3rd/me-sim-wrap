@@ -1,0 +1,50 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "seawater-water-salt-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "07e80f38f9315a70c8fccdc34cfa7f4e9b98e2bc89aff2fbcb65d80538e6cbff",
+                   "property_package":  "Seawater",
+                   "property_package_class":  "DWSIM.Thermodynamics.PropertyPackages.SeawaterPropertyPackage",
+                   "property_package_construction":  "direct-class-over-case-compound-domain",
+                   "flash_algorithm":  "Seawater Flash"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "Water",
+                                     "Salt"
+                                 ],
+                   "temperature_k":  350,
+                   "pressure_pa":  100000,
+                   "composition":  [
+                                       0.98,
+                                       0.02
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         0.38655339998989685,
+                                                         0
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        1,
+                                                        1
+                                                    ],
+                    "liquid_fraction":  1,
+                    "vapor_fraction":  0,
+                    "liquid_composition":  [
+                                               0.98,
+                                               0.02
+                                           ],
+                    "vapor_composition":  [
+                                              1E-10,
+                                              1E-10
+                                          ],
+                    "iterations":  1,
+                    "equilibrium_ratios":  [
+                                               1E-10,
+                                               1E-10
+                                           ]
+                }
+}

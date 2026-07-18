@@ -50,8 +50,8 @@
       "dwsim_class": "SeawaterPropertyPackage",
       "family": "water",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/SeaWater.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["seawater-water-salt"]
     },
     {
       "id": "peng-robinson",

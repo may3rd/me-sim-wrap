@@ -60,6 +60,7 @@ from .modfac import ModfacData, modfac_activity_coefficients
 from .chao_seader import ChaoSeaderData, ChaoSeaderTPFlashResult, chao_seader_liquid_fugacity_coefficients, chao_seader_vapor_fugacity_coefficients, chao_seader_tp_flash, grayson_streed_liquid_fugacity_coefficients, grayson_streed_vapor_fugacity_coefficients, grayson_streed_tp_flash
 from .lee_kesler_plocker import LKPData, LKPTPFlashResult, lkp_fugacity_coefficients, lkp_tp_flash
 from .steam_tables import SteamTablesData,SteamTablesTPFlashResult,steam_tables_fugacity_coefficients,steam_tables_tp_flash
+from .seawater import SeawaterData,SeawaterTPFlashResult,seawater_fugacity_coefficients,seawater_tp_flash
 
 
 PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
@@ -86,6 +87,7 @@ CHAO_SEADER_METHANE_N_PENTANE = "chao-seader-methane-n-pentane"
 GRAYSON_STREED_METHANE_N_PENTANE = "grayson-streed-methane-n-pentane"
 LEE_KESLER_PLOCKER_METHANE_N_PENTANE = "lee-kesler-plocker-methane-n-pentane"
 STEAM_TABLES_WATER = "steam-tables-water"
+SEAWATER_WATER_SALT = "seawater-water-salt"
 
 
 @runtime_checkable
@@ -586,6 +588,18 @@ class SteamTablesSystem:
         return steam_tables_fugacity_coefficients(self.data,self.water,composition,temperature_k,pressure_pa,phase)
     def tp_flash(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float)->SteamTablesTPFlashResult:
         return steam_tables_tp_flash(self.data,self.water,composition,temperature_k,pressure_pa)
+
+@dataclass(frozen=True,slots=True)
+class SeawaterSystem:
+    data:SeawaterData
+    model_id:str=field(default=SEAWATER_WATER_SALT,init=False)
+    compound_ids:tuple[str,...]=field(default=("Water","Salt"),init=False)
+    def __post_init__(self)->None:
+        if not isinstance(self.data,SeawaterData) or self.data.compound_ids!=self.compound_ids:raise ValidationError("Seawater system requires Water/Salt data")
+    def fugacity_coefficients(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float,phase:str)->tuple[float,...]:
+        return seawater_fugacity_coefficients(self.data,composition,temperature_k,pressure_pa,phase)
+    def tp_flash(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float)->SeawaterTPFlashResult:
+        return seawater_tp_flash(self.data,composition,temperature_k,pressure_pa)
 
 
 @dataclass(frozen=True, slots=True)
@@ -1137,6 +1151,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     GRAYSON_STREED_METHANE_N_PENTANE: GraysonStreedSystem,
     LEE_KESLER_PLOCKER_METHANE_N_PENTANE: LeeKeslerPlockerSystem,
     STEAM_TABLES_WATER: SteamTablesSystem,
+    SEAWATER_WATER_SALT: SeawaterSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS
