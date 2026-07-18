@@ -32,6 +32,7 @@ from mesim.thermo.systems import (
     UNIFAC_1_PROPANOL_WATER,
     UNIFAC_LL_1_PROPANOL_WATER,
     MODFAC_DORTMUND_1_PROPANOL_WATER,
+    MODFAC_NIST_1_PROPANOL_WATER,
     WILSON_ACETONE_METHANOL,
     IdealRaoultSystem,
     NRTLSystem,
@@ -74,6 +75,7 @@ class ThermodynamicSystemTest(unittest.TestCase):
                 UNIFAC_1_PROPANOL_WATER,
                 UNIFAC_LL_1_PROPANOL_WATER,
                 MODFAC_DORTMUND_1_PROPANOL_WATER,
+                MODFAC_NIST_1_PROPANOL_WATER,
             },
         )
         with self.assertRaises(TypeError):

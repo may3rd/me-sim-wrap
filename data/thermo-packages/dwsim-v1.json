@@ -137,8 +137,10 @@
       "dwsim_class": "NISTMFACPropertyPackage",
       "family": "activity-coefficient",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/NISTMFAC.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": [
+        "modfac-nist-1-propanol-water"
+      ]
     },
     {
       "id": "nrtl",

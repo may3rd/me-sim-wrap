@@ -78,6 +78,7 @@ UNIQUAC_1_PROPANOL_WATER = "uniquac-1-propanol-water"
 UNIFAC_1_PROPANOL_WATER = "unifac-1-propanol-water"
 UNIFAC_LL_1_PROPANOL_WATER = "unifac-ll-1-propanol-water"
 MODFAC_DORTMUND_1_PROPANOL_WATER = "modfac-dortmund-1-propanol-water"
+MODFAC_NIST_1_PROPANOL_WATER = "modfac-nist-1-propanol-water"
 
 
 @runtime_checkable
@@ -494,7 +495,21 @@ class ModfacDortmundSystem:
     def __post_init__(self) -> None:
         try: ids=tuple(self.compound_ids)
         except TypeError as error: raise ValidationError("Dortmund compound IDs must be a sequence") from error
-        if not isinstance(self.data,ModfacData) or len(ids)!=2 or len(set(ids))!=2: raise ValidationError("Dortmund thermodynamic-system inputs are invalid")
+        if not isinstance(self.data,ModfacData) or self.data.model!="Modified UNIFAC (Dortmund)" or len(ids)!=2 or len(set(ids))!=2: raise ValidationError("Dortmund thermodynamic-system inputs are invalid")
+        for value in ids: self.data.compound(value)
+        object.__setattr__(self,"compound_ids",ids)
+    def activity_coefficients(self,liquid_composition:tuple[float,...],temperature_k:float)->tuple[float,...]:
+        return modfac_activity_coefficients(self.data,self.compound_ids,liquid_composition,temperature_k)
+
+@dataclass(frozen=True, slots=True)
+class ModfacNistSystem:
+    data: ModfacData
+    compound_ids: tuple[str, ...]
+    model_id: str = field(default=MODFAC_NIST_1_PROPANOL_WATER, init=False)
+    def __post_init__(self) -> None:
+        try: ids=tuple(self.compound_ids)
+        except TypeError as error: raise ValidationError("NIST Modified UNIFAC compound IDs must be a sequence") from error
+        if not isinstance(self.data,ModfacData) or self.data.model!="Modified UNIFAC (NIST)" or len(ids)!=2 or len(set(ids))!=2: raise ValidationError("NIST Modified UNIFAC thermodynamic-system inputs are invalid")
         for value in ids: self.data.compound(value)
         object.__setattr__(self,"compound_ids",ids)
     def activity_coefficients(self,liquid_composition:tuple[float,...],temperature_k:float)->tuple[float,...]:
@@ -1045,6 +1060,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     UNIFAC_1_PROPANOL_WATER: UnifacSystem,
     UNIFAC_LL_1_PROPANOL_WATER: UnifacLLSystem,
     MODFAC_DORTMUND_1_PROPANOL_WATER: ModfacDortmundSystem,
+    MODFAC_NIST_1_PROPANOL_WATER: ModfacNistSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS
