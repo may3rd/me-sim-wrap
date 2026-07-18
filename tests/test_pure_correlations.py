@@ -58,6 +58,27 @@ class PureComponentCorrelationTest(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+        exclusions = json.loads(
+            (ROOT / "data/correlations/chemsep-exclusions-v1.json").read_text()
+        )
+        self.assertEqual(exclusions["source_compound_count"], 431)
+        self.assertEqual(exclusions["supported_compound_count"], 408)
+        self.assertEqual(len(exclusions["excluded_compounds"]), 23)
+        for record in exclusions["excluded_compounds"]:
+            self.assertTrue(
+                record["missing_fields"] or record["unsupported_equations"],
+                record["compound_id"],
+            )
+        squalane = next(
+            record
+            for record in exclusions["excluded_compounds"]
+            if record["compound_id"] == "Squalane"
+        )
+        self.assertEqual(
+            squalane["unsupported_equations"],
+            [{"property": "LiquidViscosity", "equation": 118}],
+        )
+
     def test_every_extracted_correlation_has_a_positive_midpoint_value(self):
         for record in self.ideal.values():
             for correlation, evaluate in (

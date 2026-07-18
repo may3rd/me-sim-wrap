@@ -232,12 +232,58 @@ def _datasets() -> dict[Path, dict]:
             }
         )
     interactions = _pr_interactions(compound_ids, compounds)
+    exclusions = _exclusions()
     return {
         COMPOUNDS: catalog,
         CORRELATIONS / "ideal-v1.json": ideal,
         CORRELATIONS / "transport-v1.json": transport,
         CORRELATIONS / "saturated-liquid-v1.json": saturated,
+        CORRELATIONS / "chemsep-exclusions-v1.json": exclusions,
         PR_INTERACTIONS: interactions,
+    }
+
+
+def _exclusions() -> dict:
+    root = ElementTree.parse(SOURCE).getroot()
+    records = []
+    source_count = 0
+    for compound in root.iter("compound"):
+        source_count += 1
+        if _supported(compound):
+            continue
+        missing_fields = []
+        unsupported_equations = []
+        for tag, equations in SUPPORTED_EQUATIONS.items():
+            node = compound.find(tag)
+            if node is None:
+                missing_fields.append(tag)
+                continue
+            values = {child.tag: child.attrib.get("value") for child in node}
+            for key in ("eqno", "A", "B", "C", "D", "Tmin", "Tmax"):
+                if values.get(key) in (None, ""):
+                    missing_fields.append(f"{tag}.{key}")
+            equation = _equation(compound, tag)
+            if equation is not None and equation not in equations:
+                unsupported_equations.append(
+                    {"property": tag, "equation": equation}
+                )
+        records.append(
+            {
+                "compound_id": compound.find("CompoundID").attrib["value"],
+                "missing_fields": sorted(set(missing_fields)),
+                "unsupported_equations": unsupported_equations,
+            }
+        )
+    return {
+        "schema_version": "chemsep-exclusions-1",
+        "provenance": {
+            "source": SOURCE_PATH,
+            "source_revision": REVISION,
+            "imported_utc": "2026-07-18T00:00:00Z",
+        },
+        "source_compound_count": source_count,
+        "supported_compound_count": source_count - len(records),
+        "excluded_compounds": records,
     }
 
 

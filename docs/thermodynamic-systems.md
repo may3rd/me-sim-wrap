@@ -21,6 +21,8 @@ the other 23 remain explicitly excluded. The PR system exposes supported records
 possible binary combinations are supported: `pr-v1.json` contains 197 explicit pairs
 (181 first-source records plus 16 accepted explicit-zero closures),
 and the constructor rejects an unrecorded pair instead of assuming a zero interaction.
+`chemsep-exclusions-v1.json` records the missing fields and unsupported equation IDs for
+every excluded source compound.
 
 The systems deliberately do not implement one artificial common flash interface. PR and
 the accepted NRTL slice have different verified capabilities, and callers must request a

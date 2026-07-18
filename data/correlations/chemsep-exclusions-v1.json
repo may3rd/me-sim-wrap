@@ -1,0 +1,249 @@
+{
+  "schema_version": "chemsep-exclusions-1",
+  "provenance": {
+    "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+    "source_revision": "9.0.4",
+    "imported_utc": "2026-07-18T00:00:00Z"
+  },
+  "source_compound_count": 431,
+  "supported_compound_count": 408,
+  "excluded_compounds": [
+    {
+      "compound_id": "Air",
+      "missing_fields": [
+        "SurfaceTension"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Propionic acid",
+      "missing_fields": [
+        "VaporThermalConductivity.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "N-butyric acid",
+      "missing_fields": [
+        "VaporThermalConductivity.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "1-methylindene",
+      "missing_fields": [
+        "LiquidViscosity"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "2-methylindene",
+      "missing_fields": [
+        "LiquidViscosity"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Nitrogen trioxide",
+      "missing_fields": [
+        "LiquidHeatCapacityCp",
+        "LiquidThermalConductivity",
+        "LiquidViscosity",
+        "SurfaceTension",
+        "VaporThermalConductivity",
+        "VaporViscosity.C",
+        "VaporViscosity.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Nitrogen tetroxide",
+      "missing_fields": [
+        "SurfaceTension"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Squalane",
+      "missing_fields": [],
+      "unsupported_equations": [
+        {
+          "property": "LiquidViscosity",
+          "equation": 118
+        }
+      ]
+    },
+    {
+      "compound_id": "Monoethanolamine",
+      "missing_fields": [
+        "VaporPressure.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Diethanolamine",
+      "missing_fields": [
+        "VaporPressure.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Oxalic acid",
+      "missing_fields": [
+        "LiquidViscosity"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Terephthalic acid",
+      "missing_fields": [
+        "LiquidHeatCapacityCp",
+        "LiquidThermalConductivity",
+        "LiquidViscosity",
+        "SurfaceTension"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Cumene hydroperoxide",
+      "missing_fields": [
+        "LiquidViscosity"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "DiEthyl Carbonate",
+      "missing_fields": [
+        "LiquidHeatCapacityCp",
+        "LiquidThermalConductivity",
+        "VaporPressure.D",
+        "VaporThermalConductivity",
+        "VaporViscosity.C",
+        "VaporViscosity.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Methyl Ethyl Carbonate",
+      "missing_fields": [
+        "LiquidDensity",
+        "LiquidHeatCapacityCp",
+        "LiquidThermalConductivity",
+        "LiquidViscosity",
+        "VaporPressure.D",
+        "VaporThermalConductivity",
+        "VaporViscosity.C",
+        "VaporViscosity.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Methyl Phenyl Carbonate",
+      "missing_fields": [
+        "LiquidDensity",
+        "LiquidHeatCapacityCp",
+        "LiquidThermalConductivity",
+        "LiquidViscosity",
+        "VaporPressure.D",
+        "VaporThermalConductivity",
+        "VaporViscosity.C",
+        "VaporViscosity.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Ethyl Phenyl Carbonate",
+      "missing_fields": [
+        "LiquidDensity",
+        "LiquidHeatCapacityCp",
+        "LiquidThermalConductivity",
+        "LiquidViscosity",
+        "VaporPressure.D",
+        "VaporThermalConductivity",
+        "VaporViscosity.C",
+        "VaporViscosity.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "DiPhenyl Carbonate",
+      "missing_fields": [
+        "LiquidDensity",
+        "LiquidHeatCapacityCp.D",
+        "LiquidThermalConductivity.D",
+        "VaporPressure.D",
+        "VaporThermalConductivity.D",
+        "VaporViscosity.C",
+        "VaporViscosity.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "2-Methoxy-2-Methyl-Heptane",
+      "missing_fields": [
+        "LiquidDensity",
+        "LiquidHeatCapacityCp",
+        "LiquidThermalConductivity",
+        "LiquidViscosity",
+        "SurfaceTension",
+        "VaporThermalConductivity",
+        "VaporViscosity.C",
+        "VaporViscosity.D"
+      ],
+      "unsupported_equations": [
+        {
+          "property": "VaporPressure",
+          "equation": 200
+        }
+      ]
+    },
+    {
+      "compound_id": "2-Methyl-2-Heptanol",
+      "missing_fields": [
+        "LiquidDensity",
+        "LiquidHeatCapacityCp",
+        "LiquidThermalConductivity",
+        "LiquidViscosity",
+        "SurfaceTension",
+        "VaporThermalConductivity",
+        "VaporViscosity.C",
+        "VaporViscosity.D"
+      ],
+      "unsupported_equations": [
+        {
+          "property": "VaporPressure",
+          "equation": 200
+        }
+      ]
+    },
+    {
+      "compound_id": "Diethylethanolamine",
+      "missing_fields": [
+        "SurfaceTension.C",
+        "SurfaceTension.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "Glycerol",
+      "missing_fields": [
+        "LiquidViscosity.D"
+      ],
+      "unsupported_equations": []
+    },
+    {
+      "compound_id": "DiButyl Carbonate",
+      "missing_fields": [
+        "LiquidDensity",
+        "LiquidHeatCapacityCp",
+        "LiquidThermalConductivity",
+        "LiquidViscosity",
+        "SurfaceTension",
+        "VaporPressure.D",
+        "VaporThermalConductivity",
+        "VaporViscosity"
+      ],
+      "unsupported_equations": []
+    }
+  ]
+}
