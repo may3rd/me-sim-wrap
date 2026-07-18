@@ -41,6 +41,7 @@ class UnifacCompoundBasis:
 
 @dataclass(frozen=True, slots=True)
 class UnifacData:
+    model: str
     source_revision: str
     groups_sha256: str
     interactions_sha256: str
@@ -74,7 +75,10 @@ class UnifacData:
 def load_unifac_data(path: str | Path) -> UnifacData:
     try:
         document = json.loads(Path(path).read_text(encoding="utf-8-sig"))
-        if document["schema_version"] != "dwsim-unifac-data-1" or document["model"] != "UNIFAC":
+        if (
+            document["schema_version"] != "dwsim-unifac-data-1"
+            or document["model"] not in {"UNIFAC", "UNIFAC-LL"}
+        ):
             raise ValidationError("unsupported UNIFAC data schema or model")
         source = document["source"]
         compounds = tuple(
@@ -98,7 +102,7 @@ def load_unifac_data(path: str | Path) -> UnifacData:
             ) for record in document["interactions"]
         )
         data = UnifacData(
-            source["revision"], source["groups_sha256"], source["interactions_sha256"],
+            document["model"], source["revision"], source["groups_sha256"], source["interactions_sha256"],
             compounds, groups, interactions,
         )
     except ValidationError:
@@ -108,7 +112,8 @@ def load_unifac_data(path: str | Path) -> UnifacData:
     if (
         not data.source_revision or len(data.groups_sha256) != 64
         or len(data.interactions_sha256) != 64 or len(data.compound_basis) != 2
-        or len(data.groups) != 119 or len(data.interactions) != 1403
+        or len(data.groups) != 119
+        or len(data.interactions) != ({"UNIFAC": 1403, "UNIFAC-LL": 1467}[data.model])
     ):
         raise ValidationError("UNIFAC source identity or record count is invalid")
     if (
@@ -143,10 +148,10 @@ def load_unifac_data(path: str | Path) -> UnifacData:
                 not math.isfinite(item.value) or item.value <= 0.0
                 for item in compound.group_surface_fractions
             )
-            or not math.isclose(
+            or (data.model == "UNIFAC" and not math.isclose(
                 math.fsum(item.value for item in compound.group_surface_fractions),
                 1.0, rel_tol=0.0, abs_tol=1.0e-12,
-            )
+            ))
         ):
             raise ValidationError("invalid UNIFAC compound group basis")
         for item in compound.group_surface_fractions:

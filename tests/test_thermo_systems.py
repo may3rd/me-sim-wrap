@@ -30,6 +30,7 @@ from mesim.thermo.systems import (
     THERMO_SYSTEM_CONSTRUCTORS,
     UNIQUAC_1_PROPANOL_WATER,
     UNIFAC_1_PROPANOL_WATER,
+    UNIFAC_LL_1_PROPANOL_WATER,
     WILSON_ACETONE_METHANOL,
     IdealRaoultSystem,
     NRTLSystem,
@@ -70,6 +71,7 @@ class ThermodynamicSystemTest(unittest.TestCase):
                 WILSON_ACETONE_METHANOL,
                 UNIQUAC_1_PROPANOL_WATER,
                 UNIFAC_1_PROPANOL_WATER,
+                UNIFAC_LL_1_PROPANOL_WATER,
             },
         )
         with self.assertRaises(TypeError):

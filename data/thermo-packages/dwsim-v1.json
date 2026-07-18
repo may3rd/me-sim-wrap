@@ -115,8 +115,10 @@
       "dwsim_class": "UNIFACLLPropertyPackage",
       "family": "activity-coefficient",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/UNIFACLL.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": [
+        "unifac-ll-1-propanol-water"
+      ]
     },
     {
       "id": "modified-unifac-dortmund",

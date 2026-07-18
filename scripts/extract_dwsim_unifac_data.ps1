@@ -3,7 +3,10 @@ param(
     [Parameter(Mandatory = $true)][string]$EngineBin,
     [Parameter(Mandatory = $true)][string]$CasePath,
     [Parameter(Mandatory = $true)][string]$OutputPath,
-    [string]$DwsimRevision = "9.0.5.0"
+    [string]$DwsimRevision = "9.0.5.0",
+    [string]$PropertyPackageName = "UNIFAC",
+    [string]$Model = "UNIFAC",
+    [string]$InteractionsResource = "DWSIM.Thermodynamics.unifac_ip.txt"
 )
 
 $ErrorActionPreference = "Stop"
@@ -64,12 +67,12 @@ public static class DwsimUnifacExtractor
             .First(candidate => candidate.Name == name && candidate.GetParameters().Length == 0);
         return method.Invoke(target, null);
     }
-    public static object PropertyPackage(object flowsheet)
+    public static object PropertyPackage(object flowsheet, string componentName)
     {
         foreach (DictionaryEntry entry in (IDictionary)Get(flowsheet, "PropertyPackages"))
             if (String.Equals(Convert.ToString(Get(entry.Value, "ComponentName"),
-                    CultureInfo.InvariantCulture), "UNIFAC", StringComparison.Ordinal)) return entry.Value;
-        throw new InvalidOperationException("No exact UNIFAC property-package match was found.");
+                    CultureInfo.InvariantCulture), componentName, StringComparison.Ordinal)) return entry.Value;
+        throw new InvalidOperationException("No exact UNIFAC property-package match was found: " + componentName);
     }
     public static void SetCurrentMaterialStream(object flowsheet, object package)
     {
@@ -166,7 +169,7 @@ if ($null -ne $thermoC) { [Reflection.Assembly]::LoadFrom($thermoC.FullName) | O
 [Reflection.Assembly]::LoadFrom((Join-Path $engineDirectory "DWSIM.Automation.dll")) | Out-Null
 $automation = New-Object DWSIM.Automation.Automation3
 $flowsheet = $automation.LoadFlowsheet2($resolvedCase)
-$package = [DwsimUnifacExtractor]::PropertyPackage($flowsheet)
+$package = [DwsimUnifacExtractor]::PropertyPackage($flowsheet, $PropertyPackageName)
 [DwsimUnifacExtractor]::SetCurrentMaterialStream($flowsheet, $package)
 
 $basis = @([DwsimUnifacExtractor]::CompoundBasis($package) | ForEach-Object {
@@ -190,14 +193,14 @@ if ($basis.Count -ne 2 -or $groups.Count -eq 0 -or $interactions.Count -eq 0) {
     throw "UNIFAC extraction returned an invalid record count"
 }
 $document = [ordered]@{
-    schema_version = "dwsim-unifac-data-1"; model = "UNIFAC"
+    schema_version = "dwsim-unifac-data-1"; model = $Model
     source = [ordered]@{
         product = "DWSIM"; revision = $DwsimRevision
         case_sha256 = (Get-FileHash -LiteralPath $resolvedCase -Algorithm SHA256).Hash.ToLowerInvariant()
         groups_resource = "DWSIM.Thermodynamics.unifac.txt"
         groups_sha256 = [DwsimUnifacExtractor]::ResourceSha256($package, "DWSIM.Thermodynamics.unifac.txt")
-        interactions_resource = "DWSIM.Thermodynamics.unifac_ip.txt"
-        interactions_sha256 = [DwsimUnifacExtractor]::ResourceSha256($package, "DWSIM.Thermodynamics.unifac_ip.txt")
+        interactions_resource = $InteractionsResource
+        interactions_sha256 = [DwsimUnifacExtractor]::ResourceSha256($package, $InteractionsResource)
     }
     compound_basis = $basis; groups = $groups; interactions = $interactions
 }
