@@ -59,7 +59,7 @@ golden-backed slices add the compounds required by reactions and columns.
 | Units boundary (temperature, pressure, flow, energy, power, enthalpy, density, transport, …) | Done |
 | Five-compound ideal properties (cp, h, s, density, vapor pressure) | Done |
 | Peng-Robinson pure + mixture (cubic roots, fugacity, departure h/s, stable-root selection) | Done (T1) |
-| TP / PH / bubble / dew flash | TP/PH done; bubble/dew stored but not DWSIM-parity verified |
+| TP / PH / bubble / dew flash | Done (T2; documented DWSIM solver/model differences) |
 | Streams, mixer, splitter, heater, cooler, valve, equilibrium separator | Done (U0) |
 | Acyclic flowsheet execution | Done |
 | HTTP API (`/v1/*`) | Done (internal alpha) |

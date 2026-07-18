@@ -4,7 +4,9 @@ All notable changes are documented here. This project follows semantic versionin
 
 ## [Unreleased]
 
-- No unreleased changes.
+### Added
+
+- Deterministic, nonzero DWSIM bubble/dew-pressure captures and executable methane/ethane PR parity gates.
 
 ## [0.1.0] - 2026-07-18
 

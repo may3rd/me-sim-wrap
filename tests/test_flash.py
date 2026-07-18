@@ -1,3 +1,4 @@
+import copy
 import math
 import json
 import sys
@@ -276,15 +277,16 @@ class PRBubbleDewPressureTest(unittest.TestCase):
 
 
 class PRDWSIMParityTest(unittest.TestCase):
-    """PR VLE vectors captured from DWSIM 9.0.4 in tests/golden/pr-flash.json."""
+    """PR VLE vectors captured from DWSIM 9.0.5 in tests/golden/pr-flash.json."""
 
     @classmethod
     def setUpClass(cls):
         compounds = {compound.id: compound for compound in load_compounds(ROOT / "data/compounds/v1.json")}
         cls.compounds = (compounds["Methane"], compounds["Ethane"])
         cls.interactions = load_pr_interactions(ROOT / "data/interactions/pr-v1.json")
-        captured = json.loads((ROOT / "tests/golden/pr-flash.json").read_text(encoding="utf-8-sig"))
-        cls.records = {record["tag"]: record for record in captured["outputs"]["objects_after"]}
+        cls.captured = json.loads((ROOT / "tests/golden/pr-flash.json").read_text(encoding="utf-8-sig"))
+        cls.repeated = json.loads((ROOT / "tests/golden/pr-flash-repeat.json").read_text(encoding="utf-8-sig"))
+        cls.records = {record["tag"]: record for record in cls.captured["outputs"]["objects_after"]}
 
     @classmethod
     def value(cls, tag: str, property_id: str) -> float:
@@ -292,6 +294,59 @@ class PRDWSIMParityTest(unittest.TestCase):
             if record["property"] == property_id:
                 return record["value"]["value"]
         raise AssertionError(f"{tag} lacks {property_id}")
+
+    def test_reference_capture_is_repeatable_clean_and_bubble_dew_enabled(self):
+        primary = copy.deepcopy(self.captured)
+        repeated = copy.deepcopy(self.repeated)
+        for document in (primary, repeated):
+            document["source"].pop("captured_utc", None)
+        self.assertEqual(primary, repeated)
+
+        self.assertTrue(self.captured["source"]["bubble_dew_calculation"])
+        self.assertGreater(self.captured["source"]["property_packages_updated"], 0)
+        self.assertTrue(self.captured["outputs"]["solve"]["success"])
+        self.assertEqual(self.captured["outputs"]["solve"]["errors"], [])
+        for record in self.captured["outputs"]["objects_after"]:
+            self.assertFalse(record["error"], record["tag"])
+            for prop in record["properties"]:
+                self.assertIsNone(prop["read_error"], f"{record['tag']} {prop['property']}")
+
+    def test_pr_bubble_and_dew_pressures_match_nonzero_dwsim_properties(self):
+        composition = tuple(
+            self.value("PR6-BUBBLE", f"PROP_MS_102/{compound}")
+            for compound in ("Methane", "Ethane")
+        )
+        temperature_k = self.value("PR6-BUBBLE", "PROP_MS_0")
+        dwsim_bubble_pa = self.value("PR6-BUBBLE", "PROP_MS_126")
+        dwsim_dew_pa = self.value("PR6-DEW", "PROP_MS_127")
+
+        self.assertGreater(dwsim_bubble_pa, dwsim_dew_pa)
+        self.assertTrue(
+            math.isclose(dwsim_bubble_pa, self.value("PR6-DEW", "PROP_MS_126"), rel_tol=1e-8)
+        )
+        self.assertTrue(
+            math.isclose(dwsim_dew_pa, self.value("PR6-BUBBLE", "PROP_MS_127"), rel_tol=1e-8)
+        )
+
+        bubble = bubble_pressure(
+            self.compounds,
+            composition,
+            self.interactions,
+            temperature_k,
+            (100_000.0, 3_000_000.0),
+        )
+        dew = dew_pressure(
+            self.compounds,
+            composition,
+            self.interactions,
+            temperature_k,
+            (100_000.0, 500_000.0),
+        )
+
+        self.assertTrue(bubble.report.converged)
+        self.assertTrue(dew.report.converged)
+        self.assertTrue(math.isclose(bubble.pressure_pa, dwsim_bubble_pa, rel_tol=2e-6))
+        self.assertTrue(math.isclose(dew.pressure_pa, dwsim_dew_pa, rel_tol=2e-6))
 
     def test_pr_tp_flash_matches_captured_dwsim_phase_states(self):
         results = {}

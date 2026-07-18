@@ -14,7 +14,7 @@ Status terms are normative: `verified` means equation and executable golden gate
 |---|---|---|
 | T0 ideal-gas and pure-component correlations | verified | Versioned catalog compounds within each saved correlation range |
 | T1 Peng-Robinson pure and mixture properties | verified-with-difference | Classic PR; unmodified and explicit Peneloux density paths remain distinct |
-| T2 TP and PH flash | verified-with-difference | TP/PH verified; bubble/dew equations pass independent vectors but lack a valid nonzero DWSIM property capture |
+| T2 TP, PH, bubble, and dew flash | verified-with-difference | Executable DWSIM parity gates pass; phase labeling, reference convergence, and caloric-model differences are documented |
 | T3 caloric and transport extensions | partial | Named vapor/liquid correlations and captured mixtures only |
 | U0 streams, basic operations, and acyclic flowsheets | verified-with-difference | Phase-split flow uses the documented reference-flash tolerance |
 | U1 pressure-changing and component-separation operations | verified | Captured PR pump, compressor, expander, and component-separator modes |
@@ -258,24 +258,8 @@ The Python kernel implements immutable material and energy streams; mixer, split
 
 ## Phase 6 flash parity status
 
-`tests/golden/pr-flash.json` and `tests/golden/pr-flash-repeat.json` are repeatable DWSIM 9.0.4 captures of the methane/ethane PR flash domain. The capture has no property-read errors. Python and DWSIM agree on stable liquid and stable vapor states. DWSIM reports the one-root near-critical stream as vapor while Python reports `single`; Python does not manufacture a vapor split from one EOS root. The two-phase vapor fraction differs by `3.96e-5` relative: DWSIM's default `NestedLoops` solver exits when the vapor-fraction update is below `1e-6`, although the saved state has a fugacity residual of about `1.2e-4`; Python retains its `1e-8` fugacity-equilibrium requirement.
+`tests/golden/pr-flash.json` and `tests/golden/pr-flash-repeat.json` are repeatable DWSIM 9.0.5 captures of the methane/ethane PR flash domain. The capture has no solve, object, or property-read errors. Python and DWSIM agree on stable liquid and stable vapor states. DWSIM reports the one-root near-critical stream as vapor while Python reports `single`; Python does not manufacture a vapor split from one EOS root. The two-phase vapor fraction differs by `3.96e-5` relative: DWSIM's default `NestedLoops` solver exits when the vapor-fraction update is below `1e-6`, although the saved state has a fugacity residual of about `1.2e-4`; Python retains its `1e-8` fugacity-equilibrium requirement.
 
 DWSIM's PR package is configured to use Lee-Kesler calorics, while this kernel uses ideal-gas heat-capacity correlations plus PR departure enthalpy. DWSIM-target PH temperatures differ by at most `2e-5` relative for the captured single-vapor and phase-crossing cases; Python PH energy closure remains `1e-6` relative to its supplied target.
 
-Bubble and dew pressure remain **not DWSIM-parity verified**. The present `PR6-BUBBLE` and `PR6-DEW` streams merely store manually supplied pressure states and report `PROP_MS_126` and `PROP_MS_127` as zero because DWSIM's `CalculateBubbleAndDewPoints` setting is disabled. Do not mark T2 fully supported until a capture records nonzero DWSIM bubble/dew property values or a direct solver result.
-
-Recapture on Windows with the capture switch below; it enables DWSIM's calculation setting in memory and does not modify the `.dwxmz` file:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\capture_dwsim_reference.ps1 `
-  -EngineBin $engine `
-  -DwsimRevision '9.0.4' `
-  -CasePath '.\tests\pr-flash.dwxmz' `
-  -CaseId 'pr-flash' `
-  -PropertyPackage 'Peng-Robinson (PR)' `
-  -FlashAlgorithm 'DWSIM default' `
-  -CalculateBubbleAndDewPoints `
-  -OutputPath '.\tests\golden\pr-flash.json'
-```
-
-Run it again with `pr-flash-repeat.json`, compare the two with `scripts/validate.py --compare`, and confirm nonzero `PROP_MS_126` and `PROP_MS_127` before committing the captures.
+The recapture enables DWSIM's `CalculateBubbleAndDewPoints` setting in memory without modifying the saved flowsheet. Both streams report the same nonzero envelope values at 180 K: approximately 2.162245 MPa bubble pressure and 0.262945 MPa dew pressure, with the required bubble-above-dew inequality. The Python PR pressure solvers match those properties within `2e-6` relative, while retaining their stricter internal fugacity residuals. This closes the T2 bubble/dew gate for the captured methane/ethane domain; it is not a general phase-envelope tracing capability.
