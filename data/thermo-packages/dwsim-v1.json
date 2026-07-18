@@ -266,8 +266,8 @@
       "dwsim_class": "SoaveRedlichKwongAdvancedPropertyPackage",
       "family": "cubic-eos",
       "source_file": "DWSIM.Thermodynamics.AdvancedEOS.PRSRKTDep/SRKAdvanced.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["soave-redlich-kwong-advanced"]
     }
   ]
 }

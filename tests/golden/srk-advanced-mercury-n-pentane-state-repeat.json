@@ -1,0 +1,50 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "srk-advanced-mercury-n-pentane-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "e66b8929cc6b5ab53771a9650881056e7dd2c65a00a249f0c262fa6e691030d5",
+                   "property_package":  "Soave-Redlich-Kwong (SRK) Advanced",
+                   "property_package_class":  "DWSIM.Thermodynamics.AdvancedEOS.SoaveRedlichKwongAdvancedPropertyPackage",
+                   "property_package_construction":  "deserialized-from-case",
+                   "flash_algorithm":  "Universal Flash"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "Mercury",
+                                     "N-pentane"
+                                 ],
+                   "temperature_k":  300,
+                   "pressure_pa":  1000000,
+                   "composition":  [
+                                       0.1,
+                                       0.9
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         0.13900053307432048,
+                                                         0.074565260877620762
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        0.13900053307432172,
+                                                        0.0745652608776205
+                                                    ],
+                    "liquid_fraction":  1,
+                    "vapor_fraction":  0,
+                    "liquid_composition":  [
+                                               0.1,
+                                               0.9
+                                           ],
+                    "vapor_composition":  [
+                                              0.097298328387660782,
+                                              0.90270167161233916
+                                          ],
+                    "iterations":  1,
+                    "equilibrium_ratios":  [
+                                               0.97290155143280033,
+                                               1.0029176032860512
+                                           ]
+                }
+}

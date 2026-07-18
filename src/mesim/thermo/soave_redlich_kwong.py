@@ -5,6 +5,7 @@ from dataclasses import dataclass, replace
 
 from ..compounds import Compound, PRInteractions
 from ..errors import ValidationError
+from .advanced_cubic import EvaluatedAdvancedCubicInteractions
 from .peng_robinson import R, _cubic_real_roots, _positive_exp, _reduced
 from .flash import SolverReport, rachford_rice
 
@@ -223,7 +224,9 @@ class SoaveRedlichKwongMixture:
             raise ValidationError("SRK mole fractions must be finite and non-negative")
         if not math.isclose(math.fsum(mole_fractions), 1.0, rel_tol=0.0, abs_tol=1.0e-12):
             raise ValidationError("SRK mole fractions must sum to one")
-        if not isinstance(interactions, PRInteractions):
+        if not isinstance(
+            interactions, (PRInteractions, EvaluatedAdvancedCubicInteractions)
+        ):
             raise ValidationError("SRK interaction data is invalid")
         self.components = tuple(SoaveRedlichKwong(compound) for compound in compounds)
         self.mole_fractions = tuple(mole_fractions)

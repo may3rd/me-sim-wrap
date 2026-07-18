@@ -14,6 +14,7 @@ loading correlation files or selecting model equations themselves.
 | `peng-robinson-stryjek-vera-2-margules` | `PRSV2MargulesSystem` | Liquid/vapor/stable phase states | DWSIM PRSV2 alpha correction plus its composition-dependent asymmetric Margules mixing rule; 90 alpha records and eight interaction pairs are frozen from the source assets |
 | `peng-robinson-stryjek-vera-2-van-laar` | `PRSV2VanLaarSystem` | Liquid/vapor/stable phase states | DWSIM PRSV2 alpha correction plus its rational asymmetric Van Laar mixing rule and separate eight-pair source table |
 | `peng-robinson-1978-advanced` | `PengRobinson1978AdvancedSystem` | Liquid/vapor/stable phase states | PR78 plus all 13 DWSIM advanced mercury interaction expressions evaluated as source-normalized temperature polynomials; absent/zero expressions fall back to ordinary PR interactions |
+| `soave-redlich-kwong-advanced` | `SoaveRedlichKwongAdvancedSystem` | Liquid/vapor/stable phase states and VLE TP flash | SRK plus a saved-case T/P interaction-expression dictionary; the parity case configures the DWSIM Mercury/N-pentane temperature polynomial before capture |
 | `nrtl-acetone-methanol` | `NRTLSystem` | Modified-Raoult equilibrium ratios, bubble/dew pressure, bubble temperature, and Excess-mode phase enthalpies | Saved-source binary acetone/methanol domain only; no general TP/PH flash |
 
 The registry is a fixed dictionary from stable model ID to constructor. Runtime plugin

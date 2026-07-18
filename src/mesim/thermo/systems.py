@@ -68,6 +68,7 @@ PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR = (
     "peng-robinson-stryjek-vera-2-van-laar"
 )
 PENG_ROBINSON_1978_ADVANCED = "peng-robinson-1978-advanced"
+SOAVE_REDLICH_KWONG_ADVANCED = "soave-redlich-kwong-advanced"
 
 
 @runtime_checkable
@@ -781,6 +782,87 @@ class PengRobinson1978AdvancedSystem:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class SoaveRedlichKwongAdvancedSystem:
+    """SRK phase states and TP flash with a configured T/P interaction layer."""
+
+    compounds: tuple[Compound, ...]
+    interactions: PRInteractions
+    advanced_data: AdvancedCubicData
+    model_id: str = field(default=SOAVE_REDLICH_KWONG_ADVANCED, init=False)
+    compound_ids: tuple[str, ...] = field(init=False)
+
+    def __post_init__(self) -> None:
+        try:
+            compounds = tuple(self.compounds)
+        except TypeError as error:
+            raise ValidationError("advanced SRK compounds must be a sequence") from error
+        if (
+            len(compounds) < 2
+            or any(not isinstance(compound, Compound) for compound in compounds)
+            or not isinstance(self.interactions, PRInteractions)
+            or self.interactions.model != "Soave-Redlich-Kwong"
+            or not isinstance(self.advanced_data, AdvancedCubicData)
+        ):
+            raise ValidationError("advanced SRK thermodynamic-system inputs are invalid")
+        compound_ids = tuple(compound.id for compound in compounds)
+        if len(set(compound_ids)) != len(compound_ids):
+            raise ValidationError("advanced SRK compound IDs must be unique")
+        object.__setattr__(self, "compounds", compounds)
+        object.__setattr__(self, "compound_ids", compound_ids)
+
+    def _interactions(
+        self, temperature_k: float, pressure_pa: float
+    ):
+        return self.advanced_data.evaluated(
+            temperature_k, pressure_pa, self.interactions
+        )
+
+    def state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+        phase: str,
+    ) -> SRKMixtureState:
+        return SoaveRedlichKwongMixture(
+            self.compounds,
+            composition,
+            self._interactions(temperature_k, pressure_pa),
+        ).state(temperature_k, pressure_pa, phase)
+
+    def stable_state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+    ) -> SRKMixtureState:
+        return SoaveRedlichKwongMixture(
+            self.compounds,
+            composition,
+            self._interactions(temperature_k, pressure_pa),
+        ).stable_state(temperature_k, pressure_pa)
+
+    def tp_flash(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+        *,
+        max_iterations: int = 100,
+        tolerance: float = 1.0e-10,
+    ) -> SRKTPFlashResult:
+        return srk_tp_flash(
+            self.compounds,
+            composition,
+            self._interactions(temperature_k, pressure_pa),
+            temperature_k,
+            pressure_pa,
+            max_iterations=max_iterations,
+            tolerance=tolerance,
+        )
+
+
 ThermoSystemConstructor = Callable[..., ThermodynamicSystem]
 _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_CLASSIC: PengRobinsonSystem,
@@ -792,6 +874,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_STRYJEK_VERA_2_MARGULES: PRSV2MargulesSystem,
     PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR: PRSV2VanLaarSystem,
     PENG_ROBINSON_1978_ADVANCED: PengRobinson1978AdvancedSystem,
+    SOAVE_REDLICH_KWONG_ADVANCED: SoaveRedlichKwongAdvancedSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS
