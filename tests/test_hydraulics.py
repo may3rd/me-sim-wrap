@@ -1,3 +1,4 @@
+import copy
 import json
 import math
 import sys
@@ -17,23 +18,82 @@ from mesim.thermo.transport import load_transport_correlations
 from mesim.unitops.hydraulics import TwoPhasePipeSegment, api_rp520_liquid_required_area, api_rp520_two_phase_required_area, api_rp520_vapor_required_area, beggs_brill_pressure_drop, beggs_brill_pressure_drop_profile, dwsim_terrain_thermal_conductivity, liquid_pipe_supplied_state_profile, lockhart_martinelli_pressure_drop, lockhart_martinelli_pressure_drop_profile, minor_loss_pressure_drop, orifice_pressure_drop, pipe_absorbed_solar_radiation, pipe_defined_heat_pr_profile, pipe_defined_htc_gradient_profile, pipe_defined_htc_heat_transfer, pipe_defined_htc_profile, pipe_estimated_htc_air, pipe_estimated_htc_air_pr_calculated_gradient_profile, pipe_estimated_htc_air_pr_calculated_profile, pipe_estimated_htc_air_pr_gradient_profile, pipe_estimated_htc_air_profile, pipe_estimated_htc_soil, pipe_estimated_htc_soil_pr_calculated_profile, pipe_estimated_htc_soil_pr_profile, pipe_estimated_htc_water, pipe_estimated_htc_water_pr_calculated_profile, pipe_estimated_htc_water_pr_profile, pipe_irradiated_heat_transfer, pipe_liquid_pr_properties, pipe_pressure_drop, pipe_pressure_drop_profile, pipe_solar_irradiation_source, pipe_tabulated_defined_htc_pr_profile
 
 
+ROOT = Path(__file__).parents[1]
+
+
+def _repeatable_golden(test_case: unittest.TestCase, case_id: str) -> dict:
+    primary = json.loads((ROOT / f"tests/golden/{case_id}.json").read_text(encoding="utf-8-sig"))
+    repeat = json.loads((ROOT / f"tests/golden/{case_id}-repeat.json").read_text(encoding="utf-8-sig"))
+    normalized_primary, normalized_repeat = copy.deepcopy(primary), copy.deepcopy(repeat)
+    normalized_primary["source"].pop("captured_utc")
+    normalized_repeat["source"].pop("captured_utc")
+    test_case.assertEqual(normalized_primary, normalized_repeat)
+    test_case.assertEqual(primary["outputs"]["solve"], {"errors": [], "success": True, "executed": True})
+    for object_record in primary["outputs"]["objects_after"]:
+        test_case.assertFalse(object_record["error"], object_record["tag"])
+        test_case.assertFalse(any(record["read_error"] for record in object_record["properties"]))
+        test_case.assertFalse(any(record["read_error"] for record in object_record.get("utilities", ())))
+    return primary
+
+
 class HydraulicsTest(unittest.TestCase):
     def test_api_rp520_two_phase_matches_dwsim_psv_capture(self):
-        result = api_rp520_two_phase_required_area(1_100_000.0, 100_000.0, 0.0020051724826423986, 0.17275978005510137, 9.179643677024487, 49.87102150345734, 44.51374508131255, 10.0, 0.85, 1.0, 1.0)
+        golden = _repeatable_golden(self, "u3-psv-two-phase-api520")
+        objects = {record["tag"]: record for record in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {record["property"]: record["value"]["value"] for record in objects[tag]["properties"]}
+            for tag in ("PSV-FEED", "PSV-FEED-90", "PSV-OUT")
+        }
+        utility = next(
+            record["data"] for record in objects["PSV-001"]["utilities"]
+            if record["name"] == "PressureSafetyValveSizing2"
+        )
+        result = api_rp520_two_phase_required_area(
+            properties["PSV-FEED"]["PROP_MS_1"], properties["PSV-OUT"]["PROP_MS_1"],
+            properties["PSV-FEED"]["PROP_MS_4"], properties["PSV-FEED"]["PROP_MS_28"],
+            properties["PSV-FEED"]["PROP_MS_12"], properties["PSV-FEED"]["PROP_MS_5"],
+            properties["PSV-FEED-90"]["PROP_MS_5"], utility["OverPressure"], utility["Kd"],
+            utility["Kb"], utility["Kc"],
+        )
 
         self.assertTrue(math.isclose(result.required_area_in2, 0.01905898823975082, rel_tol=1e-12))
         self.assertEqual(result.standard_orifice, "D")
         self.assertEqual(result.standard_area_in2, 0.11)
 
     def test_api_rp520_liquid_matches_dwsim_psv_capture(self):
-        result = api_rp520_liquid_required_area(1_100_000.0, 100_000.0, 0.0001560675811547515, 640.7480609367764, 0.00020498569099240772, 10.0, 0.85, 1.0)
+        golden = _repeatable_golden(self, "u3-psv-liquid-api520")
+        objects = {record["tag"]: record for record in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {record["property"]: record["value"]["value"] for record in objects[tag]["properties"]}
+            for tag in ("PSV-FEED", "PSV-OUT")
+        }
+        utility = objects["PSV-001"]["utilities"][0]["data"]
+        result = api_rp520_liquid_required_area(
+            properties["PSV-FEED"]["PROP_MS_1"], properties["PSV-OUT"]["PROP_MS_1"],
+            properties["PSV-FEED"]["PROP_MS_4"], properties["PSV-FEED"]["PROP_MS_5"],
+            properties["PSV-FEED"]["PROP_MS_38"], utility["OverPressure"], utility["Kd"],
+            utility["Kc"],
+        )
 
         self.assertTrue(math.isclose(result.required_area_in2, 0.004803176512159658, rel_tol=1e-12))
         self.assertEqual(result.standard_orifice, "D")
         self.assertEqual(result.standard_area_in2, 0.11)
 
     def test_api_rp520_vapor_matches_dwsim_psv_capture(self):
-        result = api_rp520_vapor_required_area(300.0, 1_100_000.0, 100_000.0, 0.1, 0.9764896861575462, 16.04246, 1.3467422057951541, 10.0, 0.85, 1.0, 1.0)
+        golden = _repeatable_golden(self, "u3-psv-vapor-api520")
+        objects = {record["tag"]: record for record in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {record["property"]: record["value"]["value"] for record in objects[tag]["properties"]}
+            for tag in ("PSV-FEED", "PSV-OUT")
+        }
+        utility = objects["PSV-001"]["utilities"][0]["data"]
+        result = api_rp520_vapor_required_area(
+            properties["PSV-FEED"]["PROP_MS_0"], properties["PSV-FEED"]["PROP_MS_1"],
+            properties["PSV-OUT"]["PROP_MS_1"], properties["PSV-FEED"]["PROP_MS_2"],
+            properties["PSV-FEED"]["PROP_MS_26"], properties["PSV-FEED"]["PROP_MS_6"],
+            properties["PSV-FEED"]["PROP_MS_22"], utility["OverPressure"], utility["Kd"],
+            utility["Kb"], utility["Kc"],
+        )
 
         self.assertTrue(result.choked)
         self.assertTrue(math.isclose(result.required_area_in2, 0.08013876894324415, rel_tol=1e-12))

@@ -1,3 +1,4 @@
+import copy
 import json
 import math
 import sys
@@ -18,6 +19,21 @@ from mesim.unitops.separation import component_separator
 
 
 ROOT = Path(__file__).parents[1]
+
+
+def _repeatable_golden(test_case: unittest.TestCase, case_id: str) -> dict:
+    primary = json.loads((ROOT / f"tests/golden/{case_id}.json").read_text(encoding="utf-8-sig"))
+    repeat = json.loads((ROOT / f"tests/golden/{case_id}-repeat.json").read_text(encoding="utf-8-sig"))
+    normalized_primary, normalized_repeat = copy.deepcopy(primary), copy.deepcopy(repeat)
+    normalized_primary["source"].pop("captured_utc")
+    normalized_repeat["source"].pop("captured_utc")
+    test_case.assertEqual(normalized_primary, normalized_repeat)
+    test_case.assertEqual(primary["outputs"]["solve"], {"errors": [], "success": True, "executed": True})
+    for object_record in primary["outputs"]["objects_after"]:
+        test_case.assertFalse(object_record["error"], object_record["tag"])
+        test_case.assertFalse(any(record["read_error"] for record in object_record["properties"]))
+        test_case.assertFalse(any(record["read_error"] for record in object_record.get("utilities", ())))
+    return primary
 
 
 class BasicUnitOperationTest(unittest.TestCase):
@@ -89,19 +105,31 @@ class BasicUnitOperationTest(unittest.TestCase):
         self.assertLessEqual(result, 1.0)
 
     def test_shell_tube_rating_matches_dwsim_pr_eos_capture(self):
+        golden = _repeatable_golden(self, "u2-shell-tube-rating-pr-eos")
+        objects = {record["tag"]: record for record in golden["outputs"]["objects_after"]}
+        properties = {
+            tag: {record["property"]: record["value"]["value"] for record in objects[tag]["properties"]}
+            for tag in ("cold feed", "hot feed", "4", "5", "HX-1")
+        }
         transport = {record.compound_id: record for record in load_transport_correlations(ROOT / "data/correlations/transport-v1.json")}
-        hot = flash_stream(StreamState(400.0, 500_000.0, 0.002, ("Methane", "Ethane"), (0.7, 0.3)), self.compounds, self.interactions, self.correlations)
-        cold = flash_stream(StreamState(300.0, 500_000.0, 0.002, ("Methane", "Ethane"), (0.7, 0.3)), self.compounds, self.interactions, self.correlations)
-        result = shell_tube_rating(hot, cold, self.compounds, self.interactions, self.correlations, tuple(transport[c.id] for c in self.compounds), ShellTubeGeometry(1, 2, 50, 60, 5, 50, 70), 500.0, 250.0, 20.0, 90.0016013520467, 0.045, 1.2)
+        hot = flash_stream(StreamState(properties["hot feed"]["PROP_MS_0"], properties["hot feed"]["PROP_MS_1"], properties["hot feed"]["PROP_MS_3"] / 1_000.0, ("Methane", "Ethane"), (0.7, 0.3)), self.compounds, self.interactions, self.correlations)
+        cold = flash_stream(StreamState(properties["cold feed"]["PROP_MS_0"], properties["cold feed"]["PROP_MS_1"], properties["cold feed"]["PROP_MS_3"] / 1_000.0, ("Methane", "Ethane"), (0.7, 0.3)), self.compounds, self.interactions, self.correlations)
+        geometry = ShellTubeGeometry(
+            int(properties["HX-1"]["PROP_HX_8"]), int(properties["HX-1"]["PROP_HX_14"]),
+            int(properties["HX-1"]["PROP_HX_15"]), properties["HX-1"]["PROP_HX_11"],
+            properties["HX-1"]["PROP_HX_12"], properties["HX-1"]["PROP_HX_10"],
+            properties["HX-1"]["PROP_HX_16"],
+        )
+        result = shell_tube_rating(hot, cold, self.compounds, self.interactions, self.correlations, tuple(transport[c.id] for c in self.compounds), geometry, properties["HX-1"]["PROP_HX_5"], properties["HX-1"]["PROP_HX_9"], properties["HX-1"]["PROP_HX_7"], 90.0016013520467, 0.045, 1.2)
 
-        self.assertTrue(math.isclose(result.result.heat_duty_w, 6461.925866248797, rel_tol=1e-4))
-        self.assertTrue(math.isclose(result.result.hot_outlet.stream.temperature_k, 329.69956086137495, rel_tol=1e-4))
-        self.assertTrue(math.isclose(result.result.cold_outlet.stream.temperature_k, 373.3146971174893, rel_tol=1e-4))
-        self.assertTrue(math.isclose(result.overall_coefficient_w_m2_k, 8.18704036555417, rel_tol=1e-4))
-        self.assertTrue(math.isclose(result.shell_reynolds, 5569.312108442105, rel_tol=1e-3))
-        self.assertTrue(math.isclose(result.tube_reynolds, 3417.3156494428736, rel_tol=1e-3))
-        self.assertTrue(math.isclose(result.cold_pressure_drop_pa, 0.9488861348945647, rel_tol=1e-3))
-        self.assertTrue(math.isclose(result.hot_pressure_drop_pa, 115.71525422408013, rel_tol=1e-3))
+        self.assertTrue(math.isclose(result.result.heat_duty_w / 1_000.0, properties["HX-1"]["PROP_HX_2"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.result.hot_outlet.stream.temperature_k, properties["5"]["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.result.cold_outlet.stream.temperature_k, properties["4"]["PROP_MS_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.overall_coefficient_w_m2_k, properties["HX-1"]["PROP_HX_0"], rel_tol=1e-4))
+        self.assertTrue(math.isclose(result.shell_reynolds, properties["HX-1"]["PROP_HX_23"], rel_tol=1e-3))
+        self.assertTrue(math.isclose(result.tube_reynolds, properties["HX-1"]["PROP_HX_24"], rel_tol=1e-3))
+        self.assertTrue(math.isclose(result.cold_pressure_drop_pa, properties["HX-1"]["PROP_HX_32"], rel_tol=1e-3))
+        self.assertTrue(math.isclose(result.hot_pressure_drop_pa, properties["HX-1"]["PROP_HX_33"], rel_tol=1e-3))
 
     def test_mixer_rejects_invalid_pressure_or_compound_order(self):
         with self.assertRaises(ValidationError):
