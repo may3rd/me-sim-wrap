@@ -21,6 +21,7 @@ from mesim.thermo.systems import (
     NRTL_ACETONE_METHANOL,
     PENG_ROBINSON_CLASSIC,
     PENG_ROBINSON_1978,
+    PENG_ROBINSON_LEE_KESLER,
     SOAVE_REDLICH_KWONG,
     THERMO_SYSTEM_CONSTRUCTORS,
     IdealRaoultSystem,
@@ -54,6 +55,7 @@ class ThermodynamicSystemTest(unittest.TestCase):
                 IDEAL_RAOULT,
                 SOAVE_REDLICH_KWONG,
                 PENG_ROBINSON_1978,
+                PENG_ROBINSON_LEE_KESLER,
             },
         )
         with self.assertRaises(TypeError):

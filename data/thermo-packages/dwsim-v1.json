@@ -95,8 +95,8 @@
       "dwsim_class": "PengRobinsonLKPropertyPackage",
       "family": "cubic-eos",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/PengRobinsonLeeKesler.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["peng-robinson-lee-kesler"]
     },
     {
       "id": "unifac",

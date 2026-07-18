@@ -12,6 +12,12 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$OutputPath,
 
+    [string]$PropertyPackageName,
+
+    [string]$DirectPropertyPackageClass,
+
+    [string]$DirectCompoundNamesCsv,
+
     [string]$CaseId,
 
     [Parameter(Mandatory = $true)]
@@ -66,6 +72,70 @@ public static class DwsimThermoProbe
             if (value != null) return value;
         }
         throw new InvalidOperationException("The dictionary is empty.");
+    }
+
+    private static object Invoke(object target, string name, object[] arguments, int count)
+    {
+        MethodInfo method = target.GetType().GetMethods(PublicInstance)
+            .First(candidate =>
+                candidate.Name == name && candidate.GetParameters().Length == count);
+        return method.Invoke(target, arguments);
+    }
+
+    public static object CreateProbeFlowsheet(object automation, string[] compoundNames)
+    {
+        object flowsheet = Invoke(automation, "CreateFlowsheet", new object[0], 0);
+        foreach (string compoundName in compoundNames)
+            Invoke(flowsheet, "AddCompound", new object[] { compoundName }, 1);
+        MethodInfo addObject = flowsheet.GetType().GetMethods(PublicInstance)
+            .First(candidate => candidate.Name == "AddObject" && candidate.GetParameters().Length == 4);
+        object materialStreamType = Enum.Parse(
+            addObject.GetParameters()[0].ParameterType, "MaterialStream", true);
+        addObject.Invoke(
+            flowsheet,
+            new object[] { materialStreamType, 50, 50, "thermo probe" });
+        return flowsheet;
+    }
+
+    public static object CreatePropertyPackage(
+        string fullTypeName, string componentName, object flowsheet)
+    {
+        Type packageType = AppDomain.CurrentDomain.GetAssemblies()
+            .Select(assembly => assembly.GetType(fullTypeName, false, false))
+            .FirstOrDefault(candidate => candidate != null);
+        if (packageType == null)
+            throw new InvalidOperationException(
+                "The property-package class is not loaded: " + fullTypeName);
+        object propertyPackage = Activator.CreateInstance(packageType);
+        Set(propertyPackage, "ComponentName", componentName);
+        Set(propertyPackage, "Flowsheet", flowsheet);
+        return propertyPackage;
+    }
+
+    private static void Set(object target, string name, object value)
+    {
+        PropertyInfo property = target.GetType().GetProperties(PublicInstance)
+            .First(candidate =>
+                candidate.Name == name && candidate.CanWrite &&
+                candidate.GetIndexParameters().Length == 0);
+        property.SetValue(target, value, null);
+    }
+
+    public static object ValueByComponentName(object dictionary, string componentName)
+    {
+        if (!(dictionary is IEnumerable))
+            throw new InvalidOperationException("Expected an enumerable dictionary.");
+        foreach (object entry in (IEnumerable)dictionary)
+        {
+            object value = Get(entry, "Value");
+            string candidate = Convert.ToString(
+                Get(value, "ComponentName"), CultureInfo.InvariantCulture);
+            if (value != null && String.Equals(
+                    candidate, componentName, StringComparison.Ordinal)) return value;
+        }
+        throw new InvalidOperationException(
+            "The property-package dictionary has no exact ComponentName match for '" +
+            componentName + "'.");
     }
 
     public static string FullTypeName(object target)
@@ -167,6 +237,11 @@ if ([string]::IsNullOrWhiteSpace($DwsimRevision)) {
 }
 
 [Reflection.Assembly]::LoadFrom($interfacesPath) | Out-Null
+$thermodynamicsPath = Join-Path $engineDirectory "DWSIM.Thermodynamics.dll"
+if (-not (Test-Path -LiteralPath $thermodynamicsPath)) {
+    throw "Missing DWSIM.Thermodynamics.dll in $engineDirectory"
+}
+[Reflection.Assembly]::LoadFrom($thermodynamicsPath) | Out-Null
 $thermoCAssemblyPath = Get-ChildItem `
     -Path $engineDirectory `
     -Filter "ThermoCS.dll" `
@@ -180,9 +255,37 @@ if ($null -ne $thermoCAssemblyPath) {
 [Reflection.Assembly]::LoadFrom($automationPath) | Out-Null
 
 $automation = New-Object DWSIM.Automation.Automation3
-$flowsheet = $automation.LoadFlowsheet2($resolvedCase)
-$packages = [DwsimThermoProbe]::Get($flowsheet, "PropertyPackages")
-$propertyPackage = [DwsimThermoProbe]::FirstValue($packages)
+$directConstruction = -not [string]::IsNullOrWhiteSpace($DirectPropertyPackageClass)
+if ($directConstruction) {
+    if ([string]::IsNullOrWhiteSpace($PropertyPackageName)) {
+        throw "PropertyPackageName is required with DirectPropertyPackageClass"
+    }
+    if ([string]::IsNullOrWhiteSpace($DirectCompoundNamesCsv)) {
+        throw "DirectCompoundNamesCsv is required with DirectPropertyPackageClass"
+    }
+    $directCompoundNames = @(
+        $DirectCompoundNamesCsv.Split(",") | ForEach-Object { $_.Trim() }
+    )
+    if ($directCompoundNames.Count -eq 0 -or $directCompoundNames -contains "") {
+        throw "DirectCompoundNamesCsv must contain non-empty DWSIM catalog names"
+    }
+    $flowsheet = [DwsimThermoProbe]::CreateProbeFlowsheet(
+        $automation, $directCompoundNames
+    )
+    $propertyPackage = [DwsimThermoProbe]::CreatePropertyPackage(
+        $DirectPropertyPackageClass, $PropertyPackageName, $flowsheet
+    )
+}
+else {
+    $flowsheet = $automation.LoadFlowsheet2($resolvedCase)
+    $packages = [DwsimThermoProbe]::Get($flowsheet, "PropertyPackages")
+    $propertyPackage = if ([string]::IsNullOrWhiteSpace($PropertyPackageName)) {
+        [DwsimThermoProbe]::FirstValue($packages)
+    }
+    else {
+        [DwsimThermoProbe]::ValueByComponentName($packages, $PropertyPackageName)
+    }
+}
 $materialStream = [DwsimThermoProbe]::FirstMaterialStream($flowsheet)
 [DwsimThermoProbe]::SetCurrentStream($propertyPackage, $materialStream)
 
@@ -213,6 +316,12 @@ $document = [ordered]@{
         input_file_sha256 = (Get-FileHash -Algorithm SHA256 -Path $resolvedCase).Hash.ToLowerInvariant()
         property_package = [string][DwsimThermoProbe]::Get($propertyPackage, "ComponentName")
         property_package_class = [DwsimThermoProbe]::FullTypeName($propertyPackage)
+        property_package_construction = if ($directConstruction) {
+            "direct-class-over-case-compound-domain"
+        }
+        else {
+            "deserialized-from-case"
+        }
         flash_algorithm = [string][DwsimThermoProbe]::Get(
             [DwsimThermoProbe]::Get($propertyPackage, "FlashBase"), "Name"
         )
