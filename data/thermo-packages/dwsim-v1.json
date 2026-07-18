@@ -160,8 +160,10 @@
       "dwsim_class": "UNIQUACPropertyPackage",
       "family": "activity-coefficient",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/UNIQUAC.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": [
+        "uniquac-1-propanol-water"
+      ]
     },
     {
       "id": "chao-seader",

@@ -1,0 +1,2671 @@
+﻿{
+    "schema_version":  "dwsim-uniquac-data-1",
+    "model":  "UNIQUAC",
+    "source":  {
+                   "product":  "DWSIM",
+                   "revision":  "9.0.5.0",
+                   "case_sha256":  "0652a3f499fa18fcff5476e60f4f2343d9302f92aaf0d296553fb342d11dba37",
+                   "resource":  "DWSIM.Thermodynamics.uniquac.dat",
+                   "resource_sha256":  "c5e36cf466e3f683a4db23555d33e460180f6df4d84968fac7e223f88c1df81f",
+                   "interaction_basis":  "cal/mol",
+                   "gas_constant_cal_per_mol_k":  1.98721
+               },
+    "compound_basis":  [
+                           {
+                               "compound_id":  "1-propanol",
+                               "chemsep_id":  "1103",
+                               "q":  2.51,
+                               "r":  2.78
+                           },
+                           {
+                               "compound_id":  "Water",
+                               "chemsep_id":  "1921",
+                               "q":  1.4,
+                               "r":  0.92
+                           }
+                       ],
+    "resolved_interaction":  {
+                                 "first":  "1-propanol",
+                                 "second":  "Water",
+                                 "A12":  190.5947,
+                                 "A21":  290.554,
+                                 "B12":  0,
+                                 "B21":  0,
+                                 "C12":  0,
+                                 "C21":  0
+                             },
+    "source_interactions":  [
+                                {
+                                    "first_chemsep_id":  5,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1289.4881,
+                                    "A21":  6.7114,
+                                    "comment":  "Butane/Methanol p126 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  7,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  938.0838,
+                                    "A21":  -112.7209,
+                                    "comment":  "Pentane/Ethanol p376 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  8,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  849.013,
+                                    "A21":  -56.7699,
+                                    "comment":  "2-Methylbutane/Ethanol p373 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  11,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  1056.8977,
+                                    "A21":  -135.5484,
+                                    "comment":  "Hexane/Ethanol p437 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  11,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  743.1034,
+                                    "A21":  -127.2476,
+                                    "comment":  "Hexane/1-Propanol p550 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  137,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  1251.6417,
+                                    "A21":  -391.9511,
+                                    "comment":  "Cyclohexane/1-Propanol p542 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  138,
+                                    "second_chemsep_id":  1181,
+                                    "A12":  1525.5351,
+                                    "A21":  -516.0584,
+                                    "comment":  "MethylCycloHexane/Phenol p482 1/2d"
+                                },
+                                {
+                                    "first_chemsep_id":  207,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1403.5125,
+                                    "A21":  -70.300299999999993,
+                                    "comment":  "Isobutylene/Methanol p105 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  214,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1499.6766,
+                                    "A21":  -66.3796,
+                                    "comment":  "2-Methyl-2-Butene/Methanol p154 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  214,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  983.1208,
+                                    "A21":  -123.8651,
+                                    "comment":  "2-Methyl-2-Butene/Ethanol p365 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  216,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1329.9294,
+                                    "A21":  -21.5842,
+                                    "comment":  "1-Hexene/Methanol p212 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  216,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  970.6914,
+                                    "A21":  -128.7022,
+                                    "comment":  "1-Hexene/Ethanol p420 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  302,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1300.2481,
+                                    "A21":  -72.9715,
+                                    "comment":  "1.3-Butadiene/Methanol p103 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  305,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1489.1438,
+                                    "A21":  -97.747,
+                                    "comment":  "1.3-Pentadiene(CIS)/Methanol p147 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  306,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1477.5985,
+                                    "A21":  -92.9294,
+                                    "comment":  "Trans-1.3-Pentadiene/Methanol p148 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  309,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1514.3534,
+                                    "A21":  -144.3088,
+                                    "comment":  "Isoprene/Methanol p145 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  309,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  912.9208,
+                                    "A21":  -118.3758,
+                                    "comment":  "Isoprene/Ethanol p358 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  315,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1410.4509,
+                                    "A21":  -61.3753,
+                                    "comment":  "Cyclopentadiene/Methanol p144 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  501,
+                                    "second_chemsep_id":  1521,
+                                    "A12":  -119.7224,
+                                    "A21":  -29.4499,
+                                    "comment":  "Benzene/Chloroform 1/7"
+                                },
+                                {
+                                    "first_chemsep_id":  501,
+                                    "second_chemsep_id":  1181,
+                                    "A12":  72.2429,
+                                    "A21":  197.453,
+                                    "comment":  "Benzene/Phenol p482 1/2d"
+                                },
+                                {
+                                    "first_chemsep_id":  501,
+                                    "second_chemsep_id":  502,
+                                    "A12":  70.7224,
+                                    "A21":  -58.3017,
+                                    "comment":  "Benzene/Toluene p282 1/7"
+                                },
+                                {
+                                    "first_chemsep_id":  501,
+                                    "second_chemsep_id":  507,
+                                    "A12":  5.7397,
+                                    "A21":  0.5699,
+                                    "comment":  "Benzene/pXylene p310 1/7"
+                                },
+                                {
+                                    "first_chemsep_id":  501,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  378.6125,
+                                    "A21":  20.5261,
+                                    "comment":  "Benzene/1-Propanol p537 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  502,
+                                    "second_chemsep_id":  1521,
+                                    "A12":  860.8206,
+                                    "A21":  -554.8868,
+                                    "comment":  "Toluene/Chloroform p352 1/7"
+                                },
+                                {
+                                    "first_chemsep_id":  502,
+                                    "second_chemsep_id":  507,
+                                    "A12":  121.3912,
+                                    "A21":  -119.706,
+                                    "comment":  "Toluene/pXylene p444 1/7"
+                                },
+                                {
+                                    "first_chemsep_id":  1002,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  -1132.16,
+                                    "A21":  -231.7521,
+                                    "comment":  "Acetaldehyde/Water p86 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1003,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  735.9692,
+                                    "A21":  208.343,
+                                    "comment":  "Propionicaldehyde/Water p209 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1003,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  416.3831,
+                                    "A21":  -377.9488,
+                                    "comment":  "PropionicAldehyde/Methanol p79 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1006,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  1263.005,
+                                    "A21":  -81.883,
+                                    "comment":  "Isobutyraldehyde/Water p280 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1051,
+                                    "second_chemsep_id":  1521,
+                                    "A12":  1566.0069,
+                                    "A21":  -781.5877,
+                                    "comment":  "Acetone/Chloroform p92 1/3+4"
+                                },
+                                {
+                                    "first_chemsep_id":  1051,
+                                    "second_chemsep_id":  501,
+                                    "A12":  -358.9226,
+                                    "A21":  604.28,
+                                    "comment":  "Acetone/Benzene p195 1/3+4"
+                                },
+                                {
+                                    "first_chemsep_id":  1051,
+                                    "second_chemsep_id":  1181,
+                                    "A12":  -468.3882,
+                                    "A21":  27.3851,
+                                    "comment":  "Acetone/Phenol"
+                                },
+                                {
+                                    "first_chemsep_id":  1051,
+                                    "second_chemsep_id":  137,
+                                    "A12":  -77.5361,
+                                    "A21":  543.595,
+                                    "comment":  "Acetone/CycloHexane p213 1/3+4"
+                                },
+                                {
+                                    "first_chemsep_id":  1051,
+                                    "second_chemsep_id":  502,
+                                    "A12":  -315.279,
+                                    "A21":  555.7418,
+                                    "comment":  "Acetone/Toluene p236 1/3+4"
+                                },
+                                {
+                                    "first_chemsep_id":  1051,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  94.5536,
+                                    "A21":  117.867,
+                                    "comment":  "Acetone/Ethanol p312 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1052,
+                                    "second_chemsep_id":  501,
+                                    "A12":  -300.8429,
+                                    "A21":  385.863,
+                                    "comment":  "2-Butanone/Benzene p291 1/3+4"
+                                },
+                                {
+                                    "first_chemsep_id":  1052,
+                                    "second_chemsep_id":  137,
+                                    "A12":  146.0313,
+                                    "A21":  100.2596,
+                                    "comment":  "2-Butanone/CycloHexane p297 1/3+4"
+                                },
+                                {
+                                    "first_chemsep_id":  1052,
+                                    "second_chemsep_id":  502,
+                                    "A12":  366.3689,
+                                    "A21":  -250.2784,
+                                    "comment":  "2-Butanone/Toluene p308 1/3+4"
+                                },
+                                {
+                                    "first_chemsep_id":  1052,
+                                    "second_chemsep_id":  17,
+                                    "A12":  -184.485,
+                                    "A21":  559.8999,
+                                    "comment":  "2-Butanone/n-Heptane p311 1/3+4"
+                                },
+                                {
+                                    "first_chemsep_id":  1052,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  775.153,
+                                    "A21":  30.4806,
+                                    "comment":  "2-Butanone/Water p279 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1052,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  147.6576,
+                                    "A21":  -8.2705,
+                                    "comment":  "2-Butanone/1-Propanol p496 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  -337.1298,
+                                    "A21":  549.2958,
+                                    "comment":  "Methanol/Water (Kojima+Kato)"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1521,
+                                    "A12":  -271.0633,
+                                    "A21":  1304.9835,
+                                    "comment":  "Methanol/Chloroform p23 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  -474.7791,
+                                    "A21":  762.8153,
+                                    "comment":  "Methanol/Ethanol p55 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1051,
+                                    "A12":  -84.2364,
+                                    "A21":  403.8524,
+                                    "comment":  "Methanol/Acetone"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  501,
+                                    "A12":  -67.7213,
+                                    "A21":  1117.8797,
+                                    "comment":  "Methanol/Benzene p232 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  137,
+                                    "A12":  -32.2887,
+                                    "A21":  1703.2055,
+                                    "comment":  "Methanol/CycloHexane p243 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  502,
+                                    "A12":  -58.1103,
+                                    "A21":  1190.6454,
+                                    "comment":  "Methanol/Toluene p269 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  17,
+                                    "A12":  17.9144,
+                                    "A21":  1360.0217,
+                                    "comment":  "Methanol/n-Heptane"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1501,
+                                    "A12":  -95.2921,
+                                    "A21":  1463.4548,
+                                    "comment":  "Methanol/Tetrachloromethane p18 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1698,
+                                    "A12":  -92.0642,
+                                    "A21":  984.2538,
+                                    "comment":  "Methanol/Tribromomethane p19 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1772,
+                                    "A12":  101.9628,
+                                    "A21":  334.9587,
+                                    "comment":  "Methanol/Acetonitrile p42 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1523,
+                                    "A12":  -80.7067,
+                                    "A21":  1094.1304,
+                                    "comment":  "Methanol/1.2-Dichloroethane p44 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1252,
+                                    "A12":  -40.7254,
+                                    "A21":  -51.0491,
+                                    "comment":  "Methanol/AceticAcid p46 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  -202.1377,
+                                    "A21":  258.6928,
+                                    "comment":  "Methanol/Ethanol p60 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1844,
+                                    "A12":  -366.7607,
+                                    "A21":  84.4189,
+                                    "comment":  "Methanol/Dimethylsulfoxide p61 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1253,
+                                    "A12":  7.1816,
+                                    "A21":  0.3295,
+                                    "comment":  "Methanol/PropionicAcid p87 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1876,
+                                    "A12":  -156.3839,
+                                    "A21":  103.9406,
+                                    "comment":  "Methanol/N.N-Dimethylformamide p88 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  -26.2861,
+                                    "A21":  113.5565,
+                                    "comment":  "Methanol/Propanol p96 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1821,
+                                    "A12":  -265.3781,
+                                    "A21":  1099.9741,
+                                    "comment":  "Methanol/Thiophene p101 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1341,
+                                    "A12":  -25.1614,
+                                    "A21":  600.3028,
+                                    "comment":  "Methanol/Methylacrylate p104 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1052,
+                                    "A12":  -136.0158,
+                                    "A21":  584.0634,
+                                    "comment":  "Methanol/2-Butanone p106 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1479,
+                                    "A12":  -153.2518,
+                                    "A21":  629.7314,
+                                    "comment":  "Methanol/Tetrahyrofuran p111 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1421,
+                                    "A12":  -19.0988,
+                                    "A21":  451.089,
+                                    "comment":  "Methanol/1.4-Dioxane p116 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1313,
+                                    "A12":  -138.9829,
+                                    "A21":  770.3047,
+                                    "comment":  "Methanol/Ethylacetate p117 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1845,
+                                    "A12":  -28.6882,
+                                    "A21":  675.1045,
+                                    "comment":  "Methanol/Sulfolane p120 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1105,
+                                    "A12":  40.3898,
+                                    "A21":  121.5049,
+                                    "comment":  "Methanol/1-Butanol p127 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1106,
+                                    "A12":  471.807,
+                                    "A21":  -279.7321,
+                                    "comment":  "Methanol/2-Butanol p128 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1108,
+                                    "A12":  -291.983,
+                                    "A21":  403.6892,
+                                    "comment":  "Methanol/Tert-Butanol p131 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1241,
+                                    "A12":  -286.6527,
+                                    "A21":  490.8909,
+                                    "comment":  "Methanol/1.4-Butanediol p138 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1791,
+                                    "A12":  425.4563,
+                                    "A21":  -393.3415,
+                                    "comment":  "Methanol/Pyridine p141 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1351,
+                                    "A12":  -98.6602,
+                                    "A21":  843.2593,
+                                    "comment":  "Methanol/MethylMethacrylate p152 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1061,
+                                    "A12":  -100.1669,
+                                    "A21":  594.2312,
+                                    "comment":  "Methanol/MethylisopropylKetone p155 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1053,
+                                    "A12":  -83.8392,
+                                    "A21":  609.2057,
+                                    "comment":  "Methanol/3-Pentanone p156 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1745,
+                                    "A12":  -383.9791,
+                                    "A21":  153.8253,
+                                    "comment":  "Methanol/Piperidine p157 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1864,
+                                    "A12":  -90.0876,
+                                    "A21":  1245.166,
+                                    "comment":  "Methanol/Hexafluorobenzene p170 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1571,
+                                    "A12":  -118.0717,
+                                    "A21":  1402.7818,
+                                    "comment":  "Methanol/Chlorobenzene p174 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  501,
+                                    "A12":  -76.6223,
+                                    "A21":  1166.9276,
+                                    "comment":  "Methanol/Benzene p191 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1792,
+                                    "A12":  -144.7753,
+                                    "A21":  517.8626,
+                                    "comment":  "Methanol/Aniline p192 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1797,
+                                    "A12":  -603.5633,
+                                    "A21":  950.103,
+                                    "comment":  "Methanol/2-Methylpyridine p195 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  2797,
+                                    "A12":  -206.2407,
+                                    "A21":  81.4664,
+                                    "comment":  "Methanol/3-Methylpyridine p196 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  2799,
+                                    "A12":  -78.8509,
+                                    "A21":  -53.173,
+                                    "comment":  "Methanol/4-Methylpyridine p198 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  270,
+                                    "A12":  -38.5257,
+                                    "A21":  1529.9926,
+                                    "comment":  "Methanol/Cyclohexene p204 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  137,
+                                    "A12":  48.3262,
+                                    "A21":  1388.9672,
+                                    "comment":  "Methanol/Cyclohexane p211 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1315,
+                                    "A12":  -174.2617,
+                                    "A21":  892.9417,
+                                    "comment":  "Methanol/n-ButylAcetate p217 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  11,
+                                    "A12":  38.3254,
+                                    "A21":  1391.4917,
+                                    "comment":  "Methanol/Hexane p224 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1706,
+                                    "A12":  -318.8007,
+                                    "A21":  905.0708,
+                                    "comment":  "Methanol/Triethylamine p226 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  502,
+                                    "A12":  -65.2736,
+                                    "A21":  1201.3122,
+                                    "comment":  "Methanol/Toluene p237 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1182,
+                                    "A12":  -502.2428,
+                                    "A21":  548.3889,
+                                    "comment":  "Methanol/2-Methylphenol p238 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  2796,
+                                    "A12":  -272.5909,
+                                    "A21":  272.4921,
+                                    "comment":  "Methanol/2.6-Dimethylpyridine p239 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  17,
+                                    "A12":  -12.605,
+                                    "A21":  1363.9261,
+                                    "comment":  "Methanol/1-Heptane p241 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  138,
+                                    "A12":  1.0023,
+                                    "A21":  1552.7297,
+                                    "comment":  "Methanol/Methylcyclohexane p242 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  17,
+                                    "A12":  -27.9877,
+                                    "A21":  1578.6097,
+                                    "comment":  "Methanol/Heptane p243 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  504,
+                                    "A12":  -57.095,
+                                    "A21":  1259.4286,
+                                    "comment":  "Methanol/Ethylbenzene p245 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  506,
+                                    "A12":  -41.7377,
+                                    "A21":  1208.1529,
+                                    "comment":  "Methanol/M-xylene p246 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  507,
+                                    "A12":  -47.6694,
+                                    "A21":  1231.2086,
+                                    "comment":  "Methanol/P-xylene p247 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  250,
+                                    "A12":  -32.2567,
+                                    "A21":  1396.3019,
+                                    "comment":  "Methanol/1-Octene p248 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  27,
+                                    "A12":  -32.7911,
+                                    "A21":  1561.8955,
+                                    "comment":  "Methanol/Octane p249 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  41,
+                                    "A12":  -59.6929,
+                                    "A21":  1577.3145,
+                                    "comment":  "Methanol/2.2.4-Trimethylpentane p250 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1140,
+                                    "A12":  18.9334,
+                                    "A21":  484.2757,
+                                    "comment":  "Methanol/1-Dodecanol p252 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1279,
+                                    "A12":  -149.1808,
+                                    "A21":  952.0283,
+                                    "comment":  "Methanol/Oleic Acid p253 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  173.801,
+                                    "A21":  109.8687,
+                                    "comment":  "Ethanol/Water"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1521,
+                                    "A12":  -305.3246,
+                                    "A21":  881.3549,
+                                    "comment":  "Ethanol/Chloroform p285 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1051,
+                                    "A12":  94.2417,
+                                    "A21":  98.7523,
+                                    "comment":  "Ethanol/Acetone p323 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1052,
+                                    "A12":  -25.7234,
+                                    "A21":  250.3958,
+                                    "comment":  "Ethanol/2-Butanone p342 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  501,
+                                    "A12":  -127.9893,
+                                    "A21":  744.8826,
+                                    "comment":  "Ethanol/Benzene p405 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  137,
+                                    "A12":  -153.0128,
+                                    "A21":  1100.3231,
+                                    "comment":  "Ethanol/CycloHexane p441 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  502,
+                                    "A12":  -97.5633,
+                                    "A21":  698.6183,
+                                    "comment":  "Ethanol/Toluene p470 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  17,
+                                    "A12":  -150.277,
+                                    "A21":  1127.5232,
+                                    "comment":  "Ethanol/n-Heptane p489 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  507,
+                                    "A12":  -63.9673,
+                                    "A21":  664.259,
+                                    "comment":  "Ethanol/p-Xylene p500 1/2a"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1542,
+                                    "A12":  -61.6485,
+                                    "A21":  783.4873,
+                                    "comment":  "Ethanol/Tetrachloroethylene p285 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1772,
+                                    "A12":  392.2083,
+                                    "A21":  91.3933,
+                                    "comment":  "Ethanol/Acetonitrile p289 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1523,
+                                    "A12":  -39.1051,
+                                    "A21":  669.688,
+                                    "comment":  "Ethanol/1.2-Dichloroethane p292 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1252,
+                                    "A12":  -25.2901,
+                                    "A21":  -86.9343,
+                                    "comment":  "Ethanol/Acetic Acid p293 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1201,
+                                    "A12":  818.093,
+                                    "A21":  -200.1567,
+                                    "comment":  "Ethanol/1.2-Ethanediol p297 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1104,
+                                    "A12":  437.5184,
+                                    "A21":  -324.6275,
+                                    "comment":  "Ethanol/2-Propanol p317 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1211,
+                                    "A12":  181.0206,
+                                    "A21":  -57.8238,
+                                    "comment":  "Ethanol/1.2-Propanediol p319 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1821,
+                                    "A12":  -77.9585,
+                                    "A21":  662.4746,
+                                    "comment":  "Ethanol/Thiophene p320 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1052,
+                                    "A12":  -169.9082,
+                                    "A21":  480.2791,
+                                    "comment":  "Ethanol/2-Butanone p327 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1421,
+                                    "A12":  50.8172,
+                                    "A21":  212.2982,
+                                    "comment":  "Ethanol/1.4-Dioxane p331 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1845,
+                                    "A12":  177.7675,
+                                    "A21":  306.35,
+                                    "comment":  "Ethanol/Sulfolane p341 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1765,
+                                    "A12":  -712.473,
+                                    "A21":  1116.7138,
+                                    "comment":  "Ethanol/Morpholine p345 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1106,
+                                    "A12":  -311.9029,
+                                    "A21":  474.5511,
+                                    "comment":  "Ethanol/2-Butanol p346 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1106,
+                                    "A12":  -117.4292,
+                                    "A21":  220.9133,
+                                    "comment":  "Ethanol/2-Methyl-1-Propanol p349 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1791,
+                                    "A12":  378.8209,
+                                    "A21":  -378.8991,
+                                    "comment":  "Ethanol/Pyridine p356 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1351,
+                                    "A12":  -105.4041,
+                                    "A21":  544.4089,
+                                    "comment":  "Ethanol/MethylMethacrylate p363 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1061,
+                                    "A12":  -260.5944,
+                                    "A21":  652.4019,
+                                    "comment":  "Ethanol/Methylisopropyl p366 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1314,
+                                    "A12":  -13.0186,
+                                    "A21":  405.1733,
+                                    "comment":  "Ethanol/PropylAcetate p367 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1123,
+                                    "A12":  82.3751,
+                                    "A21":  -18.3336,
+                                    "comment":  "Ethanol/3-Methyl-1-butanol p377 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1680,
+                                    "A12":  -169.9204,
+                                    "A21":  998.8196,
+                                    "comment":  "Ethanol/Bromobenzene p378 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1571,
+                                    "A12":  -205.6039,
+                                    "A21":  1032.724,
+                                    "comment":  "Ethanol/Chlorobezene p380 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  501,
+                                    "A12":  -105.3291,
+                                    "A21":  766.4564,
+                                    "comment":  "Ethanol/Benzene p406 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1792,
+                                    "A12":  1262.584,
+                                    "A21":  -446.4834,
+                                    "comment":  "Ethanol/Aniline p410 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1797,
+                                    "A12":  139.4905,
+                                    "A21":  -225.4203,
+                                    "comment":  "Ethanol/2-Methylpyridine p411 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  2797,
+                                    "A12":  -578.9542,
+                                    "A21":  942.9023,
+                                    "comment":  "Ethanol/3-Methylpyridine p412 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  137,
+                                    "A12":  -85.691,
+                                    "A21":  925.1697,
+                                    "comment":  "Ethanol/Cyclohexane p419 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1151,
+                                    "A12":  634.1484,
+                                    "A21":  -339.732,
+                                    "comment":  "Ethanol/Cyclohexanol p421 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1315,
+                                    "A12":  -38.4912,
+                                    "A21":  384.6715,
+                                    "comment":  "Ethanol/ButylAcetate p424 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1446,
+                                    "A12":  -177.4837,
+                                    "A21":  780.0513,
+                                    "comment":  "Ethanol/Dipropylether p438 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1706,
+                                    "A12":  -305.4069,
+                                    "A21":  674.3341,
+                                    "comment":  "Ethanol/Triethylamine p440 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  502,
+                                    "A12":  -147.1104,
+                                    "A21":  878.1135,
+                                    "comment":  "Ethanol/Toluene p444 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1461,
+                                    "A12":  928.9185,
+                                    "A21":  -379.9781,
+                                    "comment":  "Ethanol/Anisole p445 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  2797,
+                                    "A12":  -432.4206,
+                                    "A21":  583.2958,
+                                    "comment":  "Ethanol/2.6-Dimethylpyridine p447 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  138,
+                                    "A12":  -161.4264,
+                                    "A21":  631.1662,
+                                    "comment":  "Ethanol/Pentylacetate p449 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  17,
+                                    "A12":  -115.7807,
+                                    "A21":  1040.2891,
+                                    "comment":  "Ethanol/Heptane p459 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  504,
+                                    "A12":  -127.6343,
+                                    "A21":  841.5199,
+                                    "comment":  "Ethanol/Ethylbezene p460 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  507,
+                                    "A12":  -100.7193,
+                                    "A21":  794.4242,
+                                    "comment":  "Ethanol/P-xylene p461 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  27,
+                                    "A12":  -152.8323,
+                                    "A21":  1156.688,
+                                    "comment":  "Ethanol/Octane p466 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  22,
+                                    "A12":  -165.9382,
+                                    "A21":  1120.4853,
+                                    "comment":  "Ethanol/2.2.4-Trimethylpentane p468 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  68,
+                                    "A12":  -401.4408,
+                                    "A21":  1783.7857,
+                                    "comment":  "Ethanol/Hexadecane p470 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1102,
+                                    "second_chemsep_id":  1279,
+                                    "A12":  -180.7604,
+                                    "A21":  627.9668,
+                                    "comment":  "Ethanol/Oleicacid p471 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  190.5947,
+                                    "A21":  290.554,
+                                    "comment":  "1-propanol/Water p240 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1542,
+                                    "A12":  -13.5513,
+                                    "A21":  473.6899,
+                                    "comment":  "1-Propanol/Tetrachloroethylene p473 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1252,
+                                    "A12":  -729.0848,
+                                    "A21":  1660.0903,
+                                    "comment":  "1-Propanol/Aceticacid p479 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1253,
+                                    "A12":  -83.3064,
+                                    "A21":  -4.418,
+                                    "comment":  "1-Propanol/Propionicacid p486 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  2860,
+                                    "A12":  -300.7498,
+                                    "A21":  511.0851,
+                                    "comment":  "1-Propanol/2-Methoxy-ethanol p490 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1711,
+                                    "A12":  -274.4208,
+                                    "A21":  15.9476,
+                                    "comment":  "Propylamine/1-Propanol p492 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1278,
+                                    "A12":  114.789,
+                                    "A21":  -169.5098,
+                                    "comment":  "1-Propanol/Methacrylicacid p495 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1106,
+                                    "A12":  47.0059,
+                                    "A21":  -46.6524,
+                                    "comment":  "1-Propanol/2-Methyl-1-Propanol p505 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1791,
+                                    "A12":  423.4439,
+                                    "A21":  -423.9207,
+                                    "comment":  "1-Propanol/Pyridine p513 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1351,
+                                    "A12":  -27.435,
+                                    "A21":  256.1456,
+                                    "comment":  "1-Propanol/Methylmethacrylate p514 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1314,
+                                    "A12":  -91.8942,
+                                    "A21":  278.7259,
+                                    "comment":  "1-Propnaol/Propylacetate p517 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1123,
+                                    "A12":  -19.2402,
+                                    "A21":  27.9161,
+                                    "comment":  "1-Propanol/3-Methylbutanol p521 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1571,
+                                    "A12":  1.3035,
+                                    "A21":  311.4544,
+                                    "comment":  "1-Propnaol/Chlorobenzene p527 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1797,
+                                    "A12":  163.7157,
+                                    "A21":  -281.9383,
+                                    "comment":  "1-Propanol/2-Methylpyridine p538 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  2797,
+                                    "A12":  199.1862,
+                                    "A21":  -290.3666,
+                                    "comment":  "1-Propanol/3-Methylpyridine p539 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  2799,
+                                    "A12":  180.7309,
+                                    "A21":  -293.8268,
+                                    "comment":  "1-Propanol/4-Methylpyridine p540 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1324,
+                                    "A12":  -585.5214,
+                                    "A21":  1186.3162,
+                                    "comment":  "1-Propanol/Propylpropionate p545 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1707,
+                                    "A12":  -1.1304,
+                                    "A21":  48.1557,
+                                    "comment":  "1-Propanol/Dipropylamine p551 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1965,
+                                    "A12":  -218.4928,
+                                    "A21":  677.0367,
+                                    "comment":  "1-Propanol/Hexamethyldisiloxane p555 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  502,
+                                    "A12":  -1.7464,
+                                    "A21":  340.4905,
+                                    "comment":  "1-Propanol/Toluene p556 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  2796,
+                                    "A12":  -595.2165,
+                                    "A21":  936.7248,
+                                    "comment":  "1-Propnaol/2.6-Dimethylpyridine p557 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  17,
+                                    "A12":  -91.2018,
+                                    "A21":  743.266,
+                                    "comment":  "1-Propanol/Heptane p573 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  504,
+                                    "A12":  -74.7475,
+                                    "A21":  427.6292,
+                                    "comment":  "1-Propanol/P-xylene p574 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  27,
+                                    "A12":  -48.752,
+                                    "A21":  525.9933,
+                                    "comment":  "1-Propanol/Octane p576 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  56,
+                                    "A12":  -175.9432,
+                                    "A21":  744.763,
+                                    "comment":  "1-Propanol/Decane p577 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1103,
+                                    "second_chemsep_id":  1136,
+                                    "A12":  89.4506,
+                                    "A21":  31.0832,
+                                    "comment":  "1-Propanol/1-Decanol 579 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1104,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  327.443,
+                                    "A21":  64.4408,
+                                    "comment":  "2-propanol/Water p251 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1104,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  103.5993,
+                                    "A21":  -103.7179,
+                                    "comment":  "2-Propanol/1-Propanol p488 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1106,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  350.1707,
+                                    "A21":  309.5428,
+                                    "comment":  "isobutanol/Water p339 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1108,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  230.5098,
+                                    "A21":  271.3048,
+                                    "comment":  "Tert-butanol/Water p343 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1167,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  281.7442,
+                                    "A21":  47.6526,
+                                    "comment":  "Allylalcohol/Water p208 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1301,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  623.2636,
+                                    "A21":  -2.0107,
+                                    "comment":  "MethylFormate/Methanol p51 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1312,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  830.7943,
+                                    "A21":  47.5023,
+                                    "comment":  "Methylacetate/Water p214 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1312,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  611.2312,
+                                    "A21":  -70.982,
+                                    "comment":  "MethylAcetate/Methanol p86 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1312,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  267.0169,
+                                    "A21":  -79.2922,
+                                    "comment":  "MethylAcetate/Ethanol p315 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1313,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  1441.5619,
+                                    "A21":  -205.7336,
+                                    "comment":  "Ethylacetate/Water p304 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1313,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  436.0416,
+                                    "A21":  -98.562,
+                                    "comment":  "EthylAcetate/Ethanol p338 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1321,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  483.9533,
+                                    "A21":  -67.6116,
+                                    "comment":  "VinylAcetate/Ethanol p324 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1402,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  1198.9207,
+                                    "A21":  102.271,
+                                    "comment":  "Diethylether/Water p344 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1402,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  906.3646,
+                                    "A21":  -157.3556,
+                                    "comment":  "DiethylEther/Methanol p133 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1402,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  642.6982,
+                                    "A21":  -171.8091,
+                                    "comment":  "DiethylEther/Ethanol p347 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1403,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  1415.2748,
+                                    "A21":  81.2811,
+                                    "comment":  "Diisopropylether/Water p421 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1405,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1024.985,
+                                    "A21":  -203.711,
+                                    "comment":  "MethylTert-ButylEther/Methanol p160 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1431,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  1098.9416,
+                                    "A21":  -44.1418,
+                                    "comment":  "Dimethoxymethane/Water p252 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1431,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  657.2765,
+                                    "A21":  -4.6934,
+                                    "comment":  "Dimethoxymethane/Methanol p97 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1441,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  10542.2026,
+                                    "A21":  -344.1682,
+                                    "comment":  "Ethyleneoxide/Water p88 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1442,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  791.0185,
+                                    "A21":  -210.2403,
+                                    "comment":  "PropyleneOxide/Methanol p80 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1479,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  835.2626,
+                                    "A21":  10.5163,
+                                    "comment":  "Tetrahydrofuran/Water p286 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1479,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  559.1539,
+                                    "A21":  -260.1951,
+                                    "comment":  "Tetrahydrofuran/Ethanol p328 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1479,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  381.8256,
+                                    "A21":  -244.669,
+                                    "comment":  "Tetrahydrofuran/1-Propanol p497 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1501,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1029.3332,
+                                    "A21":  -171.0842,
+                                    "comment":  "Tetrachloromethane/Methanol p279 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1501,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  957.274,
+                                    "A21":  -252.3762,
+                                    "comment":  "Tertachloromethane/1-Propanol p472 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1504,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  7661.2894,
+                                    "A21":  -187.7083,
+                                    "comment":  "VinylCloride/Methanol p36 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1511,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1516.5558,
+                                    "A21":  -229.3734,
+                                    "comment":  "Dichloromethane/Methanol p26 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1511,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  796.2935,
+                                    "A21":  -172.0713,
+                                    "comment":  "Dichloromethane/Ethanol p284 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1521,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1295.4282,
+                                    "A21":  -271.461,
+                                    "comment":  "Chloroform/Methanol p25 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1521,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  981.7658,
+                                    "A21":  -335.4504,
+                                    "comment":  "Chloroform/Ethanol p282 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1523,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  272.4952,
+                                    "A21":  107.634,
+                                    "comment":  "1.2-Dichloroethane/1-Propanol p478 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1541,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  538.1802,
+                                    "A21":  -90.5235,
+                                    "comment":  "Trichloroethylene/1-Propanol p474 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1544,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  1260.1312,
+                                    "A21":  81.3308,
+                                    "comment":  "3-chloro-1-propene/Water p188 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1586,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  748.22,
+                                    "A21":  -172.7007,
+                                    "comment":  "Butylchloride/1-Propanol p502 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1702,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  -1070.3252,
+                                    "A21":  1057.3916,
+                                    "comment":  "Dimethylamine/Water p174 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1702,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  -520.5358,
+                                    "A21":  -200.8021,
+                                    "comment":  "Dimethylamine/Methanol p64 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1702,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  -1071.4286,
+                                    "A21":  1018.5371,
+                                    "comment":  "Dimethylamine/Ethanol p299 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1702,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  -71.2521,
+                                    "A21":  -231.1124,
+                                    "comment":  "Dimethylamine/1-Propanol p484 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1704,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  149.3345,
+                                    "A21":  -412.065,
+                                    "comment":  "Ethylamine/Water p177 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1706,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  242.4137,
+                                    "A21":  2458.766,
+                                    "comment":  "Triethylamine/Water p444 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1706,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  701.924,
+                                    "A21":  -371.1197,
+                                    "comment":  "Triethylamine/1-Propanol p552 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1710,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  721.1889,
+                                    "A21":  -312.3228,
+                                    "comment":  "Diethylamine/Water p355 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1710,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  -613.4553,
+                                    "A21":  1006.1474,
+                                    "comment":  "Diethylamine/Ethanol p353 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1711,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  426.0894,
+                                    "A21":  -302.8076,
+                                    "comment":  "Propylamine/Water p267 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1712,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  -379.6694,
+                                    "A21":  874.815,
+                                    "comment":  "n-Butylamine/Water p354 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1712,
+                                    "second_chemsep_id":  1102,
+                                    "A12":  -17.1391,
+                                    "A21":  -220.6087,
+                                    "comment":  "Butylamine/Ethanol p351 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1712,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  -188.4751,
+                                    "A21":  -68.9772,
+                                    "comment":  "Butylamine/1-Propanol p510 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1719,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  -553.685,
+                                    "A21":  1001.0323,
+                                    "comment":  "Isopropylamine/Water p266 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1772,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  266.3109,
+                                    "A21":  332.5988,
+                                    "comment":  "Acetonitrile/Water p76 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1773,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  367.0686,
+                                    "A21":  510.5582,
+                                    "comment":  "Propionitrile/Water p189 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1774,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  395.4004,
+                                    "A21":  537.1531,
+                                    "comment":  "Acrylonitrile/Water p182 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1864,
+                                    "second_chemsep_id":  1103,
+                                    "A12":  535.7543,
+                                    "A21":  -38.2344,
+                                    "comment":  "Hexafluorobenzene/1-Propnaol p526 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1051,
+                                    "A12":  -110.3829,
+                                    "A21":  698.7989,
+                                    "comment":  "Water/Acetone (Kato et al.)"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1052,
+                                    "A12":  752.9217,
+                                    "A21":  39.6746,
+                                    "comment":  "Water/2-Butanone p277 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1181,
+                                    "A12":  934.8834,
+                                    "A21":  -501.3763,
+                                    "comment":  "Water/Phenol p394 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1252,
+                                    "A12":  -251.6868,
+                                    "A21":  407.0073,
+                                    "comment":  "Water/Aceticacid p100 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  2852,
+                                    "A12":  -867.7066,
+                                    "A21":  2091.772,
+                                    "comment":  "Water/n-Methylformamide p115 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1844,
+                                    "A12":  -292.3021,
+                                    "A21":  -523.6271,
+                                    "comment":  "Water/Dimethylsulfoxide p165 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1741,
+                                    "A12":  -175.0216,
+                                    "A21":  -724.876,
+                                    "comment":  "Water/Ethylenediamine p179 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1277,
+                                    "A12":  -417.4722,
+                                    "A21":  1189.9025,
+                                    "comment":  "Water/Acrylicacid p186 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1253,
+                                    "A12":  486.4688,
+                                    "A21":  -146.6582,
+                                    "comment":  "Water/Propionicacid p215 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1422,
+                                    "A12":  -210.5536,
+                                    "A21":  915.1339,
+                                    "comment":  "Water/1.3.5-trioxane p225 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1876,
+                                    "A12":  639.5742,
+                                    "A21":  -556.8715,
+                                    "comment":  "Water/N.n-dimethylformamide p234 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1421,
+                                    "A12":  -444.013,
+                                    "A21":  1302.0378,
+                                    "comment":  "Water/1.4-dioxane p303 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1845,
+                                    "A12":  -397.8616,
+                                    "A21":  997.3999,
+                                    "comment":  "Water/Sulfolane p307 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  2856,
+                                    "A12":  453.4841,
+                                    "A21":  -463.0383,
+                                    "comment":  "Water/N.n-dimethylacetamide p325 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1765,
+                                    "A12":  933.6195,
+                                    "A21":  -802.5279,
+                                    "comment":  "Water/Morpholine p327 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1105,
+                                    "A12":  548.2453,
+                                    "A21":  89.0444,
+                                    "comment":  "Water/n-butanol p336 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1241,
+                                    "A12":  -370.3689,
+                                    "A21":  1635.7568,
+                                    "comment":  "Water/1.4-butanediol p346 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1238,
+                                    "A12":  489.1312,
+                                    "A21":  -286.7611,
+                                    "comment":  "Water/2.3-butanediol p351 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1202,
+                                    "A12":  -346.2827,
+                                    "A21":  900.5916,
+                                    "comment":  "Water/diethylenegylcol p352 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1889,
+                                    "A12":  537.7334,
+                                    "A21":  -36.221,
+                                    "comment":  "Water/Furfural p361 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1791,
+                                    "A12":  -56.5403,
+                                    "A21":  -97.5005,
+                                    "comment":  "Water/Pyridine p374 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1767,
+                                    "A12":  -801.2765,
+                                    "A21":  1402.6755,
+                                    "comment":  "Water/n-Methylpyrrolidone p380 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1123,
+                                    "A12":  819.6231,
+                                    "A21":  -223.7898,
+                                    "comment":  "Water/3-methylbutanol p382 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1111,
+                                    "A12":  -178.9352,
+                                    "A21":  1021.7979,
+                                    "comment":  "Water/2-methyl-2-butanol p384 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1181,
+                                    "A12":  712.2793,
+                                    "A21":  -382.5734,
+                                    "comment":  "Water/Phenol p399 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1792,
+                                    "A12":  -91.7122,
+                                    "A21":  485.3384,
+                                    "comment":  "Water/Aniline p401 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1797,
+                                    "A12":  -657.2675,
+                                    "A21":  1253.468,
+                                    "comment":  "Water/2-methylpyridine p402 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  2797,
+                                    "A12":  1280.6209,
+                                    "A21":  -655.1387,
+                                    "comment":  "Water/3-methylpyridine p406 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  2799,
+                                    "A12":  -358.5748,
+                                    "A21":  333.911,
+                                    "comment":  "Water/4-methylpyridine p408 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1757,
+                                    "A12":  -334.1695,
+                                    "A21":  857.6208,
+                                    "comment":  "Water/Phenylhydrazine p409 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1080,
+                                    "A12":  316.6082,
+                                    "A21":  95.0342,
+                                    "comment":  "Water/Cyclohexanone p410 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1065,
+                                    "A12":  -56.9399,
+                                    "A21":  1043.7692,
+                                    "comment":  "Water/Mesityloxide p411 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1151,
+                                    "A12":  -286.8493,
+                                    "A21":  1023.7144,
+                                    "comment":  "Water/Cyclohexanol p415 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1315,
+                                    "A12":  394.2396,
+                                    "A21":  756.4163,
+                                    "comment":  "Water/n-Butylacetate p418 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  2854,
+                                    "A12":  -351.0861,
+                                    "A21":  1188.5242,
+                                    "comment":  "Water/Diacetonealcohol p419 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1114,
+                                    "A12":  -9.7248,
+                                    "A21":  802.6348,
+                                    "comment":  "Water/1-hexanol p426 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1115,
+                                    "A12":  -172.0599,
+                                    "A21":  1138.3704,
+                                    "comment":  "Water/2-hexanol p427 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  2862,
+                                    "A12":  -178.571,
+                                    "A21":  670.1422,
+                                    "comment":  "Water/2-butoxy-ethanol p433 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1180,
+                                    "A12":  83.4921,
+                                    "A21":  304.0167,
+                                    "comment":  "Water/Benzylalcohol p450 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  2796,
+                                    "A12":  -497.9465,
+                                    "A21":  893.7955,
+                                    "comment":  "Water/2.6-dimethylpyridinr p457 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1317,
+                                    "A12":  -250.5667,
+                                    "A21":  1438.236,
+                                    "comment":  "Water/Isopentylacetate p459 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1090,
+                                    "A12":  234.4706,
+                                    "A21":  641.1422,
+                                    "comment":  "Water/Acetophenone p460 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1748,
+                                    "A12":  -847.2235,
+                                    "A21":  663.5428,
+                                    "comment":  "Water/Quinoline p464 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  510,
+                                    "A12":  -310.5637,
+                                    "A21":  1655.4649,
+                                    "comment":  "Water/Isopropylbenzene p465 1/1a"
+                                },
+                                {
+                                    "first_chemsep_id":  2640,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  1653.8373,
+                                    "A21":  -379.2679,
+                                    "comment":  "Halothane/Methanol p33 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  2851,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  319.3243,
+                                    "A21":  -34.2606,
+                                    "comment":  "Methanol/Formamide p30 1/2c"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Water/Water"
+                                },
+                                {
+                                    "first_chemsep_id":  1,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  -1.67124361,
+                                    "A21":  11.6847948,
+                                    "comment":  "Methane/Water"
+                                },
+                                {
+                                    "first_chemsep_id":  2,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  -8.1873052,
+                                    "A21":  -3.2590244,
+                                    "comment":  "Ethane/Water"
+                                },
+                                {
+                                    "first_chemsep_id":  3,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  6.3988162,
+                                    "A21":  14.7252261,
+                                    "comment":  "Propane/Water"
+                                },
+                                {
+                                    "first_chemsep_id":  4,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  -4.9878971,
+                                    "A21":  15.0233076,
+                                    "comment":  "Isobutane/Water"
+                                },
+                                {
+                                    "first_chemsep_id":  5,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  1.08104224,
+                                    "A21":  16.096401,
+                                    "comment":  "N-butane/Water"
+                                },
+                                {
+                                    "first_chemsep_id":  909,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  2.4641404,
+                                    "A21":  1.51226681,
+                                    "comment":  "Carbon dioxide/Water"
+                                },
+                                {
+                                    "first_chemsep_id":  1922,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  -0.1589768,
+                                    "A21":  17.8451458,
+                                    "comment":  "Hydrogen sulfide/Water"
+                                },
+                                {
+                                    "first_chemsep_id":  900,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  5.365467,
+                                    "A21":  -4.769304,
+                                    "comment":  "Nitrogen/Water"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1921,
+                                    "A12":  -1.192326,
+                                    "A21":  -6.359072,
+                                    "comment":  "Methanol/Water"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1,
+                                    "A12":  11.6847948,
+                                    "A21":  -1.67124361,
+                                    "comment":  "Water/Methane"
+                                },
+                                {
+                                    "first_chemsep_id":  1,
+                                    "second_chemsep_id":  1,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Methane/Methane"
+                                },
+                                {
+                                    "first_chemsep_id":  2,
+                                    "second_chemsep_id":  1,
+                                    "A12":  10.6514456,
+                                    "A21":  0.020070821,
+                                    "comment":  "Ethane/Methane"
+                                },
+                                {
+                                    "first_chemsep_id":  3,
+                                    "second_chemsep_id":  1,
+                                    "A12":  2.8615824,
+                                    "A21":  -0.8942445,
+                                    "comment":  "Propane/Methane"
+                                },
+                                {
+                                    "first_chemsep_id":  4,
+                                    "second_chemsep_id":  1,
+                                    "A12":  13.711749,
+                                    "A21":  -0.7551398,
+                                    "comment":  "Isobutane/Methane"
+                                },
+                                {
+                                    "first_chemsep_id":  5,
+                                    "second_chemsep_id":  1,
+                                    "A12":  1.39899584,
+                                    "A21":  0.82071773,
+                                    "comment":  "N-butane/Methane"
+                                },
+                                {
+                                    "first_chemsep_id":  909,
+                                    "second_chemsep_id":  1,
+                                    "A12":  2.2455473,
+                                    "A21":  0.040936526,
+                                    "comment":  "Carbon dioxide/Methane"
+                                },
+                                {
+                                    "first_chemsep_id":  1922,
+                                    "second_chemsep_id":  1,
+                                    "A12":  -1.2121981,
+                                    "A21":  17.487448,
+                                    "comment":  "Hydrogen sulfide/Methane"
+                                },
+                                {
+                                    "first_chemsep_id":  900,
+                                    "second_chemsep_id":  1,
+                                    "A12":  -1.0333492,
+                                    "A21":  8.2866657,
+                                    "comment":  "Nitrogen/Methane"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1,
+                                    "A12":  8.942445,
+                                    "A21":  -15.89768,
+                                    "comment":  "Methanol/Methane"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  2,
+                                    "A12":  -3.2590244,
+                                    "A21":  -8.1873052,
+                                    "comment":  "Water/Ethane"
+                                },
+                                {
+                                    "first_chemsep_id":  1,
+                                    "second_chemsep_id":  2,
+                                    "A12":  0.020070821,
+                                    "A21":  10.6514456,
+                                    "comment":  "Methane/Ethane"
+                                },
+                                {
+                                    "first_chemsep_id":  2,
+                                    "second_chemsep_id":  2,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Ethane/Ethane"
+                                },
+                                {
+                                    "first_chemsep_id":  3,
+                                    "second_chemsep_id":  2,
+                                    "A12":  5.0673855,
+                                    "A21":  -1.6295122,
+                                    "comment":  "Propane/Ethane"
+                                },
+                                {
+                                    "first_chemsep_id":  4,
+                                    "second_chemsep_id":  2,
+                                    "A12":  12.718144,
+                                    "A21":  9.141166,
+                                    "comment":  "Isobutane/Ethane"
+                                },
+                                {
+                                    "first_chemsep_id":  5,
+                                    "second_chemsep_id":  2,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "N-butane/Ethane"
+                                },
+                                {
+                                    "first_chemsep_id":  909,
+                                    "second_chemsep_id":  2,
+                                    "A12":  0.9339887,
+                                    "A21":  17.3284712,
+                                    "comment":  "Carbon dioxide/Ethane"
+                                },
+                                {
+                                    "first_chemsep_id":  1922,
+                                    "second_chemsep_id":  2,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Hydrogen sulfide/Ethane"
+                                },
+                                {
+                                    "first_chemsep_id":  900,
+                                    "second_chemsep_id":  2,
+                                    "A12":  13.91047,
+                                    "A21":  -7.94884,
+                                    "comment":  "Nitrogen/Ethane"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  2,
+                                    "A12":  -10.929655,
+                                    "A21":  -17.090006,
+                                    "comment":  "Methanol/Ethane"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  3,
+                                    "A12":  14.7252261,
+                                    "A21":  6.3988162,
+                                    "comment":  "Water/Propane"
+                                },
+                                {
+                                    "first_chemsep_id":  1,
+                                    "second_chemsep_id":  3,
+                                    "A12":  -0.8942445,
+                                    "A21":  2.8615824,
+                                    "comment":  "Methane/Propane"
+                                },
+                                {
+                                    "first_chemsep_id":  2,
+                                    "second_chemsep_id":  3,
+                                    "A12":  -1.6295122,
+                                    "A21":  5.0673855,
+                                    "comment":  "Ethane/Propane"
+                                },
+                                {
+                                    "first_chemsep_id":  3,
+                                    "second_chemsep_id":  3,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Propane/Propane"
+                                },
+                                {
+                                    "first_chemsep_id":  4,
+                                    "second_chemsep_id":  3,
+                                    "A12":  16.295122,
+                                    "A21":  13.91047,
+                                    "comment":  "Isobutane/Propane"
+                                },
+                                {
+                                    "first_chemsep_id":  5,
+                                    "second_chemsep_id":  3,
+                                    "A12":  -2.185931,
+                                    "A21":  -38.353153,
+                                    "comment":  "N-butane/Propane"
+                                },
+                                {
+                                    "first_chemsep_id":  909,
+                                    "second_chemsep_id":  3,
+                                    "A12":  7.2135723,
+                                    "A21":  1.21021089,
+                                    "comment":  "Carbon dioxide/Propane"
+                                },
+                                {
+                                    "first_chemsep_id":  1922,
+                                    "second_chemsep_id":  3,
+                                    "A12":  -4.0936526,
+                                    "A21":  17.686169,
+                                    "comment":  "Hydrogen sulfide/Propane"
+                                },
+                                {
+                                    "first_chemsep_id":  900,
+                                    "second_chemsep_id":  3,
+                                    "A12":  -3.3583849,
+                                    "A21":  12.320702,
+                                    "comment":  "Nitrogen/Propane"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  3,
+                                    "A12":  13.314307,
+                                    "A21":  -20.070821,
+                                    "comment":  "Methanol/Propane"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  4,
+                                    "A12":  15.0233076,
+                                    "A21":  -4.9878971,
+                                    "comment":  "Water/Isobutane"
+                                },
+                                {
+                                    "first_chemsep_id":  1,
+                                    "second_chemsep_id":  4,
+                                    "A12":  -0.7551398,
+                                    "A21":  13.711749,
+                                    "comment":  "Methane/Isobutane"
+                                },
+                                {
+                                    "first_chemsep_id":  2,
+                                    "second_chemsep_id":  4,
+                                    "A12":  9.141166,
+                                    "A21":  12.718144,
+                                    "comment":  "Ethane/Isobutane"
+                                },
+                                {
+                                    "first_chemsep_id":  3,
+                                    "second_chemsep_id":  4,
+                                    "A12":  13.91047,
+                                    "A21":  16.295122,
+                                    "comment":  "Propane/Isobutane"
+                                },
+                                {
+                                    "first_chemsep_id":  4,
+                                    "second_chemsep_id":  4,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Isobutane/Isobutane"
+                                },
+                                {
+                                    "first_chemsep_id":  5,
+                                    "second_chemsep_id":  4,
+                                    "A12":  22.455473,
+                                    "A21":  11.6053064,
+                                    "comment":  "N-butane/Isobutane"
+                                },
+                                {
+                                    "first_chemsep_id":  909,
+                                    "second_chemsep_id":  4,
+                                    "A12":  2.384652,
+                                    "A21":  8.1674331,
+                                    "comment":  "Carbon dioxide/Isobutane"
+                                },
+                                {
+                                    "first_chemsep_id":  1922,
+                                    "second_chemsep_id":  4,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Hydrogen sulfide/Isobutane"
+                                },
+                                {
+                                    "first_chemsep_id":  900,
+                                    "second_chemsep_id":  4,
+                                    "A12":  -13.91047,
+                                    "A21":  -9.93605,
+                                    "comment":  "Nitrogen/Isobutane"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  4,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Methanol/Isobutane"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  5,
+                                    "A12":  16.096401,
+                                    "A21":  1.08104224,
+                                    "comment":  "Water/N-butane"
+                                },
+                                {
+                                    "first_chemsep_id":  1,
+                                    "second_chemsep_id":  5,
+                                    "A12":  0.82071773,
+                                    "A21":  1.39899584,
+                                    "comment":  "Methane/N-butane"
+                                },
+                                {
+                                    "first_chemsep_id":  2,
+                                    "second_chemsep_id":  5,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Ethane/N-butane"
+                                },
+                                {
+                                    "first_chemsep_id":  3,
+                                    "second_chemsep_id":  5,
+                                    "A12":  -38.353153,
+                                    "A21":  -2.185931,
+                                    "comment":  "Propane/N-butane"
+                                },
+                                {
+                                    "first_chemsep_id":  4,
+                                    "second_chemsep_id":  5,
+                                    "A12":  11.6053064,
+                                    "A21":  22.455473,
+                                    "comment":  "Isobutane/N-butane"
+                                },
+                                {
+                                    "first_chemsep_id":  5,
+                                    "second_chemsep_id":  5,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "N-butane/N-butane"
+                                },
+                                {
+                                    "first_chemsep_id":  909,
+                                    "second_chemsep_id":  5,
+                                    "A12":  -22.455473,
+                                    "A21":  -6.3391999,
+                                    "comment":  "Carbon dioxide/N-butane"
+                                },
+                                {
+                                    "first_chemsep_id":  1922,
+                                    "second_chemsep_id":  5,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Hydrogen sulfide/N-butane"
+                                },
+                                {
+                                    "first_chemsep_id":  900,
+                                    "second_chemsep_id":  5,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Nitrogen/N-butane"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  5,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Methanol/N-butane"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  909,
+                                    "A12":  1.51226681,
+                                    "A21":  2.4641404,
+                                    "comment":  "Water/Carbon dioxide"
+                                },
+                                {
+                                    "first_chemsep_id":  1,
+                                    "second_chemsep_id":  909,
+                                    "A12":  0.040936526,
+                                    "A21":  2.2455473,
+                                    "comment":  "Methane/Carbon dioxide"
+                                },
+                                {
+                                    "first_chemsep_id":  2,
+                                    "second_chemsep_id":  909,
+                                    "A12":  17.3284712,
+                                    "A21":  0.9339887,
+                                    "comment":  "Ethane/Carbon dioxide"
+                                },
+                                {
+                                    "first_chemsep_id":  3,
+                                    "second_chemsep_id":  909,
+                                    "A12":  1.21021089,
+                                    "A21":  7.2135723,
+                                    "comment":  "Propane/Carbon dioxide"
+                                },
+                                {
+                                    "first_chemsep_id":  4,
+                                    "second_chemsep_id":  909,
+                                    "A12":  8.1674331,
+                                    "A21":  2.384652,
+                                    "comment":  "Isobutane/Carbon dioxide"
+                                },
+                                {
+                                    "first_chemsep_id":  5,
+                                    "second_chemsep_id":  909,
+                                    "A12":  -6.3391999,
+                                    "A21":  -22.455473,
+                                    "comment":  "N-butane/Carbon dioxide"
+                                },
+                                {
+                                    "first_chemsep_id":  909,
+                                    "second_chemsep_id":  909,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Carbon dioxide/Carbon dioxide"
+                                },
+                                {
+                                    "first_chemsep_id":  1922,
+                                    "second_chemsep_id":  909,
+                                    "A12":  12.718144,
+                                    "A21":  15.301517,
+                                    "comment":  "Hydrogen sulfide/Carbon dioxide"
+                                },
+                                {
+                                    "first_chemsep_id":  900,
+                                    "second_chemsep_id":  909,
+                                    "A12":  -9.3200149,
+                                    "A21":  -28.218382,
+                                    "comment":  "Nitrogen/Carbon dioxide"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  909,
+                                    "A12":  16.295122,
+                                    "A21":  2.583373,
+                                    "comment":  "Methanol/Carbon dioxide"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1922,
+                                    "A12":  17.8451458,
+                                    "A21":  -0.1589768,
+                                    "comment":  "Water/Hydrogen sulfide"
+                                },
+                                {
+                                    "first_chemsep_id":  1,
+                                    "second_chemsep_id":  1922,
+                                    "A12":  17.487448,
+                                    "A21":  -1.2121981,
+                                    "comment":  "Methane/Hydrogen sulfide"
+                                },
+                                {
+                                    "first_chemsep_id":  2,
+                                    "second_chemsep_id":  1922,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Ethane/Hydrogen sulfide"
+                                },
+                                {
+                                    "first_chemsep_id":  3,
+                                    "second_chemsep_id":  1922,
+                                    "A12":  17.686169,
+                                    "A21":  -4.0936526,
+                                    "comment":  "Propane/Hydrogen sulfide"
+                                },
+                                {
+                                    "first_chemsep_id":  4,
+                                    "second_chemsep_id":  1922,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Isobutane/Hydrogen sulfide"
+                                },
+                                {
+                                    "first_chemsep_id":  5,
+                                    "second_chemsep_id":  1922,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "N-butane/Hydrogen sulfide"
+                                },
+                                {
+                                    "first_chemsep_id":  909,
+                                    "second_chemsep_id":  1922,
+                                    "A12":  15.301517,
+                                    "A21":  12.718144,
+                                    "comment":  "Carbon dioxide/Hydrogen sulfide"
+                                },
+                                {
+                                    "first_chemsep_id":  1922,
+                                    "second_chemsep_id":  1922,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Hydrogen sulfide/Hydrogen sulfide"
+                                },
+                                {
+                                    "first_chemsep_id":  900,
+                                    "second_chemsep_id":  1922,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Nitrogen/Hydrogen sulfide"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1922,
+                                    "A12":  12.320702,
+                                    "A21":  -0.198721,
+                                    "comment":  "Methanol/Hydrogen sulfide"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  900,
+                                    "A12":  -4.769304,
+                                    "A21":  5.365467,
+                                    "comment":  "Water/Nitrogen"
+                                },
+                                {
+                                    "first_chemsep_id":  1,
+                                    "second_chemsep_id":  900,
+                                    "A12":  8.2866657,
+                                    "A21":  -1.0333492,
+                                    "comment":  "Methane/Nitrogen"
+                                },
+                                {
+                                    "first_chemsep_id":  2,
+                                    "second_chemsep_id":  900,
+                                    "A12":  -7.94884,
+                                    "A21":  13.91047,
+                                    "comment":  "Ethane/Nitrogen"
+                                },
+                                {
+                                    "first_chemsep_id":  3,
+                                    "second_chemsep_id":  900,
+                                    "A12":  12.320702,
+                                    "A21":  -3.3583849,
+                                    "comment":  "Propane/Nitrogen"
+                                },
+                                {
+                                    "first_chemsep_id":  4,
+                                    "second_chemsep_id":  900,
+                                    "A12":  -9.93605,
+                                    "A21":  -13.91047,
+                                    "comment":  "Isobutane/Nitrogen"
+                                },
+                                {
+                                    "first_chemsep_id":  5,
+                                    "second_chemsep_id":  900,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "N-butane/Nitrogen"
+                                },
+                                {
+                                    "first_chemsep_id":  909,
+                                    "second_chemsep_id":  900,
+                                    "A12":  -28.218382,
+                                    "A21":  -9.3200149,
+                                    "comment":  "Carbon dioxide/Nitrogen"
+                                },
+                                {
+                                    "first_chemsep_id":  1922,
+                                    "second_chemsep_id":  900,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Hydrogen sulfide/Nitrogen"
+                                },
+                                {
+                                    "first_chemsep_id":  900,
+                                    "second_chemsep_id":  900,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Nitrogen/Nitrogen"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  900,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Methanol/Nitrogen"
+                                },
+                                {
+                                    "first_chemsep_id":  1921,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  -6.359072,
+                                    "A21":  -1.192326,
+                                    "comment":  "Water/Methanol"
+                                },
+                                {
+                                    "first_chemsep_id":  1,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  -15.89768,
+                                    "A21":  8.942445,
+                                    "comment":  "Methane/Methanol"
+                                },
+                                {
+                                    "first_chemsep_id":  2,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  -17.090006,
+                                    "A21":  -10.929655,
+                                    "comment":  "Ethane/Methanol"
+                                },
+                                {
+                                    "first_chemsep_id":  3,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  -20.070821,
+                                    "A21":  13.314307,
+                                    "comment":  "Propane/Methanol"
+                                },
+                                {
+                                    "first_chemsep_id":  4,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Isobutane/Methanol"
+                                },
+                                {
+                                    "first_chemsep_id":  5,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "N-butane/Methanol"
+                                },
+                                {
+                                    "first_chemsep_id":  909,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  2.583373,
+                                    "A21":  16.295122,
+                                    "comment":  "Carbon dioxide/Methanol"
+                                },
+                                {
+                                    "first_chemsep_id":  1922,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  -0.198721,
+                                    "A21":  12.320702,
+                                    "comment":  "Hydrogen sulfide/Methanol"
+                                },
+                                {
+                                    "first_chemsep_id":  900,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Nitrogen/Methanol"
+                                },
+                                {
+                                    "first_chemsep_id":  1101,
+                                    "second_chemsep_id":  1101,
+                                    "A12":  0,
+                                    "A21":  0,
+                                    "comment":  "Methanol/Methanol"
+                                }
+                            ]
+}

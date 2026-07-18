@@ -54,6 +54,7 @@ from .soave_redlich_kwong import (
 )
 from .transport import TransportRecord
 from .wilson import WilsonData, wilson_activity_coefficients
+from .uniquac import UniquacData, uniquac_activity_coefficients
 
 
 PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
@@ -71,6 +72,7 @@ PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR = (
 PENG_ROBINSON_1978_ADVANCED = "peng-robinson-1978-advanced"
 SOAVE_REDLICH_KWONG_ADVANCED = "soave-redlich-kwong-advanced"
 WILSON_ACETONE_METHANOL = "wilson-acetone-methanol"
+UNIQUAC_1_PROPANOL_WATER = "uniquac-1-propanol-water"
 
 
 @runtime_checkable
@@ -376,6 +378,40 @@ class WilsonSystem:
             self.compound_ids,
             liquid_composition,
             temperature_k,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class UniquacSystem:
+    """DWSIM UNIQUAC activity coefficients over one frozen binary basis."""
+
+    data: UniquacData
+    compound_ids: tuple[str, ...]
+    model_id: str = field(default=UNIQUAC_1_PROPANOL_WATER, init=False)
+
+    def __post_init__(self) -> None:
+        try:
+            compound_ids = tuple(self.compound_ids)
+        except TypeError as error:
+            raise ValidationError(
+                "UNIQUAC thermodynamic-system compound IDs must be a sequence"
+            ) from error
+        if (
+            not isinstance(self.data, UniquacData)
+            or len(compound_ids) != 2
+            or len(set(compound_ids)) != 2
+            or any(not isinstance(value, str) or not value for value in compound_ids)
+        ):
+            raise ValidationError("UNIQUAC thermodynamic-system inputs are invalid")
+        for compound_id in compound_ids:
+            self.data.compound(compound_id)
+        object.__setattr__(self, "compound_ids", compound_ids)
+
+    def activity_coefficients(
+        self, liquid_composition: tuple[float, ...], temperature_k: float
+    ) -> tuple[float, ...]:
+        return uniquac_activity_coefficients(
+            self.data, self.compound_ids, liquid_composition, temperature_k
         )
 
 
@@ -919,6 +955,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_1978_ADVANCED: PengRobinson1978AdvancedSystem,
     SOAVE_REDLICH_KWONG_ADVANCED: SoaveRedlichKwongAdvancedSystem,
     WILSON_ACETONE_METHANOL: WilsonSystem,
+    UNIQUAC_1_PROPANOL_WATER: UniquacSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS
