@@ -1,0 +1,54 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "wilson-acetone-methanol-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "1710ac67f390854280366095f0c42ed7d04208ec51b46cbf70e552dcf175fa43",
+                   "property_package":  "Wilson",
+                   "property_package_class":  "DWSIM.Thermodynamics.WilsonPropertyPackage",
+                   "property_package_construction":  "deserialized-from-case",
+                   "flash_algorithm":  "Universal Flash"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "Acetone",
+                                     "Methanol"
+                                 ],
+                   "temperature_k":  330,
+                   "pressure_pa":  100000,
+                   "composition":  [
+                                       0.4,
+                                       0.6
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         1.281397173932969,
+                                                         0.81638274326724014
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        1,
+                                                        1
+                                                    ],
+                    "liquid_fraction":  0.93501527800869666,
+                    "vapor_fraction":  0.064984721991303313,
+                    "liquid_composition":  [
+                                               0.39261942032710051,
+                                               0.60738057967289949
+                                           ],
+                    "vapor_composition":  [
+                                              0.50618564190206883,
+                                              0.49381435809793128
+                                          ],
+                    "iterations":  5,
+                    "equilibrium_ratios":  [
+                                               1.2893480344341637,
+                                               0.81308309099719822
+                                           ],
+                    "activity_coefficients":  [
+                                                  1.2341979923787367,
+                                                  1.1014706807855421
+                                              ]
+                }
+}

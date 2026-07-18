@@ -53,6 +53,7 @@ from .soave_redlich_kwong import (
     srk_tp_flash,
 )
 from .transport import TransportRecord
+from .wilson import WilsonData, wilson_activity_coefficients
 
 
 PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
@@ -69,6 +70,7 @@ PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR = (
 )
 PENG_ROBINSON_1978_ADVANCED = "peng-robinson-1978-advanced"
 SOAVE_REDLICH_KWONG_ADVANCED = "soave-redlich-kwong-advanced"
+WILSON_ACETONE_METHANOL = "wilson-acetone-methanol"
 
 
 @runtime_checkable
@@ -333,6 +335,47 @@ class NRTLSystem:
             vapor_composition,
             temperature_k,
             pressure_pa,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class WilsonSystem:
+    """DWSIM Wilson activity coefficients over one frozen compound basis."""
+
+    data: WilsonData
+    compound_ids: tuple[str, ...]
+    model_id: str = field(default=WILSON_ACETONE_METHANOL, init=False)
+
+    def __post_init__(self) -> None:
+        try:
+            compound_ids = tuple(self.compound_ids)
+        except TypeError as error:
+            raise ValidationError(
+                "Wilson thermodynamic-system compound IDs must be a sequence"
+            ) from error
+        if (
+            not isinstance(self.data, WilsonData)
+            or len(compound_ids) < 2
+            or len(set(compound_ids)) != len(compound_ids)
+            or any(not isinstance(value, str) or not value for value in compound_ids)
+        ):
+            raise ValidationError("Wilson thermodynamic-system inputs are invalid")
+        basis = tuple(self.data.compound(compound_id) for compound_id in compound_ids)
+        for first in basis:
+            for second in basis:
+                self.data.energy(first.cas, second.cas)
+        object.__setattr__(self, "compound_ids", compound_ids)
+
+    def activity_coefficients(
+        self,
+        liquid_composition: tuple[float, ...],
+        temperature_k: float,
+    ) -> tuple[float, ...]:
+        return wilson_activity_coefficients(
+            self.data,
+            self.compound_ids,
+            liquid_composition,
+            temperature_k,
         )
 
 
@@ -875,6 +918,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR: PRSV2VanLaarSystem,
     PENG_ROBINSON_1978_ADVANCED: PengRobinson1978AdvancedSystem,
     SOAVE_REDLICH_KWONG_ADVANCED: SoaveRedlichKwongAdvancedSystem,
+    WILSON_ACETONE_METHANOL: WilsonSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS

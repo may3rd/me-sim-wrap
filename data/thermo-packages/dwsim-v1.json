@@ -149,8 +149,10 @@
       "dwsim_class": "WilsonPropertyPackage",
       "family": "activity-coefficient",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/WilsonPropertyPackage.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": [
+        "wilson-acetone-methanol"
+      ]
     },
     {
       "id": "uniquac",

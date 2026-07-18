@@ -192,6 +192,30 @@ public static class DwsimThermoProbe
             .ToArray();
     }
 
+    public static double[] ActivityCoefficients(
+        object propertyPackage, double[] composition, double temperature)
+    {
+        MethodInfo getModel = propertyPackage.GetType().GetMethods(PublicInstance)
+            .FirstOrDefault(candidate =>
+                candidate.Name == "GetModel" && candidate.GetParameters().Length == 0);
+        MethodInfo getArguments = propertyPackage.GetType().GetMethods(PublicInstance)
+            .FirstOrDefault(candidate =>
+                candidate.Name == "GetArguments" && candidate.GetParameters().Length == 0);
+        if (getModel == null || getArguments == null) return null;
+        object model = getModel.Invoke(propertyPackage, null);
+        MethodInfo calculate = model.GetType().GetMethods(PublicInstance)
+            .FirstOrDefault(candidate =>
+                candidate.Name == "CalcActivityCoefficients" &&
+                candidate.GetParameters().Length == 3);
+        if (calculate == null) return null;
+        object arguments = getArguments.Invoke(propertyPackage, null);
+        return ((IEnumerable)calculate.Invoke(
+                model, new object[] { temperature, composition, arguments }))
+            .Cast<object>()
+            .Select(value => Convert.ToDouble(value, CultureInfo.InvariantCulture))
+            .ToArray();
+    }
+
     public static object[] FlashPT(
         object propertyPackage, double[] composition, double temperature, double pressure)
     {
@@ -306,6 +330,23 @@ $vaporFugacity = @([DwsimThermoProbe]::FugacityCoefficients(
 $flash = [DwsimThermoProbe]::FlashPT(
     $propertyPackage, $Composition, $TemperatureK, $PressurePa
 )
+$activityCoefficients = [DwsimThermoProbe]::ActivityCoefficients(
+    $propertyPackage, $Composition, $TemperatureK
+)
+
+$outputs = [ordered]@{
+    liquid_fugacity_coefficients = $liquidFugacity
+    vapor_fugacity_coefficients = $vaporFugacity
+    liquid_fraction = [double]$flash[0]
+    vapor_fraction = [double]$flash[1]
+    liquid_composition = @([DwsimThermoProbe]::DoubleArray($flash[2]))
+    vapor_composition = @([DwsimThermoProbe]::DoubleArray($flash[3]))
+    iterations = [int]$flash[4]
+    equilibrium_ratios = @([DwsimThermoProbe]::DoubleArray($flash[9]))
+}
+if ($null -ne $activityCoefficients) {
+    $outputs.activity_coefficients = @($activityCoefficients)
+}
 
 $document = [ordered]@{
     schema_version = "dwsim-thermo-package-golden-1"
@@ -332,16 +373,7 @@ $document = [ordered]@{
         pressure_pa = $PressurePa
         composition = $Composition
     }
-    outputs = [ordered]@{
-        liquid_fugacity_coefficients = $liquidFugacity
-        vapor_fugacity_coefficients = $vaporFugacity
-        liquid_fraction = [double]$flash[0]
-        vapor_fraction = [double]$flash[1]
-        liquid_composition = @([DwsimThermoProbe]::DoubleArray($flash[2]))
-        vapor_composition = @([DwsimThermoProbe]::DoubleArray($flash[3]))
-        iterations = [int]$flash[4]
-        equilibrium_ratios = @([DwsimThermoProbe]::DoubleArray($flash[9]))
-    }
+    outputs = $outputs
 }
 
 $outputDirectory = Split-Path -Parent $OutputPath

@@ -16,6 +16,7 @@ loading correlation files or selecting model equations themselves.
 | `peng-robinson-1978-advanced` | `PengRobinson1978AdvancedSystem` | Liquid/vapor/stable phase states | PR78 plus all 13 DWSIM advanced mercury interaction expressions evaluated as source-normalized temperature polynomials; absent/zero expressions fall back to ordinary PR interactions |
 | `soave-redlich-kwong-advanced` | `SoaveRedlichKwongAdvancedSystem` | Liquid/vapor/stable phase states and VLE TP flash | SRK plus a saved-case T/P interaction-expression dictionary; the parity case configures the DWSIM Mercury/N-pentane temperature polynomial before capture |
 | `nrtl-acetone-methanol` | `NRTLSystem` | Modified-Raoult equilibrium ratios, bubble/dew pressure, bubble temperature, and Excess-mode phase enthalpies | Saved-source binary acetone/methanol domain only; no general TP/PH flash |
+| `wilson-acetone-methanol` | `WilsonSystem` | Liquid activity coefficients | Complete DWSIM 9.0.5 Wilson interaction table with an exact 298.15 K molar-volume basis frozen only for acetone/methanol; no general flash or caloric model |
 
 The registry is a fixed dictionary from stable model ID to constructor. Runtime plugin
 registration and silent fallback are unsupported. An unknown ID, incomplete correlation
@@ -34,6 +35,13 @@ domain: DWSIM's built-in override table contains only Mercury pairs. The scoped
 while `prsrk-advanced-v1.json` preserves all 13 raw expressions and normalized
 polynomial coefficients. This does not imply that Mercury has the full ideal,
 transport, or saturated-liquid correlation capabilities of the main catalog.
+
+Wilson data is regenerated from the installed DWSIM 9.0.5 embedded resource and a saved
+acetone/methanol case by `scripts/extract_dwsim_wilson_data.ps1`. All 364 interaction
+pairs are retained in cal/mol, while the two scoped molar volumes reproduce the package's
+298.15 K `AUX_LIQDENSi` basis. The equation-level activity coefficients match both
+repeat captures within floating-point precision. Fugacity, flash, and caloric behavior
+remain outside this first Wilson system boundary.
 
 The frozen compound catalog and all three pure-property datasets cover the same 408
 case-distinct DWSIM/ChemSep names. These are the records among the 431-source catalog
