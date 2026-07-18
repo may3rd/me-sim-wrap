@@ -24,7 +24,7 @@ This document is a release boundary for `me-sim-wrap` 0.1.0. A result is support
 - Heat exchangers do not provide general phase-change rating, arbitrary shell layouts, mechanical design, or pressure/thermal co-iteration.
 - Pipe thermal and hydraulic models support the documented saved segment conventions. Fully coupled transient multiphase networks, fitting catalogs, compressible networks, and relief discharge piping are unsupported.
 - Reaction models cover the frozen stoichiometry, phase, kinetic basis, and thermodynamic closure named by each gate. General reaction-network selection, liquid Gibbs minimization, and fully coupled adiabatic kinetics are unsupported.
-- Column functions include shortcut and frozen-profile material/energy gates plus live acetone/methanol NRTL stage K-value, bubble-point, density, and phase-enthalpy calculations. They do not yet iterate those calculations with duties, specifications, and material flows as a fully predictive rigorous-column package.
+- Column functions include shortcut and frozen-profile material/energy gates plus one simultaneous acetone/methanol NRTL total-condenser solve with a fixed pressure profile, reflux-ratio specification, bottoms-flow specification, and calculated duties. Other condenser/reboiler modes, pressure-profile generation, side draws, multiple feeds, alternate specifications, phase regimes, and arbitrary initial estimates are not a general rigorous-column package.
 
 ## Dynamics and controls
 

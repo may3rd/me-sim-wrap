@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 import math
 
+from scipy.optimize import least_squares
+
 from ..errors import ValidationError
 from ..thermo.activity import (
     NRTLVLEData,
@@ -92,6 +94,39 @@ class NRTLColumnEnthalpyProfile:
     excess_enthalpies_j_per_kmol: tuple[float, ...]
 
 
+@dataclass(frozen=True, slots=True)
+class NRTLRigorousColumnIteration:
+    residual_evaluation: int
+    scaled_residual_norm: float
+
+
+@dataclass(frozen=True, slots=True)
+class NRTLRigorousColumnResult:
+    temperatures_k: tuple[float, ...]
+    pressures_pa: tuple[float, ...]
+    liquid_flows_kmol_s: tuple[float, ...]
+    vapor_flows_kmol_s: tuple[float, ...]
+    liquid_mole_fractions: tuple[tuple[float, ...], ...]
+    vapor_mole_fractions: tuple[tuple[float, ...], ...]
+    equilibrium_ratios: tuple[tuple[float, ...], ...]
+    liquid_enthalpies_j_per_kmol: tuple[float, ...]
+    vapor_enthalpies_j_per_kmol: tuple[float, ...]
+    distillate_flow_kmol_s: float
+    bottoms_flow_kmol_s: float
+    condenser_duty_w: float
+    reboiler_duty_w: float
+    scaled_residual_norm: float
+    solver_evaluations: int
+    residual_evaluations: int
+    history: tuple[NRTLRigorousColumnIteration, ...]
+
+
+class NRTLRigorousColumnConvergenceError(RuntimeError):
+    def __init__(self, message: str, history: tuple[NRTLRigorousColumnIteration, ...]):
+        super().__init__(message)
+        self.history = history
+
+
 def nrtl_column_enthalpy_profile(
     data: NRTLVLEData,
     compound_ids: tuple[str, ...],
@@ -133,6 +168,304 @@ def nrtl_column_enthalpy_profile(
         tuple(result.vapor_j_per_kmol for result in results),
         tuple(result.liquid_density_kg_per_m3 for result in results),
         tuple(result.excess_enthalpy_j_per_kmol for result in results),
+    )
+
+
+def nrtl_rigorous_total_condenser_column(
+    data: NRTLVLEData,
+    compound_ids: tuple[str, ...],
+    feed_component_flows_by_stage_kmol_s: tuple[tuple[float, ...], ...],
+    feed_energy_flows_by_stage_w: tuple[float, ...],
+    pressures_pa: tuple[float, ...],
+    initial_temperatures_k: tuple[float, ...],
+    initial_liquid_flows_kmol_s: tuple[float, ...],
+    initial_vapor_flows_kmol_s: tuple[float, ...],
+    initial_liquid_mole_fractions: tuple[tuple[float, ...], ...],
+    reflux_ratio: float,
+    bottoms_flow_kmol_s: float,
+    temperature_bounds_k: tuple[float, float],
+    residual_tolerance: float = 1.0e-8,
+    maximum_solver_evaluations: int = 100,
+) -> NRTLRigorousColumnResult:
+    """Solve one total-condenser NRTL column with simultaneous MESH equations.
+
+    The current predictive slice fixes a constant supplied pressure profile,
+    one liquid distillate at stage zero, one liquid bottoms product at the last
+    stage, a reflux-ratio specification, and a bottoms-flow specification.
+    Condenser and reboiler duties are calculated outputs. Feed energy arrives
+    on the same watt basis as stage energy balances.
+    """
+    try:
+        ids = tuple(compound_ids)
+        feeds = tuple(tuple(float(value) for value in row) for row in feed_component_flows_by_stage_kmol_s)
+        feed_energy = tuple(float(value) for value in feed_energy_flows_by_stage_w)
+        pressures = tuple(float(value) for value in pressures_pa)
+        initial_temperatures = tuple(float(value) for value in initial_temperatures_k)
+        initial_liquid = tuple(float(value) for value in initial_liquid_flows_kmol_s)
+        initial_vapor = tuple(float(value) for value in initial_vapor_flows_kmol_s)
+        initial_fractions = tuple(
+            tuple(float(value) for value in row) for row in initial_liquid_mole_fractions
+        )
+        temperature_bounds = tuple(float(value) for value in temperature_bounds_k)
+    except (TypeError, ValueError) as error:
+        raise ValidationError("NRTL rigorous-column inputs must be finite sequences") from error
+    stage_count = len(feeds)
+    component_count = len(ids)
+    scalar_values = (reflux_ratio, bottoms_flow_kmol_s, residual_tolerance)
+    if (
+        not isinstance(data, NRTLVLEData)
+        or stage_count < 2
+        or component_count < 2
+        or len(set(ids)) != component_count
+        or any(not isinstance(value, str) or not value for value in ids)
+        or len(feed_energy) != stage_count
+        or len(pressures) != stage_count
+        or len(initial_temperatures) != stage_count
+        or len(initial_liquid) != stage_count
+        or len(initial_vapor) != stage_count
+        or len(initial_fractions) != stage_count
+        or len(temperature_bounds) != 2
+        or any(len(row) != component_count for row in feeds + initial_fractions)
+        or any(not _finite_number(value) or value < 0.0 for row in feeds for value in row)
+        or any(not _finite_number(value) for value in feed_energy)
+        or any(not _finite_number(value) or value <= 0.0 for value in pressures)
+        or any(not _finite_number(value) or value <= 0.0 for value in initial_temperatures)
+        or any(not _finite_number(value) or value <= 0.0 for value in initial_liquid)
+        or initial_vapor[0] != 0.0
+        or any(not _finite_number(value) or value <= 0.0 for value in initial_vapor[1:])
+        or any(
+            not _finite_number(value) or value <= 0.0
+            for row in initial_fractions for value in row
+        )
+        or any(abs(math.fsum(row) - 1.0) > 1.0e-8 for row in initial_fractions)
+        or any(not _finite_number(value) or value <= 0.0 for value in scalar_values)
+        or not all(_finite_number(value) and value > 0.0 for value in temperature_bounds)
+        or temperature_bounds[0] >= temperature_bounds[1]
+        or any(not temperature_bounds[0] <= value <= temperature_bounds[1] for value in initial_temperatures)
+        or isinstance(maximum_solver_evaluations, bool)
+        or not isinstance(maximum_solver_evaluations, int)
+        or maximum_solver_evaluations <= 0
+    ):
+        raise ValidationError("NRTL rigorous total-condenser column inputs are invalid")
+    flow_scale = math.fsum(value for row in feeds for value in row)
+    if flow_scale <= 0.0 or bottoms_flow_kmol_s >= flow_scale:
+        raise ValidationError("NRTL rigorous column requires feed flow above the bottoms specification")
+    distillate_initial = flow_scale - bottoms_flow_kmol_s
+
+    composition_offset = 2 * stage_count - 1
+    temperature_offset = composition_offset + stage_count * (component_count - 1)
+    distillate_index = temperature_offset + stage_count
+    condenser_index = distillate_index + 1
+    reboiler_index = condenser_index + 1
+
+    initial_logits = [
+        math.log(row[component]) - math.log(row[-1])
+        for row in initial_fractions
+        for component in range(component_count - 1)
+    ]
+    variables = (
+        [math.log(value) for value in initial_liquid]
+        + [math.log(value) for value in initial_vapor[1:]]
+        + initial_logits
+        + list(initial_temperatures)
+        + [math.log(distillate_initial)]
+    )
+
+    def decode(values):
+        liquid = tuple(math.exp(float(value)) for value in values[:stage_count])
+        vapor = (0.0,) + tuple(
+            math.exp(float(value))
+            for value in values[stage_count:composition_offset]
+        )
+        fractions = []
+        reduced_count = component_count - 1
+        for stage in range(stage_count):
+            start = composition_offset + stage * reduced_count
+            logits = [float(value) for value in values[start:start + reduced_count]] + [0.0]
+            maximum = max(logits)
+            exponentials = [math.exp(value - maximum) for value in logits]
+            total = math.fsum(exponentials)
+            fractions.append(tuple(value / total for value in exponentials))
+        temperatures = tuple(
+            float(value) for value in values[temperature_offset:distillate_index]
+        )
+        distillate = math.exp(float(values[distillate_index]))
+        condenser_heat_input = float(values[condenser_index])
+        reboiler_heat_input = float(values[reboiler_index])
+        return (
+            liquid,
+            vapor,
+            tuple(fractions),
+            temperatures,
+            distillate,
+            condenser_heat_input,
+            reboiler_heat_input,
+        )
+
+    def thermodynamics(temperatures, fractions):
+        ratios = []
+        vapor_fractions = []
+        liquid_enthalpies = []
+        vapor_enthalpies = []
+        for temperature_k, pressure_pa, liquid_row in zip(
+            temperatures, pressures, fractions
+        ):
+            ratio_row = nrtl_equilibrium_ratios(
+                data, ids, liquid_row, temperature_k, pressure_pa
+            )
+            vapor_row = tuple(
+                ratio * fraction for ratio, fraction in zip(ratio_row, liquid_row)
+            )
+            vapor_total = math.fsum(vapor_row)
+            normalized_vapor = tuple(value / vapor_total for value in vapor_row)
+            enthalpies = nrtl_phase_enthalpies(
+                data,
+                ids,
+                liquid_row,
+                normalized_vapor,
+                temperature_k,
+                pressure_pa,
+            )
+            ratios.append(ratio_row)
+            vapor_fractions.append(vapor_row)
+            liquid_enthalpies.append(enthalpies.liquid_j_per_kmol)
+            vapor_enthalpies.append(enthalpies.vapor_j_per_kmol)
+        return (
+            tuple(ratios),
+            tuple(vapor_fractions),
+            tuple(liquid_enthalpies),
+            tuple(vapor_enthalpies),
+        )
+
+    _, _, initial_hl, initial_hv = thermodynamics(
+        initial_temperatures, initial_fractions
+    )
+    condenser_initial_w = (
+        (initial_liquid[0] + distillate_initial) * initial_hl[0]
+        - initial_vapor[1] * initial_hv[1]
+        - feed_energy[0]
+    )
+    reboiler_initial_w = (
+        initial_liquid[-1] * initial_hl[-1]
+        + initial_vapor[-1] * initial_hv[-1]
+        - initial_liquid[-2] * initial_hl[-2]
+        - feed_energy[-1]
+    )
+    if condenser_initial_w >= 0.0 or reboiler_initial_w <= 0.0:
+        raise ValidationError("initial column profile does not imply condenser removal and reboiler input")
+    energy_scale = max(abs(condenser_initial_w), reboiler_initial_w, 1.0)
+    variables.extend((condenser_initial_w / energy_scale, reboiler_initial_w / energy_scale))
+
+    lower_flow = max(flow_scale * 1.0e-12, 1.0e-300)
+    upper_flow = max(
+        flow_scale * 1.0e4,
+        max(initial_liquid + initial_vapor[1:] + (distillate_initial,)) * 10.0,
+    )
+    lower_logit = min(-50.0, min(initial_logits) - 1.0)
+    upper_logit = max(50.0, max(initial_logits) + 1.0)
+    lower_bounds = (
+        [math.log(lower_flow)] * stage_count
+        + [math.log(lower_flow)] * (stage_count - 1)
+        + [lower_logit] * (stage_count * (component_count - 1))
+        + [temperature_bounds[0]] * stage_count
+        + [math.log(lower_flow), -100.0, 0.0]
+    )
+    upper_bounds = (
+        [math.log(upper_flow)] * stage_count
+        + [math.log(upper_flow)] * (stage_count - 1)
+        + [upper_logit] * (stage_count * (component_count - 1))
+        + [temperature_bounds[1]] * stage_count
+        + [math.log(upper_flow), 0.0, 100.0]
+    )
+
+    history: list[NRTLRigorousColumnIteration] = []
+    residual_evaluation = 0
+    best_norm = math.inf
+
+    def residuals(values):
+        nonlocal residual_evaluation, best_norm
+        residual_evaluation += 1
+        liquid, vapor, fractions, temperatures, distillate, condenser, reboiler = decode(values)
+        ratios, vapor_fractions, liquid_enthalpies, vapor_enthalpies = thermodynamics(
+            temperatures, fractions
+        )
+        result = []
+        for stage in range(stage_count):
+            for component in range(component_count):
+                residual = feeds[stage][component]
+                if stage > 0:
+                    residual += liquid[stage - 1] * fractions[stage - 1][component]
+                if stage < stage_count - 1:
+                    residual += vapor[stage + 1] * vapor_fractions[stage + 1][component]
+                residual -= liquid[stage] * fractions[stage][component]
+                residual -= vapor[stage] * vapor_fractions[stage][component]
+                if stage == 0:
+                    residual -= distillate * fractions[stage][component]
+                result.append(residual / flow_scale)
+        result.extend(math.fsum(row) - 1.0 for row in vapor_fractions)
+        for stage in range(stage_count):
+            residual = feed_energy[stage]
+            if stage > 0:
+                residual += liquid[stage - 1] * liquid_enthalpies[stage - 1]
+            if stage < stage_count - 1:
+                residual += vapor[stage + 1] * vapor_enthalpies[stage + 1]
+            residual -= liquid[stage] * liquid_enthalpies[stage]
+            residual -= vapor[stage] * vapor_enthalpies[stage]
+            if stage == 0:
+                residual -= distillate * liquid_enthalpies[stage]
+                residual += condenser * energy_scale
+            if stage == stage_count - 1:
+                residual += reboiler * energy_scale
+            result.append(residual / energy_scale)
+        result.append((liquid[0] - reflux_ratio * distillate) / flow_scale)
+        result.append((liquid[-1] - bottoms_flow_kmol_s) / flow_scale)
+        norm = max(abs(value) for value in result)
+        if math.isfinite(norm) and norm < best_norm:
+            best_norm = norm
+            history.append(NRTLRigorousColumnIteration(residual_evaluation, norm))
+        return tuple(result)
+
+    try:
+        solved = least_squares(
+            residuals,
+            variables,
+            bounds=(lower_bounds, upper_bounds),
+            x_scale="jac",
+            ftol=1.0e-11,
+            xtol=1.0e-11,
+            gtol=1.0e-11,
+            max_nfev=maximum_solver_evaluations,
+        )
+    except (ValidationError, ValueError, OverflowError) as error:
+        raise NRTLRigorousColumnConvergenceError(str(error), tuple(history)) from error
+    final_residuals = residuals(solved.x)
+    final_norm = max(abs(value) for value in final_residuals)
+    if not math.isfinite(final_norm) or final_norm > residual_tolerance:
+        raise NRTLRigorousColumnConvergenceError(
+            "NRTL rigorous total-condenser column did not converge", tuple(history)
+        )
+    liquid, vapor, fractions, temperatures, distillate, condenser, reboiler = decode(solved.x)
+    ratios, vapor_fractions, liquid_enthalpies, vapor_enthalpies = thermodynamics(
+        temperatures, fractions
+    )
+    return NRTLRigorousColumnResult(
+        temperatures,
+        pressures,
+        liquid,
+        vapor,
+        fractions,
+        vapor_fractions,
+        ratios,
+        liquid_enthalpies,
+        vapor_enthalpies,
+        distillate,
+        liquid[-1],
+        -condenser * energy_scale,
+        reboiler * energy_scale,
+        final_norm,
+        int(solved.nfev),
+        residual_evaluation,
+        tuple(history),
     )
 
 

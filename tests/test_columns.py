@@ -19,6 +19,7 @@ from mesim.unitops.columns import (
     StageStream,
     ColumnConvergenceError,
     ColumnNewtonConvergenceError,
+    NRTLRigorousColumnConvergenceError,
     column_balance_residuals,
     column_energy_residual_w,
     column_profile_energy_residuals,
@@ -29,6 +30,7 @@ from mesim.unitops.columns import (
     nrtl_column_bubble_temperature_profile,
     nrtl_column_enthalpy_profile,
     nrtl_column_equilibrium_profile,
+    nrtl_rigorous_total_condenser_column,
     shortcut_column,
 )
 
@@ -865,6 +867,159 @@ class RigorousDistillationGoldenGateTest(unittest.TestCase):
             liquid_product_flows_by_stage_kmol_s=tuple(liquid_products),
         )
         self.assertLess(max(abs(value) for value in residuals), 31.0)
+
+    def test_live_nrtl_mesh_solver_predicts_captured_column_profile_and_duties(self):
+        captured = self.objects["Acetone Column (6 atm)"]["column_profile"]
+        feeds = [[0.0] * len(self.NAMES) for _ in range(20)]
+        feeds[10] = [
+            self.properties["HP Feed"][f"PROP_MS_104/{name}"] / 1000.0
+            for name in self.NAMES
+        ]
+        feed_energy = [0.0] * 20
+        feed_energy[10] = (
+            self.properties["HP Feed"]["PROP_MS_2"]
+            * self.properties["HP Feed"]["PROP_MS_7"]
+            * 1000.0
+        )
+        pressure_pa = self.properties["HP Azeotrope"]["PROP_MS_1"]
+        result = nrtl_rigorous_total_condenser_column(
+            self.nrtl_data,
+            self.NAMES,
+            tuple(tuple(row) for row in feeds),
+            tuple(feed_energy),
+            (pressure_pa,) * 20,
+            tuple(captured["Tf"]),
+            tuple(value / 1000.0 for value in captured["Lf"]),
+            tuple(value / 1000.0 for value in captured["Vf"]),
+            tuple(tuple(row) for row in captured["xf"]),
+            reflux_ratio=40.0,
+            bottoms_flow_kmol_s=0.0005,
+            temperature_bounds_k=(350.0, 450.0),
+        )
+
+        self.assertLess(result.scaled_residual_norm, 1.0e-8)
+        self.assertLessEqual(result.solver_evaluations, 100)
+        self.assertLessEqual(result.residual_evaluations, 600)
+        self.assertTrue(result.history)
+        self.assertLess(
+            max(abs(actual - expected) for actual, expected in zip(result.temperatures_k, captured["Tf"])),
+            0.08,
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected)
+                for actual_row, expected_row in zip(result.liquid_mole_fractions, captured["xf"])
+                for actual, expected in zip(actual_row, expected_row)
+            ),
+            7.0e-4,
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected)
+                for actual_row, expected_row in zip(result.vapor_mole_fractions, captured["yf"])
+                for actual, expected in zip(actual_row, expected_row)
+            ),
+            7.0e-4,
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected / 1000.0)
+                for actual, expected in zip(result.liquid_flows_kmol_s, captured["Lf"])
+            ),
+            2.6e-5,
+        )
+        self.assertLess(
+            max(
+                abs(actual - expected / 1000.0)
+                for actual, expected in zip(result.vapor_flows_kmol_s, captured["Vf"])
+            ),
+            2.6e-5,
+        )
+        self.assertTrue(math.isclose(
+            result.distillate_flow_kmol_s * 1000.0,
+            self.properties["HP Azeotrope"]["PROP_MS_3"],
+            abs_tol=1.0e-11,
+        ))
+        self.assertTrue(math.isclose(result.bottoms_flow_kmol_s, 0.0005, abs_tol=1.0e-12))
+        self.assertTrue(math.isclose(
+            result.condenser_duty_w / 1000.0,
+            self.properties["Condenser Duty (2)"]["PROP_ES_0"],
+            rel_tol=3.0e-4,
+        ))
+        self.assertTrue(math.isclose(
+            result.reboiler_duty_w / 1000.0,
+            self.properties["Reboiler Duty (2)"]["PROP_ES_0"],
+            rel_tol=3.0e-4,
+        ))
+
+        liquid_products = [0.0] * 20
+        liquid_products[0] = result.distillate_flow_kmol_s
+        material = fixed_k_column_profile_residuals(
+            tuple(tuple(row) for row in feeds),
+            result.liquid_flows_kmol_s,
+            result.vapor_flows_kmol_s,
+            result.liquid_mole_fractions,
+            result.vapor_mole_fractions,
+            result.equilibrium_ratios,
+            liquid_product_flows_by_stage_kmol_s=tuple(liquid_products),
+        )
+        self.assertTrue(material.is_closed(1.0e-8, 1.0e-8, 1.0e-12))
+        duties = [0.0] * 20
+        duties[0] = -result.condenser_duty_w
+        duties[-1] = result.reboiler_duty_w
+        energy = column_profile_energy_residuals(
+            tuple(feed_energy),
+            result.liquid_flows_kmol_s,
+            result.vapor_flows_kmol_s,
+            result.liquid_enthalpies_j_per_kmol,
+            result.vapor_enthalpies_j_per_kmol,
+            heat_duties_by_stage_w=tuple(duties),
+            liquid_product_flows_by_stage_kmol_s=tuple(liquid_products),
+        )
+        self.assertLess(max(abs(value) for value in energy), 1.0e-3)
+
+    def test_live_nrtl_mesh_solver_validates_and_preserves_failure_history(self):
+        captured = self.objects["Acetone Column (6 atm)"]["column_profile"]
+        feeds = [[0.0] * len(self.NAMES) for _ in range(20)]
+        feeds[10] = [
+            self.properties["HP Feed"][f"PROP_MS_104/{name}"] / 1000.0
+            for name in self.NAMES
+        ]
+        feed_energy = [0.0] * 20
+        feed_energy[10] = (
+            self.properties["HP Feed"]["PROP_MS_2"]
+            * self.properties["HP Feed"]["PROP_MS_7"]
+            * 1000.0
+        )
+        pressure_pa = self.properties["HP Azeotrope"]["PROP_MS_1"]
+        arguments = (
+            self.nrtl_data,
+            self.NAMES,
+            tuple(tuple(row) for row in feeds),
+            tuple(feed_energy),
+            (pressure_pa,) * 20,
+            tuple(captured["Tf"]),
+            tuple(value / 1000.0 for value in captured["Lf"]),
+            tuple(value / 1000.0 for value in captured["Vf"]),
+            tuple(tuple(row) for row in captured["xf"]),
+            40.0,
+            0.0005,
+            (350.0, 450.0),
+        )
+        with self.assertRaises(NRTLRigorousColumnConvergenceError) as caught:
+            nrtl_rigorous_total_condenser_column(
+                *arguments,
+                residual_tolerance=1.0e-12,
+                maximum_solver_evaluations=1,
+            )
+        self.assertTrue(caught.exception.history)
+
+        invalid_vapor = list(arguments[7])
+        invalid_vapor[0] = 1.0e-3
+        invalid_arguments = list(arguments)
+        invalid_arguments[7] = tuple(invalid_vapor)
+        with self.assertRaises(ValidationError):
+            nrtl_rigorous_total_condenser_column(*invalid_arguments)
 
     def test_every_stage_energy_balance_closes_with_saved_solver_tolerance(self):
         captured = self.objects["Acetone Column (6 atm)"]["column_profile"]
