@@ -1,0 +1,28 @@
+﻿{
+    "schema_version":  "dwsim-steam-tables-data-1",
+    "model":  "Steam Tables",
+    "source":  {
+                   "product":  "DWSIM",
+                   "revision":  "9.0.5.0",
+                   "case_sha256":  "e578c3c9cbdce626bc63f1582f0cbd2c8229e457f92d869396a2ccc1cdb53aa0",
+                   "runtime_assembly_sha256":  "c5a038c86cdfd3304be5e283527ab377df7579ca306eac69950ab4b8c495c544",
+                   "property_package_source_sha256":  "2192d933910241337c9996499026f3fdd25452ebfb9035cd5c472c2165121025",
+                   "iapws_source_sha256":  "b5ed91b55175783df46df0670b4cb607df5cb80170ad74ef07d744d8efb9837f"
+               },
+    "temperature_range_k":  [
+                                273.15,
+                                647.096
+                            ],
+    "region4_coefficients":  [
+                                 1167.0521452767,
+                                 -724213.16703206,
+                                 -17.073846940092,
+                                 12020.82470247,
+                                 -3232555.0322333,
+                                 14.91510861353,
+                                 -4823.2657361591,
+                                 405113.40542057,
+                                 -0.23855557567849,
+                                 650.17534844798
+                             ]
+}

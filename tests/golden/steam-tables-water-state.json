@@ -1,0 +1,43 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "steam-tables-water-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "e578c3c9cbdce626bc63f1582f0cbd2c8229e457f92d869396a2ccc1cdb53aa0",
+                   "property_package":  "Steam Tables",
+                   "property_package_class":  "DWSIM.Thermodynamics.PropertyPackages.SteamTablesPropertyPackage",
+                   "property_package_construction":  "direct-class-over-case-compound-domain",
+                   "flash_algorithm":  "Steam Tables VLE"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "Water"
+                                 ],
+                   "temperature_k":  450,
+                   "pressure_pa":  1000000,
+                   "composition":  [
+                                       1
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         0.93023215482104848
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        1
+                                                    ],
+                    "liquid_fraction":  1,
+                    "vapor_fraction":  0,
+                    "liquid_composition":  [
+                                               1
+                                           ],
+                    "vapor_composition":  [
+                                              1
+                                          ],
+                    "iterations":  0,
+                    "equilibrium_ratios":  [
+                                               0
+                                           ]
+                }
+}

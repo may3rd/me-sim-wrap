@@ -10,7 +10,9 @@ param(
     [string]$PropertyPackageName,
 
     [Parameter(Mandatory = $true)]
-    [string]$CompoundNamesCsv
+    [string]$CompoundNamesCsv,
+
+    [string]$DirectPropertyPackageClass
 )
 
 $ErrorActionPreference = "Stop"
@@ -33,7 +35,8 @@ public static class DwsimThermoCaseBuilder
     }
 
     public static object Create(
-        object automation, string[] compoundNames, string propertyPackageName)
+        object automation, string[] compoundNames, string propertyPackageName,
+        string directPropertyPackageClass)
     {
         object flowsheet = Invoke(automation, "CreateFlowsheet", new object[0], 0);
         foreach (string compoundName in compoundNames)
@@ -48,11 +51,21 @@ public static class DwsimThermoCaseBuilder
             "AddObject",
             new object[] { materialStreamType, 50, 50, "thermo probe" },
             4);
-        Invoke(
-            flowsheet,
-            "CreateAndAddPropertyPackage",
-            new object[] { propertyPackageName },
-            1);
+        if (String.IsNullOrWhiteSpace(directPropertyPackageClass))
+            Invoke(flowsheet,"CreateAndAddPropertyPackage",new object[] { propertyPackageName },1);
+        else
+        {
+            Type packageType=AppDomain.CurrentDomain.GetAssemblies()
+                .Select(assembly=>assembly.GetType(directPropertyPackageClass,false,false))
+                .FirstOrDefault(candidate=>candidate!=null);
+            if(packageType==null)throw new InvalidOperationException(
+                "Property-package class is not loaded: "+directPropertyPackageClass);
+            object package=Activator.CreateInstance(packageType);
+            packageType.GetProperties(PublicInstance)
+                .First(property=>property.Name=="ComponentName"&&property.CanWrite&&property.GetIndexParameters().Length==0)
+                .SetValue(package,propertyPackageName,null);
+            Invoke(flowsheet,"AddPropertyPackage",new object[] { package },1);
+        }
         return flowsheet;
     }
 }
@@ -70,7 +83,8 @@ if (-not (Test-Path -LiteralPath $outputDirectory -PathType Container)) {
 
 $interfacesPath = Join-Path $engineDirectory "DWSIM.Interfaces.dll"
 $automationPath = Join-Path $engineDirectory "DWSIM.Automation.dll"
-foreach ($assemblyPath in @($interfacesPath, $automationPath)) {
+$thermodynamicsPath = Join-Path $engineDirectory "DWSIM.Thermodynamics.dll"
+foreach ($assemblyPath in @($interfacesPath, $automationPath, $thermodynamicsPath)) {
     if (-not (Test-Path -LiteralPath $assemblyPath -PathType Leaf)) {
         throw "Missing DWSIM assembly: $assemblyPath"
     }
@@ -86,6 +100,7 @@ $thermoCAssemblyPath = Get-ChildItem `
 if ($null -ne $thermoCAssemblyPath) {
     [Reflection.Assembly]::LoadFrom($thermoCAssemblyPath.FullName) | Out-Null
 }
+[Reflection.Assembly]::LoadFrom($thermodynamicsPath) | Out-Null
 [Reflection.Assembly]::LoadFrom($automationPath) | Out-Null
 
 $compoundNames = @(
@@ -97,7 +112,7 @@ if ($compoundNames.Count -eq 0 -or $compoundNames -contains "") {
 
 $automation = New-Object DWSIM.Automation.Automation3
 $flowsheet = [DwsimThermoCaseBuilder]::Create(
-    $automation, $compoundNames, $PropertyPackageName
+    $automation, $compoundNames, $PropertyPackageName, $DirectPropertyPackageClass
 )
 $automation.SaveFlowsheet2($flowsheet, $outputFile)
 

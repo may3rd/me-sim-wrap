@@ -236,6 +236,11 @@ public static class DwsimThermoProbe
             .Select(item => Convert.ToDouble(item, CultureInfo.InvariantCulture))
             .ToArray();
     }
+
+    public static double[] FlashEquilibriumRatios(object[] flash)
+    {
+        return DoubleArray(flash.Length > 9 ? flash[9] : flash[8]);
+    }
 }
 "@
 
@@ -330,6 +335,7 @@ $vaporFugacity = @([DwsimThermoProbe]::FugacityCoefficients(
 $flash = [DwsimThermoProbe]::FlashPT(
     $propertyPackage, $Composition, $TemperatureK, $PressurePa
 )
+if ($flash.Count -lt 9) { throw "Flash_PT returned fewer than nine fields" }
 $activityCoefficients = [DwsimThermoProbe]::ActivityCoefficients(
     $propertyPackage, $Composition, $TemperatureK
 )
@@ -342,7 +348,7 @@ $outputs = [ordered]@{
     liquid_composition = @([DwsimThermoProbe]::DoubleArray($flash[2]))
     vapor_composition = @([DwsimThermoProbe]::DoubleArray($flash[3]))
     iterations = [int]$flash[4]
-    equilibrium_ratios = @([DwsimThermoProbe]::DoubleArray($flash[9]))
+    equilibrium_ratios = @([DwsimThermoProbe]::FlashEquilibriumRatios($flash))
 }
 if ($null -ne $activityCoefficients) {
     $outputs.activity_coefficients = @($activityCoefficients)
