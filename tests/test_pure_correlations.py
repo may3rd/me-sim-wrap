@@ -45,7 +45,7 @@ class PureComponentCorrelationTest(unittest.TestCase):
 
     def test_all_catalog_compounds_have_all_extracted_property_families(self):
         expected = set(self.compounds)
-        self.assertEqual(len(expected), 391)
+        self.assertEqual(len(expected), 408)
         self.assertEqual(set(self.ideal), expected)
         self.assertEqual(set(self.transport), expected)
         self.assertEqual(set(self.saturated), expected)
@@ -85,12 +85,17 @@ class PureComponentCorrelationTest(unittest.TestCase):
                 )
 
     def test_extracted_properties_match_dwsim_catalog_evaluation(self):
-        captured = json.loads(
-            (ROOT / "tests/golden/compound-catalog-full.json").read_text(
-                encoding="utf-8-sig"
+        captured = []
+        for name in (
+            "compound-catalog-full.json",
+            "compound-catalog-extended-equations.json",
+        ):
+            captured.extend(
+                json.loads(
+                    (ROOT / "tests/golden" / name).read_text(encoding="utf-8-sig")
+                )["inputs"]["compounds"]
             )
-        )["inputs"]["compounds"]
-        self.assertEqual(len(captured), 14)
+        self.assertEqual(len(captured), 31)
         for record in captured:
             compound_id = record["id"]
             molecular_weight = self.compounds[compound_id].molecular_weight.value

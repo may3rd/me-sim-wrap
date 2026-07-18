@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from ..errors import OutOfRangeError, ValidationError
+from .correlations import evaluate_temperature_equation
 from .ideal import Provenance, Result
 
 
@@ -40,27 +41,12 @@ class TemperatureCorrelation:
             if not allow_extrapolation:
                 raise OutOfRangeError(message)
             warnings = (message,)
-        a, b, c, d, e = self.coefficients
-        reduced = temperature_k / critical_temperature_k
-        if self.equation == 105 and (b <= 0 or c <= 0 or temperature_k >= c):
-            raise ValidationError("equation 105 state is outside its real-valued domain")
-        if self.equation == 106 and reduced >= 1.0:
-            raise ValidationError("equation 106 state is at or above the critical temperature")
-        try:
-            if self.equation == 16:
-                value = a + math.exp(
-                    b / temperature_k + c + d * temperature_k + e * temperature_k**2
-                )
-            elif self.equation == 105:
-                value = a / b ** (1.0 + (1.0 - temperature_k / c) ** d)
-            elif self.equation == 106:
-                value = a * (1.0 - reduced) ** (
-                    b + c * reduced + d * reduced**2 + e * reduced**3
-                )
-            else:
-                raise ValidationError(f"unsupported saturated-property equation {self.equation}")
-        except (OverflowError, ValueError, ZeroDivisionError) as error:
-            raise ValidationError("pure-component correlation is outside the representable range") from error
+        value = evaluate_temperature_equation(
+            self.equation,
+            self.coefficients,
+            temperature_k,
+            critical_temperature_k,
+        )
         if not math.isfinite(value) or value <= 0:
             raise ValidationError("pure-component correlation must be positive and finite")
         return Result(value, self.unit, warnings)
@@ -130,7 +116,7 @@ def _correlation(data: dict, equations: tuple[int, ...], unit: str) -> Temperatu
             or not math.isfinite(value)
             for value in values
         )
-        or minimum <= 0
+        or minimum < 0
         or maximum <= minimum
     ):
         raise ValidationError(f"invalid saturated-property correlation in {unit}")
@@ -166,13 +152,13 @@ def load_saturated_liquid_correlations(
                     record["liquid_density"], (105, 106), "kmol/m3"
                 ),
                 liquid_heat_capacity_correlation=_correlation(
-                    record["liquid_heat_capacity"], (16,), "J/kmol/K"
+                    record["liquid_heat_capacity"], (3, 4, 16, 100), "J/kmol/K"
                 ),
                 heat_of_vaporization_correlation=_correlation(
                     record["heat_of_vaporization"], (106,), "J/kmol"
                 ),
                 surface_tension_correlation=_correlation(
-                    record["surface_tension"], (16,), "N/m"
+                    record["surface_tension"], (2, 16, 106, 116), "N/m"
                 ),
                 provenance=provenance,
             )

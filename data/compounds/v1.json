@@ -3074,6 +3074,38 @@
       }
     },
     {
+      "id": "Diethylene glycol",
+      "name": "Diethylene glycol",
+      "cas": "111-46-6",
+      "formula": "HOCH2CH2OCH2CH2OH",
+      "molecular_weight": {
+        "value": 106.1204,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 744.6,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 4600000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.622105,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 517.95,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
       "id": "Diethylamine",
       "name": "Diethylamine",
       "cas": "109-89-7",
@@ -6018,6 +6050,38 @@
       }
     },
     {
+      "id": "Helium-4",
+      "name": "Helium-4",
+      "cas": "7440-59-7",
+      "formula": "He",
+      "molecular_weight": {
+        "value": 4.002602,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 5.19,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 227000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": -0.39,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 4.3,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
       "id": "Fluorine",
       "name": "Fluorine",
       "cas": "7782-41-4",
@@ -7032,6 +7096,38 @@
       },
       "normal_boiling_point": {
         "value": 379.99,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "2,3-dimethylhexane",
+      "name": "2,3-dimethylhexane",
+      "cas": "584-94-1",
+      "formula": "CH3CH(CH3)CH(CH3)CH2CH2CH3",
+      "molecular_weight": {
+        "value": 114.2285,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 563.4,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 2630000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.347,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 388.76,
         "unit": "K"
       },
       "provenance": {
@@ -8856,6 +8952,38 @@
       },
       "normal_boiling_point": {
         "value": 445.9,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "Sec-butylbenzene",
+      "name": "Sec-butylbenzene",
+      "cas": "135-98-8",
+      "formula": "(C6H5)CH(CH3)CH2CH3",
+      "molecular_weight": {
+        "value": 134.2182,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 664.54,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 2930000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.279149,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 446.48,
         "unit": "K"
       },
       "provenance": {
@@ -11234,6 +11362,102 @@
       }
     },
     {
+      "id": "Ethyl methyl disulfide",
+      "name": "Ethyl methyl disulfide",
+      "cas": "20333-39-5",
+      "formula": "CH3CH2SSCH3",
+      "molecular_weight": {
+        "value": 108.2256,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 628.9,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 4615000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.301,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 407.15,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "Ethyl propyl disulfide",
+      "name": "Ethyl propyl disulfide",
+      "cas": "30453-31-7",
+      "formula": "CH3(CH2)2SSCH2CH3",
+      "molecular_weight": {
+        "value": 136.2788,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 660,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 3612000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.391,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 446.85,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "Diphenyl disulfide",
+      "name": "Diphenyl disulfide",
+      "cas": "882-33-7",
+      "formula": "(C6H5)SS(C6H5)",
+      "molecular_weight": {
+        "value": 218.3378,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 829.8,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 3569000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.569717,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 583.15,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
       "id": "Triethanolamine",
       "name": "Triethanolamine",
       "cas": "102-71-6",
@@ -11448,6 +11672,70 @@
       },
       "normal_boiling_point": {
         "value": 540,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "Piperazine",
+      "name": "Piperazine",
+      "cas": "110-85-0",
+      "formula": "-NHCH2CH2NHCH2CH2-",
+      "molecular_weight": {
+        "value": 86.1356,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 656.3,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 5420000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.269668,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 419.15,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "Methylethanolamine",
+      "name": "Methylethanolamine",
+      "cas": "109-83-1",
+      "formula": "CH3NHCH2CH2OH",
+      "molecular_weight": {
+        "value": 75.10966,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 630,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 5300000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.604,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 432.388,
         "unit": "K"
       },
       "provenance": {
@@ -12450,6 +12738,102 @@
       }
     },
     {
+      "id": "Dimethyl carbonate",
+      "name": "Dimethyl carbonate",
+      "cas": "616-38-6",
+      "formula": "(CH3O)2CO",
+      "molecular_weight": {
+        "value": 90.07794,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 557,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 4800000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.337,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 363.24,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "Ethylene carbonate",
+      "name": "Ethylene carbonate",
+      "cas": "96-49-1",
+      "formula": "-CH2OCOOCH2-",
+      "molecular_weight": {
+        "value": 88.06207,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 806,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 6770000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.442272,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 521.15,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "Propylene carbonate",
+      "name": "Propylene carbonate",
+      "cas": "108-32-7",
+      "formula": "-OCH(CH3)CH2OCO-",
+      "molecular_weight": {
+        "value": 102.0886,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 778,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 5410000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.449764,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 514.9,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
       "id": "2-methyl-1-heptene",
       "name": "2-methyl-1-heptene",
       "cas": "15870-10-7",
@@ -12504,6 +12888,166 @@
       },
       "normal_boiling_point": {
         "value": 315,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "Methyl DiEthanolAmine",
+      "name": "Methyl DiEthanolAmine",
+      "cas": "105-59-9",
+      "formula": "CH3N(CH2CH2OH)2",
+      "molecular_weight": {
+        "value": 119.1622,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 741.9,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 4160000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 1.1649,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 520.15,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "Diisopropanolamine",
+      "name": "Diisopropanolamine",
+      "cas": "110-97-4",
+      "formula": "CH3CH(OH)CH2NHCH2CH(OH)CH3",
+      "molecular_weight": {
+        "value": 133.1888,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 672,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 3600000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 1.38914,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 521.9,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "Cyclobutane",
+      "name": "Cyclobutane",
+      "cas": "287-23-0",
+      "formula": "-(CH2)4-",
+      "molecular_weight": {
+        "value": 56.10632,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 459.93,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 4980000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.18474,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 285.66,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "Isopropyl mercaptan",
+      "name": "Isopropyl mercaptan",
+      "cas": "75-33-2",
+      "formula": "(CH3)2CHSH",
+      "molecular_weight": {
+        "value": 76.16061,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 517.3,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 4750000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.21381,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 325.75,
+        "unit": "K"
+      },
+      "provenance": {
+        "database": "ChemSep",
+        "source": "dwsim-windows/DWSIM.Thermodynamics/Assets/Databases/chemsep1.xml",
+        "source_revision": "9.0.4",
+        "imported_utc": "2026-07-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "N-eicosane",
+      "name": "N-eicosane",
+      "cas": "112-95-8",
+      "formula": "CH3(CH2)18CH3",
+      "molecular_weight": {
+        "value": 282.5475,
+        "unit": "kg/kmol"
+      },
+      "critical_temperature": {
+        "value": 767,
+        "unit": "K"
+      },
+      "critical_pressure": {
+        "value": 1160000,
+        "unit": "Pa"
+      },
+      "acentric_factor": {
+        "value": 0.9065,
+        "unit": "dimensionless"
+      },
+      "normal_boiling_point": {
+        "value": 616.95,
         "unit": "K"
       },
       "provenance": {

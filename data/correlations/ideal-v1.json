@@ -2407,6 +2407,31 @@
       }
     },
     {
+      "compound_id": "Diethylene glycol",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 82107,
+        "B": -687.16,
+        "C": 13.353,
+        "D": -0.00070647,
+        "E": 2.4155e-07,
+        "minimum_k": 200,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 46.26595,
+        "B": -10205.15,
+        "C": -2.102723,
+        "D": -7.036466e-06,
+        "E": 2,
+        "minimum_k": 262.7,
+        "maximum_k": 744.6,
+        "unit": "Pa"
+      }
+    },
+    {
       "compound_id": "Diethylamine",
       "heat_capacity": {
         "equation": 16,
@@ -4707,6 +4732,31 @@
       }
     },
     {
+      "compound_id": "Helium-4",
+      "heat_capacity": {
+        "equation": 1,
+        "A": 20786,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "minimum_k": 1,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 8.8804,
+        "B": -4.8932,
+        "C": 2.5648,
+        "D": 0.0062779,
+        "E": 2,
+        "minimum_k": 1.4,
+        "maximum_k": 11.26,
+        "unit": "Pa"
+      }
+    },
+    {
       "compound_id": "Fluorine",
       "heat_capacity": {
         "equation": 16,
@@ -5503,6 +5553,31 @@
         "E": 2,
         "minimum_k": 151.97,
         "maximum_k": 549.8,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "2,3-dimethylhexane",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 55247,
+        "B": -379.2,
+        "C": 12.913,
+        "D": 0.00048944,
+        "E": -1.5722e-07,
+        "minimum_k": 200,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 106.31,
+        "B": -8083.9,
+        "C": -12.636,
+        "D": 8.991e-06,
+        "E": 2,
+        "minimum_k": 272.04,
+        "maximum_k": 563.5,
         "unit": "Pa"
       }
     },
@@ -6928,6 +7003,31 @@
         "E": 2,
         "minimum_k": 221.7,
         "maximum_k": 650,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "Sec-butylbenzene",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 118430,
+        "B": -784.79,
+        "C": 13.745,
+        "D": -0.00050199,
+        "E": 1.4393e-07,
+        "minimum_k": 200,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 222.2329,
+        "B": -13854.88,
+        "C": -30.30702,
+        "D": 2.62583e-05,
+        "E": 2,
+        "minimum_k": 197.72,
+        "maximum_k": 664.54,
         "unit": "Pa"
       }
     },
@@ -8782,6 +8882,81 @@
       }
     },
     {
+      "compound_id": "Ethyl methyl disulfide",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 84149,
+        "B": -628.71,
+        "C": 12.564,
+        "D": -0.0001652,
+        "E": 8.9754e-08,
+        "minimum_k": 273,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 96.027,
+        "B": -8038.4,
+        "C": -10.972,
+        "D": 7.0895e-06,
+        "E": 2,
+        "minimum_k": 183.22,
+        "maximum_k": 628.9,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "Ethyl propyl disulfide",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 105720,
+        "B": -573.79,
+        "C": 12.857,
+        "D": 5.8344e-05,
+        "E": 8.0803e-09,
+        "minimum_k": 273,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 110.6,
+        "B": -9574.8,
+        "C": -12.96,
+        "D": 7.2115e-06,
+        "E": 2,
+        "minimum_k": 165,
+        "maximum_k": 660,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "Diphenyl disulfide",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 50433,
+        "B": -472.23,
+        "C": 13.469,
+        "D": -0.00011605,
+        "E": 2.3877e-08,
+        "minimum_k": 273,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 927.5541,
+        "B": -59320.23,
+        "C": -131.1073,
+        "D": 6.0625e-05,
+        "E": 2,
+        "minimum_k": 333.5,
+        "maximum_k": 829.8,
+        "unit": "Pa"
+      }
+    },
+    {
       "compound_id": "Triethanolamine",
       "heat_capacity": {
         "equation": 16,
@@ -8953,6 +9128,56 @@
         "E": 2,
         "minimum_k": 298.15,
         "maximum_k": 796,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "Piperazine",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 68463,
+        "B": -744.16,
+        "C": 13.556,
+        "D": -0.00073698,
+        "E": 1.7652e-07,
+        "minimum_k": 273,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 143.27,
+        "B": -11245,
+        "C": -17.657,
+        "D": 9.6236e-06,
+        "E": 2,
+        "minimum_k": 379.15,
+        "maximum_k": 638,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "Methylethanolamine",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 50351,
+        "B": -464.92,
+        "C": 12.353,
+        "D": 0.00032078,
+        "E": -1.1521e-07,
+        "minimum_k": 273,
+        "maximum_k": 1200,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 101.1268,
+        "B": -9896.461,
+        "C": -11.12231,
+        "D": 4.333878e-06,
+        "E": 2,
+        "minimum_k": 268.65,
+        "maximum_k": 630,
         "unit": "Pa"
       }
     },
@@ -9732,6 +9957,81 @@
       }
     },
     {
+      "compound_id": "Dimethyl carbonate",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 62577,
+        "B": -594.2,
+        "C": 12.53,
+        "D": -2.2352e-05,
+        "E": -2.2803e-08,
+        "minimum_k": 273,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 127.2975,
+        "B": -8353.984,
+        "C": -16.14514,
+        "D": 1.81933e-05,
+        "E": 2,
+        "minimum_k": 273.15,
+        "maximum_k": 548,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "Ethylene carbonate",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 50075,
+        "B": -516.61,
+        "C": 12.288,
+        "D": 1.3893e-05,
+        "E": -2.689e-08,
+        "minimum_k": 273,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 132.44,
+        "B": -12293,
+        "C": -15.875,
+        "D": 7.3572e-06,
+        "E": 2,
+        "minimum_k": 309.55,
+        "maximum_k": 806,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "Propylene carbonate",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 51696,
+        "B": -502.59,
+        "C": 12.655,
+        "D": -7.6494e-05,
+        "E": 1.3781e-08,
+        "minimum_k": 273,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 102.32,
+        "B": -10530,
+        "C": -11.489,
+        "D": 5.2921e-06,
+        "E": 2,
+        "minimum_k": 224.85,
+        "maximum_k": 778,
+        "unit": "Pa"
+      }
+    },
+    {
       "compound_id": "2-methyl-1-heptene",
       "heat_capacity": {
         "equation": 16,
@@ -9778,6 +10078,131 @@
         "E": 2,
         "minimum_k": 168.35,
         "maximum_k": 480.6,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "Methyl DiEthanolAmine",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 89777,
+        "B": -550.24,
+        "C": 13.01,
+        "D": 4.5139e-05,
+        "E": -3.2024e-08,
+        "minimum_k": 273,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": -0.352098,
+        "B": -4812.65,
+        "C": 3.121045,
+        "D": 6.605463e-06,
+        "E": 2,
+        "minimum_k": 252.15,
+        "maximum_k": 678,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "Diisopropanolamine",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 104010,
+        "B": -559.93,
+        "C": 13.272,
+        "D": -0.00018865,
+        "E": 9.0295e-08,
+        "minimum_k": 273,
+        "maximum_k": 1200,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 339.329,
+        "B": -25910.98,
+        "C": -45.42461,
+        "D": 2.23088e-05,
+        "E": 2,
+        "minimum_k": 318.15,
+        "maximum_k": 672,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "Cyclobutane",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 37380.05,
+        "B": -673.6637,
+        "C": 12.72112,
+        "D": -6.3263e-05,
+        "E": 1.539025e-09,
+        "minimum_k": 200,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 60.70694,
+        "B": -4389.85,
+        "C": -6.086364,
+        "D": 7.387074e-06,
+        "E": 2,
+        "minimum_k": 182.48,
+        "maximum_k": 459.93,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "Isopropyl mercaptan",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 68588.92,
+        "B": -673.2911,
+        "C": 12.50044,
+        "D": 1.486465e-06,
+        "E": -1.964897e-08,
+        "minimum_k": 200,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 52.49398,
+        "B": -5018.813,
+        "C": -4.414151,
+        "D": 1.969036e-13,
+        "E": 2,
+        "minimum_k": 142.61,
+        "maximum_k": 517.0001,
+        "unit": "Pa"
+      }
+    },
+    {
+      "compound_id": "N-eicosane",
+      "heat_capacity": {
+        "equation": 16,
+        "A": 275645.1,
+        "B": -603.1483,
+        "C": 14.16387,
+        "D": 0,
+        "E": 0,
+        "minimum_k": 200,
+        "maximum_k": 1500,
+        "unit": "J/kmol/K"
+      },
+      "vapor_pressure": {
+        "equation": 101,
+        "A": 164.6909,
+        "B": -17503.89,
+        "C": -19.74205,
+        "D": 5.399206e-06,
+        "E": 2,
+        "minimum_k": 309.58,
+        "maximum_k": 768,
         "unit": "Pa"
       }
     }

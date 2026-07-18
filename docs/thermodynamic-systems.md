@@ -13,13 +13,13 @@ The registry is a fixed dictionary from stable model ID to constructor. Runtime 
 registration and silent fallback are unsupported. An unknown ID, incomplete correlation
 set, missing binary interaction, or compound-order mismatch fails before calculation.
 
-The frozen compound catalog and all three pure-property datasets cover the same 391
+The frozen compound catalog and all three pure-property datasets cover the same 408
 case-distinct DWSIM/ChemSep names. These are the records among the 431-source catalog
 whose ten required property families use equation types implemented by this runtime;
-the other 40 remain explicitly excluded. The PR system exposes supported records through `ideal`,
+the other 23 remain explicitly excluded. The PR system exposes supported records through `ideal`,
 `saturated_liquid`, and `transport`. This is property coverage, not a claim that all
-possible binary combinations are supported: `pr-v1.json` contains 196 explicit pairs
-(180 first-source records plus 16 accepted explicit-zero closures),
+possible binary combinations are supported: `pr-v1.json` contains 197 explicit pairs
+(181 first-source records plus 16 accepted explicit-zero closures),
 and the constructor rejects an unrecorded pair instead of assuming a zero interaction.
 
 The systems deliberately do not implement one artificial common flash interface. PR and

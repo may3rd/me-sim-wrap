@@ -4903,6 +4903,57 @@
       }
     },
     {
+      "compound_id": "Diethylene glycol",
+      "critical_temperature": {
+        "value": 744.6,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.81894,
+        "B": 0.25823,
+        "C": 744.6,
+        "D": 0.23979,
+        "E": 0,
+        "minimum_k": 262.7,
+        "maximum_k": 719.24,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 188290,
+        "B": 227.63,
+        "C": 5.7157,
+        "D": 0.020545,
+        "E": -1.8798e-05,
+        "minimum_k": 262.7,
+        "maximum_k": 513.15,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 108530000,
+        "B": -0.00876655,
+        "C": 1.770951,
+        "D": -1.359893,
+        "E": -0.0210292,
+        "minimum_k": 262.7,
+        "maximum_k": 744.6,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 116,
+        "A": 0,
+        "B": -0.0648458,
+        "C": 0.111405,
+        "D": 0.156705,
+        "E": -0.141678,
+        "minimum_k": 200,
+        "maximum_k": 744.6,
+        "unit": "N/m"
+      }
+    },
+    {
       "compound_id": "Diethylamine",
       "critical_temperature": {
         "value": 496.6,
@@ -9595,6 +9646,57 @@
       }
     },
     {
+      "compound_id": "Helium-4",
+      "critical_temperature": {
+        "value": 5.19,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.31844,
+        "B": 0.089499,
+        "C": 5.21,
+        "D": 0.063807,
+        "E": 0,
+        "minimum_k": 1.2,
+        "maximum_k": 5.2,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": -72432,
+        "B": 14.864,
+        "C": 0.90909,
+        "D": 1.9106,
+        "E": -0.057997,
+        "minimum_k": 3.7,
+        "maximum_k": 11.7,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 191120,
+        "B": 4.6881,
+        "C": -12.652,
+        "D": 12.947,
+        "E": -4.5859,
+        "minimum_k": 2.2,
+        "maximum_k": 5.18,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": 0.00015359,
+        "B": -20.248,
+        "C": 20.138,
+        "D": -11.865,
+        "E": 1.2499,
+        "minimum_k": 1.25,
+        "maximum_k": 4.7,
+        "unit": "N/m"
+      }
+    },
+    {
       "compound_id": "Fluorine",
       "critical_temperature": {
         "value": 144.3,
@@ -11223,6 +11325,57 @@
         "E": -4.5811e-06,
         "minimum_k": 151.97,
         "maximum_k": 549.8,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "2,3-dimethylhexane",
+      "critical_temperature": {
+        "value": 563.4,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.48655,
+        "B": 0.24924,
+        "C": 563.43,
+        "D": 0.24533,
+        "E": 0,
+        "minimum_k": 272.04,
+        "maximum_k": 563.42,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": -256410,
+        "B": 53.354,
+        "C": 11.988,
+        "D": 0.00458,
+        "E": -4.5457e-06,
+        "minimum_k": 138.5,
+        "maximum_k": 388.76,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 55877000,
+        "B": 0.44475,
+        "C": 0.4503,
+        "D": -0.98905,
+        "E": 0.49662,
+        "minimum_k": 272.04,
+        "maximum_k": 548.16,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 106,
+        "A": 0.05024,
+        "B": 1.1882,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "minimum_k": 0,
+        "maximum_k": 563.5,
         "unit": "N/m"
       }
     },
@@ -14130,6 +14283,57 @@
         "E": -4.3503e-06,
         "minimum_k": 221.7,
         "maximum_k": 627.46,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Sec-butylbenzene",
+      "critical_temperature": {
+        "value": 664.54,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.51273,
+        "B": 0.25494,
+        "C": 664.54,
+        "D": 0.28096,
+        "E": 0,
+        "minimum_k": 197.72,
+        "maximum_k": 664.54,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 163140,
+        "B": -1794.7,
+        "C": 23.385,
+        "D": -0.029199,
+        "E": 2.8e-05,
+        "minimum_k": 197.72,
+        "maximum_k": 498.4,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 31793000,
+        "B": -4.1563,
+        "C": 12.591,
+        "D": -13.449,
+        "E": 5.2588,
+        "minimum_k": 197.72,
+        "maximum_k": 664.54,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.0072678,
+        "B": 56.315,
+        "C": -3.3559,
+        "D": 0.00098625,
+        "E": -5.2989e-06,
+        "minimum_k": 197.72,
+        "maximum_k": 664.54,
         "unit": "N/m"
       }
     },
@@ -17908,6 +18112,159 @@
       }
     },
     {
+      "compound_id": "Ethyl methyl disulfide",
+      "critical_temperature": {
+        "value": 628.9,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.88258,
+        "B": 0.27523,
+        "C": 628.9,
+        "D": 0.28571,
+        "E": 0,
+        "minimum_k": 183.22,
+        "maximum_k": 605.44,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 100,
+        "A": 187520,
+        "B": -208.62,
+        "C": 0.55295,
+        "D": 0,
+        "E": 0,
+        "minimum_k": 183.22,
+        "maximum_k": 628.22,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 48216000,
+        "B": 0.48633,
+        "C": -0.6279,
+        "D": 0.476,
+        "E": 0,
+        "minimum_k": 183.22,
+        "maximum_k": 628.9,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.019623,
+        "B": 24.049,
+        "C": -2.6806,
+        "D": -0.0004209,
+        "E": -2.6778e-06,
+        "minimum_k": 183.22,
+        "maximum_k": 605.44,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Ethyl propyl disulfide",
+      "critical_temperature": {
+        "value": 660,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.65822,
+        "B": 0.27459,
+        "C": 660,
+        "D": 0.28571,
+        "E": 0,
+        "minimum_k": 165,
+        "maximum_k": 660,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 100,
+        "A": 223630,
+        "B": -139.83,
+        "C": 0.57232,
+        "D": 0,
+        "E": 0,
+        "minimum_k": 165,
+        "maximum_k": 446.85,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 59782000,
+        "B": 0.63427,
+        "C": -0.74757,
+        "D": 0.47275,
+        "E": 0,
+        "minimum_k": 165,
+        "maximum_k": 660,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.016218,
+        "B": 22.019,
+        "C": -2.7492,
+        "D": -0.00041928,
+        "E": -2.6424e-06,
+        "minimum_k": 165,
+        "maximum_k": 660,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Diphenyl disulfide",
+      "critical_temperature": {
+        "value": 829.8,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.5173,
+        "B": 0.302,
+        "C": 829.8,
+        "D": 0.28571,
+        "E": 0,
+        "minimum_k": 333.5,
+        "maximum_k": 829.8,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 100,
+        "A": 267470,
+        "B": 28.884,
+        "C": 0.54728,
+        "D": 0,
+        "E": 0,
+        "minimum_k": 333.5,
+        "maximum_k": 583.15,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 118050000,
+        "B": 0.46278,
+        "C": 0.25764,
+        "D": -0.22402,
+        "E": -0.0012437,
+        "minimum_k": 333.5,
+        "maximum_k": 829.8,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 106,
+        "A": 0.086,
+        "B": 1.222,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "minimum_k": 333.5,
+        "maximum_k": 829.8,
+        "unit": "N/m"
+      }
+    },
+    {
       "compound_id": "Triethanolamine",
       "critical_temperature": {
         "value": 787,
@@ -18261,6 +18618,108 @@
         "E": -7.2097e-06,
         "minimum_k": 413,
         "maximum_k": 775.84,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Piperazine",
+      "critical_temperature": {
+        "value": 656.3,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.4074,
+        "B": 0.323,
+        "C": 638,
+        "D": 0.28571,
+        "E": 0,
+        "minimum_k": 379.15,
+        "maximum_k": 638,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 4,
+        "A": 32886.27,
+        "B": 346.6189,
+        "C": 0.473406,
+        "D": -0.000434168,
+        "E": 0,
+        "minimum_k": 300,
+        "maximum_k": 638,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 66945000,
+        "B": 0.99602,
+        "C": -2.0069,
+        "D": 2.4018,
+        "E": -0.97129,
+        "minimum_k": 379.15,
+        "maximum_k": 638,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 106,
+        "A": 0.0533278,
+        "B": 1.232,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "minimum_k": 273,
+        "maximum_k": 656.3,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Methylethanolamine",
+      "critical_temperature": {
+        "value": 630,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.982868,
+        "B": 0.255663,
+        "C": 630,
+        "D": 0.231239,
+        "E": 0,
+        "minimum_k": 268.65,
+        "maximum_k": 610.98,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 4,
+        "A": 65879.9,
+        "B": 415.0007,
+        "C": 4.583e-05,
+        "D": 2.109e-09,
+        "E": -3.0816e-06,
+        "minimum_k": 250,
+        "maximum_k": 465,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 83715000,
+        "B": 1.1304,
+        "C": -1.7736,
+        "D": 1.7333,
+        "E": -0.66961,
+        "minimum_k": 268.65,
+        "maximum_k": 610.98,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.011359,
+        "B": 194.04,
+        "C": -4.2168,
+        "D": 0.0039447,
+        "E": -7.7857e-06,
+        "minimum_k": 268.65,
+        "maximum_k": 610.98,
         "unit": "N/m"
       }
     },
@@ -19846,6 +20305,159 @@
       }
     },
     {
+      "compound_id": "Dimethyl carbonate",
+      "critical_temperature": {
+        "value": 557,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.0073625,
+        "B": 0.022214,
+        "C": 557,
+        "D": 0.083013,
+        "E": 0,
+        "minimum_k": 273.15,
+        "maximum_k": 548,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 170430,
+        "B": -2560.3,
+        "C": -9.9628,
+        "D": -0.012169,
+        "E": 1.4736e-05,
+        "minimum_k": 292.95,
+        "maximum_k": 361.15,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 52917640,
+        "B": 1.146922,
+        "C": -2.489366,
+        "D": 2.898325,
+        "E": -1.182726,
+        "minimum_k": 273.15,
+        "maximum_k": 548,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 116,
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0.0365301,
+        "E": 0.0365301,
+        "minimum_k": 276.15,
+        "maximum_k": 557,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Ethylene carbonate",
+      "critical_temperature": {
+        "value": 806,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.5442,
+        "B": 0.2959,
+        "C": 806,
+        "D": 0.28857,
+        "E": 0,
+        "minimum_k": 293.15,
+        "maximum_k": 779.87,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": -57259,
+        "B": -17.021,
+        "C": 11.366,
+        "D": 0.0033817,
+        "E": -2.0646e-06,
+        "minimum_k": 298.15,
+        "maximum_k": 511.15,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 87297000,
+        "B": -0.075043,
+        "C": 3.7018,
+        "D": -6.1954,
+        "E": 2.9631,
+        "minimum_k": 309.55,
+        "maximum_k": 779.87,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 116,
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0.0366997,
+        "E": 0.0366997,
+        "minimum_k": 309.15,
+        "maximum_k": 806,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Propylene carbonate",
+      "critical_temperature": {
+        "value": 778,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.122,
+        "B": 0.27599,
+        "C": 778,
+        "D": 0.40344,
+        "E": 0,
+        "minimum_k": 224.85,
+        "maximum_k": 778,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": 121750,
+        "B": 105.89,
+        "C": 6.5083,
+        "D": 0.016964,
+        "E": -1.4577e-05,
+        "minimum_k": 298.15,
+        "maximum_k": 425,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 314589800,
+        "B": 9.998207,
+        "C": -26.2884,
+        "D": 28.38292,
+        "E": -11.49051,
+        "minimum_k": 224.85,
+        "maximum_k": 778,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 116,
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0.0358859,
+        "E": 0.0358859,
+        "minimum_k": 218.62,
+        "maximum_k": 778,
+        "unit": "N/m"
+      }
+    },
+    {
       "compound_id": "2-methyl-1-heptene",
       "critical_temperature": {
         "value": 564,
@@ -19944,6 +20556,261 @@
         "E": -1.2647e-06,
         "minimum_k": 168.35,
         "maximum_k": 480.6,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Methyl DiEthanolAmine",
+      "critical_temperature": {
+        "value": 741.9,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.69135,
+        "B": 0.25418,
+        "C": 675,
+        "D": 0.2857,
+        "E": 0,
+        "minimum_k": 252.15,
+        "maximum_k": 675,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 4,
+        "A": 181326,
+        "B": 26.21689,
+        "C": 0.880838,
+        "D": 0,
+        "E": -1.581e-05,
+        "minimum_k": 290,
+        "maximum_k": 506.25,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 140201000,
+        "B": 0.632751,
+        "C": 0.350924,
+        "D": -0.633597,
+        "E": 0.0584955,
+        "minimum_k": 252.15,
+        "maximum_k": 675,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.0388377,
+        "B": -28.75677,
+        "C": -2.216016,
+        "D": -0.00048763,
+        "E": -1.144892e-06,
+        "minimum_k": 252.15,
+        "maximum_k": 742,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Diisopropanolamine",
+      "critical_temperature": {
+        "value": 672,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.54022,
+        "B": 0.24621,
+        "C": 672,
+        "D": 0.22052,
+        "E": 0,
+        "minimum_k": 293.15,
+        "maximum_k": 672,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 4,
+        "A": 119382.9,
+        "B": 778.3072,
+        "C": -0.00245385,
+        "D": -1.190941e-06,
+        "E": -1.3464e-06,
+        "minimum_k": 300,
+        "maximum_k": 400,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 141130000,
+        "B": 0.38119,
+        "C": 1.0156,
+        "D": -1.8242,
+        "E": 0.83437,
+        "minimum_k": 318.15,
+        "maximum_k": 672,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.091653,
+        "B": 26.019,
+        "C": -2.0608,
+        "D": -0.00014789,
+        "E": -5.9445e-07,
+        "minimum_k": 318.15,
+        "maximum_k": 672,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Cyclobutane",
+      "critical_temperature": {
+        "value": 459.93,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.407691,
+        "B": 0.295395,
+        "C": 459.93,
+        "D": 0.248729,
+        "E": 0,
+        "minimum_k": 182.48,
+        "maximum_k": 459.93,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": -3355.973,
+        "B": 25.71519,
+        "C": 11.14976,
+        "D": -1.99586e-05,
+        "E": 4.55626e-06,
+        "minimum_k": 190,
+        "maximum_k": 298.1501,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 33449740,
+        "B": 0.35995,
+        "C": -0.0547115,
+        "D": 0.0583309,
+        "E": -0.0233634,
+        "minimum_k": 182.48,
+        "maximum_k": 459.93,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.00834272,
+        "B": 113.8985,
+        "C": -4.119698,
+        "D": 0.00522719,
+        "E": -1.579e-05,
+        "minimum_k": 182.48,
+        "maximum_k": 459.93,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "Isopropyl mercaptan",
+      "critical_temperature": {
+        "value": 517.3,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 1.093001,
+        "B": 0.27762,
+        "C": 517,
+        "D": 0.29781,
+        "E": 0,
+        "minimum_k": 142.61,
+        "maximum_k": 497.2953,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 16,
+        "A": -4182.09,
+        "B": 11.57821,
+        "C": 11.69322,
+        "D": 1.33303e-05,
+        "E": 2.0152e-06,
+        "minimum_k": 142.61,
+        "maximum_k": 350,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 40718600,
+        "B": 0.189905,
+        "C": 0.420769,
+        "D": -0.0231137,
+        "E": -0.258009,
+        "minimum_k": 142.61,
+        "maximum_k": 517.0001,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 16,
+        "A": -0.0111776,
+        "B": 26.63325,
+        "C": -3.053494,
+        "D": 0.000331969,
+        "E": -6.2853e-06,
+        "minimum_k": 142.61,
+        "maximum_k": 517.0001,
+        "unit": "N/m"
+      }
+    },
+    {
+      "compound_id": "N-eicosane",
+      "critical_temperature": {
+        "value": 767,
+        "unit": "K"
+      },
+      "liquid_density": {
+        "equation": 105,
+        "A": 0.18166,
+        "B": 0.23351,
+        "C": 768,
+        "D": 0.28571,
+        "E": 0,
+        "minimum_k": 309.58,
+        "maximum_k": 768,
+        "unit": "kmol/m3"
+      },
+      "liquid_heat_capacity": {
+        "equation": 100,
+        "A": 352720,
+        "B": 807.32,
+        "C": 0.2122,
+        "D": 0,
+        "E": 0,
+        "minimum_k": 309.58,
+        "maximum_k": 616.93,
+        "unit": "J/kmol/K"
+      },
+      "heat_of_vaporization": {
+        "equation": 106,
+        "A": 128600000,
+        "B": 0.50351,
+        "C": 0.32986,
+        "D": -0.42184,
+        "E": 0,
+        "minimum_k": 309.58,
+        "maximum_k": 768,
+        "unit": "J/kmol"
+      },
+      "surface_tension": {
+        "equation": 106,
+        "A": 0.058226,
+        "B": 1.4495,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "minimum_k": 309.58,
+        "maximum_k": 768,
         "unit": "N/m"
       }
     }

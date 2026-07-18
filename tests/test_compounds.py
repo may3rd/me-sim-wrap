@@ -23,7 +23,7 @@ class CompoundDataTest(unittest.TestCase):
             (ROOT / "tests/golden/compound-catalog.json").read_text(encoding="utf-8-sig")
         )["inputs"]["compounds"]
 
-        self.assertEqual(len(compounds), 391)
+        self.assertEqual(len(compounds), 408)
         self.assertTrue({c["id"] for c in captured}.issubset({c.id for c in compounds}))
         for compound in (item for item in compounds if item.id in {c["id"] for c in captured}):
             reference = next(c for c in captured if c["id"] == compound.id)
@@ -105,7 +105,7 @@ class CompoundDataTest(unittest.TestCase):
         self.assertEqual(interactions.get("N-pentane", "Methane"), 0.023)
         self.assertEqual(interactions.get("Methane", "Methane"), 0.0)
         self.assertEqual(interactions.get("Methane", "Water"), 0.5)
-        self.assertEqual(len(interactions.pairs), 196)
+        self.assertEqual(len(interactions.pairs), 197)
         with self.assertRaises(MissingCompoundData):
             interactions.get("Methane", "Bromine")
 
@@ -151,7 +151,12 @@ class CompoundDataTest(unittest.TestCase):
         valid = json.loads((ROOT / "data/interactions/pr-v1.json").read_text())
         mutations = (
             ("model", lambda data: data.update(model="SRK")),
-            ("self pair", lambda data: data["pairs"][0].update(compound_2="Methane")),
+            (
+                "self pair",
+                lambda data: data["pairs"][0].update(
+                    compound_2=data["pairs"][0]["compound_1"]
+                ),
+            ),
             ("blank ID", lambda data: data["pairs"][0].update(compound_1="")),
             ("non-finite", lambda data: data["pairs"][0].update(kij=math.inf)),
             ("wrong unit", lambda data: data["pairs"][0].update(unit="Pa")),

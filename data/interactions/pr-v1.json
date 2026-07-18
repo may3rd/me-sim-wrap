@@ -10,6 +10,12 @@
   },
   "pairs": [
     {
+      "compound_1": "Helium-4",
+      "compound_2": "Carbon monoxide",
+      "kij": 0.5463,
+      "unit": "dimensionless"
+    },
+    {
       "compound_1": "Hydrogen",
       "compound_2": "Nitrogen",
       "kij": 0.0711,

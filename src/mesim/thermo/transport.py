@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ..compounds import Compound
 from ..errors import OutOfRangeError, ValidationError
+from .correlations import evaluate_temperature_equation
 
 
 # DWSIM PengRobinson.vb AUX_Ci fallback values for the catalog compounds.
@@ -15,7 +16,8 @@ R = 8314.46261815324  # J/kmol/K
 
 @dataclass(frozen=True)
 class TransportCorrelation:
-    coefficients: tuple[float, float, float, float]
+    equation: int
+    coefficients: tuple[float, float, float, float, float]
     minimum_k: float
     maximum_k: float
     unit: str
@@ -26,11 +28,9 @@ class TransportCorrelation:
         if not self.minimum_k <= temperature_k <= self.maximum_k:
             if not allow_extrapolation:
                 raise OutOfRangeError(f"transport correlation extrapolated outside {self.minimum_k:g}..{self.maximum_k:g} K")
-        a, b, c, d = self.coefficients
-        try:
-            value = a * temperature_k**b / (1.0 + c / temperature_k + d / temperature_k**2)
-        except (OverflowError, ZeroDivisionError) as error:
-            raise ValidationError("transport correlation is outside the representable range") from error
+        value = evaluate_temperature_equation(
+            self.equation, self.coefficients, temperature_k
+        )
         if not math.isfinite(value) or value <= 0:
             raise ValidationError("transport correlation produced a non-positive value")
         return value
@@ -55,16 +55,9 @@ class LiquidTransportCorrelation:
             raise OutOfRangeError(
                 f"liquid transport correlation extrapolated outside {self.minimum_k:g}..{self.maximum_k:g} K",
             )
-        a, b, c, d, e = self.coefficients
-        try:
-            if self.equation == 101:
-                value = math.exp(a + b / temperature_k + c * math.log(temperature_k) + d * temperature_k**e)
-            elif self.equation == 16:
-                value = a + math.exp(b / temperature_k + c + d * temperature_k + e * temperature_k**2)
-            else:
-                raise ValidationError(f"unsupported liquid transport equation {self.equation}")
-        except (OverflowError, ZeroDivisionError) as error:
-            raise ValidationError("liquid transport correlation is outside the representable range") from error
+        value = evaluate_temperature_equation(
+            self.equation, self.coefficients, temperature_k
+        )
         if not math.isfinite(value) or value <= 0:
             raise ValidationError("liquid transport correlation produced a non-positive value")
         return value
@@ -95,7 +88,7 @@ class LiquidTransport:
 def load_transport_correlations(path: str | Path) -> tuple[TransportRecord, ...]:
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8-sig"))
-        if data["schema_version"] != "transport-correlations-2":
+        if data["schema_version"] != "transport-correlations-3":
             raise ValidationError("unsupported transport correlation schema")
         provenance = data["provenance"]
         imported = datetime.fromisoformat(provenance["imported_utc"])
@@ -105,10 +98,10 @@ def load_transport_correlations(path: str | Path) -> tuple[TransportRecord, ...]
             TransportRecord(
                 record["compound_id"],
                 _positive(record["critical_volume"], "m3/kmol", "critical volume"),
-                _correlation(record["vapor_viscosity"], "Pa.s"),
-                _correlation(record["vapor_thermal_conductivity"], "W/m/K"),
-                _liquid_correlation(record["liquid_viscosity"], 101, "Pa.s", True),
-                _liquid_correlation(record["liquid_thermal_conductivity"], 16, "W/m/K", True),
+                _correlation(record["vapor_viscosity"], (2, 3, 16, 102), "Pa.s"),
+                _correlation(record["vapor_thermal_conductivity"], (3, 16, 102), "W/m/K"),
+                _liquid_correlation(record["liquid_viscosity"], (10, 16, 101), "Pa.s"),
+                _liquid_correlation(record["liquid_thermal_conductivity"], (3, 16, 100), "W/m/K"),
             )
             for record in data["correlations"]
         )
@@ -128,33 +121,32 @@ def _positive(data: dict, unit: str, label: str) -> float:
     return value
 
 
-def _correlation(data: dict, unit: str) -> TransportCorrelation:
-    values = tuple(data[key] for key in "ABCD")
+def _correlation(data: dict, equations: tuple[int, ...], unit: str) -> TransportCorrelation:
+    values = tuple(data[key] for key in "ABCDE")
     minimum, maximum = data["minimum_k"], data["maximum_k"]
-    if data["equation"] != 102 or data["unit"] != unit or any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) for value in (*values, minimum, maximum)) or minimum <= 0 or maximum <= minimum:
-        raise ValidationError(f"invalid equation 102 transport correlation in {unit}")
-    return TransportCorrelation(values, minimum, maximum, unit)
+    if data["equation"] not in equations or data["unit"] != unit or any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) for value in (*values, minimum, maximum)) or minimum <= 0 or maximum <= minimum:
+        raise ValidationError(f"invalid transport correlation in {unit}")
+    return TransportCorrelation(data["equation"], values, minimum, maximum, unit)
 
 
 def _liquid_correlation(
-    data: dict, equation: int, unit: str, bounded: bool,
+    data: dict, equations: tuple[int, ...], unit: str,
 ) -> LiquidTransportCorrelation:
     values = tuple(data[key] for key in "ABCDE")
     minimum = data.get("minimum_k")
     maximum = data.get("maximum_k")
     if (
-        data["equation"] != equation or data["unit"] != unit
+        data["equation"] not in equations or data["unit"] != unit
         or any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) for value in values)
-        or not bounded and (minimum is not None or maximum is not None)
-        or bounded and (
+        or (
             isinstance(minimum, bool) or isinstance(maximum, bool)
             or not isinstance(minimum, (int, float)) or not isinstance(maximum, (int, float))
             or not math.isfinite(minimum) or not math.isfinite(maximum)
             or minimum <= 0 or maximum <= minimum
         )
     ):
-        raise ValidationError(f"invalid equation {equation} liquid transport correlation in {unit}")
-    return LiquidTransportCorrelation(equation, values, minimum, maximum, unit)
+        raise ValidationError(f"invalid liquid transport correlation in {unit}")
+    return LiquidTransportCorrelation(data["equation"], values, minimum, maximum, unit)
 
 
 def vapor_transport(compounds: tuple[Compound, ...], mole_fractions: tuple[float, ...], records: tuple[TransportRecord, ...], temperature_k: float, density_kg_per_m3: float) -> VaporTransport:

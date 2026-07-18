@@ -33,16 +33,16 @@ PRIMARY_COMPOUNDS = (
     "Acetone",
 )
 SUPPORTED_EQUATIONS = {
-    "IdealGasHeatCapacityCp": {16},
-    "VaporPressure": {101},
+    "IdealGasHeatCapacityCp": {1, 16, 100},
+    "VaporPressure": {10, 101},
     "LiquidDensity": {105, 106},
-    "LiquidHeatCapacityCp": {16},
+    "LiquidHeatCapacityCp": {3, 4, 16, 100},
     "HeatOfVaporization": {106},
-    "LiquidViscosity": {101},
-    "VaporViscosity": {102},
-    "LiquidThermalConductivity": {16},
-    "VaporThermalConductivity": {102},
-    "SurfaceTension": {16},
+    "LiquidViscosity": {10, 16, 101},
+    "VaporViscosity": {2, 3, 16, 102},
+    "LiquidThermalConductivity": {3, 16, 100},
+    "VaporThermalConductivity": {3, 16, 102},
+    "SurfaceTension": {2, 16, 106, 116},
 }
 APPROVED_ZERO_PAIRS = (
     ("Hydrogen", "Water"),
@@ -90,10 +90,14 @@ def _equation(compound, tag: str) -> int | None:
 
 
 def _supported(compound) -> bool:
-    return all(
-        _equation(compound, tag) in equations
-        for tag, equations in SUPPORTED_EQUATIONS.items()
-    )
+    for tag, equations in SUPPORTED_EQUATIONS.items():
+        node = compound.find(tag)
+        if node is None or _equation(compound, tag) not in equations:
+            return False
+        values = {child.tag: child.attrib.get("value") for child in node}
+        if any(values.get(key) in (None, "") for key in ("A", "B", "C", "D", "Tmin", "Tmax")):
+            return False
+    return True
 
 
 def _source_records() -> tuple[list[str], dict[str, object]]:
@@ -127,7 +131,7 @@ def _datasets() -> dict[Path, dict]:
         "correlations": [],
     }
     transport = {
-        "schema_version": "transport-correlations-2",
+        "schema_version": "transport-correlations-3",
         "provenance": {**source, "imported_utc": "2026-07-18T00:00:00Z"},
         "correlations": [],
     }
@@ -190,12 +194,11 @@ def _datasets() -> dict[Path, dict]:
                     "unit": "m3/kmol",
                 },
                 "vapor_viscosity": _correlation(
-                    compound.find("VaporViscosity"), "Pa.s", include_e=False
+                    compound.find("VaporViscosity"), "Pa.s"
                 ),
                 "vapor_thermal_conductivity": _correlation(
                     compound.find("VaporThermalConductivity"),
                     "W/m/K",
-                    include_e=False,
                 ),
                 "liquid_viscosity": _correlation(
                     compound.find("LiquidViscosity"), "Pa.s"

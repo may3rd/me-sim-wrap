@@ -820,7 +820,7 @@ function New-CompoundRecord {
         $maximum = [double](
             Get-MemberValue -Object $Constant -Name $MaximumProperty
         )
-        if ($minimum -le 0 -or $maximum -le $minimum) {
+        if ($minimum -lt 0 -or $maximum -le $minimum) {
             throw "$canonicalName has an invalid $Method temperature range"
         }
         $temperature = ($minimum + $maximum) / 2.0

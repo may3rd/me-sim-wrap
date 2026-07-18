@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from ..errors import OutOfRangeError, ValidationError
+from .correlations import evaluate_temperature_equation
 
 
 R = 8314.46261815324  # J/kmol/K
@@ -52,13 +53,25 @@ class IdealCorrelations:
 
     def heat_capacity(self, temperature_k: float, allow_extrapolation: bool = False) -> Result:
         warnings = self._range("heat_capacity", self.heat_capacity_correlation, (temperature_k,), allow_extrapolation)
-        a, b, c, d, e = self.heat_capacity_correlation.coefficients
-        return Result(a + math.exp(b / temperature_k + c + d * temperature_k + e * temperature_k**2), "J/kmol/K", warnings)
+        value = evaluate_temperature_equation(
+            self.heat_capacity_correlation.equation,
+            self.heat_capacity_correlation.coefficients,
+            temperature_k,
+        )
+        if value <= 0:
+            raise ValidationError("ideal-gas heat capacity must be positive")
+        return Result(value, "J/kmol/K", warnings)
 
     def vapor_pressure(self, temperature_k: float, allow_extrapolation: bool = False) -> Result:
         warnings = self._range("vapor_pressure", self.vapor_pressure_correlation, (temperature_k,), allow_extrapolation)
-        a, b, c, d, e = self.vapor_pressure_correlation.coefficients
-        return Result(math.exp(a + b / temperature_k + c * math.log(temperature_k) + d * temperature_k**e), "Pa", warnings)
+        value = evaluate_temperature_equation(
+            self.vapor_pressure_correlation.equation,
+            self.vapor_pressure_correlation.coefficients,
+            temperature_k,
+        )
+        if value <= 0:
+            raise ValidationError("vapor pressure must be positive")
+        return Result(value, "Pa", warnings)
 
     def enthalpy_change(self, temperature_k: float, reference_k: float = 298.15, allow_extrapolation: bool = False) -> Result:
         warnings = self._range("heat_capacity", self.heat_capacity_correlation, (temperature_k, reference_k), allow_extrapolation)
@@ -129,8 +142,8 @@ def load_correlations(path: str | Path) -> tuple[IdealCorrelations, ...]:
         records = tuple(
             IdealCorrelations(
                 compound_id=record["compound_id"],
-                heat_capacity_correlation=_correlation(record["heat_capacity"], 16, "J/kmol/K"),
-                vapor_pressure_correlation=_correlation(record["vapor_pressure"], 101, "Pa"),
+                heat_capacity_correlation=_correlation(record["heat_capacity"], (1, 16, 100), "J/kmol/K"),
+                vapor_pressure_correlation=_correlation(record["vapor_pressure"], (10, 101), "Pa"),
                 provenance=provenance,
             )
             for record in data["correlations"]
@@ -144,13 +157,13 @@ def load_correlations(path: str | Path) -> tuple[IdealCorrelations, ...]:
     return records
 
 
-def _correlation(data: dict, equation: int, unit: str) -> Correlation:
-    if data["equation"] != equation or data["unit"] != unit:
-        raise ValidationError(f"expected equation {equation} in {unit}")
+def _correlation(data: dict, equations: tuple[int, ...], unit: str) -> Correlation:
+    if data["equation"] not in equations or data["unit"] != unit:
+        raise ValidationError(f"expected equations {equations} in {unit}")
     coefficients = tuple(data[key] for key in "ABCDE")
     values = coefficients + (data["minimum_k"], data["maximum_k"])
     if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) for value in values):
         raise ValidationError("correlation values must be finite numbers")
     if data["minimum_k"] <= 0 or data["maximum_k"] <= data["minimum_k"]:
         raise ValidationError("invalid correlation temperature range")
-    return Correlation(equation, coefficients, data["minimum_k"], data["maximum_k"], unit)
+    return Correlation(data["equation"], coefficients, data["minimum_k"], data["maximum_k"], unit)
