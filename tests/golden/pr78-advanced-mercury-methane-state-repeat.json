@@ -1,0 +1,50 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "pr78-advanced-mercury-methane-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "5dc01060dd685d3659a0083c4b99e42e529cd168b1634cc8a573bd0fbdd3eeb4",
+                   "property_package":  "Peng-Robinson 1978 (PR78) Advanced",
+                   "property_package_class":  "DWSIM.Thermodynamics.AdvancedEOS.PengRobinson1978AdvancedPropertyPackage",
+                   "property_package_construction":  "deserialized-from-case",
+                   "flash_algorithm":  "Universal Flash"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "Mercury",
+                                     "Methane"
+                                 ],
+                   "temperature_k":  400,
+                   "pressure_pa":  1000000,
+                   "composition":  [
+                                       0.1,
+                                       0.9
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         0.9739018474996014,
+                                                         0.99327330968356531
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        0.97390184749960174,
+                                                        0.99327330968356542
+                                                    ],
+                    "liquid_fraction":  0.0998940399433016,
+                    "vapor_fraction":  0.90010596005669841,
+                    "liquid_composition":  [
+                                               1,
+                                               2.4090629550632495E-26
+                                           ],
+                    "vapor_composition":  [
+                                              0.00011763906341260342,
+                                              0.99988236093658733
+                                          ],
+                    "iterations":  1,
+                    "equilibrium_ratios":  [
+                                               0.0001176389686329537,
+                                               4.1504998997559938E+25
+                                           ]
+                }
+}

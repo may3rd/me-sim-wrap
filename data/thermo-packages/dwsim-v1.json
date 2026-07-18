@@ -257,8 +257,8 @@
       "dwsim_class": "PengRobinson1978AdvancedPropertyPackage",
       "family": "cubic-eos",
       "source_file": "DWSIM.Thermodynamics.AdvancedEOS.PRSRKTDep/PengRobinsonAdvanced.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["peng-robinson-1978-advanced"]
     },
     {
       "id": "soave-redlich-kwong-advanced",

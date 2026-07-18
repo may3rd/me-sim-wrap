@@ -7,6 +7,7 @@ from typing import Protocol, runtime_checkable
 
 from ..compounds import Compound, PRInteractions
 from ..errors import ValidationError
+from .advanced_cubic import AdvancedCubicData
 from .activity import (
     NRTLPhaseEnthalpies,
     NRTLVLEData,
@@ -66,6 +67,7 @@ PENG_ROBINSON_STRYJEK_VERA_2_MARGULES = (
 PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR = (
     "peng-robinson-stryjek-vera-2-van-laar"
 )
+PENG_ROBINSON_1978_ADVANCED = "peng-robinson-1978-advanced"
 
 
 @runtime_checkable
@@ -715,6 +717,70 @@ class PRSV2VanLaarSystem(PRSV2MargulesSystem):
         ).stable_state(temperature_k, pressure_pa)
 
 
+@dataclass(frozen=True, slots=True)
+class PengRobinson1978AdvancedSystem:
+    """PR78 phase states with DWSIM's T/P-dependent interaction override."""
+
+    compounds: tuple[Compound, ...]
+    interactions: PRInteractions
+    advanced_data: AdvancedCubicData
+    model_id: str = field(default=PENG_ROBINSON_1978_ADVANCED, init=False)
+    compound_ids: tuple[str, ...] = field(init=False)
+
+    def __post_init__(self) -> None:
+        try:
+            compounds = tuple(self.compounds)
+        except TypeError as error:
+            raise ValidationError("advanced PR78 compounds must be a sequence") from error
+        if (
+            len(compounds) < 2
+            or any(not isinstance(compound, Compound) for compound in compounds)
+            or not isinstance(self.interactions, PRInteractions)
+            or self.interactions.model != "Peng-Robinson"
+            or not isinstance(self.advanced_data, AdvancedCubicData)
+        ):
+            raise ValidationError("advanced PR78 thermodynamic-system inputs are invalid")
+        compound_ids = tuple(compound.id for compound in compounds)
+        if len(set(compound_ids)) != len(compound_ids):
+            raise ValidationError("advanced PR78 compound IDs must be unique")
+        object.__setattr__(self, "compounds", compounds)
+        object.__setattr__(self, "compound_ids", compound_ids)
+
+    def _mixture(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+    ) -> PengRobinson1978Mixture:
+        interactions = self.advanced_data.evaluated(
+            temperature_k, pressure_pa, self.interactions
+        )
+        return PengRobinson1978Mixture(
+            self.compounds, composition, interactions
+        )
+
+    def state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+        phase: str,
+    ) -> PRMixtureState:
+        return self._mixture(composition, temperature_k, pressure_pa).state(
+            temperature_k, pressure_pa, phase
+        )
+
+    def stable_state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+    ) -> PRMixtureState:
+        return self._mixture(composition, temperature_k, pressure_pa).stable_state(
+            temperature_k, pressure_pa
+        )
+
+
 ThermoSystemConstructor = Callable[..., ThermodynamicSystem]
 _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_CLASSIC: PengRobinsonSystem,
@@ -725,6 +791,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_LEE_KESLER: PengRobinsonLeeKeslerSystem,
     PENG_ROBINSON_STRYJEK_VERA_2_MARGULES: PRSV2MargulesSystem,
     PENG_ROBINSON_STRYJEK_VERA_2_VAN_LAAR: PRSV2VanLaarSystem,
+    PENG_ROBINSON_1978_ADVANCED: PengRobinson1978AdvancedSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS

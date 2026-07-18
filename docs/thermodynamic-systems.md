@@ -13,6 +13,7 @@ loading correlation files or selecting model equations themselves.
 | `peng-robinson-lee-kesler` | `PengRobinsonLeeKeslerSystem` | Liquid/vapor/stable phase states and VLE TP flash | DWSIM PR/LK's classic-PR equilibrium path; Lee-Kesler caloric and compressibility-property overrides remain explicitly outside this boundary |
 | `peng-robinson-stryjek-vera-2-margules` | `PRSV2MargulesSystem` | Liquid/vapor/stable phase states | DWSIM PRSV2 alpha correction plus its composition-dependent asymmetric Margules mixing rule; 90 alpha records and eight interaction pairs are frozen from the source assets |
 | `peng-robinson-stryjek-vera-2-van-laar` | `PRSV2VanLaarSystem` | Liquid/vapor/stable phase states | DWSIM PRSV2 alpha correction plus its rational asymmetric Van Laar mixing rule and separate eight-pair source table |
+| `peng-robinson-1978-advanced` | `PengRobinson1978AdvancedSystem` | Liquid/vapor/stable phase states | PR78 plus all 13 DWSIM advanced mercury interaction expressions evaluated as source-normalized temperature polynomials; absent/zero expressions fall back to ordinary PR interactions |
 | `nrtl-acetone-methanol` | `NRTLSystem` | Modified-Raoult equilibrium ratios, bubble/dew pressure, bubble temperature, and Excess-mode phase enthalpies | Saved-source binary acetone/methanol domain only; no general TP/PH flash |
 
 The registry is a fixed dictionary from stable model ID to constructor. Runtime plugin
@@ -25,6 +26,13 @@ Repeat captures cover methane/ethane alpha behavior and the nonzero
 acetone/cyclohexane Margules and Van Laar pairs. Feed-phase fugacity coefficients
 agree within `5e-11` relative; TP flash and caloric methods remain outside these
 first PRSV2 gates.
+
+The advanced PR78/SRK source domain is separate from the 408-compound pure-property
+domain: DWSIM's built-in override table contains only Mercury pairs. The scoped
+`advanced-eos-v1.json` compound file freezes Mercury's EOS constants from `chemsep2.xml`,
+while `prsrk-advanced-v1.json` preserves all 13 raw expressions and normalized
+polynomial coefficients. This does not imply that Mercury has the full ideal,
+transport, or saturated-liquid correlation capabilities of the main catalog.
 
 The frozen compound catalog and all three pure-property datasets cover the same 408
 case-distinct DWSIM/ChemSep names. These are the records among the 431-source catalog

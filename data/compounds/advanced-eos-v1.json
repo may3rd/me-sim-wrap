@@ -1,0 +1,22 @@
+{
+  "schema_version": "compound-data-1",
+  "compounds": [
+    {
+      "id": "Mercury",
+      "name": "Mercury",
+      "cas": "7439-97-6",
+      "formula": "Hg",
+      "molecular_weight": {"value": 200.59, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 1735.0, "unit": "K"},
+      "critical_pressure": {"value": 160803000.0, "unit": "Pa"},
+      "acentric_factor": {"value": -0.16445, "unit": "dimensionless"},
+      "normal_boiling_point": {"value": 629.73, "unit": "K"},
+      "provenance": {
+        "database": "DWSIM ChemSep",
+        "source": "DWSIM.Thermodynamics/Assets/Databases/chemsep2.xml",
+        "source_revision": "9.0.5.0",
+        "imported_utc": "2026-07-18T16:30:00Z"
+      }
+    }
+  ]
+}

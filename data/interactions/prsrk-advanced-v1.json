@@ -1,0 +1,24 @@
+{
+  "schema_version": "dwsim-prsrk-advanced-interactions-1",
+  "source": {
+    "product": "DWSIM",
+    "revision": "9.0.5.0",
+    "file": "DWSIM.Thermodynamics.AdvancedEOS.PRSRKTDep/Data/mercury.txt",
+    "sha256": "56106e14c65eb4be21fd52011f305c5d32368e8ee945295cdc80f28dc4e3d1d3"
+  },
+  "pairs": [
+    {"first": "Mercury", "second": "Nitrogen", "expression": "0.390", "temperature_coefficients": [0.39]},
+    {"first": "Mercury", "second": "Carbon dioxide", "expression": "0.000", "temperature_coefficients": [0.0]},
+    {"first": "Mercury", "second": "Methane", "expression": "0.400", "temperature_coefficients": [0.4]},
+    {"first": "Mercury", "second": "Ethane", "expression": "0.350", "temperature_coefficients": [0.35]},
+    {"first": "Mercury", "second": "Propane", "expression": "0.220", "temperature_coefficients": [0.22]},
+    {"first": "Mercury", "second": "Isobutane", "expression": "0.100", "temperature_coefficients": [0.1]},
+    {"first": "Mercury", "second": "N-butane", "expression": "0.100", "temperature_coefficients": [0.1]},
+    {"first": "Mercury", "second": "Isopentane", "expression": "1.0036E-04*T^2-5.5429E-02*T+7.5340", "temperature_coefficients": [7.534, -0.055429, 0.00010036]},
+    {"first": "Mercury", "second": "N-pentane", "expression": "1.0036E-04*T^2-5.5429E-02*T+7.5340", "temperature_coefficients": [7.534, -0.055429, 0.00010036]},
+    {"first": "Mercury", "second": "N-hexane", "expression": "9.1720E-05*T^2-4.9756E-02*T+6.5981", "temperature_coefficients": [6.5981, -0.049756, 0.00009172]},
+    {"first": "Mercury", "second": "N-heptane", "expression": "-1.5167E-05*T^2+9.9217E-03*T-1.6765", "temperature_coefficients": [-1.6765, 0.0099217, -0.000015167]},
+    {"first": "Mercury", "second": "N-octane", "expression": "3.9972E-06*T^3-3.5439E-03*T^2+1.0478*T-1.0335E+02", "temperature_coefficients": [-103.35, 1.0478, -0.0035439, 0.0000039972]},
+    {"first": "Mercury", "second": "N-decane", "expression": "-1.4149E-05*T^2+9.8034E-03*T-1.7292", "temperature_coefficients": [-1.7292, 0.0098034, -0.000014149]}
+  ]
+}
