@@ -61,6 +61,7 @@ from .chao_seader import ChaoSeaderData, ChaoSeaderTPFlashResult, chao_seader_li
 from .lee_kesler_plocker import LKPData, LKPTPFlashResult, lkp_fugacity_coefficients, lkp_tp_flash
 from .steam_tables import SteamTablesData,SteamTablesTPFlashResult,steam_tables_fugacity_coefficients,steam_tables_tp_flash
 from .seawater import SeawaterData,SeawaterTPFlashResult,seawater_fugacity_coefficients,seawater_tp_flash
+from .black_oil import BlackOilData,BlackOilTPFlashResult,black_oil_fugacity_coefficients,black_oil_tp_flash
 
 
 PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
@@ -88,6 +89,7 @@ GRAYSON_STREED_METHANE_N_PENTANE = "grayson-streed-methane-n-pentane"
 LEE_KESLER_PLOCKER_METHANE_N_PENTANE = "lee-kesler-plocker-methane-n-pentane"
 STEAM_TABLES_WATER = "steam-tables-water"
 SEAWATER_WATER_SALT = "seawater-water-salt"
+BLACK_OIL_N_PENTANE_N_HEXANE = "black-oil-n-pentane-n-hexane"
 
 
 @runtime_checkable
@@ -600,6 +602,19 @@ class SeawaterSystem:
         return seawater_fugacity_coefficients(self.data,composition,temperature_k,pressure_pa,phase)
     def tp_flash(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float)->SeawaterTPFlashResult:
         return seawater_tp_flash(self.data,composition,temperature_k,pressure_pa)
+
+@dataclass(frozen=True,slots=True)
+class BlackOilSystem:
+    data:BlackOilData
+    steam_data:SteamTablesData
+    model_id:str=field(default=BLACK_OIL_N_PENTANE_N_HEXANE,init=False)
+    compound_ids:tuple[str,...]=field(default=("n-Pentane","n-Hexane"),init=False)
+    def __post_init__(self)->None:
+        if not isinstance(self.data,BlackOilData) or not isinstance(self.steam_data,SteamTablesData) or self.data.compound_ids!=self.compound_ids:raise ValidationError("Black Oil system requires scoped compound and IAPWS data")
+    def fugacity_coefficients(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float,phase:str)->tuple[float,...]:
+        return black_oil_fugacity_coefficients(self.data,self.steam_data,self.compound_ids,composition,temperature_k,pressure_pa,phase)
+    def tp_flash(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float)->BlackOilTPFlashResult:
+        return black_oil_tp_flash(self.data,self.compound_ids,composition,temperature_k,pressure_pa)
 
 
 @dataclass(frozen=True, slots=True)
@@ -1152,6 +1167,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     LEE_KESLER_PLOCKER_METHANE_N_PENTANE: LeeKeslerPlockerSystem,
     STEAM_TABLES_WATER: SteamTablesSystem,
     SEAWATER_WATER_SALT: SeawaterSystem,
+    BLACK_OIL_N_PENTANE_N_HEXANE: BlackOilSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS

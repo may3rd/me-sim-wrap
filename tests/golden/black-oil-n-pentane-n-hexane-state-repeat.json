@@ -1,0 +1,50 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "black-oil-n-pentane-n-hexane-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "e734c1178212f7c7eac1404c61cfabc7a11a226a11976548ba03d9b30b0b2cec",
+                   "property_package":  "Black Oil",
+                   "property_package_class":  "DWSIM.Thermodynamics.PropertyPackages.BlackOilPropertyPackage",
+                   "property_package_construction":  "deserialized-from-case",
+                   "flash_algorithm":  "Black Oil"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "n-Pentane",
+                                     "n-Hexane"
+                                 ],
+                   "temperature_k":  350,
+                   "pressure_pa":  1000000,
+                   "composition":  [
+                                       0.6,
+                                       0.4
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         9.9377536364442916E-06,
+                                                         8.6164051902869918E-08
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        1,
+                                                        1
+                                                    ],
+                    "liquid_fraction":  0.90473403846887568,
+                    "vapor_fraction":  0.095265961531124349,
+                    "liquid_composition":  [
+                                               0.61437221697232747,
+                                               0.38562778302767248
+                                           ],
+                    "vapor_composition":  [
+                                              0.46350808101719965,
+                                              0.53649191898280035
+                                          ],
+                    "iterations":  1,
+                    "equilibrium_ratios":  [
+                                               0,
+                                               0
+                                           ]
+                }
+}

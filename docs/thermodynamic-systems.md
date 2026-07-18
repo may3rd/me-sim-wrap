@@ -27,6 +27,7 @@ loading correlation files or selecting model equations themselves.
 | `lee-kesler-plocker-methane-n-pentane` | `LeeKeslerPlockerSystem` | Lee-Kesler-Plöcker phase fugacity coefficients and TP flash | Full 140-interaction installed domain plus scoped methane/N-pentane critical data and equation parity at 350 K and 1 MPa; no caloric API or broader flash domain |
 | `steam-tables-water` | `SteamTablesSystem` | Pure-Water saturation, phase fugacity, and TP phase classification | Full IAPWS-IF97 region-4 saturation coefficients and exact DWSIM executable behavior at 450 K and 1 MPa; no native IAPWS caloric or transport API |
 | `seawater-water-salt` | `SeawaterSystem` | Water/Salt salinity, seawater vapor pressure, phase fugacity, and all-liquid TP classification | DWSIM's Water/Salt basis and 0.12 kg/kg salinity ceiling at 350 K and 0.1 MPa; no caloric, density, transport, solid-salt, or vapor/two-phase flash API |
+| `black-oil-n-pentane-n-hexane` | `BlackOilSystem` | Component vapor pressure, vaporized fraction, phase fugacity, and TP split | Two saved pseudo-fluid records at 350 K and 1 MPa using DWSIM's Black Oil correlations; no PH/PS flash, caloric, density, viscosity, or broader pseudo-component domain |
 
 The registry is a fixed dictionary from stable model ID to constructor. Runtime plugin
 registration and silent fallback are unsupported. An unknown ID, incomplete correlation

@@ -1,0 +1,14 @@
+{
+  "n-Pentane": {
+    "BO_SGO": 0.85,
+    "BO_SGG": 0.65,
+    "BO_BSW": 10.0,
+    "BO_GOR": 100.0
+  },
+  "n-Hexane": {
+    "BO_SGO": 0.9,
+    "BO_SGG": 0.7,
+    "BO_BSW": 20.0,
+    "BO_GOR": 200.0
+  }
+}

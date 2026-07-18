@@ -17,6 +17,7 @@ from mesim.thermo.activity import (
 from mesim.thermo.flash import flash_enthalpy, tp_flash
 from mesim.thermo.ideal import load_correlations
 from mesim.thermo.systems import (
+    BLACK_OIL_N_PENTANE_N_HEXANE,
     CHAO_SEADER_METHANE_N_PENTANE,
     GRAYSON_STREED_METHANE_N_PENTANE,
     LEE_KESLER_PLOCKER_METHANE_N_PENTANE,
@@ -65,6 +66,7 @@ class ThermodynamicSystemTest(unittest.TestCase):
         self.assertEqual(
             set(THERMO_SYSTEM_CONSTRUCTORS),
             {
+                BLACK_OIL_N_PENTANE_N_HEXANE,
                 CHAO_SEADER_METHANE_N_PENTANE,
                 GRAYSON_STREED_METHANE_N_PENTANE,
                 LEE_KESLER_PLOCKER_METHANE_N_PENTANE,

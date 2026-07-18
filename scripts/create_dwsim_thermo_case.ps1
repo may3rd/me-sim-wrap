@@ -12,7 +12,9 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$CompoundNamesCsv,
 
-    [string]$DirectPropertyPackageClass
+    [string]$DirectPropertyPackageClass,
+
+    [string]$CompoundPropertyOverridesPath
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,6 +22,8 @@ Set-StrictMode -Version Latest
 
 Add-Type -TypeDefinition @"
 using System;
+using System.Collections;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
@@ -68,6 +72,32 @@ public static class DwsimThermoCaseBuilder
         }
         return flowsheet;
     }
+
+    public static void SetCompoundProperty(
+        object flowsheet, string compoundName, string propertyName, double value)
+    {
+        object selected = flowsheet.GetType().GetProperties(PublicInstance)
+            .First(property => property.Name == "SelectedCompounds" &&
+                property.GetIndexParameters().Length == 0)
+            .GetValue(flowsheet, null);
+        foreach (object entry in (IEnumerable)selected)
+        {
+            object constantProperties = entry.GetType().GetProperty("Value")
+                .GetValue(entry, null);
+            string name = Convert.ToString(
+                constantProperties.GetType().GetProperty("Name")
+                    .GetValue(constantProperties, null),
+                CultureInfo.InvariantCulture);
+            if (!String.Equals(name, compoundName, StringComparison.Ordinal)) continue;
+            PropertyInfo property = constantProperties.GetType().GetProperties(PublicInstance)
+                .First(candidate => candidate.Name == propertyName && candidate.CanWrite &&
+                    candidate.GetIndexParameters().Length == 0);
+            property.SetValue(constantProperties, value, null);
+            return;
+        }
+        throw new InvalidOperationException(
+            "Selected compound was not found for override: " + compoundName);
+    }
 }
 "@
 
@@ -114,11 +144,27 @@ $automation = New-Object DWSIM.Automation.Automation3
 $flowsheet = [DwsimThermoCaseBuilder]::Create(
     $automation, $compoundNames, $PropertyPackageName, $DirectPropertyPackageClass
 )
+if (-not [string]::IsNullOrWhiteSpace($CompoundPropertyOverridesPath)) {
+    $overrideFile = (Resolve-Path -LiteralPath $CompoundPropertyOverridesPath).Path
+    $overrides = Get-Content -LiteralPath $overrideFile -Raw | ConvertFrom-Json
+    foreach ($compoundProperty in $overrides.PSObject.Properties) {
+        if ($compoundNames -cnotcontains $compoundProperty.Name) {
+            throw "Override compound is outside the exact case domain: $($compoundProperty.Name)"
+        }
+        foreach ($property in $compoundProperty.Value.PSObject.Properties) {
+            [DwsimThermoCaseBuilder]::SetCompoundProperty(
+                $flowsheet, $compoundProperty.Name, $property.Name,
+                [double]$property.Value
+            )
+        }
+    }
+}
 $automation.SaveFlowsheet2($flowsheet, $outputFile)
 
 [ordered]@{
     output_case = $outputFile
     property_package = $PropertyPackageName
     compounds = $compoundNames
+    compound_property_overrides = if ([string]::IsNullOrWhiteSpace($CompoundPropertyOverridesPath)) { $null } else { (Resolve-Path -LiteralPath $CompoundPropertyOverridesPath).Path }
     sha256 = (Get-FileHash -Algorithm SHA256 -Path $outputFile).Hash.ToLowerInvariant()
 } | ConvertTo-Json -Depth 4

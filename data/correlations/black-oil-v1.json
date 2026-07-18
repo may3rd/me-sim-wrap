@@ -1,0 +1,46 @@
+﻿{
+    "schema_version":  "dwsim-black-oil-data-1",
+    "model":  "Black Oil",
+    "source":  {
+                   "product":  "DWSIM",
+                   "revision":  "9.0.5.0",
+                   "case_sha256":  "e734c1178212f7c7eac1404c61cfabc7a11a226a11976548ba03d9b30b0b2cec",
+                   "runtime_assembly_sha256":  "c5a038c86cdfd3304be5e283527ab377df7579ca306eac69950ab4b8c495c544",
+                   "property_package_source_sha256":  "6a076e84edd5d19b5edfec292ef1f234af76254a9e13e955cdeac7e95aa99eb0",
+                   "model_source_sha256":  "d84fbe6b1f266b9984874ebc22fe22bbe5f1a4a07ef35c569a1b0b921a67cf3c",
+                   "flash_source_sha256":  "ab6136e745474fc0ee702f8f7848fcc6784430c96d633752c0015a50e61c06ee",
+                   "petroleum_methods_source_sha256":  "cc91c97611cd739b2c2e0fcfe9f4d3bbea5b38d1cd8830044c13a4d998ce088e"
+               },
+    "compounds":  [
+                      {
+                          "compound_id":  "n-Pentane",
+                          "specific_gravity_oil":  0.85,
+                          "specific_gravity_gas":  0.65,
+                          "basic_sediment_water_percent":  10,
+                          "gas_oil_ratio":  100
+                      },
+                      {
+                          "compound_id":  "n-Hexane",
+                          "specific_gravity_oil":  0.9,
+                          "specific_gravity_gas":  0.7,
+                          "basic_sediment_water_percent":  20,
+                          "gas_oil_ratio":  200
+                      }
+                  ],
+    "scoped_probe":  {
+                         "temperature_k":  350,
+                         "pressure_pa":  1000000,
+                         "composition":  [
+                                             0.6,
+                                             0.4
+                                         ],
+                         "component_vapor_pressures_pa":  [
+                                                              9.9377536364442918,
+                                                              0.086164051902869923
+                                                          ],
+                         "component_vaporized_fractions":  [
+                                                               0.073594238359249692,
+                                                               0.12777354628893636
+                                                           ]
+                     }
+}

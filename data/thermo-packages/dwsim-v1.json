@@ -233,8 +233,8 @@
       "dwsim_class": "BlackOilPropertyPackage",
       "family": "petroleum",
       "source_file": "DWSIM.Thermodynamics/PropertyPackages/BlackOil.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["black-oil-n-pentane-n-hexane"]
     },
     {
       "id": "gerg-2008",
