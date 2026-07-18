@@ -10,7 +10,7 @@ The wheel installs these records under `share/mesim/data`; a source checkout use
 | `data/interactions/pr-v1.json` | `pr-interactions-1` | `dwsim-windows/DWSIM.Thermodynamics/Assets/pr_ip.dat` | DWSIM 9.0.5.0 | Symmetry, compound-key, and PR mixture gates |
 | `data/correlations/ideal-v1.json` | `ideal-correlations-1` | Vendored ChemSep `chemsep1.xml` | DWSIM 9.0.4 | Range, equation-vector, and DWSIM property gates |
 | `data/correlations/transport-v1.json` | `transport-correlations-1` | Vendored ChemSep `chemsep1.xml` | DWSIM 9.0.4 | Equation and captured vapor/liquid transport gates |
-| `data/reactions/v1.json` | `reaction-data-1` | DWSIM isomerization, Gibbs/equilibrium, CSTR, and PFR samples | DWSIM 9.0.5.0 | Element balance, formation-property consistency, units, and reactor goldens |
+| `data/reactions/v1.json` | `reaction-data-1` | DWSIM isomerization, Gibbs/equilibrium, ethylene-glycol, and methanol-carbonylation reactor samples | DWSIM 9.0.5.0 | Element balance, formation-property consistency, original kinetic units, and reactor goldens |
 
 ## Golden references
 

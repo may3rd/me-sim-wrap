@@ -169,24 +169,40 @@ def _kinetic_rate_kmol_m3_s(
     kinetics = reaction.kinetics
     if kinetics is None:
         raise ValidationError("kinetic reaction is missing its rate definition")
+    if kinetics.concentration_unit == "mol/m3":
+        rate_concentrations = {
+            compound: concentration * 1_000.0
+            for compound, concentration in concentrations_kmol_m3.items()
+        }
+    elif kinetics.concentration_unit == "kmol/m3":
+        rate_concentrations = concentrations_kmol_m3
+    else:
+        raise ValidationError("unsupported kinetic concentration unit")
     forward = _arrhenius_rate(
         kinetics.forward.pre_exponential_factor,
         kinetics.forward.activation_energy_j_per_mol,
         kinetics.forward.orders,
-        concentrations_kmol_m3,
+        rate_concentrations,
         temperature_k,
     )
     reverse = _arrhenius_rate(
         kinetics.reverse.pre_exponential_factor,
         kinetics.reverse.activation_energy_j_per_mol,
         kinetics.reverse.orders,
-        concentrations_kmol_m3,
+        rate_concentrations,
         temperature_k,
     )
     rate = forward - reverse
-    if kinetics.rate_unit == "kmol/[m3.h]":
-        rate /= 3600.0
-    return rate
+    rate_to_kmol_m3_s = {
+        "kmol/[m3.s]": 1.0,
+        "kmol/[m3.h]": 1.0 / 3_600.0,
+        "mol/[m3.s]": 1.0 / 1_000.0,
+        "mol/[m3.h]": 1.0 / 3_600_000.0,
+    }
+    try:
+        return rate * rate_to_kmol_m3_s[kinetics.rate_unit]
+    except KeyError as error:
+        raise ValidationError("unsupported kinetic rate unit") from error
 
 
 def continuous_stirred_tank_reactor(

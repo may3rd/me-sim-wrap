@@ -1,9 +1,9 @@
 {
   "schema_version": "reaction-data-1",
   "provenance": {
-    "source": "DWSIM tests/Isomerisation.dwxmz plus Gibbs/Equilibrium and Dynamic Simulation - PFR samples",
+    "source": "DWSIM tests/Isomerisation.dwxmz plus Gibbs/Equilibrium, Dynamic Simulation - PFR, and methanol-carbonylation samples",
     "source_revision": "9.0.5.0",
-    "selection": "saved conversion, equilibrium, and ethylene-glycol kinetic reactions plus ChemSep compound records",
+    "selection": "saved conversion, equilibrium, ethylene-glycol, and methanol-carbonylation reactions plus ChemSep compound records",
     "imported_utc": "2026-07-17T07:30:00Z"
   },
   "thermochemistry": [
@@ -38,6 +38,22 @@
       "ideal_gas_formation_enthalpy": {"value": -241814000.0, "unit": "J/kmol"},
       "ideal_gas_formation_gibbs_energy": {"value": -228590000.0, "unit": "J/kmol"},
       "ideal_gas_formation_entropy": {"value": -44353.513332215276, "unit": "J/kmol/K"}
+    },
+    {
+      "compound_id": "Methanol",
+      "elements": {"C": 1, "H": 4, "O": 1},
+      "formation_temperature": {"value": 298.15, "unit": "K"},
+      "ideal_gas_formation_enthalpy": {"value": -200940000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_gibbs_energy": {"value": -162320000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_entropy": {"value": -129532.11470736208, "unit": "J/kmol/K"}
+    },
+    {
+      "compound_id": "Acetic acid",
+      "elements": {"C": 2, "H": 4, "O": 2},
+      "formation_temperature": {"value": 298.15, "unit": "K"},
+      "ideal_gas_formation_enthalpy": {"value": -432800000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_gibbs_energy": {"value": -374500000.0, "unit": "J/kmol"},
+      "ideal_gas_formation_entropy": {"value": -195539.1581418749, "unit": "J/kmol/K"}
     },
     {
       "compound_id": "Ethylene oxide",
@@ -136,6 +152,32 @@
           "pre_exponential_factor": 0.0,
           "activation_energy": {"value": 0.0, "unit": "J/mol"},
           "orders": {"Ethylene oxide": 0.0, "Water": 0.0, "Ethylene glycol": 0.0}
+        }
+      }
+    },
+    {
+      "id": "methanol-carbonylation",
+      "name": "Main Reaction kinetics",
+      "reaction_type": "kinetic",
+      "base_reactant": "Methanol",
+      "phase": "mixture",
+      "stoichiometry": {"Methanol": -1.0, "Acetic acid": 1.0, "Carbon monoxide": -1.0},
+      "reaction_heat": {"value": -121330000.0, "unit": "J/kmol"},
+      "kinetics": {
+        "basis": "molar_concentration",
+        "concentration_unit": "mol/m3",
+        "rate_unit": "mol/[m3.s]",
+        "forward": {
+          "model": "arrhenius",
+          "pre_exponential_factor": 3500000.0,
+          "activation_energy": {"value": 83680.0, "unit": "J/mol"},
+          "orders": {"Methanol": 1.0, "Acetic acid": 0.0, "Carbon monoxide": 0.5}
+        },
+        "reverse": {
+          "model": "arrhenius",
+          "pre_exponential_factor": 0.0,
+          "activation_energy": {"value": 0.0, "unit": "J/mol"},
+          "orders": {"Methanol": 0.0, "Acetic acid": 0.0, "Carbon monoxide": 0.0}
         }
       }
     }

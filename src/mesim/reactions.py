@@ -208,8 +208,10 @@ def load_reaction_data(path: str | Path) -> ReactionData:
                 raise ValidationError("kinetic reaction requires explicit kinetics")
             if (
                 kinetics.basis != "molar_concentration"
-                or kinetics.concentration_unit != "kmol/m3"
-                or kinetics.rate_unit not in {"kmol/[m3.s]", "kmol/[m3.h]"}
+                or kinetics.concentration_unit not in {"mol/m3", "kmol/m3"}
+                or kinetics.rate_unit not in {
+                    "mol/[m3.s]", "mol/[m3.h]", "kmol/[m3.s]", "kmol/[m3.h]",
+                }
             ):
                 raise ValidationError("unsupported kinetic basis or original expression units")
             for direction in (kinetics.forward, kinetics.reverse):
