@@ -1,0 +1,273 @@
+{
+  "schema_version": "dwsim-property-package-catalog-1",
+  "catalog_id": "dwsim-builtins-v1",
+  "source": {
+    "product": "DWSIM",
+    "version": "9.0.5.0",
+    "registry_file": "DWSIM/Forms/MainWindow/FormMain.vb",
+    "registry_method": "AddPropPacks"
+  },
+  "packages": [
+    {
+      "id": "coolprop",
+      "dwsim_name": "CoolProp",
+      "dwsim_class": "CoolPropPropertyPackage",
+      "family": "external-fluid-library",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/CoolProp.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "coolprop-incompressible-pure",
+      "dwsim_name": "CoolProp (Incompressible Fluids)",
+      "dwsim_class": "CoolPropIncompressiblePurePropertyPackage",
+      "family": "external-fluid-library",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/CoolPropIncompressiblePure.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "coolprop-incompressible-mixture",
+      "dwsim_name": "CoolProp (Incompressible Mixtures)",
+      "dwsim_class": "CoolPropIncompressibleMixturePropertyPackage",
+      "family": "external-fluid-library",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/CoolPropIncompressibleMixture.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "steam-tables",
+      "dwsim_name": "Steam Tables",
+      "dwsim_class": "SteamTablesPropertyPackage",
+      "family": "water",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/SteamTables.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "seawater",
+      "dwsim_name": "Seawater",
+      "dwsim_class": "SeawaterPropertyPackage",
+      "family": "water",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/SeaWater.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "peng-robinson",
+      "dwsim_name": "Peng-Robinson (PR)",
+      "dwsim_class": "PengRobinsonPropertyPackage",
+      "family": "cubic-eos",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/PengRobinson.vb",
+      "extraction_status": "partial",
+      "mesim_model_ids": ["peng-robinson-classic"]
+    },
+    {
+      "id": "prsv2-m",
+      "dwsim_name": "Peng-Robinson-Stryjek-Vera 2 (PRSV2-M)",
+      "dwsim_class": "PRSV2PropertyPackage",
+      "family": "cubic-eos",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/PengRobinsonStryjekVera2.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "prsv2-vl",
+      "dwsim_name": "Peng-Robinson-Stryjek-Vera 2 (PRSV2-VL)",
+      "dwsim_class": "PRSV2VLPropertyPackage",
+      "family": "cubic-eos",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/PengRobinsonStryjekVera2VL.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "soave-redlich-kwong",
+      "dwsim_name": "Soave-Redlich-Kwong (SRK)",
+      "dwsim_class": "SRKPropertyPackage",
+      "family": "cubic-eos",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/SoaveRedlichKwong.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "peng-robinson-lee-kesler",
+      "dwsim_name": "Peng-Robinson / Lee-Kesler (PR/LK)",
+      "dwsim_class": "PengRobinsonLKPropertyPackage",
+      "family": "cubic-eos",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/PengRobinsonLeeKesler.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "unifac",
+      "dwsim_name": "UNIFAC",
+      "dwsim_class": "UNIFACPropertyPackage",
+      "family": "activity-coefficient",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/UNIFAC.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "unifac-ll",
+      "dwsim_name": "UNIFAC-LL",
+      "dwsim_class": "UNIFACLLPropertyPackage",
+      "family": "activity-coefficient",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/UNIFACLL.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "modified-unifac-dortmund",
+      "dwsim_name": "Modified UNIFAC (Dortmund)",
+      "dwsim_class": "MODFACPropertyPackage",
+      "family": "activity-coefficient",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/MODFAC.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "modified-unifac-nist",
+      "dwsim_name": "Modified UNIFAC (NIST)",
+      "dwsim_class": "NISTMFACPropertyPackage",
+      "family": "activity-coefficient",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/NISTMFAC.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "nrtl",
+      "dwsim_name": "NRTL",
+      "dwsim_class": "NRTLPropertyPackage",
+      "family": "activity-coefficient",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/NRTL.vb",
+      "extraction_status": "partial",
+      "mesim_model_ids": ["nrtl-acetone-methanol"]
+    },
+    {
+      "id": "wilson",
+      "dwsim_name": "Wilson",
+      "dwsim_class": "WilsonPropertyPackage",
+      "family": "activity-coefficient",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/WilsonPropertyPackage.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "uniquac",
+      "dwsim_name": "UNIQUAC",
+      "dwsim_class": "UNIQUACPropertyPackage",
+      "family": "activity-coefficient",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/UNIQUAC.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "chao-seader",
+      "dwsim_name": "Chao-Seader",
+      "dwsim_class": "ChaoSeaderPropertyPackage",
+      "family": "semi-empirical",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/ChaoSeader.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "grayson-streed",
+      "dwsim_name": "Grayson-Streed",
+      "dwsim_class": "GraysonStreedPropertyPackage",
+      "family": "semi-empirical",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/GraysonStreed.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "ideal-raoult",
+      "dwsim_name": "Ideal (Raoult's Law)",
+      "dwsim_class": "RaoultPropertyPackage",
+      "family": "ideal-mixture",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/Ideal.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "lee-kesler-plocker",
+      "dwsim_name": "Lee-Kesler-Plöcker",
+      "dwsim_class": "LKPPropertyPackage",
+      "family": "corresponding-states",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/LeeKeslerPlocker.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "reaktoro",
+      "dwsim_name": "Reaktoro (Aqueous Electrolytes)",
+      "dwsim_class": "ReaktoroPropertyPackage",
+      "family": "reactive-electrolyte",
+      "source_file": "DWSIM.Thermodynamics.ReaktoroPropertyPackage/ReaktoroPP.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "ideal-aqueous-electrolyte",
+      "dwsim_name": "Ideal Solution (Aqueous Electrolytes)",
+      "dwsim_class": "IdealElectrolytePropertyPackage",
+      "family": "electrolyte",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/ElectrolyteIdeal.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "black-oil",
+      "dwsim_name": "Black Oil",
+      "dwsim_class": "BlackOilPropertyPackage",
+      "family": "petroleum",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/BlackOil.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "gerg-2008",
+      "dwsim_name": "GERG-2008",
+      "dwsim_class": "GERG2008PropertyPackage",
+      "family": "multiparameter-eos",
+      "source_file": "DWSIM.Thermodynamics.AdvancedEOS.GERG2008/GERG2008PropertyPackage.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "pc-saft",
+      "dwsim_name": "PC-SAFT (with Association Support) (.NET Code)",
+      "dwsim_class": "PCSAFT2PropertyPackage",
+      "family": "association-eos",
+      "source_file": "DWSIM.Thermodynamics.AdvancedEOS.PCSAFT/PCSAFT2PropertyPackage.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "peng-robinson-1978",
+      "dwsim_name": "Peng-Robinson 1978 (PR78)",
+      "dwsim_class": "PengRobinson1978PropertyPackage",
+      "family": "cubic-eos",
+      "source_file": "DWSIM.Thermodynamics/PropertyPackages/PengRobinson78.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "peng-robinson-1978-advanced",
+      "dwsim_name": "Peng-Robinson 1978 (PR78) Advanced",
+      "dwsim_class": "PengRobinson1978AdvancedPropertyPackage",
+      "family": "cubic-eos",
+      "source_file": "DWSIM.Thermodynamics.AdvancedEOS.PRSRKTDep/PengRobinsonAdvanced.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    },
+    {
+      "id": "soave-redlich-kwong-advanced",
+      "dwsim_name": "Soave-Redlich-Kwong (SRK) Advanced",
+      "dwsim_class": "SoaveRedlichKwongAdvancedPropertyPackage",
+      "family": "cubic-eos",
+      "source_file": "DWSIM.Thermodynamics.AdvancedEOS.PRSRKTDep/SRKAdvanced.vb",
+      "extraction_status": "pending",
+      "mesim_model_ids": []
+    }
+  ]
+}
