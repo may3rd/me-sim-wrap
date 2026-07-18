@@ -4,14 +4,15 @@ All notable changes are documented here. This project follows semantic versionin
 
 ## [Unreleased]
 
-- Await hosted Linux amd64, Linux arm64, and macOS arm64 release-workflow results before promoting the candidate or creating the `0.1.0` tag.
+- No unreleased changes.
 
-## [0.1.0rc1] - 2026-07-18
+## [0.1.0] - 2026-07-18
 
 ### Added
 
 - Explicit SI unit boundary, versioned compound/correlation/interaction/reaction data, Peng-Robinson thermodynamics, TP/PH flashes, and immutable streams.
 - Golden-backed basic operations, pressure changers, heat exchangers, hydraulics, reactors, recycles/logical blocks, columns, dynamics/PID, and solar/wind/hydroelectric source-equation slices.
+- Methanol-carbonylation CSTR parity with deterministic, property-error-free DWSIM captures and explicit mol/kmol kinetic-unit conversion.
 - FastAPI U0 boundary, request-size and calculation-deadline guards, deterministic Windows DWSIM capture tooling, cross-platform release workflow, and representative performance benchmark.
 - Release support matrix, model limitations, and data-provenance records.
 
@@ -23,4 +24,5 @@ All notable changes are documented here. This project follows semantic versionin
 
 - Bubble/dew pressure lacks a valid nonzero DWSIM property capture.
 - Several capabilities are partial fixed-thermodynamic or source-equation gates rather than general predictive models; see `docs/model-limitations.md`.
+- Linux amd64, Linux arm64, macOS arm64, and container jobs are defined but remain unexecuted because GitHub rejected the jobs for an account-level billing lock; this source promotion is not a multi-architecture verification or release tag.
 - Public distribution remains subject to GPLv3-derived-work review.

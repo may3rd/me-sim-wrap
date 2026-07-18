@@ -1,6 +1,6 @@
 # Model limitations
 
-This document is a release boundary for `me-sim-wrap` 0.1.0rc1. A result is supported only when its model, phase domain, compound data, and solver mode are explicitly covered in [compatibility.md](compatibility.md). Unsupported input must be rejected rather than silently approximated.
+This document is a release boundary for `me-sim-wrap` 0.1.0. A result is supported only when its model, phase domain, compound data, and solver mode are explicitly covered in [compatibility.md](compatibility.md). Unsupported input must be rejected rather than silently approximated.
 
 ## Safety and design use
 

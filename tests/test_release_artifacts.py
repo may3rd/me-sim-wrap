@@ -12,11 +12,11 @@ from mesim.api import DATA, app
 
 
 class ReleaseArtifactTest(unittest.TestCase):
-    def test_package_and_api_versions_match_release_candidate(self):
+    def test_package_and_api_versions_match_release(self):
         metadata = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-        self.assertEqual(metadata["project"]["version"], "0.1.0rc1")
-        self.assertEqual(mesim.__version__, "0.1.0rc1")
-        self.assertEqual(app.version, "0.1.0rc1")
+        self.assertEqual(metadata["project"]["version"], "0.1.0")
+        self.assertEqual(mesim.__version__, "0.1.0")
+        self.assertEqual(app.version, "0.1.0")
         self.assertTrue((DATA / "compounds/v1.json").is_file())
 
     def test_release_documents_and_changelog_exist(self):
@@ -28,7 +28,7 @@ class ReleaseArtifactTest(unittest.TestCase):
         ):
             text = (ROOT / relative).read_text(encoding="utf-8")
             self.assertGreater(len(text), 500, relative)
-        self.assertIn("## [0.1.0rc1] - 2026-07-18", (ROOT / "CHANGELOG.md").read_text())
+        self.assertIn("## [0.1.0] - 2026-07-18", (ROOT / "CHANGELOG.md").read_text())
 
     def test_support_matrix_uses_only_normative_statuses(self):
         compatibility = (ROOT / "docs/compatibility.md").read_text(encoding="utf-8")
@@ -45,6 +45,7 @@ class ReleaseArtifactTest(unittest.TestCase):
         self.assertIn("python -m unittest discover -s tests", workflow)
         self.assertIn("python scripts/validate.py --quiet", workflow)
         self.assertIn("docker build", workflow)
+        self.assertIn("mesim.__version__ == '0.1.0'", workflow)
 
 
 if __name__ == "__main__":

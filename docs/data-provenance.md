@@ -28,4 +28,4 @@ The wheel installs these records under `share/mesim/data`; a source checkout use
 4. Capture DWSIM twice when executable parity is claimed and document any residual or model difference.
 5. Version a schema when a change is not backward compatible; never reinterpret an existing field in place.
 
-The vendored DWSIM source is GPLv3. Public distribution of derived code or data requires a separate license review; the current release candidate is for internal use.
+The vendored DWSIM source is GPLv3. Public distribution of derived code or data requires a separate license review; the current 0.1.0 source promotion is for internal use and is not a public release tag.
