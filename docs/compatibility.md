@@ -16,6 +16,7 @@ Status terms are normative: `verified` means equation and executable golden gate
 | T1 Peng-Robinson pure and mixture properties | verified-with-difference | Classic PR; unmodified and explicit Peneloux density paths remain distinct |
 | T2 TP, PH, bubble, and dew flash | verified-with-difference | Executable DWSIM parity gates pass; phase labeling, reference convergence, and caloric-model differences are documented |
 | T3 caloric and transport extensions | partial | Named vapor/liquid correlations and captured mixtures only |
+| T4 activity-coefficient liquid VLE | partial | Saved-source acetone/methanol NRTL activities and modified-Raoult bubble/dew pressures only |
 | U0 streams, basic operations, and acyclic flowsheets | verified-with-difference | Phase-split flow uses the documented reference-flash tolerance |
 | U1 pressure-changing and component-separation operations | verified | Captured PR pump, compressor, expander, and component-separator modes |
 | U2 heat exchangers | partial | Duty, UA, efficiency, terminal pinch, and one vapor shell-and-tube rating slice |
@@ -187,6 +188,12 @@ The same estimated-air reference now gates automatic liquid-property updates. `d
 `tests/golden/u3-pipe-thermal-phase-change-pr-eos.json` and its normalized repeat cover a defined-heat liquid-to-two-phase PR pipe. The 2 MW saved specification advances four active 400 kW rows; DWSIM's stream energy is 1.5995935 MW after pressure coupling. The reference remains liquid for the first two active outlets and becomes two-phase for the final two, ending at 339.449473 K, 391489.647 Pa, and 0.0712191 molar vapor fraction. `pipe_defined_heat_pr_profile` now preserves each PH flash phase, vapor fraction, and molar enthalpy instead of rejecting the first non-liquid row. Segment temperatures match within `3e-6` relative, the outlet phase split uses a documented `5e-4` reference-flash tolerance, total molar flow remains exact, and the independent PR stream-energy closure matches within `5e-5` relative. Pressure endpoints are still explicit inputs, so fully coupled thermal/two-phase hydraulic iteration remains outside this gate.
 
 Windows setup and capture steps are in [phase-5-dwsim-parity.md](phase-5-dwsim-parity.md).
+
+## Phase 13 T4 activity-model status
+
+`tests/golden/t4-nrtl-acetone-methanol-vle.json` and its normalized repeat isolate the `HP Azeotrope` stream from DWSIM 10's accepted pressure-swing acetone-column case. The capture enables bubble/dew calculation in memory, leaves the saved column unchanged, and returns without solve, object, or property-read errors. A first candidate using `HP Feed` was rejected because DWSIM's near-azeotropic result placed bubble pressure 17 Pa below dew pressure. The accepted stream is 69.518685 mol% acetone and 30.481315 mol% methanol at 388.288289 K; its 607.921595 kPa bubble pressure remains above its 596.554401 kPa dew pressure.
+
+`data/correlations/nrtl-acetone-methanol-v1.json` preserves the official sample's embedded COCO vapor-pressure records and both directed ChemSep NRTL parameter records in their saved cal/mol basis. The loader converts those parameters explicitly to J/mol and rejects missing interactions, invalid units, duplicate directed pairs, invalid correlation ranges, and non-UTC provenance. `nrtl_activity_coefficients` follows DWSIM's saved-source NRTL equation, while `nrtl_bubble_pressure` and `nrtl_dew_pressure` close the scoped modified-Raoult equations with normalized incipient-phase compositions. Equation vectors match at floating-point precision; captured activities and both DWSIM envelope pressures match within `2.5e-3` and `2e-3` relative respectively. The small reference difference is retained because the saved stream activities do not exactly equal a fresh evaluation of the saved interaction records. This is a bounded binary liquid-VLE dependency for future column work, not a general NRTL TP/PH flash, excess-enthalpy model, LLE/VLLE stability solver, or live rigorous-column thermodynamic loop.
 
 ## Phase 14 U4 reaction status
 

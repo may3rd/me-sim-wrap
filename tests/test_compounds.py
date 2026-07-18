@@ -22,7 +22,7 @@ class CompoundDataTest(unittest.TestCase):
             (ROOT / "tests/golden/compound-catalog.json").read_text(encoding="utf-8-sig")
         )["inputs"]["compounds"]
 
-        self.assertEqual(len(compounds), 13)
+        self.assertEqual(len(compounds), 14)
         self.assertTrue({c["id"] for c in captured}.issubset({c.id for c in compounds}))
         for compound in (item for item in compounds if item.id in {c["id"] for c in captured}):
             reference = next(c for c in captured if c["id"] == compound.id)
@@ -44,6 +44,15 @@ class CompoundDataTest(unittest.TestCase):
             self.assertEqual(compound.formula, reference["formula"])
             for field in ("molecular_weight", "critical_temperature", "critical_pressure", "acentric_factor", "normal_boiling_point"):
                 self.assertEqual(getattr(compound, field).value, reference[field]["value"])
+
+        nrtl = json.loads(
+            (ROOT / "tests/golden/t4-nrtl-acetone-methanol-vle.json").read_text(encoding="utf-8-sig")
+        )["inputs"]["compounds"]
+        acetone_reference = next(record for record in nrtl if record["id"] == "Acetone")
+        acetone = next(compound for compound in compounds if compound.id == "Acetone")
+        self.assertEqual((acetone.name, acetone.cas, acetone.formula), ("Acetone", "67-64-1", "CH3COCH3"))
+        for field in ("molecular_weight", "critical_temperature", "critical_pressure", "acentric_factor", "normal_boiling_point"):
+            self.assertEqual(getattr(acetone, field).value, acetone_reference[field]["value"])
         with self.assertRaises(FrozenInstanceError):
             compounds[0].id = "changed"
 

@@ -1,0 +1,60 @@
+{
+  "schema_version": "nrtl-vle-data-1",
+  "model": "NRTL",
+  "provenance": {
+    "source": "tests/u7-distillation-acetone-nrtl.dwxmz saved compound records and InteractionParameters_NRTL",
+    "source_revision": "sha256:078b90884100a8d1bdeac1fe75dabdff69611a2b0908194e6a0e4c2d5bb67e9b; DWSIM 10.0.9671.22371",
+    "selection": "COCO pressure-swing acetone/methanol sample; both saved directed interaction records retained",
+    "imported_utc": "2026-07-18T10:17:02Z"
+  },
+  "vapor_pressure_correlations": [
+    {
+      "compound_id": "Acetone",
+      "equation": 101,
+      "A": 74.087,
+      "B": -5770.1,
+      "C": -7.9032,
+      "D": 0.000007,
+      "E": 2,
+      "minimum_k": 178.45,
+      "maximum_k": 508.2,
+      "unit": "Pa"
+    },
+    {
+      "compound_id": "Methanol",
+      "equation": 101,
+      "A": 123.6,
+      "B": -8660.0,
+      "C": -15.101,
+      "D": 0.000013,
+      "E": 2,
+      "minimum_k": 175.47,
+      "maximum_k": 512.64,
+      "unit": "Pa"
+    }
+  ],
+  "interactions": [
+    {
+      "compound_1": "Acetone",
+      "compound_2": "Methanol",
+      "A12": {"value": 184.2662, "unit": "cal/mol"},
+      "A21": {"value": 226.558, "unit": "cal/mol"},
+      "B12": {"value": 0.0, "unit": "cal/mol/K"},
+      "B21": {"value": 0.0, "unit": "cal/mol/K"},
+      "C12": {"value": 0.0, "unit": "cal/mol/K2"},
+      "C21": {"value": 0.0, "unit": "cal/mol/K2"},
+      "alpha12": {"value": 0.3009, "unit": "dimensionless"}
+    },
+    {
+      "compound_1": "Methanol",
+      "compound_2": "Acetone",
+      "A12": {"value": 296.2432, "unit": "cal/mol"},
+      "A21": {"value": 118.0803, "unit": "cal/mol"},
+      "B12": {"value": 0.0, "unit": "cal/mol/K"},
+      "B21": {"value": 0.0, "unit": "cal/mol/K"},
+      "C12": {"value": 0.0, "unit": "cal/mol/K2"},
+      "C21": {"value": 0.0, "unit": "cal/mol/K2"},
+      "alpha12": {"value": 0.3003, "unit": "dimensionless"}
+    }
+  ]
+}

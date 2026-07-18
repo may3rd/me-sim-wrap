@@ -117,6 +117,15 @@
       "acentric_factor": {"value": -0.215993, "unit": "dimensionless"},
       "normal_boiling_point": {"value": 20.39, "unit": "K"},
       "provenance": {"database": "ChemSep", "source": "DWSIM.AvailableCompounds", "source_revision": "9.0.5.0", "imported_utc": "2026-07-17T09:00:00Z"}
+    },
+    {
+      "id": "Acetone", "name": "Acetone", "cas": "67-64-1", "formula": "CH3COCH3",
+      "molecular_weight": {"value": 58.07914, "unit": "kg/kmol"},
+      "critical_temperature": {"value": 508.1, "unit": "K"},
+      "critical_pressure": {"value": 4700000, "unit": "Pa"},
+      "acentric_factor": {"value": 0.307, "unit": "dimensionless"},
+      "normal_boiling_point": {"value": 329.22, "unit": "K"},
+      "provenance": {"database": "ChemSep", "source": "DWSIM.AvailableCompounds", "source_revision": "10.0.9671.22371", "imported_utc": "2026-07-18T10:17:02Z"}
     }
   ]
 }

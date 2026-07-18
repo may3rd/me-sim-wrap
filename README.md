@@ -60,6 +60,7 @@ golden-backed slices add the compounds required by reactions and columns.
 | Five-compound ideal properties (cp, h, s, density, vapor pressure) | Done |
 | Peng-Robinson pure + mixture (cubic roots, fugacity, departure h/s, stable-root selection) | Done (T1) |
 | TP / PH / bubble / dew flash | Done (T2; documented DWSIM solver/model differences) |
+| Activity-coefficient liquid VLE | Partial (T4: saved-source acetone/methanol NRTL bubble/dew slice) |
 | Streams, mixer, splitter, heater, cooler, valve, equilibrium separator | Done (U0) |
 | Acyclic flowsheet execution | Done |
 | HTTP API (`/v1/*`) | Done (internal alpha) |
