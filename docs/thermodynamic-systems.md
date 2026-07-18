@@ -9,6 +9,7 @@ loading correlation files or selecting model equations themselves.
 | `peng-robinson-classic` | `PengRobinsonSystem` | TP, PH, and PS flash, total flash enthalpy, and source-backed ideal, saturated-liquid, and transport records | Classic PR with supplied binary interactions; a mixture is accepted only when every requested pair is explicit |
 | `ideal-raoult` | `IdealRaoultSystem` | Liquid/vapor fugacity coefficients, K-values, bubble/dew pressure, and TP flash | DWSIM Ideal/Raoult equilibrium contract over an ordered source-backed vapor-pressure domain |
 | `soave-redlich-kwong` | `SoaveRedlichKwongSystem` | Liquid/vapor/stable phase states and VLE TP flash | Classic SRK with its own frozen DWSIM binary-interaction table; PR interaction records are rejected |
+| `peng-robinson-1978` | `PengRobinson1978System` | Liquid/vapor/stable phase states | PR78's piecewise alpha law, including the high-acentric-factor branch, with the frozen PR interaction domain |
 | `nrtl-acetone-methanol` | `NRTLSystem` | Modified-Raoult equilibrium ratios, bubble/dew pressure, bubble temperature, and Excess-mode phase enthalpies | Saved-source binary acetone/methanol domain only; no general TP/PH flash |
 
 The registry is a fixed dictionary from stable model ID to constructor. Runtime plugin

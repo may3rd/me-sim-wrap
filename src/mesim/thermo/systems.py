@@ -29,6 +29,8 @@ from .flash import (
 )
 from .ideal import IdealCorrelations
 from .pure import SaturatedLiquidCorrelations
+from .peng_robinson_1978 import PengRobinson1978Mixture
+from .peng_robinson import PRMixtureState
 from .raoult import (
     RaoultTPFlashResult,
     RaoultVLEResult,
@@ -51,6 +53,7 @@ PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
 NRTL_ACETONE_METHANOL = "nrtl-acetone-methanol"
 IDEAL_RAOULT = "ideal-raoult"
 SOAVE_REDLICH_KWONG = "soave-redlich-kwong"
+PENG_ROBINSON_1978 = "peng-robinson-1978"
 
 
 @runtime_checkable
@@ -499,12 +502,65 @@ class SoaveRedlichKwongSystem:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class PengRobinson1978System:
+    """PR78 phase-state boundary with the source-backed PR interaction domain."""
+
+    compounds: tuple[Compound, ...]
+    interactions: PRInteractions
+    model_id: str = field(default=PENG_ROBINSON_1978, init=False)
+    compound_ids: tuple[str, ...] = field(init=False)
+
+    def __post_init__(self) -> None:
+        try:
+            compounds = tuple(self.compounds)
+        except TypeError as error:
+            raise ValidationError("PR78 compounds must be a sequence") from error
+        if (
+            len(compounds) < 2
+            or any(not isinstance(compound, Compound) for compound in compounds)
+            or not isinstance(self.interactions, PRInteractions)
+            or self.interactions.model != "Peng-Robinson"
+        ):
+            raise ValidationError("PR78 thermodynamic-system inputs are invalid")
+        compound_ids = tuple(compound.id for compound in compounds)
+        if len(set(compound_ids)) != len(compound_ids):
+            raise ValidationError("PR78 thermodynamic-system compound IDs must be unique")
+        for first_index, first in enumerate(compound_ids):
+            for second in compound_ids[first_index + 1:]:
+                self.interactions.get(first, second)
+        object.__setattr__(self, "compounds", compounds)
+        object.__setattr__(self, "compound_ids", compound_ids)
+
+    def state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+        phase: str,
+    ) -> PRMixtureState:
+        return PengRobinson1978Mixture(
+            self.compounds, composition, self.interactions
+        ).state(temperature_k, pressure_pa, phase)
+
+    def stable_state(
+        self,
+        composition: tuple[float, ...],
+        temperature_k: float,
+        pressure_pa: float,
+    ) -> PRMixtureState:
+        return PengRobinson1978Mixture(
+            self.compounds, composition, self.interactions
+        ).stable_state(temperature_k, pressure_pa)
+
+
 ThermoSystemConstructor = Callable[..., ThermodynamicSystem]
 _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     PENG_ROBINSON_CLASSIC: PengRobinsonSystem,
     NRTL_ACETONE_METHANOL: NRTLSystem,
     IDEAL_RAOULT: IdealRaoultSystem,
     SOAVE_REDLICH_KWONG: SoaveRedlichKwongSystem,
+    PENG_ROBINSON_1978: PengRobinson1978System,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS
