@@ -1,0 +1,50 @@
+﻿{
+    "schema_version":  "dwsim-thermo-package-golden-1",
+    "case_id":  "gerg-2008-methane-ethane-state",
+    "source":  {
+                   "dwsim_revision":  "9.0.5.0",
+                   "automation_version":  "DWSIM version 9.0.5.0 (28-Oct-25 10:42:38 AM)",
+                   "input_file_sha256":  "a699950d410abbb44011d9a4c82273248510842d99e225ced54cca1daee25a2b",
+                   "property_package":  "GERG-2008",
+                   "property_package_class":  "DWSIM.Thermodynamics.AdvancedEOS.GERG2008PropertyPackage",
+                   "property_package_construction":  "deserialized-from-case",
+                   "flash_algorithm":  "Universal Flash"
+               },
+    "inputs":  {
+                   "compounds":  [
+                                     "Methane",
+                                     "Ethane"
+                                 ],
+                   "temperature_k":  220,
+                   "pressure_pa":  3000000,
+                   "composition":  [
+                                       0.7,
+                                       0.3
+                                   ]
+               },
+    "outputs":  {
+                    "liquid_fugacity_coefficients":  [
+                                                         0.89521015865358622,
+                                                         0.53069313396211981
+                                                     ],
+                    "vapor_fugacity_coefficients":  [
+                                                        0.89521015866352516,
+                                                        0.53069313397390361
+                                                    ],
+                    "liquid_fraction":  0.24360487681518284,
+                    "vapor_fraction":  0.75639512318481716,
+                    "liquid_composition":  [
+                                               0.35947419227451111,
+                                               0.640525807725489
+                                           ],
+                    "vapor_composition":  [
+                                              0.80967849216101018,
+                                              0.19032150783898982
+                                          ],
+                    "iterations":  5,
+                    "equilibrium_ratios":  [
+                                               2.2522194532657771,
+                                               0.29710985388417094
+                                           ]
+                }
+}

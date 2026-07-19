@@ -63,6 +63,7 @@ from .steam_tables import SteamTablesData,SteamTablesTPFlashResult,steam_tables_
 from .seawater import SeawaterData,SeawaterTPFlashResult,seawater_fugacity_coefficients,seawater_tp_flash
 from .black_oil import BlackOilData,BlackOilTPFlashResult,black_oil_fugacity_coefficients,black_oil_tp_flash
 from .ideal_electrolyte import IdealElectrolyteData,IdealElectrolyteTPFlashResult,ideal_electrolyte_fugacity_coefficients,ideal_electrolyte_tp_flash
+from .pcsaft import PCSAFTData,PCSAFTTPFlashResult,pcsaft_fugacity_coefficients,pcsaft_tp_flash
 
 
 PENG_ROBINSON_CLASSIC = "peng-robinson-classic"
@@ -92,6 +93,7 @@ STEAM_TABLES_WATER = "steam-tables-water"
 SEAWATER_WATER_SALT = "seawater-water-salt"
 BLACK_OIL_N_PENTANE_N_HEXANE = "black-oil-n-pentane-n-hexane"
 IDEAL_AQUEOUS_ELECTROLYTE_WATER_SODIUM_CHLORIDE = "ideal-aqueous-electrolyte-water-sodium-chloride"
+PCSAFT_METHANE_ETHANE = "pc-saft-methane-ethane"
 
 
 @runtime_checkable
@@ -630,6 +632,18 @@ class IdealAqueousElectrolyteSystem:
         return ideal_electrolyte_fugacity_coefficients(self.data,self.water,self.compound_ids,composition,temperature_k,pressure_pa,phase)
     def tp_flash(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float)->IdealElectrolyteTPFlashResult:
         return ideal_electrolyte_tp_flash(self.data,self.water,self.compound_ids,composition,temperature_k,pressure_pa)
+
+@dataclass(frozen=True,slots=True)
+class PCSAFTSystem:
+    data:PCSAFTData
+    model_id:str=field(default=PCSAFT_METHANE_ETHANE,init=False)
+    compound_ids:tuple[str,...]=field(default=("Methane","Ethane"),init=False)
+    def __post_init__(self)->None:
+        if not isinstance(self.data,PCSAFTData) or self.data.compound_ids!=self.compound_ids:raise ValidationError("PC-SAFT system requires scoped methane/ethane data")
+    def fugacity_coefficients(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float,phase:str)->tuple[float,...]:
+        return pcsaft_fugacity_coefficients(self.data,self.compound_ids,composition,temperature_k,pressure_pa,phase)
+    def tp_flash(self,composition:tuple[float,...],temperature_k:float,pressure_pa:float)->PCSAFTTPFlashResult:
+        return pcsaft_tp_flash(self.data,self.compound_ids,composition,temperature_k,pressure_pa)
 
 
 @dataclass(frozen=True, slots=True)
@@ -1184,6 +1198,7 @@ _THERMO_SYSTEM_CONSTRUCTORS: dict[str, ThermoSystemConstructor] = {
     SEAWATER_WATER_SALT: SeawaterSystem,
     BLACK_OIL_N_PENTANE_N_HEXANE: BlackOilSystem,
     IDEAL_AQUEOUS_ELECTROLYTE_WATER_SODIUM_CHLORIDE: IdealAqueousElectrolyteSystem,
+    PCSAFT_METHANE_ETHANE: PCSAFTSystem,
 }
 THERMO_SYSTEM_CONSTRUCTORS: Mapping[str, ThermoSystemConstructor] = MappingProxyType(
     _THERMO_SYSTEM_CONSTRUCTORS

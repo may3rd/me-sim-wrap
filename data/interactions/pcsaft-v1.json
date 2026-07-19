@@ -1,0 +1,1199 @@
+﻿{
+    "schema_version":  "dwsim-pcsaft-data-1",
+    "model":  "PC-SAFT (with Association Support) (.NET Code)",
+    "source":  {
+                   "product":  "DWSIM",
+                   "revision":  "9.0.5.0",
+                   "case_sha256":  "d9b7d11cc5e87f07039ef4668b874f7d3ad710a77b583ade90e13f97cb8fa508",
+                   "runtime_assembly_sha256":  "6befe35a38c70818be1645b4320e7c6d3e43a717b887a79f25627faf3392006d",
+                   "property_package_source_sha256":  "a46a3af1580be83f5f2361dcd10b94006a36b4d82cb515139ae24e76fa403eb5",
+                   "eos_source_sha256":  "c28c9aff3310c331927d50ff6e02825ed0c26efe7c6fd64f0fc5e7c82598508e",
+                   "pure_data_source_sha256":  "1fc1ea96344ae5125b419bb73c1bc2e79938671cdaf089054b896f9b5e45ed2e",
+                   "interaction_data_source_sha256":  "8fcf9f40dd15b4e237c736c3f86c04186d2e354e57b0f6d19ada616384588540"
+               },
+    "scoped_compounds":  [
+                             {
+                                 "compound_id":  "Methane",
+                                 "cas_number":  "74-82-8"
+                             },
+                             {
+                                 "compound_id":  "Ethane",
+                                 "cas_number":  "74-84-0"
+                             }
+                         ],
+    "pure_parameters":  [
+                            {
+                                "source_name":  "1-butanol",
+                                "cas_number":  "71-36-3",
+                                "molecular_weight":  74.123,
+                                "segment_count":  2.7515,
+                                "segment_diameter_angstrom":  3.6139,
+                                "dispersion_energy_k":  259.59,
+                                "association_volume":  0.006692,
+                                "association_energy_k":  2544.6
+                            },
+                            {
+                                "source_name":  "1-butene",
+                                "cas_number":  "106-98-9",
+                                "molecular_weight":  56.107,
+                                "segment_count":  2.2864,
+                                "segment_diameter_angstrom":  3.6431,
+                                "dispersion_energy_k":  222,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "1-chlorobutane",
+                                "cas_number":  "109-69-3",
+                                "molecular_weight":  92.568,
+                                "segment_count":  2.8585,
+                                "segment_diameter_angstrom":  3.6424,
+                                "dispersion_energy_k":  258.66,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "1-heptanol",
+                                "cas_number":  "111-70-6",
+                                "molecular_weight":  116.203,
+                                "segment_count":  4.3985,
+                                "segment_diameter_angstrom":  3.545,
+                                "dispersion_energy_k":  253.46,
+                                "association_volume":  0.001155,
+                                "association_energy_k":  2878.5
+                            },
+                            {
+                                "source_name":  "1-hexanol",
+                                "cas_number":  "111-27-3",
+                                "molecular_weight":  102.177,
+                                "segment_count":  3.5146,
+                                "segment_diameter_angstrom":  3.6735,
+                                "dispersion_energy_k":  262.32,
+                                "association_volume":  0.005747,
+                                "association_energy_k":  2538.9
+                            },
+                            {
+                                "source_name":  "1-hexene",
+                                "cas_number":  "592-41-6",
+                                "molecular_weight":  84.616,
+                                "segment_count":  2.9853,
+                                "segment_diameter_angstrom":  3.7753,
+                                "dispersion_energy_k":  236.81,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "1-nonanol",
+                                "cas_number":  "143-08-8",
+                                "molecular_weight":  144.257,
+                                "segment_count":  4.6839,
+                                "segment_diameter_angstrom":  3.7292,
+                                "dispersion_energy_k":  263.64,
+                                "association_volume":  0.001427,
+                                "association_energy_k":  2941.9
+                            },
+                            {
+                                "source_name":  "1-octanol",
+                                "cas_number":  "111-87-5",
+                                "molecular_weight":  130.23,
+                                "segment_count":  4.3555,
+                                "segment_diameter_angstrom":  3.7145,
+                                "dispersion_energy_k":  262.74,
+                                "association_volume":  0.002197,
+                                "association_energy_k":  2754.8
+                            },
+                            {
+                                "source_name":  "1-octene",
+                                "cas_number":  "111-66-0",
+                                "molecular_weight":  112.215,
+                                "segment_count":  3.7424,
+                                "segment_diameter_angstrom":  3.8133,
+                                "dispersion_energy_k":  243.02,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "1-pentanol",
+                                "cas_number":  "71-41-0",
+                                "molecular_weight":  88.15,
+                                "segment_count":  3.626,
+                                "segment_diameter_angstrom":  3.4508,
+                                "dispersion_energy_k":  247.28,
+                                "association_volume":  0.010319,
+                                "association_energy_k":  2252.1
+                            },
+                            {
+                                "source_name":  "1-pentene",
+                                "cas_number":  "109-67-1",
+                                "molecular_weight":  70.134,
+                                "segment_count":  2.6006,
+                                "segment_diameter_angstrom":  3.7399,
+                                "dispersion_energy_k":  231.99,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "1-propanol",
+                                "cas_number":  "71-23-8",
+                                "molecular_weight":  60.096,
+                                "segment_count":  2.9997,
+                                "segment_diameter_angstrom":  3.2522,
+                                "dispersion_energy_k":  233.4,
+                                "association_volume":  0.015268,
+                                "association_energy_k":  2276.8
+                            },
+                            {
+                                "source_name":  "1-propylamine",
+                                "cas_number":  "107-10-8",
+                                "molecular_weight":  59.11,
+                                "segment_count":  2.4539,
+                                "segment_diameter_angstrom":  3.5347,
+                                "dispersion_energy_k":  250.52,
+                                "association_volume":  0.022674,
+                                "association_energy_k":  1028.1
+                            },
+                            {
+                                "source_name":  "2.2-dimethylbutane",
+                                "cas_number":  "75-83-2",
+                                "molecular_weight":  86.177,
+                                "segment_count":  2.6008,
+                                "segment_diameter_angstrom":  4.0042,
+                                "dispersion_energy_k":  243.51,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "2.3-dimethylbutane",
+                                "cas_number":  "79-29-8",
+                                "molecular_weight":  86.177,
+                                "segment_count":  2.6853,
+                                "segment_diameter_angstrom":  3.9545,
+                                "dispersion_energy_k":  246.07,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "2-chloropropane",
+                                "cas_number":  "75-29-6",
+                                "molecular_weight":  78.541,
+                                "segment_count":  2.4151,
+                                "segment_diameter_angstrom":  3.6184,
+                                "dispersion_energy_k":  251.47,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "2-methyl-2-butanol",
+                                "cas_number":  "75-85-4",
+                                "molecular_weight":  88.15,
+                                "segment_count":  2.5487,
+                                "segment_diameter_angstrom":  3.9053,
+                                "dispersion_energy_k":  266.01,
+                                "association_volume":  0.001863,
+                                "association_energy_k":  2618.8
+                            },
+                            {
+                                "source_name":  "2-methylhexane",
+                                "cas_number":  "591-76-4",
+                                "molecular_weight":  100.204,
+                                "segment_count":  3.3478,
+                                "segment_diameter_angstrom":  3.8612,
+                                "dispersion_energy_k":  237.42,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "2-methylpentane",
+                                "cas_number":  "107-83-5",
+                                "molecular_weight":  86.177,
+                                "segment_count":  2.9317,
+                                "segment_diameter_angstrom":  3.8535,
+                                "dispersion_energy_k":  235.58,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "2-propanol",
+                                "cas_number":  "67-63-0",
+                                "molecular_weight":  60.096,
+                                "segment_count":  3.0929,
+                                "segment_diameter_angstrom":  3.2085,
+                                "dispersion_energy_k":  208.42,
+                                "association_volume":  0.024675,
+                                "association_energy_k":  2253.9
+                            },
+                            {
+                                "source_name":  "2-propylamine",
+                                "cas_number":  "75-31-0",
+                                "molecular_weight":  59.11,
+                                "segment_count":  2.5908,
+                                "segment_diameter_angstrom":  3.4777,
+                                "dispersion_energy_k":  231.8,
+                                "association_volume":  0.02134,
+                                "association_energy_k":  932.2
+                            },
+                            {
+                                "source_name":  "3-methylpentane",
+                                "cas_number":  "96-14-0",
+                                "molecular_weight":  86.177,
+                                "segment_count":  2.8852,
+                                "segment_diameter_angstrom":  3.8605,
+                                "dispersion_energy_k":  240.48,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "acetic acid",
+                                "cas_number":  "64-19-7",
+                                "molecular_weight":  60.053,
+                                "segment_count":  1.3403,
+                                "segment_diameter_angstrom":  3.8582,
+                                "dispersion_energy_k":  211.59,
+                                "association_volume":  0.07555,
+                                "association_energy_k":  3044.4
+                            },
+                            {
+                                "source_name":  "aniline",
+                                "cas_number":  "62-53-3",
+                                "molecular_weight":  93.13,
+                                "segment_count":  2.6607,
+                                "segment_diameter_angstrom":  3.7021,
+                                "dispersion_energy_k":  335.47,
+                                "association_volume":  0.074883,
+                                "association_energy_k":  1351.6
+                            },
+                            {
+                                "source_name":  "argon",
+                                "cas_number":  "7440-37-1",
+                                "molecular_weight":  39.948,
+                                "segment_count":  0.9285,
+                                "segment_diameter_angstrom":  3.4784,
+                                "dispersion_energy_k":  122.23,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "benzene",
+                                "cas_number":  "71-43-2",
+                                "molecular_weight":  78.114,
+                                "segment_count":  2.4653,
+                                "segment_diameter_angstrom":  3.6478,
+                                "dispersion_energy_k":  287.35,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "biphenyl",
+                                "cas_number":  "92-52-4",
+                                "molecular_weight":  154.211,
+                                "segment_count":  3.8877,
+                                "segment_diameter_angstrom":  3.8151,
+                                "dispersion_energy_k":  327.42,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "bromobenzene",
+                                "cas_number":  "108-86-1",
+                                "molecular_weight":  157.01,
+                                "segment_count":  2.6456,
+                                "segment_diameter_angstrom":  3.836,
+                                "dispersion_energy_k":  334.37,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "N-butane",
+                                "cas_number":  "106-97-8",
+                                "molecular_weight":  58.123,
+                                "segment_count":  2.3316,
+                                "segment_diameter_angstrom":  3.7086,
+                                "dispersion_energy_k":  222.88,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "carbon dioxide",
+                                "cas_number":  "124-38-9",
+                                "molecular_weight":  44.01,
+                                "segment_count":  2.0729,
+                                "segment_diameter_angstrom":  2.7852,
+                                "dispersion_energy_k":  169.21,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "carbon disulfide",
+                                "cas_number":  "75-15-0",
+                                "molecular_weight":  76.143,
+                                "segment_count":  1.6919,
+                                "segment_diameter_angstrom":  3.6172,
+                                "dispersion_energy_k":  334.82,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "carbon monoxide",
+                                "cas_number":  "630-08-0",
+                                "molecular_weight":  28.01,
+                                "segment_count":  1.3097,
+                                "segment_diameter_angstrom":  3.2507,
+                                "dispersion_energy_k":  92.15,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "chlorine",
+                                "cas_number":  "7782-50-5",
+                                "molecular_weight":  70.905,
+                                "segment_count":  1.5514,
+                                "segment_diameter_angstrom":  3.3672,
+                                "dispersion_energy_k":  265.67,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "chlorobenzene",
+                                "cas_number":  "108-90-7",
+                                "molecular_weight":  112.558,
+                                "segment_count":  2.6485,
+                                "segment_diameter_angstrom":  3.7533,
+                                "dispersion_energy_k":  315.04,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "chloroethane",
+                                "cas_number":  "75-00-3",
+                                "molecular_weight":  64.514,
+                                "segment_count":  2.2638,
+                                "segment_diameter_angstrom":  3.416,
+                                "dispersion_energy_k":  245.43,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "cyclohexane",
+                                "cas_number":  "110-82-7",
+                                "molecular_weight":  84.147,
+                                "segment_count":  2.5303,
+                                "segment_diameter_angstrom":  3.8499,
+                                "dispersion_energy_k":  278.11,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "cyclopentane",
+                                "cas_number":  "287-92-3",
+                                "molecular_weight":  70.13,
+                                "segment_count":  2.3655,
+                                "segment_diameter_angstrom":  3.7114,
+                                "dispersion_energy_k":  265.83,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "cyclopentene",
+                                "cas_number":  "142-29-0",
+                                "molecular_weight":  68.114,
+                                "segment_count":  2.2934,
+                                "segment_diameter_angstrom":  3.6668,
+                                "dispersion_energy_k":  267.76,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "N-decane",
+                                "cas_number":  "124-18-5",
+                                "molecular_weight":  142.285,
+                                "segment_count":  4.6627,
+                                "segment_diameter_angstrom":  3.8384,
+                                "dispersion_energy_k":  243.87,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "diethyl ether",
+                                "cas_number":  "60-29-7",
+                                "molecular_weight":  74.123,
+                                "segment_count":  2.9686,
+                                "segment_diameter_angstrom":  3.5147,
+                                "dispersion_energy_k":  220.09,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "dimethyl ether",
+                                "cas_number":  "115-10-6",
+                                "molecular_weight":  46.069,
+                                "segment_count":  2.3071,
+                                "segment_diameter_angstrom":  3.2528,
+                                "dispersion_energy_k":  211.06,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "N-dodecane",
+                                "cas_number":  "112-40-3",
+                                "molecular_weight":  170.338,
+                                "segment_count":  5.306,
+                                "segment_diameter_angstrom":  3.8959,
+                                "dispersion_energy_k":  249.21,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "N-eicosane",
+                                "cas_number":  "112-95-8",
+                                "molecular_weight":  282.553,
+                                "segment_count":  7.9849,
+                                "segment_diameter_angstrom":  3.9869,
+                                "dispersion_energy_k":  257.75,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "ethane",
+                                "cas_number":  "74-84-0",
+                                "molecular_weight":  30.07,
+                                "segment_count":  1.6069,
+                                "segment_diameter_angstrom":  3.5206,
+                                "dispersion_energy_k":  191.42,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "ethanol",
+                                "cas_number":  "64-17-5",
+                                "molecular_weight":  46.069,
+                                "segment_count":  2.3827,
+                                "segment_diameter_angstrom":  3.1771,
+                                "dispersion_energy_k":  198.24,
+                                "association_volume":  0.032384,
+                                "association_energy_k":  2653.4
+                            },
+                            {
+                                "source_name":  "ethylamine",
+                                "cas_number":  "75-04-7",
+                                "molecular_weight":  45.09,
+                                "segment_count":  2.7046,
+                                "segment_diameter_angstrom":  3.1343,
+                                "dispersion_energy_k":  221.53,
+                                "association_volume":  0.017275,
+                                "association_energy_k":  854.7
+                            },
+                            {
+                                "source_name":  "ethylbenzene",
+                                "cas_number":  "100-41-4",
+                                "molecular_weight":  106.167,
+                                "segment_count":  3.0799,
+                                "segment_diameter_angstrom":  3.7974,
+                                "dispersion_energy_k":  287.35,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "ethylcyclohexane",
+                                "cas_number":  "1678-91-7",
+                                "molecular_weight":  112.215,
+                                "segment_count":  2.8256,
+                                "segment_diameter_angstrom":  4.1039,
+                                "dispersion_energy_k":  294.04,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "ethylcyclopentane",
+                                "cas_number":  "1640-89-7",
+                                "molecular_weight":  98.182,
+                                "segment_count":  2.9062,
+                                "segment_diameter_angstrom":  3.8873,
+                                "dispersion_energy_k":  270.5,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "ethylene",
+                                "cas_number":  "74-85-1",
+                                "molecular_weight":  28.05,
+                                "segment_count":  1.593,
+                                "segment_diameter_angstrom":  3.445,
+                                "dispersion_energy_k":  176.47,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "ethylethanoate",
+                                "cas_number":  "141-78-6",
+                                "molecular_weight":  88.106,
+                                "segment_count":  3.5375,
+                                "segment_diameter_angstrom":  3.3079,
+                                "dispersion_energy_k":  230.8,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "ethylmethanoate",
+                                "cas_number":  "109-94-4",
+                                "molecular_weight":  74.079,
+                                "segment_count":  2.8876,
+                                "segment_diameter_angstrom":  3.3109,
+                                "dispersion_energy_k":  246.47,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "ethylpropanoate",
+                                "cas_number":  "105-37-3",
+                                "molecular_weight":  102.133,
+                                "segment_count":  3.8371,
+                                "segment_diameter_angstrom":  3.4031,
+                                "dispersion_energy_k":  232.78,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "heptadecane",
+                                "cas_number":  "629-78-7",
+                                "molecular_weight":  240.473,
+                                "segment_count":  6.9809,
+                                "segment_diameter_angstrom":  3.9675,
+                                "dispersion_energy_k":  255.65,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "N-heptane",
+                                "cas_number":  "142-82-5",
+                                "molecular_weight":  100.203,
+                                "segment_count":  3.4831,
+                                "segment_diameter_angstrom":  3.8049,
+                                "dispersion_energy_k":  238.4,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "hexadecane",
+                                "cas_number":  "544-76-3",
+                                "molecular_weight":  226.446,
+                                "segment_count":  6.6485,
+                                "segment_diameter_angstrom":  3.9552,
+                                "dispersion_energy_k":  254.7,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "N-hexane",
+                                "cas_number":  "110-54-3",
+                                "molecular_weight":  86.177,
+                                "segment_count":  3.0576,
+                                "segment_diameter_angstrom":  3.7983,
+                                "dispersion_energy_k":  236.77,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "isobutane",
+                                "cas_number":  "75-28-5",
+                                "molecular_weight":  58.123,
+                                "segment_count":  2.2616,
+                                "segment_diameter_angstrom":  3.7574,
+                                "dispersion_energy_k":  216.53,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "isopentane",
+                                "cas_number":  "78-78-4",
+                                "molecular_weight":  72.15,
+                                "segment_count":  2.562,
+                                "segment_diameter_angstrom":  3.8296,
+                                "dispersion_energy_k":  230.75,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "isopropylethanoate",
+                                "cas_number":  "108-21-4",
+                                "molecular_weight":  102.133,
+                                "segment_count":  3.6084,
+                                "segment_diameter_angstrom":  3.4818,
+                                "dispersion_energy_k":  231.91,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "methane",
+                                "cas_number":  "74-82-8",
+                                "molecular_weight":  16.043,
+                                "segment_count":  1,
+                                "segment_diameter_angstrom":  3.7039,
+                                "dispersion_energy_k":  150.03,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "methanol",
+                                "cas_number":  "67-56-1",
+                                "molecular_weight":  32.042,
+                                "segment_count":  1.5255,
+                                "segment_diameter_angstrom":  3.23,
+                                "dispersion_energy_k":  188.9,
+                                "association_volume":  0.035176,
+                                "association_energy_k":  2899.5
+                            },
+                            {
+                                "source_name":  "methylamine",
+                                "cas_number":  "74-89-5",
+                                "molecular_weight":  31.06,
+                                "segment_count":  2.3967,
+                                "segment_diameter_angstrom":  2.8906,
+                                "dispersion_energy_k":  214.94,
+                                "association_volume":  0.095103,
+                                "association_energy_k":  684.3
+                            },
+                            {
+                                "source_name":  "methyl butanoate",
+                                "cas_number":  "623-42-7",
+                                "molecular_weight":  102.133,
+                                "segment_count":  3.6758,
+                                "segment_diameter_angstrom":  3.4437,
+                                "dispersion_energy_k":  240.62,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "methyl chloride",
+                                "cas_number":  "74-87-3",
+                                "molecular_weight":  50.488,
+                                "segment_count":  1.9297,
+                                "segment_diameter_angstrom":  3.2293,
+                                "dispersion_energy_k":  240.56,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "methylcyclohexane",
+                                "cas_number":  "108-87-2",
+                                "molecular_weight":  98.182,
+                                "segment_count":  2.6637,
+                                "segment_diameter_angstrom":  3.9993,
+                                "dispersion_energy_k":  282.33,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "methylcyclopentane",
+                                "cas_number":  "96-37-7",
+                                "molecular_weight":  84.156,
+                                "segment_count":  2.613,
+                                "segment_diameter_angstrom":  3.8253,
+                                "dispersion_energy_k":  265.12,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "methyl methanoate",
+                                "cas_number":  "107-31-3",
+                                "molecular_weight":  60.053,
+                                "segment_count":  2.6784,
+                                "segment_diameter_angstrom":  3.0875,
+                                "dispersion_energy_k":  242.63,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "methyl-n-propylether",
+                                "cas_number":  "107-31-3",
+                                "molecular_weight":  74.123,
+                                "segment_count":  3.0087,
+                                "segment_diameter_angstrom":  3.4569,
+                                "dispersion_energy_k":  222.73,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "methyl propanoate",
+                                "cas_number":  "554-12-1",
+                                "molecular_weight":  88.106,
+                                "segment_count":  3.4793,
+                                "segment_diameter_angstrom":  3.3142,
+                                "dispersion_energy_k":  234.96,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "m-xylene",
+                                "cas_number":  "108-38-3",
+                                "molecular_weight":  106.167,
+                                "segment_count":  3.1861,
+                                "segment_diameter_angstrom":  3.7563,
+                                "dispersion_energy_k":  283.98,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "n-butylbenzene",
+                                "cas_number":  "104-51-8",
+                                "molecular_weight":  134.221,
+                                "segment_count":  3.7662,
+                                "segment_diameter_angstrom":  3.8727,
+                                "dispersion_energy_k":  283.07,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "n-butylethanoate",
+                                "cas_number":  "123-86-4",
+                                "molecular_weight":  116.16,
+                                "segment_count":  3.9808,
+                                "segment_diameter_angstrom":  3.5427,
+                                "dispersion_energy_k":  242.52,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "neopentane",
+                                "cas_number":  "463-82-1",
+                                "molecular_weight":  72.15,
+                                "segment_count":  2.3543,
+                                "segment_diameter_angstrom":  3.955,
+                                "dispersion_energy_k":  225.69,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "nitrogen",
+                                "cas_number":  "7727-37-9",
+                                "molecular_weight":  28.01,
+                                "segment_count":  1.2053,
+                                "segment_diameter_angstrom":  3.313,
+                                "dispersion_energy_k":  90.96,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "nonadecane",
+                                "cas_number":  "629-92-5",
+                                "molecular_weight":  268.527,
+                                "segment_count":  7.7175,
+                                "segment_diameter_angstrom":  3.9721,
+                                "dispersion_energy_k":  256,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "N-nonane",
+                                "cas_number":  "111-84-2",
+                                "molecular_weight":  128.25,
+                                "segment_count":  4.2079,
+                                "segment_diameter_angstrom":  3.8448,
+                                "dispersion_energy_k":  244.51,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "n-propylbenzene",
+                                "cas_number":  "103-65-1",
+                                "molecular_weight":  120.194,
+                                "segment_count":  3.3438,
+                                "segment_diameter_angstrom":  3.8438,
+                                "dispersion_energy_k":  288.13,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "n-propylethanoate",
+                                "cas_number":  "109-60-4",
+                                "molecular_weight":  102.133,
+                                "segment_count":  3.7861,
+                                "segment_diameter_angstrom":  3.4227,
+                                "dispersion_energy_k":  235.76,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "octadecane",
+                                "cas_number":  "593-45-3",
+                                "molecular_weight":  254.5,
+                                "segment_count":  7.3271,
+                                "segment_diameter_angstrom":  3.9668,
+                                "dispersion_energy_k":  256.2,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "N-octane",
+                                "cas_number":  "111-65-9",
+                                "molecular_weight":  114.231,
+                                "segment_count":  3.8176,
+                                "segment_diameter_angstrom":  3.8373,
+                                "dispersion_energy_k":  242.78,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "o-xylene",
+                                "cas_number":  "95-47-6",
+                                "molecular_weight":  106.167,
+                                "segment_count":  3.1362,
+                                "segment_diameter_angstrom":  3.76,
+                                "dispersion_energy_k":  291.05,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "pentadecane",
+                                "cas_number":  "629-62-9",
+                                "molecular_weight":  212.419,
+                                "segment_count":  6.2855,
+                                "segment_diameter_angstrom":  3.9531,
+                                "dispersion_energy_k":  254.14,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "N-pentane",
+                                "cas_number":  "109-66-0",
+                                "molecular_weight":  72.146,
+                                "segment_count":  2.6896,
+                                "segment_diameter_angstrom":  3.7729,
+                                "dispersion_energy_k":  231.2,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "propane",
+                                "cas_number":  "74-98-6",
+                                "molecular_weight":  44.096,
+                                "segment_count":  2.002,
+                                "segment_diameter_angstrom":  3.6184,
+                                "dispersion_energy_k":  208.11,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "propylene",
+                                "cas_number":  "115-07-1",
+                                "molecular_weight":  42.081,
+                                "segment_count":  1.9597,
+                                "segment_diameter_angstrom":  3.5356,
+                                "dispersion_energy_k":  207.19,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "p-xylene",
+                                "cas_number":  "106-42-3",
+                                "molecular_weight":  106.167,
+                                "segment_count":  3.1723,
+                                "segment_diameter_angstrom":  3.7781,
+                                "dispersion_energy_k":  283.77,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "sulfur dioxide",
+                                "cas_number":  "05/09/7446",
+                                "molecular_weight":  64.065,
+                                "segment_count":  2.8611,
+                                "segment_diameter_angstrom":  2.6826,
+                                "dispersion_energy_k":  205.35,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "tetradecane",
+                                "cas_number":  "629-59-4",
+                                "molecular_weight":  198.392,
+                                "segment_count":  5.9002,
+                                "segment_diameter_angstrom":  3.9396,
+                                "dispersion_energy_k":  254.21,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "tetralin",
+                                "cas_number":  "119-64-2",
+                                "molecular_weight":  132.205,
+                                "segment_count":  3.3131,
+                                "segment_diameter_angstrom":  3.875,
+                                "dispersion_energy_k":  325.07,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "toluene",
+                                "cas_number":  "108-88-3",
+                                "molecular_weight":  92.141,
+                                "segment_count":  2.8149,
+                                "segment_diameter_angstrom":  3.7169,
+                                "dispersion_energy_k":  285.69,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "N-tridecane",
+                                "cas_number":  "629-50-5",
+                                "molecular_weight":  184.365,
+                                "segment_count":  5.6877,
+                                "segment_diameter_angstrom":  3.9143,
+                                "dispersion_energy_k":  249.78,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "N-undecane",
+                                "cas_number":  "1120-21-4",
+                                "molecular_weight":  156.312,
+                                "segment_count":  4.9082,
+                                "segment_diameter_angstrom":  3.8893,
+                                "dispersion_energy_k":  248.82,
+                                "association_volume":  0,
+                                "association_energy_k":  0
+                            },
+                            {
+                                "source_name":  "water",
+                                "cas_number":  "7732-18-5",
+                                "molecular_weight":  18.015,
+                                "segment_count":  1.0656,
+                                "segment_diameter_angstrom":  3.0007,
+                                "dispersion_energy_k":  366.51,
+                                "association_volume":  0.034868,
+                                "association_energy_k":  2500.7
+                            }
+                        ],
+    "interaction_parameters":  [
+                                   {
+                                       "source_name_1":  "methane",
+                                       "cas_number_1":  "74-82-8",
+                                       "source_name_2":  "N-butane",
+                                       "cas_number_2":  "106-97-8",
+                                       "kij":  0.022
+                                   },
+                                   {
+                                       "source_name_1":  "methane",
+                                       "cas_number_1":  "74-82-8",
+                                       "source_name_2":  "N-pentane",
+                                       "cas_number_2":  "109-66-0",
+                                       "kij":  0.024
+                                   },
+                                   {
+                                       "source_name_1":  "methane",
+                                       "cas_number_1":  "74-82-8",
+                                       "source_name_2":  "N-hexane",
+                                       "cas_number_2":  "110-54-3",
+                                       "kij":  0.021
+                                   },
+                                   {
+                                       "source_name_1":  "methane",
+                                       "cas_number_1":  "74-82-8",
+                                       "source_name_2":  "N-heptane",
+                                       "cas_number_2":  "142-82-5",
+                                       "kij":  0.016
+                                   },
+                                   {
+                                       "source_name_1":  "methane",
+                                       "cas_number_1":  "74-82-8",
+                                       "source_name_2":  "N-decane",
+                                       "cas_number_2":  "124-18-5",
+                                       "kij":  0.056
+                                   },
+                                   {
+                                       "source_name_1":  "methane",
+                                       "cas_number_1":  "74-82-8",
+                                       "source_name_2":  "isobutane",
+                                       "cas_number_2":  "75-28-5",
+                                       "kij":  0.028
+                                   },
+                                   {
+                                       "source_name_1":  "methane",
+                                       "cas_number_1":  "74-82-8",
+                                       "source_name_2":  "cyclohexane",
+                                       "cas_number_2":  "110-82-7",
+                                       "kij":  0.045
+                                   },
+                                   {
+                                       "source_name_1":  "methane",
+                                       "cas_number_1":  "74-82-8",
+                                       "source_name_2":  "benzene",
+                                       "cas_number_2":  "71-43-2",
+                                       "kij":  0.037
+                                   },
+                                   {
+                                       "source_name_1":  "methane",
+                                       "cas_number_1":  "74-82-8",
+                                       "source_name_2":  "toluene",
+                                       "cas_number_2":  "108-88-3",
+                                       "kij":  0.052
+                                   },
+                                   {
+                                       "source_name_1":  "methane",
+                                       "cas_number_1":  "74-82-8",
+                                       "source_name_2":  "m-xylene",
+                                       "cas_number_2":  "108-38-3",
+                                       "kij":  0.045
+                                   },
+                                   {
+                                       "source_name_1":  "methane",
+                                       "cas_number_1":  "74-82-8",
+                                       "source_name_2":  "tetralin",
+                                       "cas_number_2":  "119-64-2",
+                                       "kij":  0.075
+                                   },
+                                   {
+                                       "source_name_1":  "nitrogen",
+                                       "cas_number_1":  "7727-37-9",
+                                       "source_name_2":  "ethylene",
+                                       "cas_number_2":  "74-85-1",
+                                       "kij":  0.075
+                                   },
+                                   {
+                                       "source_name_1":  "nitrogen",
+                                       "cas_number_1":  "7727-37-9",
+                                       "source_name_2":  "N-hexane",
+                                       "cas_number_2":  "110-54-3",
+                                       "kij":  0.119
+                                   },
+                                   {
+                                       "source_name_1":  "ethylene",
+                                       "cas_number_1":  "74-85-1",
+                                       "source_name_2":  "N-heptane",
+                                       "cas_number_2":  "142-82-5",
+                                       "kij":  0.018
+                                   },
+                                   {
+                                       "source_name_1":  "ethylene",
+                                       "cas_number_1":  "74-85-1",
+                                       "source_name_2":  "propylene",
+                                       "cas_number_2":  "115-07-1",
+                                       "kij":  -0.001
+                                   },
+                                   {
+                                       "source_name_1":  "propane",
+                                       "cas_number_1":  "74-98-6",
+                                       "source_name_2":  "N-butane",
+                                       "cas_number_2":  "106-97-8",
+                                       "kij":  0.003
+                                   },
+                                   {
+                                       "source_name_1":  "propylene",
+                                       "cas_number_1":  "115-07-1",
+                                       "source_name_2":  "isobutane",
+                                       "cas_number_2":  "75-28-5",
+                                       "kij":  -0.006
+                                   },
+                                   {
+                                       "source_name_1":  "N-pentane",
+                                       "cas_number_1":  "109-66-0",
+                                       "source_name_2":  "N-heptane",
+                                       "cas_number_2":  "142-82-5",
+                                       "kij":  0.011
+                                   },
+                                   {
+                                       "source_name_1":  "carbon dioxide",
+                                       "cas_number_1":  "124-38-9",
+                                       "source_name_2":  "methane",
+                                       "cas_number_2":  "74-82-8",
+                                       "kij":  0.065
+                                   },
+                                   {
+                                       "source_name_1":  "carbon dioxide",
+                                       "cas_number_1":  "124-38-9",
+                                       "source_name_2":  "propane",
+                                       "cas_number_2":  "74-98-6",
+                                       "kij":  0.109
+                                   },
+                                   {
+                                       "source_name_1":  "carbon dioxide",
+                                       "cas_number_1":  "124-38-9",
+                                       "source_name_2":  "N-butane",
+                                       "cas_number_2":  "106-97-8",
+                                       "kij":  0.12
+                                   },
+                                   {
+                                       "source_name_1":  "carbon dioxide",
+                                       "cas_number_1":  "124-38-9",
+                                       "source_name_2":  "N-pentane",
+                                       "cas_number_2":  "109-66-0",
+                                       "kij":  0.143
+                                   },
+                                   {
+                                       "source_name_1":  "carbon dioxide",
+                                       "cas_number_1":  "124-38-9",
+                                       "source_name_2":  "N-heptane",
+                                       "cas_number_2":  "142-82-5",
+                                       "kij":  0.129
+                                   },
+                                   {
+                                       "source_name_1":  "carbon dioxide",
+                                       "cas_number_1":  "124-38-9",
+                                       "source_name_2":  "methylcyclohexane",
+                                       "cas_number_2":  "108-87-2",
+                                       "kij":  0.144
+                                   },
+                                   {
+                                       "source_name_1":  "methanol",
+                                       "cas_number_1":  "67-56-1",
+                                       "source_name_2":  "cyclohexane",
+                                       "cas_number_2":  "110-82-7",
+                                       "kij":  0.051
+                                   },
+                                   {
+                                       "source_name_1":  "methanol",
+                                       "cas_number_1":  "67-56-1",
+                                       "source_name_2":  "1-octanol",
+                                       "cas_number_2":  "111-87-5",
+                                       "kij":  0.02
+                                   },
+                                   {
+                                       "source_name_1":  "ethanol",
+                                       "cas_number_1":  "64-17-5",
+                                       "source_name_2":  "n-butane",
+                                       "cas_number_2":  "106-97-8",
+                                       "kij":  0.028
+                                   },
+                                   {
+                                       "source_name_1":  "1-propanol",
+                                       "cas_number_1":  "71-23-8",
+                                       "source_name_2":  "benzene",
+                                       "cas_number_2":  "71-43-2",
+                                       "kij":  0.02
+                                   },
+                                   {
+                                       "source_name_1":  "1-propanol",
+                                       "cas_number_1":  "71-23-8",
+                                       "source_name_2":  "ethylbenzene",
+                                       "cas_number_2":  "100-41-4",
+                                       "kij":  0.023
+                                   },
+                                   {
+                                       "source_name_1":  "2-propanol",
+                                       "cas_number_1":  "67-63-0",
+                                       "source_name_2":  "benzene",
+                                       "cas_number_2":  "71-43-2",
+                                       "kij":  0.021
+                                   },
+                                   {
+                                       "source_name_1":  "1-butanol",
+                                       "cas_number_1":  "71-36-3",
+                                       "source_name_2":  "n-butane",
+                                       "cas_number_2":  "106-97-8",
+                                       "kij":  0.015
+                                   },
+                                   {
+                                       "source_name_1":  "1-pentanol",
+                                       "cas_number_1":  "71-41-0",
+                                       "source_name_2":  "benzene",
+                                       "cas_number_2":  "71-43-2",
+                                       "kij":  0.0135
+                                   },
+                                   {
+                                       "source_name_1":  "water",
+                                       "cas_number_1":  "7732-18-5",
+                                       "source_name_2":  "1-pentanol",
+                                       "cas_number_2":  "71-41-0",
+                                       "kij":  0.016
+                                   }
+                               ]
+}

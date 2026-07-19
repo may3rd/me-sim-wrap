@@ -251,8 +251,8 @@
       "dwsim_class": "PCSAFT2PropertyPackage",
       "family": "association-eos",
       "source_file": "DWSIM.Thermodynamics.AdvancedEOS.PCSAFT/PCSAFT2PropertyPackage.vb",
-      "extraction_status": "pending",
-      "mesim_model_ids": []
+      "extraction_status": "partial",
+      "mesim_model_ids": ["pc-saft-methane-ethane"]
     },
     {
       "id": "peng-robinson-1978",

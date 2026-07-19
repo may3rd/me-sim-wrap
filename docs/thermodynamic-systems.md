@@ -29,6 +29,7 @@ loading correlation files or selecting model equations themselves.
 | `seawater-water-salt` | `SeawaterSystem` | Water/Salt salinity, seawater vapor pressure, phase fugacity, and all-liquid TP classification | DWSIM's Water/Salt basis and 0.12 kg/kg salinity ceiling at 350 K and 0.1 MPa; no caloric, density, transport, solid-salt, or vapor/two-phase flash API |
 | `black-oil-n-pentane-n-hexane` | `BlackOilSystem` | Component vapor pressure, vaporized fraction, phase fugacity, and TP split | Two saved pseudo-fluid records at 350 K and 1 MPa using DWSIM's Black Oil correlations; no PH/PS flash, caloric, density, viscosity, or broader pseudo-component domain |
 | `ideal-aqueous-electrolyte-water-sodium-chloride` | `IdealAqueousElectrolyteSystem` | Solvent/ion fugacity, ionic molality, and all-liquid TP classification | Electroneutral Water/Na+/Cl- domain at 298.15 K and 0.1 MPa; no reaction speciation, precipitation, nonideal activities, caloric, or vapor/two-phase flash API |
+| `pc-saft-methane-ethane` | `PCSAFTSystem` | Non-associating PC-SAFT phase fugacity and TP flash | Full installed 94-record/33-interaction source tables, but equation execution is scoped to methane/ethane at 220 K and 3 MPa; association, caloric, and broader flash domains are unsupported |
 
 The registry is a fixed dictionary from stable model ID to constructor. Runtime plugin
 registration and silent fallback are unsupported. An unknown ID, incomplete correlation
